@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "world-builder-site"
+version = "0.1.0"
+description = "Backend and core engine for world-builder-site"
+authors = ["Inbar Rose <inbar@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.95.0"
+uvicorn = {extras=["standard"], version="^0.22.0"}
+sqlmodel = "^0.0.8"
+alembic = "^1.11"
+pydantic = "^2.3"
+httpx = "^0.25"
+python-dotenv = "^1.0"
+pytest = "^7.4"
+pytest-asyncio = "^0.21"
+coverage = "^6.6"
+black = "^24.3"
+ruff = "^0.12.0"
+
+[tool.poetry.dev-dependencies]
+mypy = "^1.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
