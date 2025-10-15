@@ -1,0 +1,120 @@
+{
+  "version": "2025-01-27",
+  "description": "Default world-building rules",
+  "stages": [
+    {
+      "id": "foundation",
+      "name": "Foundation",
+      "description": "Initial world building phase",
+      "cards": [
+        {
+          "id": "land_formation",
+          "name": "Land Formation",
+          "description": "The world's geography begins to take shape",
+          "probability": 0.3,
+          "effects": [
+            "Creates landmasses",
+            "Establishes terrain"
+          ]
+        },
+        {
+          "id": "water_source",
+          "name": "Water Source",
+          "description": "Rivers, lakes, and seas emerge",
+          "probability": 0.25,
+          "effects": [
+            "Creates water bodies",
+            "Establishes water cycle"
+          ]
+        },
+        {
+          "id": "climate",
+          "name": "Climate Patterns",
+          "description": "Weather systems establish themselves",
+          "probability": 0.2,
+          "effects": [
+            "Creates weather patterns",
+            "Establishes seasons"
+          ]
+        },
+        {
+          "id": "resources",
+          "name": "Natural Resources",
+          "description": "Minerals and materials become available",
+          "probability": 0.2,
+          "effects": [
+            "Creates mineral deposits",
+            "Enables crafting"
+          ]
+        },
+        {
+          "id": "catastrophe",
+          "name": "Natural Disaster",
+          "description": "A major event reshapes the landscape",
+          "probability": 0.05,
+          "effects": [
+            "Changes terrain",
+            "Creates new opportunities"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "civilization",
+      "name": "Civilization",
+      "description": "Human settlement and development",
+      "cards": [
+        {
+          "id": "first_settlement",
+          "name": "First Settlement",
+          "description": "Humans establish their first permanent home",
+          "probability": 0.3,
+          "effects": [
+            "Creates first city",
+            "Enables population growth"
+          ]
+        },
+        {
+          "id": "agriculture",
+          "name": "Agriculture",
+          "description": "Farming techniques are discovered",
+          "probability": 0.25,
+          "effects": [
+            "Enables food production",
+            "Supports larger populations"
+          ]
+        },
+        {
+          "id": "trade_routes",
+          "name": "Trade Routes",
+          "description": "Commerce begins between settlements",
+          "probability": 0.2,
+          "effects": [
+            "Enables resource exchange",
+            "Connects settlements"
+          ]
+        },
+        {
+          "id": "technology",
+          "name": "Technological Advancement",
+          "description": "New tools and techniques emerge",
+          "probability": 0.15,
+          "effects": [
+            "Improves efficiency",
+            "Enables new capabilities"
+          ]
+        },
+        {
+          "id": "conflict",
+          "name": "Conflict",
+          "description": "Disputes arise between groups",
+          "probability": 0.1,
+          "effects": [
+            "Creates tension",
+            "May lead to war or peace"
+          ]
+        }
+      ]
+    }
+  ]
+}
