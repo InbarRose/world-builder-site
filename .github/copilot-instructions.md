@@ -5,90 +5,73 @@ title: Copilot/LLM Agent Instructions for world-builder-site
 status: authoritative
 ---
 
-# LLM Agent Instructions — world-builder-site
+# Copilot/LLM Agent Instructions — world-builder-site
 
-## Mission
+## Mission & Scope
 
-Develop, maintain, and extend the world-builder-site application (Python FastAPI backend, React/TypeScript frontend, Supabase DB/Auth) in a deterministic, test-driven, phase-based manner. All work must be auditable, safe, and aligned with the project vision and human intent.
+Develop, maintain, and extend the world-builder-site (FastAPI backend, React/TypeScript frontend, Supabase DB/Auth) in a deterministic, phase-based, test-driven manner. All work must be auditable, safe, and aligned with project vision.
 
-## Core Operating Rules
+## Essential Knowledge for AI Agents
 
-1. **Phase Discipline**
-   - Only work on the *current active phase* (see `/docs/SESSION_STATE.md`).
-   - Do not alter future-phase files or placeholders until current phase quality gates pass.
-   - Reference `/docs/phase-0-specifications.md`, `/docs/phase-1-specifications.md`, etc. for phase tasks.
+### 1. Architecture & Structure
 
-2. **Determinism & Idempotence**
-   - All code and outputs must be reproducible given the same context.
-   - Avoid random IDs/timestamps unless seeded and documented.
+- **Backend**: Python FastAPI (`src/`), SQLModel/Pydantic v2, async endpoints, all logic/data flows through backend.
+- **Frontend**: React + TypeScript (Vite, Tailwind, `/frontend`), functional components only, API client generated from OpenAPI.
+- **Database/Auth**: Supabase (Postgres), Supabase Auth, JWT tokens (≤24h validity).
+- **Docs & Phases**: All specs, progress, and phase tasks in `/docs/`. Only work on the _current phase_ (`/docs/SESSION_STATE.md`).
 
-3. **Explain → Plan → Implement → Validate**
-   - Explain what will be done, plan tasks, implement in atomic commits, validate via lint/tests/CI.
+### 2. Critical Workflows
 
-4. **Safety & Auditability**
-   - Never delete or overwrite human-authored docs/specs.
-   - Create new versions for rules or data (e.g., `rules_vYYYY-MM-DD.json`).
-   - All code must include docstrings and type hints.
+- **Context Recovery**: Run `./scripts/context-recovery.sh` before any coding. Loads project/phase/task context and checks environment.
+- **Agent Workflow**: Use `./scripts/agent-workflow.sh` for status, task execution, and quality gates. Example:
+  - `./scripts/agent-workflow.sh status`
+  - `./scripts/agent-workflow.sh execute <task_id>`
+  - `./scripts/agent-workflow.sh quality-gate`
+- **Dev Container**: Use VS Code Dev Container for consistent environment. Aliases: `wb-status`, `wb-context`, `wb-setup`, `wb-quality`, `wb-test`, `wb-lint`, `wb-format`, `wb-execute <task>`
+- **Testing**: Run `poetry run pytest` (≥80% coverage required before phase close). Lint: `poetry run ruff check .`. Format: `poetry run black --check .`. Type check: `poetry run mypy src/ --strict`.
+- **CI**: GitHub Actions runs lint, format, and tests on push/PR (`.github/workflows/ci.yml`).
 
-5. **Human Override**
-   - The repository owner (Inbar Rose) has final authority. Stop and request clarification on uncertainty or conflict.
+### 3. Project-Specific Conventions
 
-## Coding & Testing Standards
+- **Phase Discipline**: Never implement features from future phases. Only edit files relevant to the current phase spec.
+- **Templates**: Use `/templates/fastapi-endpoint.py.template`, `/templates/sqlmodel-class.py.template`, `/templates/test-file.py.template` for new code. Always include the required file header (see below).
+- **Data & Rules**: Game rules are versioned JSON (`rules_vYYYY-MM-DD.json`). Never alter canonical rules or narrative content except by explicit human request.
+- **Security**: Never commit secrets. Use GitHub Secrets and `.env` for local dev. Sanitize all user input. Enforce CORS/CSRF, rate-limit endpoints, hash sensitive data.
+- **Attribution**: Attribute creative assets per `/docs/assets.md`.
 
-- **Python**: Use `async def` endpoints, Pydantic v2 models, type hints, and docstrings. All public functions must be typed and documented.
-- **React/TypeScript**: Functional components only, Tailwind CSS, design tokens, typed API client (OpenAPI-generated).
-- **Tests**: Pytest for backend (≥80% coverage), Playwright for frontend (optional for MVP). Lint with Ruff + Black, type check with MyPy (strict).
-- **Documentation**: Update `/docs/PROGRESS.md` and relevant phase/task lists as work progresses.
+### 4. Integration & Communication
 
-## Data & Game Logic
+- **API**: Backend is authoritative for all game logic. Frontend fetches via OpenAPI-generated client. Shared types are generated from Python models.
+- **DB Models**: Use SQLModel for all persistent entities. Migrations via Alembic.
+- **Error Recovery**: Use `scripts/error-recovery.py` for backup, analyze, and rollback. Log failures in `/docs/PROGRESS.md`.
 
-- Game rules are data-driven and versioned (see `rules_vYYYY-MM-DD.json`).
-- Never alter canonical rules or narrative content except by explicit human request.
-- Backend is authoritative for game logic; frontend is for presentation and interaction.
+### 5. Output & Commit Standards
 
-## Security & Privacy
+- All generated code files must include this header:
 
-- Never commit secrets; use GitHub Secrets.
-- Sanitize all user input and timeline text.
-- Rate-limit public endpoints, enforce JWT validity ≤24h, hash all sensitive data.
-- Enforce CORS/CSRF headers and least-privilege DB access.
-
-## Collaboration & Communication
-
-- Respect phase boundaries and do not implement future features early.
-- Never alter human narrative content in `/docs/rules*` or `/docs/lore*`.
-- Add questions/uncertainties to `/docs/DECISIONS.md`.
-- Log failures and recovery steps in `/docs/PROGRESS.md`.
-
-## Workflow Checklist
-
-1. Read `PROJECT_CONTEXT.md`, `LLM_OPERATING_GUIDE.md`, `/docs/SESSION_STATE.md`, and current phase spec.
-2. Run `./scripts/context-recovery.sh` to load context.
-3. Identify `## Tasks` in current phase doc and break into granular steps.
-4. For each task:
-   - Plan, implement, and test.
-   - Run: `poetry run ruff check .`, `poetry run black --check .`, `poetry run pytest`.
-   - If all pass, update `/docs/PROGRESS.md` and commit with a conventional message.
-5. On error, log in `/docs/PROGRESS.md`, rerun context recovery, and replan.
-
-## Output & Attribution
-
-- All generated code files must include a header:
-
-    Auto-generated by agent under LLM_OPERATING_GUIDE v2.0.
-    Phase: <current_phase_id>
-    Date: <YYYY-MM-DD>
-    Purpose: <short description>
+      Auto-generated by agent under LLM_OPERATING_GUIDE v2.0.
+      Phase: <current_phase_id>
+      Date: <YYYY-MM-DD>
+      Purpose: <short description>
 
 - All generated Markdown specs must end with a `## Tasks` section.
-- Attribute creative assets per `/docs/assets.md`.
+- Use conventional commit messages. Reference task IDs and include a change summary.
 
-## Ethics
+## Example Patterns
 
-- Respect copyright and never leak sensitive data.
-- When in doubt, escalate to human owner.
+- **API Endpoint**: See `/templates/fastapi-endpoint.py.template` for structure and required docstrings/type hints.
+- **Model**: See `/templates/sqlmodel-class.py.template` for SQLModel conventions.
+- **Test**: See `/templates/test-file.py.template` for Pytest structure and fixtures.
+- **Frontend**: All components in `/frontend/src/` are functional, use Tailwind, and fetch data via typed API client.
 
----
+## Quick Reference
+
+- **Start backend**: `poetry run uvicorn src.app.main:app --reload`
+- **Run tests**: `poetry run pytest`
+- **Run lint**: `poetry run ruff check .`
+- **Format code**: `poetry run black .`
+- **Check type**: `poetry run mypy src/ --strict`
+- **Frontend dev**: `cd frontend && npm install && npm run dev`
 
 ## Tasks
 
