@@ -1,17 +1,15 @@
-
 services:
   # Main development container
   world-builder-dev:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
     volumes:
-      - .:/workspaces/world-builder-site
+      - ..:/workspaces/world-builder-site
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "8000:8000"  # FastAPI backend
-      - "3000:3000"  # React frontend (if needed)
-      - "5432:5432"  # PostgreSQL (if using local DB)
+      - "8000:8000" # FastAPI backend
+      - "3000:3000" # React frontend (if needed)
 
   # PostgreSQL database (optional - for local development)
   postgres:
@@ -38,7 +36,7 @@ services:
 volumes:
   postgres_data:
 
+
 networks:
   world-builder-network:
     driver: bridge
-

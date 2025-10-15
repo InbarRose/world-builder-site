@@ -31,20 +31,13 @@ RUN poetry install
 
 # Install Node.js dependencies (if frontend exists)
 RUN if [ -d "frontend" ]; then \
-        cd frontend && npm install; \
+    cd frontend && npm install; \
     fi
 
 # Set environment variables
 ENV PYTHONPATH=/workspaces/world-builder-site/src
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Create non-root user
-RUN useradd -m -s /bin/bash vscode
-RUN usermod -aG sudo vscode
-RUN echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# Switch to vscode user
-USER vscode
 WORKDIR /workspaces/world-builder-site
 
 # Install Poetry for vscode user
