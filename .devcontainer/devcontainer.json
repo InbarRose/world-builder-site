@@ -5,7 +5,7 @@
   "workspaceFolder": "/workspaces/world-builder-site",
   "shutdownAction": "stopCompose",
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.ssh,target=/home/root/.ssh,type=bind,consistency=cached"
   ],
   "customizations": {
     "vscode": {
@@ -65,7 +65,6 @@
   },
   "postCreateCommand": "./scripts/setup-dev.sh",
   "postStartCommand": "echo '🚀 World Builder Site Dev Container Ready!'",
-  "remoteUser": "vscode",
   "forwardPorts": [
     8000,
     3000,
