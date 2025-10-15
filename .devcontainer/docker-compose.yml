@@ -1,11 +1,10 @@
-version: '3.8'
 
 services:
   # Main development container
   world-builder-dev:
     build:
       context: .
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - .:/workspaces/world-builder-site
       - /var/run/docker.sock:/var/run/docker.sock
@@ -13,12 +12,6 @@ services:
       - "8000:8000"  # FastAPI backend
       - "3000:3000"  # React frontend (if needed)
       - "5432:5432"  # PostgreSQL (if using local DB)
-    environment:
-      - PYTHONPATH=/workspaces/world-builder-site/src
-      - PYTHONDONTWRITEBYTECODE=1
-    command: sleep infinity
-    networks:
-      - world-builder-network
 
   # PostgreSQL database (optional - for local development)
   postgres:
