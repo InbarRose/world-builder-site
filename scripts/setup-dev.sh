@@ -1,25 +1,215 @@
 #!/usr/bin/env bash
 set -e
-echo "Setting up development environment (guide)"
-echo "-----------------------------------------"
-echo "1) Install Python 3.12+ and Poetry"
-echo "   https://python.org https://python-poetry.org"
+
+echo "🔧 world-builder-site: Automated Development Setup"
+echo "=================================================="
 echo ""
-echo "2) Install project dependencies:"
-echo "   poetry install"
+
+# Check if we're in the right directory
+if [ ! -f "pyproject.toml" ]; then
+    echo "❌ Not in project root directory. Please run from project root."
+    exit 1
+fi
+
+echo "📋 Checking prerequisites..."
+
+# Check Python version
+PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f1,2)
+REQUIRED_VERSION="3.12"
+
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
+    echo "❌ Python $REQUIRED_VERSION+ required, found $PYTHON_VERSION"
+    echo "Please install Python $REQUIRED_VERSION+ from https://python.org"
+    exit 1
+fi
+
+echo "✅ Python $PYTHON_VERSION detected"
+
+# Check Poetry
+if ! command -v poetry &> /dev/null; then
+    echo "❌ Poetry not found. Installing Poetry..."
+    curl -sSL https://install.python-poetry.org | python3 -
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if ! command -v poetry &> /dev/null; then
+        echo "❌ Poetry installation failed. Please install manually:"
+        echo "curl -sSL https://install.python-poetry.org | python3 -"
+        exit 1
+    fi
+fi
+
+echo "✅ Poetry available: $(poetry --version)"
+
+# Install dependencies
 echo ""
-echo "3) Create .env file with these values (example):"
-echo "   SUPABASE_URL=your-db-url"
-echo "   SUPABASE_SERVICE_ROLE_KEY=supersecret"
-echo "   VERCEL_TOKEN=token"
+echo "📦 Installing project dependencies..."
+poetry install
+
+if [ $? -eq 0 ]; then
+    echo "✅ Dependencies installed successfully"
+else
+    echo "❌ Dependency installation failed"
+    exit 1
+fi
+
+# Create .env file if it doesn't exist
+if [ ! -f ".env" ]; then
+    echo ""
+    echo "🔐 Creating .env file template..."
+    cat > .env << 'EOF'
+# Supabase Configuration
+SUPABASE_URL=your-supabase-url-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+SUPABASE_ANON_KEY=your-anon-key-here
+
+# Vercel Configuration
+VERCEL_TOKEN=your-vercel-token-here
+
+# Development Settings
+DEBUG=true
+LOG_LEVEL=info
+EOF
+    echo "✅ .env file created. Please update with your actual values."
+else
+    echo "✅ .env file already exists"
+fi
+
+# Create GitHub secrets documentation
+if [ ! -f ".github/secrets.md" ]; then
+    echo ""
+    echo "📝 Creating GitHub secrets documentation..."
+    mkdir -p .github
+    cat > .github/secrets.md << 'EOF'
+# GitHub Secrets Configuration
+
+## Required Secrets
+
+Add these secrets to your GitHub repository settings:
+
+### Supabase
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role key for database access
+- `SUPABASE_ANON_KEY`: Anonymous key for client access
+
+### Vercel
+- `VERCEL_TOKEN`: Vercel API token for deployment
+
+## How to Add Secrets
+
+1. Go to your GitHub repository
+2. Click Settings → Secrets and variables → Actions
+3. Click "New repository secret"
+4. Add each secret with the exact name above
+
+## Local Development
+
+Copy `.env.example` to `.env` and fill in your values for local development.
+EOF
+    echo "✅ GitHub secrets documentation created"
+fi
+
+# Validate installation
 echo ""
-echo "4) Initialize DB (local) or configure Supabase..."
-echo "   alembic upgrade head  # after implementing migrations"
+echo "🔍 Validating installation..."
+
+# Check if FastAPI can be imported
+if poetry run python3 -c "import fastapi; print('FastAPI version:', fastapi.__version__)" 2>/dev/null; then
+    echo "✅ FastAPI available"
+else
+    echo "❌ FastAPI not available"
+    exit 1
+fi
+
+# Check if SQLModel can be imported
+if poetry run python3 -c "import sqlmodel; print('SQLModel available')" 2>/dev/null; then
+    echo "✅ SQLModel available"
+else
+    echo "❌ SQLModel not available"
+    exit 1
+fi
+
+# Check if pytest can be imported
+if poetry run python3 -c "import pytest; print('Pytest available')" 2>/dev/null; then
+    echo "✅ Pytest available"
+else
+    echo "❌ Pytest not available"
+    exit 1
+fi
+
+# Run basic linting check
 echo ""
-echo "5) Start backend (dev):"
-echo "   poetry run uvicorn src.app.main:app --reload"
+echo "🔍 Running basic validation..."
+
+if poetry run ruff check . --no-fix 2>/dev/null; then
+    echo "✅ Ruff linting passed"
+else
+    echo "⚠️  Ruff linting issues found (this is expected for initial setup)"
+fi
+
+if poetry run black --check . 2>/dev/null; then
+    echo "✅ Black formatting check passed"
+else
+    echo "⚠️  Black formatting issues found (this is expected for initial setup)"
+fi
+
+# Create basic FastAPI app if it doesn't exist
+if [ ! -f "src/app/main.py" ] || [ "$(cat src/app/main.py)" = "# TODO" ]; then
+    echo ""
+    echo "🚀 Creating basic FastAPI application..."
+    cat > src/app/main.py << 'EOF'
+"""
+Auto-generated by agent under LLM_OPERATING_GUIDE v2.0.
+Phase: Phase 0 - Foundation
+Date: 2025-01-27
+Purpose: Basic FastAPI application setup
+"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(
+    title="World Builder Site API",
+    description="Backend API for collaborative world-building application",
+    version="0.1.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "World Builder Site API", "version": "0.1.0"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": "2025-01-27T00:00:00Z"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+EOF
+    echo "✅ Basic FastAPI application created"
+fi
+
 echo ""
-echo "6) Start frontend (dev):"
-echo "   cd frontend && npm install && npm run dev"
+echo "🎉 Development environment setup complete!"
 echo ""
-echo "This script is a guide. Implement local dev automation as needed."
+echo "📋 Next Steps:"
+echo "1. Update .env file with your actual Supabase and Vercel credentials"
+echo "2. Add GitHub secrets as documented in .github/secrets.md"
+echo "3. Run './scripts/agent-workflow.sh status' to check current state"
+echo "4. Start development with './scripts/agent-workflow.sh execute <task_id>'"
+echo ""
+echo "🛠️  Available Commands:"
+echo "  poetry run uvicorn src.app.main:app --reload  # Start backend"
+echo "  poetry run pytest                            # Run tests"
+echo "  poetry run ruff check .                      # Run linting"
+echo "  poetry run black .                          # Format code"
+echo "  ./scripts/agent-workflow.sh help            # Show agent commands"

@@ -1,0 +1,72 @@
+# World Builder Site Dev Container Bash Configuration
+
+# Add Poetry to PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Set Python environment variables
+export PYTHONPATH="/workspaces/world-builder-site/src:$PYTHONPATH"
+export PYTHONDONTWRITEBYTECODE=1
+
+# Aliases for common commands
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Project-specific aliases
+alias wb-status='./scripts/agent-workflow.sh status'
+alias wb-context='./scripts/context-recovery.sh'
+alias wb-setup='./scripts/setup-dev.sh'
+alias wb-quality='./scripts/agent-workflow.sh quality-gate'
+alias wb-test='poetry run pytest'
+alias wb-lint='poetry run ruff check .'
+alias wb-format='poetry run black .'
+alias wb-type='poetry run mypy src/'
+
+# Function to run agent workflow
+wb-execute() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: wb-execute <task_id>"
+        echo "Available tasks:"
+        echo "  setup-dev-environment"
+        echo "  implement-fastapi-app"
+        echo "  fix-ci-pipeline"
+        echo "  add-github-secrets"
+        echo "  quality-gate-validation"
+        echo "  phase-0-completion"
+        return 1
+    fi
+    ./scripts/agent-workflow.sh execute "$1"
+}
+
+# Function to validate task
+wb-validate() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: wb-validate <task_id>"
+        return 1
+    fi
+    ./scripts/agent-workflow.sh validate "$1"
+}
+
+# Function to create backup
+wb-backup() {
+    python3 scripts/error-recovery.py backup "$1"
+}
+
+# Function to analyze errors
+wb-analyze() {
+    python3 scripts/error-recovery.py analyze
+}
+
+# Welcome message
+echo "🎉 Welcome to World Builder Site Dev Container!"
+echo "📋 Quick Commands:"
+echo "  wb-status     - Show current project status"
+echo "  wb-context    - Load project context"
+echo "  wb-execute <task> - Execute agent task"
+echo "  wb-validate <task> - Validate task prerequisites"
+echo "  wb-quality    - Run quality gates"
+echo "  wb-backup [name] - Create backup"
+echo "  wb-analyze    - Analyze error patterns"
+echo ""
+echo "🚀 Run 'wb-status' to get started!"
+

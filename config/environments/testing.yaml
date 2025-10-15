@@ -1,0 +1,47 @@
+---
+# Testing Environment Configuration
+environment: testing
+debug: false
+log_level: warning
+
+# Database Configuration
+database:
+  url: "sqlite:///:memory:"
+  echo: false
+  pool_size: 1
+  max_overflow: 0
+
+# API Configuration
+api:
+  title: "World Builder Site API (Test)"
+  version: "0.1.0"
+  docs_url: "/docs"
+  redoc_url: "/redoc"
+  cors_origins: ["http://test"]
+
+# Authentication
+auth:
+  jwt_secret: "test-secret-key"
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 1
+  password_min_length: 8
+
+# Supabase Configuration (Testing - Mock)
+supabase:
+  url: "http://mock-supabase"
+  service_role_key: "mock-service-key"
+  anon_key: "mock-anon-key"
+
+# Game Configuration
+game:
+  default_grid_width: 5
+  default_grid_height: 5
+  max_moves_per_session: 10
+  rules_version: "2025-01-27"
+
+# Rate Limiting
+rate_limiting:
+  enabled: false
+  requests_per_minute: 1000
+  burst_limit: 1000
+

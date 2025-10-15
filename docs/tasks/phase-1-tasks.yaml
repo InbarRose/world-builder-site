@@ -1,0 +1,161 @@
+---
+id: PHASE_1_TASKS
+title: Phase 1 Tasks - Game Engine & API
+version: 1.0.0
+status: pending
+---
+
+# Phase 1 Tasks
+
+## Database Models
+- id: create-sqlmodel-schemas
+  description: "Implement SQLModel classes for core entities"
+  status: "pending"
+  priority: "high"
+  dependencies: []
+  acceptance_criteria:
+    - "User model with auth fields"
+    - "Session model with state management"
+    - "Timeline model for events"
+    - "Tile model for map grid"
+    - "Entity model for world objects"
+    - "All models have proper relationships"
+
+- id: setup-database-migrations
+  description: "Configure Alembic for database migrations"
+  status: "pending"
+  priority: "high"
+  dependencies: ["create-sqlmodel-schemas"]
+  acceptance_criteria:
+    - "Alembic configured"
+    - "Initial migration created"
+    - "Migration scripts executable"
+    - "Database schema documented"
+
+## Game Engine
+- id: implement-rules-loader
+  description: "Create rules loading system for game mechanics"
+  status: "pending"
+  priority: "high"
+  dependencies: []
+  acceptance_criteria:
+    - "Rules JSON parser implemented"
+    - "Version validation system"
+    - "Rule caching mechanism"
+    - "Error handling for invalid rules"
+
+- id: implement-deck-system
+  description: "Create card deck management and drawing logic"
+  status: "pending"
+  priority: "high"
+  dependencies: ["implement-rules-loader"]
+  acceptance_criteria:
+    - "Deck creation and management"
+    - "Card drawing with probabilities"
+    - "Deck state persistence"
+    - "Shuffle and reset functionality"
+
+- id: implement-stage-engine
+  description: "Create stage progression and timeline management"
+  status: "pending"
+  priority: "high"
+  dependencies: ["implement-deck-system"]
+  acceptance_criteria:
+    - "Stage progression logic"
+    - "Timeline event generation"
+    - "Year calculation system"
+    - "Event persistence"
+
+## API Endpoints
+- id: create-auth-endpoints
+  description: "Implement authentication and user management endpoints"
+  status: "pending"
+  priority: "high"
+  dependencies: ["create-sqlmodel-schemas"]
+  acceptance_criteria:
+    - "User registration endpoint"
+    - "Login/logout endpoints"
+    - "JWT token management"
+    - "Password hashing"
+
+- id: create-session-endpoints
+  description: "Implement session management endpoints"
+  status: "pending"
+  priority: "high"
+  dependencies: ["create-sqlmodel-schemas", "implement-stage-engine"]
+  acceptance_criteria:
+    - "Session creation endpoint"
+    - "Session state retrieval"
+    - "Session update endpoints"
+    - "Session deletion"
+
+- id: create-simulate-endpoints
+  description: "Implement card drawing and simulation endpoints"
+  status: "pending"
+  priority: "high"
+  dependencies: ["implement-deck-system", "implement-stage-engine"]
+  acceptance_criteria:
+    - "Card draw endpoint"
+    - "Simulation endpoint"
+    - "Anonymous mode support"
+    - "Result validation"
+
+- id: create-export-endpoints
+  description: "Implement session export and import functionality"
+  status: "pending"
+  priority: "medium"
+  dependencies: ["create-session-endpoints"]
+  acceptance_criteria:
+    - "Session export to JSON"
+    - "Session import from JSON"
+    - "Data validation"
+    - "Error handling"
+
+## Testing
+- id: create-unit-tests
+  description: "Create comprehensive unit tests for engine components"
+  status: "pending"
+  priority: "high"
+  dependencies: ["implement-stage-engine"]
+  acceptance_criteria:
+    - "Engine function tests"
+    - "Model validation tests"
+    - "Rule parsing tests"
+    - "Deck management tests"
+    - "≥80% coverage"
+
+- id: create-integration-tests
+  description: "Create API integration tests"
+  status: "pending"
+  priority: "high"
+  dependencies: ["create-simulate-endpoints"]
+  acceptance_criteria:
+    - "API endpoint tests"
+    - "Authentication flow tests"
+    - "Session lifecycle tests"
+    - "Error handling tests"
+
+## Documentation
+- id: generate-api-docs
+  description: "Generate comprehensive API documentation"
+  status: "pending"
+  priority: "medium"
+  dependencies: ["create-simulate-endpoints"]
+  acceptance_criteria:
+    - "OpenAPI spec generated"
+    - "API documentation complete"
+    - "Example requests provided"
+    - "Error responses documented"
+
+## Quality Gates
+- id: phase-1-quality-gates
+  description: "Validate Phase 1 quality gates"
+  status: "pending"
+  priority: "high"
+  dependencies: ["create-integration-tests", "generate-api-docs"]
+  acceptance_criteria:
+    - "All tests pass"
+    - "Coverage ≥80%"
+    - "API documentation complete"
+    - "Performance benchmarks met"
+
