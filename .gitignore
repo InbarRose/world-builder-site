@@ -216,3 +216,10 @@ frontend/dist/
 frontend/.vite/
 frontend/.eslintcache
 *.local
+frontend/.env.local
+frontend/.env
+
+# Supabase
+supabase/.branches
+supabase/.temp
+supabase/.env.local

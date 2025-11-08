@@ -1,0 +1,13 @@
+# Supabase local development files
+.branches
+.temp
+supabase/.branches
+supabase/.temp
+
+# Database dumps
+*.dump
+*.sql.backup
+
+# Local environment
+.env.local
+
