@@ -1,5 +1,6 @@
 {
   "rootDirectory": "frontend",
+  "functions": {},
   "rewrites": [
     {
       "source": "/(.*)",
