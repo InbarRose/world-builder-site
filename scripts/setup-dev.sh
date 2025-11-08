@@ -136,6 +136,50 @@ else
     exit 1
 fi
 
+# Setup frontend dependencies
+if [ -d "frontend" ]; then
+    echo ""
+    echo "📦 Setting up frontend dependencies..."
+    
+    # Check Node.js
+    if ! command -v node &> /dev/null; then
+        echo "❌ Node.js not found"
+        exit 1
+    fi
+    
+    echo "✅ Node.js available: $(node --version)"
+    
+    # Check npm
+    if ! command -v npm &> /dev/null; then
+        echo "❌ npm not found"
+        exit 1
+    fi
+    
+    echo "✅ npm available: $(npm --version)"
+    
+    # Install frontend dependencies
+    cd frontend
+    npm install
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Frontend dependencies installed successfully"
+    else
+        echo "❌ Frontend dependency installation failed"
+        exit 1
+    fi
+    
+    # Verify build works
+    echo ""
+    echo "🔍 Verifying frontend build..."
+    if npm run build 2>/dev/null; then
+        echo "✅ Frontend build successful"
+    else
+        echo "⚠️  Frontend build issues found (this may be expected for initial setup)"
+    fi
+    
+    cd ..
+fi
+
 # Run basic linting check
 echo ""
 echo "🔍 Running basic validation..."
