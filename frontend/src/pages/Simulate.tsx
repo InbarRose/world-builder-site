@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Play, Shuffle, BookOpen } from 'lucide-react'
 
 export function Simulate() {
