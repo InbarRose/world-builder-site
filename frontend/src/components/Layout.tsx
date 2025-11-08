@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Gamepad2, Map, BookOpen, Settings } from 'lucide-react'
+import { Home, Gamepad2, BookOpen, Settings } from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -31,11 +31,10 @@ export function Layout({ children }: LayoutProps) {
                 <Link
                   key={path}
                   to={path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-                    location.pathname === path
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${location.pathname === path
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{label}</span>
