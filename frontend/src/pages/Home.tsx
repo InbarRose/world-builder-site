@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Link } from 'react-router-dom'
 import { Plus, Play, BookOpen, Map } from 'lucide-react'
 
@@ -9,7 +9,7 @@ export function Home() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">World Builder Site</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Create collaborative worlds through card-driven storytelling. 
+          Create collaborative worlds through card-driven storytelling.
           Draw cards, build timelines, and shape your universe together.
         </p>
       </div>
@@ -73,23 +73,23 @@ export function Home() {
           <div className="card p-6">
             <h3 className="font-semibold mb-2">Card-Driven Storytelling</h3>
             <p className="text-sm text-muted-foreground">
-              Draw cards to generate world events and shape your universe through 
+              Draw cards to generate world events and shape your universe through
               probability-based storytelling mechanics.
             </p>
           </div>
-          
+
           <div className="card p-6">
             <h3 className="font-semibold mb-2">Collaborative Sessions</h3>
             <p className="text-sm text-muted-foreground">
-              Work together with friends to build worlds, share sessions, 
+              Work together with friends to build worlds, share sessions,
               and create shared narratives.
             </p>
           </div>
-          
+
           <div className="card p-6">
             <h3 className="font-semibold mb-2">Interactive Timeline</h3>
             <p className="text-sm text-muted-foreground">
-              Track your world's history with a visual timeline that shows 
+              Track your world's history with a visual timeline that shows
               the progression of events and years.
             </p>
           </div>

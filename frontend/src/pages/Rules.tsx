@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { BookOpen, Shuffle, Users, Calendar } from 'lucide-react'
 
 export function Rules() {

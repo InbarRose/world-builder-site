@@ -1,6 +1,5 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Calendar, Users } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 export function Sessions() {
   return (
