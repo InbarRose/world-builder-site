@@ -218,6 +218,7 @@ frontend/.eslintcache
 *.local
 frontend/.env.local
 frontend/.env
+frontend/coverage/
 
 # Supabase
 supabase/.branches
