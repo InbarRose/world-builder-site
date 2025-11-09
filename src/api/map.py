@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlmodel import Session, select
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime
 
 from src.models.tile import Tile, TileCreate, TileResponse, TileUpdate, MapState
 from src.models.entity import Entity, EntityCreate, EntityResponse, EntityUpdate

@@ -5,10 +5,16 @@ Date: 2025-01-27
 Purpose: Game session model for managing world-building sessions
 """
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from src.models.user import User
+    from src.models.timeline import TimelineEvent, TimelineEventResponse
+    from src.models.tile import Tile, TileResponse
+    from src.models.entity import Entity, EntityResponse
 
 class SessionBase(SQLModel):
     """Base session model with common fields"""
@@ -30,9 +36,9 @@ class GameSession(SessionBase, table=True):
     
     # Relationships
     user: Optional["User"] = Relationship(back_populates="sessions")
-    timeline_events: List["TimelineEvent"] = Relationship(back_populates="session")
-    tiles: List["Tile"] = Relationship(back_populates="session")
-    entities: List["Entity"] = Relationship(back_populates="session")
+    timeline_events: List["TimelineEvent"] = Relationship(back_populates="session", sa_relationship_kwargs={"lazy": "joined"})
+    tiles: List["Tile"] = Relationship(back_populates="session", sa_relationship_kwargs={"lazy": "joined"})
+    entities: List["Entity"] = Relationship(back_populates="session", sa_relationship_kwargs={"lazy": "joined"})
     
     class Config:
         arbitrary_types_allowed = True

@@ -5,10 +5,14 @@ Date: 2025-01-27
 Purpose: Tile model for map grid system
 """
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from src.models.session import GameSession
+    from src.models.entity import EntityResponse
 
 class TileBase(SQLModel):
     """Base tile model"""

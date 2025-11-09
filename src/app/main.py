@@ -7,21 +7,15 @@ Purpose: Core FastAPI application with essential endpoints and Vercel support
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse
-from sqlmodel import Session
 from contextlib import asynccontextmanager
-from typing import Optional, List
+from typing import Optional
 import uvicorn
 import time
+from sqlmodel import Session
 
-from src.config import AppConfig, load_config
+from src.config import load_config
 from src.database import init_db, get_async_session
-
-from src.models.user import User, UserCreate, UserResponse
-from src.models.session import GameSession, SessionCreate, SessionResponse
-from src.models.timeline import TimelineEvent, TimelineEventCreate, TimelineEventResponse
-from src.models.tile import Tile, TileCreate, TileResponse
-from src.models.entity import Entity, EntityCreate, EntityResponse
+from src.models.user import User
 from src.engine.card_engine import CardEngine
 from src.engine.rules_loader import RulesLoader
 from src.api.auth import router as auth_router

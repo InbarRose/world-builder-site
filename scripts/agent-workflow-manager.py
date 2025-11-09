@@ -4,12 +4,11 @@ Agent Workflow Manager for world-builder-site
 Manages complete agent development workflow with validation and rollback
 """
 import json
-import os
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import yaml
 
 class AgentWorkflowManager:

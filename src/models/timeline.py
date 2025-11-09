@@ -5,10 +5,13 @@ Date: 2025-01-27
 Purpose: Timeline event model for tracking world history
 """
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from src.models.session import GameSession
 
 class TimelineEventBase(SQLModel):
     """Base timeline event model"""
