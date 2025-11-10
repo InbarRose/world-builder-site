@@ -1,0 +1,9 @@
+{
+  "stage": "primal",
+  "suit": "♣",
+  "power": "Resource",
+  "description": "Enhance the species with a resource; domesticated crops or animals, raw materials (wood, stone, iron, etc), natural resource, etc.",
+  "fantasticalDescription": "Enhance the species with a fantastical resource; magical materials, enchanted crops, etc.",
+  "examples": "Enhance the species with a resource; domesticated crops or animals, raw materials (wood, stone, iron, etc), natural resource, etc."
+}
+

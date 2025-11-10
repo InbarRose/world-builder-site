@@ -1,0 +1,8 @@
+{
+  "stage": "intrigue",
+  "type": "disaster",
+  "power": "Natural Disaster",
+  "description": "Natural Disasters happen during any age and are triggered whenever a player draws an Ace card. When this happens, the player who drew the card should decide what happens. Examples of natural disasters could be a volcanic eruption, an earthquake, a tsunami, a meteor, a plague, a tornado, etc.",
+  "examples": "Natural Disasters happen during any age and are triggered whenever a player draws an Ace card. When this happens, the player who drew the card should decide what happens. Examples of natural disasters could be a volcanic eruption, an earthquake, a tsunami, a meteor, a plague, a tornado, etc."
+}
+
