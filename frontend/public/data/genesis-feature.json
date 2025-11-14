@@ -1,0 +1,9 @@
+{
+  "stage": "genesis",
+  "suit": "♦",
+  "power": "Feature",
+  "description": "This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren't really represented with the other powers.",
+  "fantasticalDescription": "This power represents fantastical features: magical weather patterns, portals, ley lines, etc.",
+  "examples": "This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren't really represented with the other powers."
+}
+
