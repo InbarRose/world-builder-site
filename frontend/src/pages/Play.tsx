@@ -31,36 +31,7 @@ interface PowerData {
 }
 
 const SUITS: Card['suit'][] = ['♠', '♥', '♣', '♦']
-const NUMBERED_VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
-const FACE_VALUES = ['J', 'Q', 'K']
 const JOKER = 'Joker'
-
-const STAGE_POWERS: Record<string, Record<string, string>> = {
-  'genesis': {
-    '♠': 'Earth',
-    '♥': 'Water',
-    '♣': 'Plant',
-    '♦': 'Feature',
-  },
-  'primal': {
-    '♠': 'Settlement',
-    '♥': 'Tradition',
-    '♣': 'Resource',
-    '♦': 'Skill',
-  },
-  'civilization': {
-    '♠': 'Construction',
-    '♥': 'Enlightenment',
-    '♣': 'Expansion',
-    '♦': 'Diplomacy',
-  },
-  'intrigue': {
-    '♠': 'Conflict',
-    '♥': 'Cooperation',
-    '♣': 'Scheme',
-    '♦': 'Myth',
-  },
-}
 
 const SUIT_TO_POWER_NAME: Record<string, Record<string, string>> = {
   'genesis': {
@@ -100,7 +71,7 @@ function shuffleDeck(deck: Card[]): Card[] {
   const shuffled = [...deck]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
 }
@@ -109,14 +80,14 @@ function getCardDisplay(card: Card): { display: string; color: string; bgColor: 
   if (card.value === JOKER) {
     return { display: JOKER, color: 'text-purple-600', bgColor: 'bg-purple-50 dark:bg-purple-900/20' }
   }
-  
+
   const suitColors: Record<Card['suit'], { text: string; bg: string }> = {
     '♠': { text: 'text-gray-900 dark:text-gray-100', bg: 'bg-white dark:bg-gray-800' },
     '♥': { text: 'text-red-600 dark:text-red-400', bg: 'bg-white dark:bg-gray-800' },
     '♣': { text: 'text-green-700 dark:text-green-400', bg: 'bg-white dark:bg-gray-800' },
     '♦': { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-white dark:bg-gray-800' },
   }
-  
+
   const colors = suitColors[card.suit]
   return {
     display: `${card.value}${card.suit}`,
@@ -161,7 +132,7 @@ export function Play() {
   const [stagesEnabled, setStagesEnabled] = useState(true) // On by default
   const [selectedStage, setSelectedStage] = useState('genesis') // Start in first stage
   const [powerData, setPowerData] = useState<PowerData | null>(null)
-  
+
   // Deck configuration
   const [numberRange, setNumberRange] = useState<[number, number]>([2, 10]) // Slider for numbered cards
   const [faceCards, setFaceCards] = useState<Record<string, boolean>>({ J: true, Q: true, K: true })
@@ -170,32 +141,32 @@ export function Play() {
 
   const buildDeck = useCallback(() => {
     const newDeck: Card[] = []
-    
+
     for (const suit of SUITS) {
       // Add numbered cards based on range
       for (let i = numberRange[0]; i <= numberRange[1]; i++) {
         const value = i.toString()
         newDeck.push({ suit, value, id: `${suit}-${value}` })
       }
-      
+
       // Add face cards based on selection
       for (const [face, included] of Object.entries(faceCards)) {
         if (included) {
           newDeck.push({ suit, value: face, id: `${suit}-${face}` })
         }
       }
-      
+
       // Add aces
       for (let i = 0; i < aceCount; i++) {
         newDeck.push({ suit, value: 'A', id: `${suit}-A-${i}` })
       }
     }
-    
+
     // Add jokers
     for (let i = 0; i < jokerCount; i++) {
       newDeck.push({ suit: '♠', value: JOKER, id: `joker-${i}` })
     }
-    
+
     return shuffleDeck(newDeck)
   }, [numberRange, faceCards, aceCount, jokerCount])
 
@@ -218,19 +189,19 @@ export function Play() {
       alert('Deck is empty! Reset the deck to draw more cards.')
       return
     }
-    
+
     const newDeck = [...deck]
     const card = newDeck.pop()!
     setDeck(newDeck)
     setDrawnCard(card)
-    
+
     // Load power data for the record
     let power: string | undefined = undefined
     if (stagesEnabled) {
       const data = await loadPowerData(selectedStage, card)
       power = data?.power
     }
-    
+
     const record: DrawRecord = {
       id: `${Date.now()}-${Math.random()}`,
       card,
@@ -238,7 +209,7 @@ export function Play() {
       stage: stagesEnabled ? selectedStage : undefined,
       power,
     }
-    
+
     setDrawHistory([...drawHistory, record])
   }
 
@@ -267,7 +238,7 @@ export function Play() {
         return line
       })
       .join('\n')
-    
+
     navigator.clipboard.writeText(text)
     alert('History copied to clipboard!')
   }
@@ -279,7 +250,7 @@ export function Play() {
       power: record.power || null,
       timestamp: record.timestamp.toISOString(),
     }))
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -307,7 +278,7 @@ export function Play() {
   }
 
   const isFantastical = drawnCard ? ['J', 'Q', 'K'].includes(drawnCard.value) : false
-  const { display, color, bgColor } = drawnCard ? getCardDisplay(drawnCard) : { display: '', color: '', bgColor: '' }
+  const { color, bgColor } = drawnCard ? getCardDisplay(drawnCard) : { color: '', bgColor: '' }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -375,23 +346,23 @@ export function Play() {
                       {powerData.power}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Stage</div>
                     <div className="text-lg font-medium">
                       {STAGES.find(s => s.id === selectedStage)?.name}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Description</div>
                     <div className="text-sm">
-                      {isFantastical && powerData.fantasticalDescription 
-                        ? powerData.fantasticalDescription 
+                      {isFantastical && powerData.fantasticalDescription
+                        ? powerData.fantasticalDescription
                         : powerData.description}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Examples</div>
                     <div className="text-sm text-muted-foreground">
@@ -459,7 +430,7 @@ export function Play() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 {/* Presets */}
                 <div>
@@ -527,11 +498,10 @@ export function Play() {
                       <button
                         key={face}
                         onClick={() => setFaceCards({ ...faceCards, [face]: !faceCards[face] })}
-                        className={`flex-1 py-2 px-3 rounded border ${
-                          faceCards[face]
+                        className={`flex-1 py-2 px-3 rounded border ${faceCards[face]
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'bg-background border-border hover:bg-accent'
-                        }`}
+                          }`}
                       >
                         {face}
                       </button>
@@ -677,7 +647,7 @@ export function Play() {
               </button>
             </div>
           </div>
-          
+
           {drawHistory.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               No cards drawn yet. Start drawing to see history here.
