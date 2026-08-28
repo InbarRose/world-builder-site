@@ -1,0 +1,10 @@
+{
+  "cardColors": {
+    "♠": "text-gray-900 dark:text-gray-100",
+    "♥": "text-red-600 dark:text-red-400",
+    "♣": "text-gray-900 dark:text-gray-100",
+    "♦": "text-red-600 dark:text-red-400",
+    "joker": "text-purple-600 dark:text-purple-400"
+  }
+}
+

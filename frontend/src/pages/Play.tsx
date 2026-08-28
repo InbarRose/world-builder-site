@@ -3,11 +3,11 @@
 // Date: 2025-01-27
 // Purpose: Card drawing interface with deck configuration and stages-and-powers overlay
 
-import { useState, useCallback, useEffect } from 'react'
-import { Play as PlayIcon, Shuffle, Settings, X, Copy, Download, Trash2, History } from 'lucide-react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Play as PlayIcon, Shuffle, X, Copy, Download, Trash2, Upload, RotateCcw, ExternalLink, HelpCircle } from 'lucide-react'
 
 interface Card {
-  suit: '♠' | '♥' | '♣' | '♦'
+  suit: '♠' | '♥' | '♣' | '♦' | '' // Empty string for jokers
   value: string
   id: string
 }
@@ -18,6 +18,7 @@ interface DrawRecord {
   timestamp: Date
   stage?: string
   power?: string
+  note?: string
 }
 
 interface PowerData {
@@ -30,8 +31,64 @@ interface PowerData {
   examples: string
 }
 
+interface GameState {
+  drawHistory: DrawRecord[]
+  deckConfig: {
+    numberRange: [number, number]
+    faceCards: Record<string, boolean>
+    aceCount: number
+    jokerCount: number
+    stagesEnabled: boolean
+    selectedStage: string
+  }
+  currentStage: string
+  stageNotes?: Record<string, string>
+  timestamp: string
+}
+
 const SUITS: Card['suit'][] = ['♠', '♥', '♣', '♦']
 const JOKER = 'Joker'
+
+const STAGE_POWERS: Record<string, Record<string, { name: string; id: string }>> = {
+  'genesis': {
+    '♠': { name: 'Earth', id: '(♠)---earth' },
+    '♥': { name: 'Water', id: '(♥)---water' },
+    '♣': { name: 'Plant', id: '(♣)---plant' },
+    '♦': { name: 'Feature', id: '(♦)---feature' },
+  },
+  'primal': {
+    '♠': { name: 'Settlement', id: '(♠)---settlement' },
+    '♥': { name: 'Tradition', id: '(♥)---tradition' },
+    '♣': { name: 'Resource', id: '(♣)---resource' },
+    '♦': { name: 'Skill', id: '(♦)---skill' },
+  },
+  'civilization': {
+    '♠': { name: 'Construction', id: '(♠)---construction' },
+    '♥': { name: 'Enlightenment', id: '(♥)---enlightenment' },
+    '♣': { name: 'Expansion', id: '(♣)---expansion' },
+    '♦': { name: 'Diplomacy', id: '(♦)---diplomacy' },
+  },
+  'intrigue': {
+    '♠': { name: 'Conflict', id: '(♠)---conflict' },
+    '♥': { name: 'Cooperation', id: '(♥)---cooperation' },
+    '♣': { name: 'Scheme', id: '(♣)---scheme' },
+    '♦': { name: 'Myth', id: '(♦)---myth' },
+  },
+}
+
+const STAGE_PRE_SETUP: Record<string, string> = {
+  'genesis': 'Before starting this stage, make sure you already have some basic terrain features such as coastlines for your continent(s) and maybe a river, or a mountain or two.',
+  'primal': 'Before starting this stage, each player should create a species, describing them and naming them and deciding where on the map they originated from.',
+  'civilization': 'Before starting this stage, each player should create some societies within the different species which might grow and expand during this stage into kingdoms or empires.',
+  'intrigue': 'Before this stage, you should make sure to give names to cities, nations, and societies. And deliberate on their aspects that you have developed over the last two stages. Noting the power, influence, armies, government, economy, etc of the different societies in the world.',
+}
+
+const STAGES = [
+  { id: 'genesis', name: 'Genesis', number: 1 },
+  { id: 'primal', name: 'Primal', number: 2 },
+  { id: 'civilization', name: 'Civilization', number: 3 },
+  { id: 'intrigue', name: 'Intrigue', number: 4 },
+]
 
 const SUIT_TO_POWER_NAME: Record<string, Record<string, string>> = {
   'genesis': {
@@ -60,37 +117,62 @@ const SUIT_TO_POWER_NAME: Record<string, Record<string, string>> = {
   },
 }
 
-const STAGES = [
-  { id: 'genesis', name: 'Genesis' },
-  { id: 'primal', name: 'Primal' },
-  { id: 'civilization', name: 'Civilization' },
-  { id: 'intrigue', name: 'Intrigue' },
-]
-
 function shuffleDeck(deck: Card[]): Card[] {
   const shuffled = [...deck]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
 }
 
-function getCardDisplay(card: Card): { display: string; color: string; bgColor: string } {
-  if (card.value === JOKER) {
-    return { display: JOKER, color: 'text-purple-600', bgColor: 'bg-purple-50 dark:bg-purple-900/20' }
+async function loadCardColors(): Promise<Record<string, string>> {
+  try {
+    const response = await fetch('/data/stage-colors.json')
+    if (response.ok) {
+      const data = await response.json()
+      return data.cardColors || {
+        '♠': 'text-gray-900 dark:text-gray-100',
+        '♥': 'text-red-600 dark:text-red-400',
+        '♣': 'text-gray-900 dark:text-gray-100',
+        '♦': 'text-red-600 dark:text-red-400',
+        'joker': 'text-purple-600 dark:text-purple-400',
+      }
+    }
+  } catch (error) {
+    console.error('Error loading card colors:', error)
   }
-
-  const suitColors: Record<Card['suit'], { text: string; bg: string }> = {
-    '♠': { text: 'text-gray-900 dark:text-gray-100', bg: 'bg-white dark:bg-gray-800' },
-    '♥': { text: 'text-red-600 dark:text-red-400', bg: 'bg-white dark:bg-gray-800' },
-    '♣': { text: 'text-green-700 dark:text-green-400', bg: 'bg-white dark:bg-gray-800' },
-    '♦': { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-white dark:bg-gray-800' },
-  }
-
-  const colors = suitColors[card.suit]
+  // Default colors
   return {
-    display: `${card.value}${card.suit}`,
+    '♠': 'text-gray-900 dark:text-gray-100',
+    '♥': 'text-red-600 dark:text-red-400',
+    '♣': 'text-gray-900 dark:text-gray-100',
+    '♦': 'text-red-600 dark:text-red-400',
+    'joker': 'text-purple-600 dark:text-purple-400',
+  }
+}
+
+function getCardDisplay(card: Card, cardColors: Record<string, string>): { display: string; color: string; bgColor: string } {
+  if (card.value === JOKER) {
+    const jokerColor = cardColors['joker'] || 'text-purple-600 dark:text-purple-400'
+    return { display: JOKER, color: jokerColor, bgColor: 'bg-white dark:bg-gray-800' }
+  }
+
+  const suitKey = card.suit as string
+  const colorClass = cardColors[suitKey] || 
+    (['♠', '♣'].includes(card.suit) ? 'text-gray-900 dark:text-gray-100' : 'text-red-600 dark:text-red-400')
+  
+  const suitColors: Record<Card['suit'], { text: string; bg: string }> = {
+    '♠': { text: colorClass, bg: 'bg-white dark:bg-gray-800' },
+    '♥': { text: colorClass, bg: 'bg-white dark:bg-gray-800' },
+    '♣': { text: colorClass, bg: 'bg-white dark:bg-gray-800' },
+    '♦': { text: colorClass, bg: 'bg-white dark:bg-gray-800' },
+    '': { text: colorClass, bg: 'bg-white dark:bg-gray-800' },
+  }
+
+  const colors = suitColors[card.suit] || suitColors['♠']
+  return {
+    display: card.suit ? `${card.value}${card.suit}` : card.value,
     color: colors.text,
     bgColor: colors.bg,
   }
@@ -127,17 +209,34 @@ export function Play() {
   const [deck, setDeck] = useState<Card[]>([])
   const [drawnCard, setDrawnCard] = useState<Card | null>(null)
   const [drawHistory, setDrawHistory] = useState<DrawRecord[]>([])
-  const [showConfig, setShowConfig] = useState(false)
-  const [showHistory, setShowHistory] = useState(false)
   const [stagesEnabled, setStagesEnabled] = useState(true) // On by default
   const [selectedStage, setSelectedStage] = useState('genesis') // Start in first stage
   const [powerData, setPowerData] = useState<PowerData | null>(null)
+  const [showDeckEmptyDialog, setShowDeckEmptyDialog] = useState(false)
+  const [showRestartDialog, setShowRestartDialog] = useState(false)
+  const [showHelpDialog, setShowHelpDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFileName, setExportFileName] = useState('')
+  const [stageNotes, setStageNotes] = useState<Record<string, string>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Deck configuration
-  const [numberRange, setNumberRange] = useState<[number, number]>([2, 10]) // Slider for numbered cards
+  const [numberRange, setNumberRange] = useState<[number, number]>([2, 10])
   const [faceCards, setFaceCards] = useState<Record<string, boolean>>({ J: true, Q: true, K: true })
-  const [aceCount, setAceCount] = useState(4) // 0-4
+  const [aceCount, setAceCount] = useState(4) // 0-4 total aces
   const [jokerCount, setJokerCount] = useState(2) // 0-2
+  const [cardColors, setCardColors] = useState<Record<string, string>>({
+    '♠': 'text-gray-900 dark:text-gray-100',
+    '♥': 'text-red-600 dark:text-red-400',
+    '♣': 'text-gray-900 dark:text-gray-100',
+    '♦': 'text-red-600 dark:text-red-400',
+    'joker': 'text-purple-600 dark:text-purple-400',
+  })
+
+  // Load card colors on mount
+  useEffect(() => {
+    loadCardColors().then(setCardColors)
+  }, [])
 
   const buildDeck = useCallback(() => {
     const newDeck: Card[] = []
@@ -155,16 +254,23 @@ export function Play() {
           newDeck.push({ suit, value: face, id: `${suit}-${face}` })
         }
       }
+    }
 
-      // Add aces
-      for (let i = 0; i < aceCount; i++) {
-        newDeck.push({ suit, value: 'A', id: `${suit}-A-${i}` })
+    // Add aces - total count, distributed across suits
+    // For standard deck: 4 aces = 1 per suit
+    // For custom: distribute evenly, remainder goes to first suits
+    const acesPerSuit = Math.floor(aceCount / SUITS.length)
+    const extraAces = aceCount % SUITS.length
+    for (let i = 0; i < SUITS.length; i++) {
+      const count = acesPerSuit + (i < extraAces ? 1 : 0)
+      for (let j = 0; j < count; j++) {
+        newDeck.push({ suit: SUITS[i], value: 'A', id: `${SUITS[i]}-A-${j}` })
       }
     }
 
-    // Add jokers
+    // Add jokers - no suit (empty string)
     for (let i = 0; i < jokerCount; i++) {
-      newDeck.push({ suit: '♠', value: JOKER, id: `joker-${i}` })
+      newDeck.push({ suit: '', value: JOKER, id: `joker-${i}` })
     }
 
     return shuffleDeck(newDeck)
@@ -186,7 +292,7 @@ export function Play() {
 
   const handleDrawCard = async () => {
     if (deck.length === 0) {
-      alert('Deck is empty! Reset the deck to draw more cards.')
+      setShowDeckEmptyDialog(true)
       return
     }
 
@@ -208,9 +314,46 @@ export function Play() {
       timestamp: new Date(),
       stage: stagesEnabled ? selectedStage : undefined,
       power,
+      note: '',
     }
 
     setDrawHistory([...drawHistory, record])
+
+    // Check if deck is now empty after drawing
+    if (newDeck.length === 0) {
+      setShowDeckEmptyDialog(true)
+    }
+  }
+
+  const handleNoteChange = (recordId: string, note: string) => {
+    setDrawHistory(drawHistory.map(r => 
+      r.id === recordId ? { ...r, note } : r
+    ))
+  }
+
+  const handleStageNoteChange = (note: string) => {
+    setStageNotes({ ...stageNotes, [selectedStage]: note })
+  }
+
+  const handleProgressToNextStage = () => {
+    const currentIndex = STAGES.findIndex(s => s.id === selectedStage)
+    if (currentIndex < STAGES.length - 1) {
+      const nextStage = STAGES[currentIndex + 1]
+      setSelectedStage(nextStage.id)
+      const newDeck = buildDeck()
+      setDeck(newDeck)
+      setDrawnCard(null)
+      setPowerData(null)
+      setShowDeckEmptyDialog(false)
+    }
+  }
+
+  const handleReshuffleDeck = () => {
+    const newDeck = buildDeck()
+    setDeck(newDeck)
+    setDrawnCard(null)
+    setPowerData(null)
+    setShowDeckEmptyDialog(false)
   }
 
   const handleResetDeck = () => {
@@ -218,6 +361,15 @@ export function Play() {
     setDeck(newDeck)
     setDrawnCard(null)
     setPowerData(null)
+  }
+
+  const handleRestart = () => {
+    setDeck(buildDeck())
+    setDrawnCard(null)
+    setDrawHistory([])
+    setPowerData(null)
+    setSelectedStage('genesis')
+    setShowRestartDialog(false)
   }
 
   const handleResetHistory = () => {
@@ -229,7 +381,7 @@ export function Play() {
   const handleCopyHistory = () => {
     const text = drawHistory
       .map((record) => {
-        const { display } = getCardDisplay(record.card)
+        const { display } = getCardDisplay(record.card, cardColors)
         let line = `${display}`
         if (record.stage && record.power) {
           line += ` - ${record.stage}: ${record.power}`
@@ -243,23 +395,134 @@ export function Play() {
     alert('History copied to clipboard!')
   }
 
-  const handleExportHistory = () => {
-    const data = drawHistory.map((record) => ({
-      card: `${record.card.value}${record.card.suit}`,
-      stage: record.stage || null,
-      power: record.power || null,
-      timestamp: record.timestamp.toISOString(),
-    }))
+  const handleExportGameState = () => {
+    setExportFileName(`game-state-${new Date().toISOString().split('T')[0]}`)
+    setShowExportDialog(true)
+  }
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const handleConfirmExport = () => {
+    const gameState: GameState = {
+      drawHistory: drawHistory.map(r => ({
+        ...r,
+        timestamp: r.timestamp,
+      })),
+      deckConfig: {
+        numberRange,
+        faceCards,
+        aceCount,
+        jokerCount,
+        stagesEnabled,
+        selectedStage,
+      },
+      currentStage: selectedStage,
+      stageNotes,
+      timestamp: new Date().toISOString(),
+    }
+
+    const blob = new Blob([JSON.stringify(gameState, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `draw-history-${new Date().toISOString().split('T')[0]}.json`
+    a.download = exportFileName.endsWith('.json') ? exportFileName : `${exportFileName}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    setShowExportDialog(false)
+    setExportFileName('')
+  }
+
+  const handleImportGameState = () => {
+    fileInputRef.current?.click()
+  }
+
+  const buildDeckWithConfig = useCallback((
+    numRange: [number, number],
+    faces: Record<string, boolean>,
+    aces: number,
+    jokers: number
+  ) => {
+    const newDeck: Card[] = []
+
+    for (const suit of SUITS) {
+      // Add numbered cards based on range
+      for (let i = numRange[0]; i <= numRange[1]; i++) {
+        const value = i.toString()
+        newDeck.push({ suit, value, id: `${suit}-${value}` })
+      }
+
+      // Add face cards based on selection
+      for (const [face, included] of Object.entries(faces)) {
+        if (included) {
+          newDeck.push({ suit, value: face, id: `${suit}-${face}` })
+        }
+      }
+    }
+
+    // Add aces - total count, distributed across suits
+    const acesPerSuit = Math.floor(aces / SUITS.length)
+    const extraAces = aces % SUITS.length
+    for (let i = 0; i < SUITS.length; i++) {
+      const count = acesPerSuit + (i < extraAces ? 1 : 0)
+      for (let j = 0; j < count; j++) {
+        newDeck.push({ suit: SUITS[i], value: 'A', id: `${SUITS[i]}-A-${j}` })
+      }
+    }
+
+    // Add jokers - no suit (empty string)
+    for (let i = 0; i < jokers; i++) {
+      newDeck.push({ suit: '', value: JOKER, id: `joker-${i}` })
+    }
+
+    return shuffleDeck(newDeck)
+  }, [])
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const gameState: GameState = JSON.parse(text)
+
+      // Restore state
+      setDrawHistory(gameState.drawHistory.map(r => ({
+        ...r,
+        card: {
+          ...r.card,
+          suit: r.card.suit || '', // Handle jokers with empty suit
+        },
+        timestamp: new Date(r.timestamp),
+      })))
+      setNumberRange(gameState.deckConfig.numberRange)
+      setFaceCards(gameState.deckConfig.faceCards)
+      setAceCount(gameState.deckConfig.aceCount)
+      setJokerCount(gameState.deckConfig.jokerCount)
+      setStagesEnabled(gameState.deckConfig.stagesEnabled)
+      setSelectedStage(gameState.deckConfig.selectedStage || gameState.currentStage)
+      setStageNotes(gameState.stageNotes || {})
+
+      // Rebuild deck with imported config
+      const newDeck = buildDeckWithConfig(
+        gameState.deckConfig.numberRange,
+        gameState.deckConfig.faceCards,
+        gameState.deckConfig.aceCount,
+        gameState.deckConfig.jokerCount
+      )
+      setDeck(newDeck)
+      setDrawnCard(null)
+      setPowerData(null)
+
+      alert('Game state imported successfully!')
+    } catch (error) {
+      alert('Error importing game state. Please check the file format.')
+      console.error(error)
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const applyPreset = (preset: 'all' | 'short') => {
@@ -274,11 +537,47 @@ export function Play() {
       setAceCount(2)
       setJokerCount(1)
     }
-    // Deck will rebuild automatically via useEffect
+  }
+
+  const getStageRulesUrl = (stageId: string, powerId?: string) => {
+    const baseUrl = '/rules'
+    if (powerId) {
+      // Power IDs are like "(♠)---earth", need to URL encode
+      return `${baseUrl}#${encodeURIComponent(powerId)}`
+    }
+    // Stage IDs need to match the navigation structure
+    const stageMap: Record<string, string> = {
+      'genesis': '1.-genesis',
+      'primal': '2.-primal',
+      'civilization': '3.-civilization',
+      'intrigue': '4.-intrigue',
+    }
+    return `${baseUrl}#${stageMap[stageId] || stageId}`
+  }
+
+  const handleRulesLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    e.preventDefault()
+    const hash = url.split('#')[1]
+    const baseUrl = url.split('#')[0]
+    const newWindow = window.open(baseUrl, '_blank', 'noopener,noreferrer')
+    if (newWindow && hash) {
+      // Wait for the page to load, then navigate to the hash
+      newWindow.addEventListener('load', () => {
+        setTimeout(() => {
+          newWindow.location.hash = hash
+          // Try scrolling to the element
+          const element = newWindow.document.getElementById(decodeURIComponent(hash))
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 500)
+      })
+    }
   }
 
   const isFantastical = drawnCard ? ['J', 'Q', 'K'].includes(drawnCard.value) : false
-  const { color, bgColor } = drawnCard ? getCardDisplay(drawnCard) : { color: '', bgColor: '' }
+  const { color, bgColor } = drawnCard ? getCardDisplay(drawnCard, cardColors) : { color: '', bgColor: '' }
+  const currentStageData = STAGES.find(s => s.id === selectedStage)
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -298,12 +597,16 @@ export function Play() {
                 {drawnCard ? (
                   <div className={`w-full max-w-xs aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-8 relative`}>
                     {/* Corner value (top-left) */}
-                    <div className={`absolute top-2 left-3 text-2xl font-bold ${color}`}>
-                      {drawnCard.value}
-                    </div>
-                    <div className={`absolute top-8 left-3 text-xl ${color}`}>
-                      {drawnCard.suit}
-                    </div>
+                    {drawnCard.value !== JOKER && (
+                      <>
+                        <div className={`absolute top-2 left-3 text-2xl font-bold ${color}`}>
+                          {drawnCard.value}
+                        </div>
+                        <div className={`absolute top-8 left-3 text-xl ${color}`}>
+                          {drawnCard.suit}
+                        </div>
+                      </>
+                    )}
                     {/* Center display */}
                     <div className={`text-7xl font-bold ${color} mb-4`}>
                       {drawnCard.value === JOKER ? '🃏' : drawnCard.suit}
@@ -388,6 +691,7 @@ export function Play() {
               onClick={handleDrawCard}
               disabled={deck.length === 0}
               className="btn-primary flex items-center space-x-2 px-6 py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Draw the next card from the deck. You can add a note after drawing."
             >
               <PlayIcon className="h-5 w-5" />
               <span>Draw Card</span>
@@ -395,199 +699,278 @@ export function Play() {
             <button
               onClick={handleResetDeck}
               className="btn-outline flex items-center space-x-2 px-6 py-3"
+              title="Reshuffle the current deck with the same configuration. Does not clear history."
             >
               <Shuffle className="h-5 w-5" />
               <span>Reset Deck</span>
             </button>
             <button
-              onClick={() => setShowConfig(!showConfig)}
+              onClick={() => setShowRestartDialog(true)}
               className="btn-outline flex items-center space-x-2 px-6 py-3"
+              title="Restart the entire game. This will clear all progress including history and reset to the first stage."
             >
-              <Settings className="h-5 w-5" />
-              <span>Configure</span>
+              <RotateCcw className="h-5 w-5" />
+              <span>Restart</span>
             </button>
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={handleImportGameState}
               className="btn-outline flex items-center space-x-2 px-6 py-3"
+              title="Import a previously saved game state from a JSON file."
             >
-              <History className="h-5 w-5" />
-              <span>History ({drawHistory.length})</span>
+              <Upload className="h-5 w-5" />
+              <span>Import</span>
             </button>
+            <button
+              onClick={handleExportGameState}
+              disabled={drawHistory.length === 0}
+              className="btn-outline flex items-center space-x-2 px-6 py-3 disabled:opacity-50"
+              title="Export the current game state including history, configuration, and notes to a JSON file."
+            >
+              <Download className="h-5 w-5" />
+              <span>Export</span>
+            </button>
+            <button
+              onClick={() => setShowHelpDialog(true)}
+              className="btn-outline flex items-center space-x-2 px-6 py-3"
+              title="View help and instructions for using the Play page."
+            >
+              <HelpCircle className="h-5 w-5" />
+              <span>Help</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileImport}
+              className="hidden"
+            />
           </div>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Configuration Panel */}
-          {showConfig && (
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold">Configuration</h3>
-                <button
-                  onClick={() => setShowConfig(false)}
-                  className="p-1 hover:bg-accent rounded"
+          {/* Stage Legend and Pre-Stage Setup */}
+          {stagesEnabled && currentStageData && (
+            <div className="card p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">
+                  {currentStageData.number}. {currentStageData.name} Stage
+                </h3>
+                <a
+                  href={getStageRulesUrl(selectedStage)}
+                  onClick={(e) => handleRulesLinkClick(e, getStageRulesUrl(selectedStage))}
+                  className="btn-outline flex items-center space-x-2 px-3 py-1 text-sm"
+                  title="Open the Rules page in a new tab showing this stage's details"
                 >
-                  <X className="h-4 w-4" />
-                </button>
+                  <span>View Rules</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              
+              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                <div>
+                  <p className="font-semibold text-sm mb-2">Pre-Stage Setup:</p>
+                  <p className="text-sm">{STAGE_PRE_SETUP[selectedStage]}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Your Notes:</label>
+                  <textarea
+                    value={stageNotes[selectedStage] || ''}
+                    onChange={(e) => handleStageNoteChange(e.target.value)}
+                    placeholder="Add your notes for this stage's pre-setup..."
+                    className="input w-full text-sm min-h-[80px]"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-6">
-                {/* Presets */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Presets</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => applyPreset('all')}
-                      className="btn-outline flex-1 text-sm py-2"
-                    >
-                      All - Normal Game
-                    </button>
-                    <button
-                      onClick={() => applyPreset('short')}
-                      className="btn-outline flex-1 text-sm py-2"
-                    >
-                      Short Game
-                    </button>
-                  </div>
-                </div>
-
-                {/* Numbered Cards Slider */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Numbered Cards: {numberRange[0]}-{numberRange[1]}
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs text-muted-foreground w-12">Min:</span>
-                      <input
-                        type="range"
-                        min="2"
-                        max="10"
-                        value={numberRange[0]}
-                        onChange={(e) => {
-                          const min = parseInt(e.target.value)
-                          setNumberRange([min, Math.max(min, numberRange[1])])
-                        }}
-                        className="flex-1"
-                      />
-                      <span className="text-sm font-medium w-8">{numberRange[0]}</span>
+              <div>
+                <p className="font-semibold mb-2 text-sm">Powers by Suit:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(STAGE_POWERS[selectedStage] || {}).map(([suit, power]) => (
+                    <div key={suit} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                      <span className="text-lg font-bold">{suit}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{power.name}</span>
+                        <a
+                          href={getStageRulesUrl(selectedStage, power.id)}
+                          onClick={(e) => handleRulesLinkClick(e, getStageRulesUrl(selectedStage, power.id))}
+                          className="text-primary hover:underline"
+                          title="Open the Rules page in a new tab showing this power's details"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs text-muted-foreground w-12">Max:</span>
-                      <input
-                        type="range"
-                        min="2"
-                        max="10"
-                        value={numberRange[1]}
-                        onChange={(e) => {
-                          const max = parseInt(e.target.value)
-                          setNumberRange([Math.min(numberRange[0], max), max])
-                        }}
-                        className="flex-1"
-                      />
-                      <span className="text-sm font-medium w-8">{numberRange[1]}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                {/* Face Cards */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Face Cards</label>
-                  <div className="flex gap-2">
-                    {(['J', 'Q', 'K'] as const).map((face) => (
-                      <button
-                        key={face}
-                        onClick={() => setFaceCards({ ...faceCards, [face]: !faceCards[face] })}
-                        className={`flex-1 py-2 px-3 rounded border ${faceCards[face]
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-background border-border hover:bg-accent'
-                          }`}
-                      >
-                        {face}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Aces */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Aces: {aceCount}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="4"
-                    value={aceCount}
-                    onChange={(e) => setAceCount(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0</span>
-                    <span>4</span>
-                  </div>
-                </div>
-
-                {/* Jokers */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Jokers: {jokerCount}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2"
-                    value={jokerCount}
-                    onChange={(e) => setJokerCount(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>0</span>
-                    <span>2</span>
-                  </div>
-                </div>
-
-                {/* Stages & Powers */}
-                <div className="border-t border-border pt-4">
-                  <label className="text-sm font-medium mb-2 block">Stages & Powers</label>
-                  <label className="flex items-center space-x-2 mb-3">
-                    <input
-                      type="checkbox"
-                      checked={stagesEnabled}
-                      onChange={(e) => setStagesEnabled(e.target.checked)}
-                      className="rounded"
-                    />
-                    <span>Enable Stages & Powers Overlay</span>
-                  </label>
-                  {stagesEnabled && (
-                    <select
-                      value={selectedStage}
-                      onChange={(e) => setSelectedStage(e.target.value)}
-                      className="input w-full"
-                    >
-                      {STAGES.map((stage) => (
-                        <option key={stage.id} value={stage.id}>
-                          {stage.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    const newDeck = buildDeck()
-                    setDeck(newDeck)
-                    setDrawnCard(null)
-                    setPowerData(null)
-                  }}
-                  className="btn-primary w-full"
-                >
-                  Apply Configuration
-                </button>
               </div>
             </div>
           )}
+        </div>
+
+        {/* Sidebar - Configuration Always Visible */}
+        <div className="space-y-6">
+          {/* Configuration Panel */}
+          <div className="card p-6">
+            <h3 className="text-xl font-semibold mb-4">Configuration</h3>
+
+            <div className="space-y-6">
+              {/* Presets */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Presets</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => applyPreset('all')}
+                    className="btn-outline flex-1 text-sm py-2"
+                    title="Set deck to standard game: numbers 2-10, all face cards (J, Q, K), 4 aces, 2 jokers"
+                  >
+                    All - Normal Game
+                  </button>
+                  <button
+                    onClick={() => applyPreset('short')}
+                    className="btn-outline flex-1 text-sm py-2"
+                    title="Set deck to short game: numbers 2-6, only King face cards, 2 aces, 1 joker"
+                  >
+                    Short Game
+                  </button>
+                </div>
+              </div>
+
+              {/* Numbered Cards Slider */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Numbered Cards: {numberRange[0]}-{numberRange[1]}
+                </label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-muted-foreground w-12">Min:</span>
+                    <input
+                      type="range"
+                      min="2"
+                      max="10"
+                      value={numberRange[0]}
+                      onChange={(e) => {
+                        const min = parseInt(e.target.value)
+                        setNumberRange([min, Math.max(min, numberRange[1])])
+                      }}
+                      className="flex-1"
+                    />
+                    <span className="text-sm font-medium w-8">{numberRange[0]}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-muted-foreground w-12">Max:</span>
+                    <input
+                      type="range"
+                      min="2"
+                      max="10"
+                      value={numberRange[1]}
+                      onChange={(e) => {
+                        const max = parseInt(e.target.value)
+                        setNumberRange([Math.min(numberRange[0], max), max])
+                      }}
+                      className="flex-1"
+                    />
+                    <span className="text-sm font-medium w-8">{numberRange[1]}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Face Cards */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Face Cards</label>
+                <div className="flex gap-2">
+                  {(['J', 'Q', 'K'] as const).map((face) => (
+                    <button
+                      key={face}
+                      onClick={() => setFaceCards({ ...faceCards, [face]: !faceCards[face] })}
+                      className={`flex-1 py-2 px-3 rounded border ${
+                        faceCards[face]
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background border-border hover:bg-accent'
+                      }`}
+                    >
+                      {face}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Aces */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Aces: {aceCount} (total)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="4"
+                  value={aceCount}
+                  onChange={(e) => setAceCount(parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>0</span>
+                  <span>4</span>
+                </div>
+              </div>
+
+              {/* Jokers */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Jokers: {jokerCount}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  value={jokerCount}
+                  onChange={(e) => setJokerCount(parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>0</span>
+                  <span>2</span>
+                </div>
+              </div>
+
+              {/* Stages & Powers */}
+              <div className="border-t border-border pt-4">
+                <label className="text-sm font-medium mb-2 block">Stages & Powers</label>
+                <label className="flex items-center space-x-2 mb-3">
+                  <input
+                    type="checkbox"
+                    checked={stagesEnabled}
+                    onChange={(e) => setStagesEnabled(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span>Enable Stages & Powers Overlay</span>
+                </label>
+                {stagesEnabled && (
+                  <select
+                    value={selectedStage}
+                    onChange={(e) => setSelectedStage(e.target.value)}
+                    className="input w-full"
+                  >
+                    {STAGES.map((stage) => (
+                      <option key={stage.id} value={stage.id}>
+                        {stage.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <button
+                onClick={() => {
+                  const newDeck = buildDeck()
+                  setDeck(newDeck)
+                  setDrawnCard(null)
+                  setPowerData(null)
+                }}
+                className="btn-primary w-full"
+                title="Apply the current deck configuration and rebuild the deck"
+              >
+                Apply Configuration
+              </button>
+            </div>
+          </div>
 
           {/* Deck Info */}
           <div className="card p-6">
@@ -606,64 +989,118 @@ export function Play() {
         </div>
       </div>
 
-      {/* Draw History */}
-      {showHistory && (
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Draw History</h3>
-            <div className="flex items-center space-x-2">
+      {/* Restart Dialog */}
+      {showRestartDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4">Restart Game</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to restart? This will clear all progress including draw history, current card, and reset to the first stage. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
               <button
-                onClick={handleCopyHistory}
-                disabled={drawHistory.length === 0}
-                className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm disabled:opacity-50"
-                title="Copy to clipboard"
+                onClick={handleRestart}
+                className="btn-primary flex-1"
               >
-                <Copy className="h-4 w-4" />
-                <span>Copy</span>
+                Yes, Restart
               </button>
               <button
-                onClick={handleExportHistory}
-                disabled={drawHistory.length === 0}
-                className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm disabled:opacity-50"
-                title="Export as JSON"
+                onClick={() => setShowRestartDialog(false)}
+                className="btn-outline flex-1"
               >
-                <Download className="h-4 w-4" />
-                <span>Export</span>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deck Empty Dialog */}
+      {showDeckEmptyDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4">Deck is Empty</h3>
+            <p className="text-muted-foreground mb-6">
+              {stagesEnabled
+                ? 'Would you like to progress to the next stage or reshuffle the current deck?'
+                : 'Would you like to reshuffle the deck?'}
+            </p>
+            <div className="flex gap-3">
+              {stagesEnabled && (
+                <button
+                  onClick={handleProgressToNextStage}
+                  disabled={STAGES.findIndex(s => s.id === selectedStage) === STAGES.length - 1}
+                  className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {STAGES.findIndex(s => s.id === selectedStage) === STAGES.length - 1
+                    ? 'Last Stage'
+                    : `Next Stage (${STAGES[STAGES.findIndex(s => s.id === selectedStage) + 1]?.name})`}
+                </button>
+              )}
+              <button
+                onClick={handleReshuffleDeck}
+                className="btn-outline flex-1"
+              >
+                Reshuffle Deck
               </button>
               <button
-                onClick={handleResetHistory}
-                disabled={drawHistory.length === 0}
-                className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm disabled:opacity-50 text-destructive"
-                title="Clear history"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Clear</span>
-              </button>
-              <button
-                onClick={() => setShowHistory(false)}
-                className="p-1 hover:bg-accent rounded"
+                onClick={() => setShowDeckEmptyDialog(false)}
+                className="btn-outline px-4"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
           </div>
+        </div>
+      )}
 
-          {drawHistory.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No cards drawn yet. Start drawing to see history here.
-            </p>
-          ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {drawHistory.slice().reverse().map((record) => {
-                const { display, color } = getCardDisplay(record.card)
-                return (
-                  <div
-                    key={record.id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
+      {/* Draw History - Always Visible */}
+      <div className="card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold">Draw History</h3>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleCopyHistory}
+              disabled={drawHistory.length === 0}
+              className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm disabled:opacity-50"
+              title="Copy the draw history to your clipboard as text"
+            >
+              <Copy className="h-4 w-4" />
+              <span>Copy</span>
+            </button>
+            <button
+              onClick={handleResetHistory}
+              disabled={drawHistory.length === 0}
+              className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm disabled:opacity-50 text-destructive"
+              title="Clear all draw history. This action cannot be undone."
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        {drawHistory.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No cards drawn yet. Start drawing to see history here.
+          </p>
+        ) : (
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {drawHistory.slice().reverse().map((record, index) => {
+              const { display, color } = getCardDisplay(record.card, cardColors)
+              const historyIndex = drawHistory.length - index
+              return (
+                <div
+                  key={record.id}
+                  className="p-3 bg-muted/50 rounded-lg space-y-2"
+                >
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
+                      <span className="text-sm font-semibold text-muted-foreground w-8">
+                        {historyIndex}
+                      </span>
                       <span className={`text-2xl font-bold ${color}`}>{display}</span>
-                      <div>
+                      <div className="flex-1">
                         {record.power && (
                           <div className="font-semibold">{record.power}</div>
                         )}
@@ -678,12 +1115,126 @@ export function Play() {
                       {record.timestamp.toLocaleTimeString()}
                     </div>
                   </div>
-                )
-              })}
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Note:</label>
+                    <textarea
+                      value={record.note || ''}
+                      onChange={(e) => handleNoteChange(record.id, e.target.value)}
+                      placeholder="Add a note about this card..."
+                      className="input w-full text-sm min-h-[60px]"
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Help Dialog */}
+      {showHelpDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">How to Use the Play Page</h3>
+              <button
+                onClick={() => setShowHelpDialog(false)}
+                className="p-1 hover:bg-accent rounded"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-          )}
+            <div className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-semibold mb-2">Drawing Cards</h4>
+                <p>Click "Draw Card" to draw the next card from your deck. After drawing, you can add a note to record what happened or any decisions made.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Deck Configuration</h4>
+                <p>Use the configuration panel to customize your deck:</p>
+                <ul className="list-disc list-inside ml-4 space-y-1">
+                  <li><strong>Presets:</strong> Quickly set up a standard or short game deck</li>
+                  <li><strong>Numbered Cards:</strong> Select the range of numbered cards (2-10) to include</li>
+                  <li><strong>Face Cards:</strong> Toggle individual face cards (J, Q, K) on or off</li>
+                  <li><strong>Aces:</strong> Set the total number of aces (0-4)</li>
+                  <li><strong>Jokers:</strong> Set the number of jokers (0-2)</li>
+                </ul>
+                <p className="mt-2">Click "Apply Configuration" to rebuild the deck with your settings.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Stages & Powers</h4>
+                <p>Enable "Stages & Powers Overlay" to see power descriptions for each card based on the current stage. Each stage has different powers associated with each suit. For detailed rules about stages and powers, see the <a href="/rules#stages-and-powers" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Rules page</a>.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Notes</h4>
+                <p>You can add notes to individual cards after drawing them, or edit existing notes by clicking "Add Note" or "Edit" in the history. You can also add notes for each stage's pre-setup section.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Saving & Loading</h4>
+                <p>Use "Export" to save your game state (including history, configuration, and notes) to a JSON file. Use "Import" to load a previously saved game. You can name the export file when saving.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Deck Management</h4>
+                <ul className="list-disc list-inside ml-4 space-y-1">
+                  <li><strong>Reset Deck:</strong> Reshuffle the current deck without clearing history</li>
+                  <li><strong>Restart:</strong> Clear everything and start over from the beginning</li>
+                  <li><strong>When deck is empty:</strong> Choose to progress to the next stage or reshuffle</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">History</h4>
+                <p>The draw history shows all cards drawn with their powers, stages, and notes. Use "Copy" to copy the history as text, or "Clear" to remove all history.</p>
+              </div>
+              <div className="border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
+                  For complete game rules, see the <a href="/rules" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Rules page</a>.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Export File Name Dialog */}
+      {showExportDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4">Export Game State</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">File Name</label>
+                <input
+                  type="text"
+                  value={exportFileName}
+                  onChange={(e) => setExportFileName(e.target.value)}
+                  placeholder="game-state"
+                  className="input w-full"
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground mt-1">.json extension will be added automatically</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmExport}
+                  className="btn-primary flex-1"
+                >
+                  Export
+                </button>
+                <button
+                  onClick={() => {
+                    setShowExportDialog(false)
+                    setExportFileName('')
+                  }}
+                  className="btn-outline flex-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
