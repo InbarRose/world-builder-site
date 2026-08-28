@@ -1,0 +1,8 @@
+{
+  "name": "world-builder-site-scripts",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "node scripts/deploy.js"
+  }
+}
