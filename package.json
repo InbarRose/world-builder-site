@@ -1,8 +1,13 @@
 {
-  "name": "world-builder-site-scripts",
-  "version": "0.0.0",
+  "name": "world-builder-site",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "deploy": "node scripts/deploy.js"
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "test": "npm --prefix frontend run test",
+    "test:ci": "npm --prefix frontend run test:ci",
+    "lint": "npm --prefix frontend run lint"
   }
 }

@@ -1,56 +1,26 @@
 # Frontend (React + TypeScript)
 
-This folder holds the frontend app (Vite + React + TypeScript). It is deployed to Vercel and connects directly to Supabase.
+Static Single Page Application for World Builder built with Vite, React, TypeScript, and Tailwind CSS. Deployed to GitHub Pages at [world-building.inbarrose.com](https://world-building.inbarrose.com).
 
-## Quick start
+## Quick Start
 
 1. `cd frontend`
-2. `npm install` (or `pnpm install`)
-3. Create `.env.local` file with your Supabase credentials:
-   ```
-   # New API key structure (preferred)
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key-here
-   
-   # OR use legacy structure (still supported)
-   # VITE_SUPABASE_ANON_KEY=your-anon-key-here
-   ```
-4. `npm run dev`
+2. `npm install`
+3. `npm run dev` — start local development server at `http://localhost:3000`
+4. `npm test` — run unit tests (Vitest)
+5. `npm run build` — build static production bundle into `dist/`
+6. `npm run preview` — preview production build locally
 
-## Tech stack
+## Tech Stack
 
-- Vite
-- React
-- TypeScript
-- Tailwind CSS
-- Supabase (direct client connection)
-- React Router
+- **Vite** — Build tool and dev server
+- **React 18** — UI library
+- **TypeScript** — Static typing
+- **Tailwind CSS** — Styling
+- **React Router 6** — Client-side SPA routing
+- **Vitest & React Testing Library** — Unit testing
 
-## Supabase Setup
+## Static Data
 
-The frontend connects directly to Supabase from the browser. No backend server needed for basic operations!
+All game rules and card decks are stored as static JSON files in `public/data/` and loaded client-side directly by the app.
 
-1. Get your Supabase credentials from [Supabase Dashboard](https://app.supabase.com/project/_/settings/api)
-2. Create `frontend/.env.local` with:
-   - `VITE_SUPABASE_URL` - Your Supabase project URL
-   - `VITE_SUPABASE_PUBLISHABLE_KEY` - Your Supabase publishable key (new structure, preferred)
-   - OR `VITE_SUPABASE_ANON_KEY` - Legacy anon key (still supported for backward compatibility)
-
-3. Use the Supabase client in your components:
-   ```typescript
-   import { supabase } from './lib/supabase'
-   
-   // Example: Fetch data
-   const { data, error } = await supabase
-     .from('sessions')
-     .select('*')
-   ```
-
-## Environment Variables for Vercel
-
-Add these in Vercel Project Settings → Environment Variables:
-- `VITE_SUPABASE_URL` (required)
-- `VITE_SUPABASE_PUBLISHABLE_KEY` (new structure, preferred)
-- OR `VITE_SUPABASE_ANON_KEY` (legacy structure, still supported)
-
-These will be available at build time and in the deployed app.

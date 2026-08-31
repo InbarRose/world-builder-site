@@ -1,85 +1,75 @@
 # world-builder-site
 
-Static + interactive site for a card-driven collaborative world-building game.
+Static interactive site for collaborative card-driven world-building.
 
-This repository contains scaffolding, documentation, automation scripts, and an initial Phase 0/1 plan so agentic coding tools (Copilot, LLMs) can iterate safely and with validation.
-
-See `PROJECT_CONTEXT.md` first.
+Hosted on **GitHub Pages** at [world-building.inbarrose.com](https://world-building.inbarrose.com).
 
 ## 🚀 Quick Start
 
-### Option 1: Dev Container (Recommended)
-1. **Prerequisites**: Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [VS Code](https://code.visualstudio.com/)
-2. **Install Extension**: Install the "Dev Containers" extension in VS Code
-3. **Open Project**: Clone repository and open in VS Code
-4. **Start Container**: Press `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
-5. **Verify Setup**: Run `wb-status` in the terminal
+### Local Development
 
-### Option 2: Local Development
-1. Install Python 3.12 and Poetry
-2. Clone repository
-3. Run `./scripts/setup-dev.sh` (automated setup)
-4. Implement Supabase connection (see `docs/technical-architecture.md`)
-5. Frontend: `cd frontend` and follow `frontend/README.md`
+1. **Install dependencies**:
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-## 🛠️ Development Commands
+2. **Run dev server**:
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:3000` in your browser.
 
-### Quick Aliases (Dev Container)
-```bash
-wb-status      # Show current project status
-wb-context     # Load project context
-wb-setup       # Setup development environment
-wb-quality     # Run quality gates
-wb-test        # Run tests
-wb-lint        # Run linting
-wb-format      # Format code
-wb-execute <task>  # Execute agent task
-```
+3. **Run unit tests**:
+   ```bash
+   npm test
+   ```
 
-### Agent Workflow
-```bash
-./scripts/agent-workflow.sh status        # Check current state
-./scripts/agent-workflow.sh execute <task_id>  # Execute tasks
-./scripts/agent-workflow.sh quality-gate # Run quality validation
-```
+4. **Build production static site**:
+   ```bash
+   npm run build
+   ```
+   Outputs production-ready static assets to `frontend/dist/`.
+
+## 🌐 Deployment to GitHub Pages
+
+This site is deployed automatically to GitHub Pages on every push to the `main` branch via GitHub Actions (`.github/workflows/deploy.yml`).
+
+### Custom Domain & DNS Setup
+
+- **Custom Domain**: `world-building.inbarrose.com`
+- **CNAME File**: `frontend/public/CNAME`
+- **DNS Configuration**: Create a `CNAME` record in your DNS provider:
+  - **Host / Name**: `world-building`
+  - **Target / Value**: `<your-github-username>.github.io`
+- **GitHub Repository Settings**:
+  - Go to **Settings** > **Pages**
+  - Source: **GitHub Actions**
+  - Custom domain: `world-building.inbarrose.com` (with Enforce HTTPS enabled)
 
 ## 📁 Project Structure
 
 ```
 world-builder-site/
-├── .devcontainer/          # Dev container configuration
-├── config/                 # Environment configurations
-├── docs/                   # Documentation and specifications
-├── scripts/                # Automation and utility scripts
-├── src/                    # Python FastAPI backend
-├── frontend/               # React TypeScript frontend
-├── tests/                  # Test suites
-└── templates/              # Code generation templates
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Pages automated build & deploy
+├── frontend/
+│   ├── public/
+│   │   ├── CNAME               # Custom domain configuration
+│   │   └── data/               # Static card deck data JSONs
+│   ├── src/
+│   │   ├── components/         # Reusable React components (Layout, etc.)
+│   │   ├── pages/              # Main routes (Home, Rules, Play)
+│   │   ├── test/               # Unit tests (Vitest + Testing Library)
+│   │   ├── App.tsx             # Root router & layout
+│   │   └── main.tsx            # React entry point
+│   ├── package.json
+│   └── vite.config.ts
+└── rules_v2025-01-27.json      # Canonical game rules reference
 ```
-
-## 🎯 Current Status
-
-- **Phase**: Phase 0 (Foundation) - In Progress
-- **Progress**: ~10%
-- **Next Steps**: Complete FastAPI setup and CI pipeline validation
-
-## 📚 Documentation
-
-- [Project Context](PROJECT_CONTEXT.md) - Project overview and goals
-- [Dev Container Setup](docs/DEV_CONTAINER_SETUP.md) - Complete dev container guide
-- [Agent Development Guide](docs/agent-guides/agent-development-guide.md) - Agent-specific instructions
-- [API Documentation](docs/api/api-documentation.md) - API endpoints and usage
-- [Repository Improvements](docs/REPO_IMPROVEMENTS_SUMMARY.md) - Summary of optimizations
-
-## 🔧 Features
-
-- **Agentic Development**: Optimized for AI-assisted coding
-- **Quality Gates**: Automated testing, linting, and validation
-- **Error Recovery**: Automatic error recovery and rollback capabilities
-- **Template System**: Consistent code generation patterns
-- **Configuration Management**: Environment-specific configurations
-- **Comprehensive Testing**: Unit, integration, and E2E test support
 
 ## 📋 License
 
 MIT. See `LICENSE`.
+
