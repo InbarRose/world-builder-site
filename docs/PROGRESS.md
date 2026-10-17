@@ -20,11 +20,11 @@ status: active
   - [x] Standalone TypeScript `DeckEngine` module with 100% unit test coverage
   - [x] `WorldStorageService` with named `localStorage` slots and auto-save
   - [x] JSON export / import schema validation
-- [ ] **Phase 2: Interactive Grid Map Canvas**
-  - [ ] Configurable 20x12 grid canvas component
-  - [ ] Terrain palette (12+ types with colors/patterns) & paint tools
-  - [ ] Tile inspection drawer with annotations and linked events
-  - [ ] PNG and SVG map export
+- [x] **Phase 2: Interactive Grid Map Canvas**
+  - [x] Configurable 20x12 grid canvas component
+  - [x] Terrain palette (12+ types with colors/patterns) & paint tools
+  - [x] Tile inspection drawer with annotations and linked events
+  - [x] PNG and SVG map export
 - [ ] **Phase 3: Timeline & Entity Registry**
   - [ ] Interactive Timeline panel with filters and relative epoch/year calculation
   - [ ] Species, Societies, and Mythic entity managers

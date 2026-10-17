@@ -1,38 +1,50 @@
-
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowLeft, Map as MapIcon } from 'lucide-react'
+import { MapCanvas } from '../components/MapCanvas'
+import { getActiveWorld, saveWorld } from '../engine/storageService'
+import { MapState, WorldState } from '../engine/types'
 
 export function Map() {
-  const { id } = useParams<{ id: string }>()
+  const [world, setWorld] = useState<WorldState>(() => getActiveWorld())
+
+  useEffect(() => {
+    setWorld(getActiveWorld())
+  }, [])
+
+  const handleMapChange = (newMap: MapState) => {
+    const updated = saveWorld({
+      ...world,
+      map: newMap,
+    })
+    setWorld(updated)
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link to="/" className="btn-outline flex items-center space-x-2">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center space-x-3">
+          <MapIcon className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">World Atlas — {world.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              Paint terrain, stamp settlements, and inspect historical tile coordinates
+            </p>
+          </div>
+        </div>
+        <Link to="/play" className="btn-outline flex items-center space-x-2 px-4 py-2 text-sm">
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Home</span>
+          <span>Back to World Studio</span>
         </Link>
       </div>
 
-      <div className="card p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <MapIcon className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Interactive Map - Session {id}</h1>
-        </div>
-        <p className="text-muted-foreground mb-6">
-          The interactive map will be displayed here.
-        </p>
-
-        <div className="border-2 border-dashed border-border rounded-lg p-12 text-center">
-          <MapIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Map visualization coming soon
-          </p>
-        </div>
-      </div>
+      <MapCanvas
+        map={world.map}
+        worldName={world.name}
+        drawHistory={world.drawHistory}
+        entities={world.entities}
+        onChange={handleMapChange}
+      />
     </div>
   )
 }
-
-
-
