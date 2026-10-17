@@ -1,32 +1,69 @@
 ---
 id: ROADMAP
 title: Roadmap & Milestones
-version: 1.0.0
-status: draft
+version: 2.0.0
+status: active
 ---
 
-# Roadmap
+# Roadmap & Milestones — world-builder-site
 
-## Phase 0 (Foundation)
+```
+[Phase 0: Governance & Static Foundations] (Done)
+  │
+  ├──► [Phase 1: Core Engine & Multi-World Local Persistence] (Current)
+  │      - TypeScript DeckEngine & CardData types
+  │      - WorldStorageService (localStorage named slots, autosave, JSON export/import)
+  │      - Unit test coverage (Vitest)
+  │
+  ├──► [Phase 2: Interactive Grid Map Canvas]
+  │      - Configurable 20x12 grid canvas
+  │      - Terrain palette & paint/fill tools
+  │      - Tile inspector modal/drawer with event linkages
+  │      - Map snapshot export (PNG/SVG)
+  │
+  ├──► [Phase 3: Timeline & Entity Registry]
+  │      - Chronological event timeline with epoch/year calculation
+  │      - Species, Civilization, and Myth trackers
+  │      - Spatial & entity cross-linking with map and cards
+  │
+  └──► [Phase 4: Integrated World Building Studio]
+         - Unified responsive layout with panel toggles
+         - Theme polish & accessibility
+         - End-to-end verification and documentation
+```
 
-- Docs, CI, scripts — complete
+## Milestone Deliverables
 
-## Phase 1 (Game Engine & API)
+### Phase 0: Foundations & Governance (Completed)
+- Clean up server-side/Vercel artifacts.
+- Set up GitHub Pages automated CI/CD with custom domain `world-building.inbarrose.com`.
+- Overhaul Agent Instructions, ADRs, and Architecture documentation.
 
-- Engine module, DB models, simulate endpoint, OpenAPI — target week 1-3
+### Phase 1: Modular Engine & Multi-World Persistence
+- Refactor card logic into standalone `DeckEngine.ts`.
+- Implement `WorldStorageService.ts` for multiple named saved worlds in `localStorage`.
+- Comprehensive Vitest test suite for deck logic and serialization.
 
-## Phase 2 (Frontend)
+### Phase 2: Interactive Grid Map Canvas
+- Build HTML5/SVG interactive tile canvas with 12+ terrain types.
+- Tile inspection drawer showing terrain details, notes, and associated historical events.
+- PNG/SVG map image export.
 
-- UI skeleton, local anon play, map canvas — week 3-6
+### Phase 3: Timeline & Entity Registry
+- Dedicated timeline viewer with search and stage filters.
+- Entity registry tracking Primal species, Civilization societies, and Intrigue myths.
 
-## Phase 3 (Collaboration)
+### Phase 4: Integrated World Studio & Final Polish
+- Unified Studio interface integrating Deck, Map, Timeline, and Entities.
+- Export entire world chronicle as a markdown/HTML bundle.
 
-- Sessions, invites, realtime polling or SSE — week 6-10
-
-## Phase 4 (AI)
-
-- Premium AI features — week 10-16
+---
 
 ## Tasks
 
-- [ ] Translate milestones to GitHub project board and issues
+- [x] Phase 0: Governance & Static Foundations
+- [ ] Phase 1: Core Engine & Multi-World Local Persistence
+- [ ] Phase 2: Interactive Grid Map Canvas
+- [ ] Phase 3: Timeline & Entity Registry
+- [ ] Phase 4: Integrated World Studio & Polish
+

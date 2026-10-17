@@ -1,31 +1,31 @@
 ---
 id: SESSION_STATE
 title: Session State
-version: 1.0.0
+version: 2.0.0
 status: active
 ---
 
-# SESSION_STATE.md
+# Session State — world-builder-site
 
 ## Current Status
 
-- **Current Phase**: Phase 0 — Foundation (In progress)
-- **Session Date**: 2025-10-14
-- **Progress**: ~10%
+- **Current Phase**: Phase 1 — Core Engine & Multi-World Local Persistence
+- **Session Date**: 2026-08-31
+- **Status**: Ready for Core Engine & Storage Service Implementation
 
-## Recent Activity
+## Completed in Current Session
+- Completed Phase 0: Removed all server-side and Vercel artifacts, established GitHub Pages automated deployment workflow, updated all agent governance files, ADR records, and technical specs.
 
-- Scaffold created for repo and docs.
-- Phase 0 & Phase 1 templates populated.
+## Immediate Next Steps (Phase 1)
+1. Implement `frontend/src/engine/types.ts` defining `WorldState`, `Card`, `DeckConfig`, `MapTile`, `TimelineEvent`, `Species`, `Society`.
+2. Implement `frontend/src/engine/deckEngine.ts` with pure deck creation, shuffling, and drawing logic.
+3. Implement `frontend/src/engine/storageService.ts` for multiple named saved worlds in `localStorage`, auto-saving, and JSON import/export validation.
+4. Write Vitest unit tests in `frontend/src/test/engine.test.ts` and `frontend/src/test/storage.test.ts`.
 
-## Immediate Next Steps
-
-1. Commit scaffold files to GitHub.
-2. Configure GitHub Secrets for Supabase and Vercel.
-3. Implement `src/models` basic SQLModel classes and tests (Phase 1 tasks).
+---
 
 ## Tasks
 
-- [ ] Add secrets to GitHub repo (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, VERCEL_TOKEN)
-- [ ] Run `scripts/setup-dev.sh` instructions locally
-- [ ] Start Phase 1 tasks from `docs/phase-1-specifications.md`
+- [ ] Implement Phase 1 engine and storage services.
+- [ ] Run automated test suite to verify 100% test passing.
+

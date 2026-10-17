@@ -1,280 +1,142 @@
 ---
 id: LLM_OPERATING_GUIDE
 title: Agent Operating Guide for world-builder-site
-version: 2.0.0
+version: 3.0.0
 status: authoritative
 ---
 
-# LLM OPERATING GUIDE
+# LLM OPERATING GUIDE — world-builder-site
 
-This document defines **how any AI or agentic system should interact with this repository**, generate code, plan work, and maintain quality.
-It merges the general "LLM Development Framework" principles with the specifics of the `world-builder-site` architecture.
+This document defines **how any AI agent or developer must interact with this repository**, generate code, plan work, and maintain software quality for the `world-builder-site` project.
 
 ---
 
 ## 1. Mission
 
-Create, maintain, and extend the `world-builder-site` application — a hybrid Python (FastAPI) + React + Supabase world-building platform — in a deterministic, test-driven, phase-based manner with no uncontrolled code generation or scope drift.
+Create, maintain, and extend the `world-builder-site` application — a pure client-side, static Single Page Application built in **React 18 + TypeScript + Vite + Tailwind CSS** deployed to GitHub Pages at [world-building.inbarrose.com](https://world-building.inbarrose.com). All development must be deterministic, modular, test-driven, and divided into atomic commits.
 
 ---
 
 ## 2. Core Rules of Operation
 
-1. **Single-Phase Discipline**  
-   - Only work on the *current active phase* listed in `/docs/SESSION_STATE.md`.  
-   - Do not alter future-phase files or placeholders until current phase’s quality gates pass.
+1. **Atomic Commits & Frequent Checkpoints**
+   - The user requires atomic changes so they can review and commit frequently.
+   - Keep pull requests and changes focused on single logical components with accompanying unit tests.
 
-2. **Determinism & Idempotence**  
-   - Each run or commit must yield the same results given the same context and inputs.  
-   - Avoid random IDs or timestamps in code output unless seeded.
+2. **Phase Discipline**
+   - Work strictly within the current milestone defined in `docs/SESSION_STATE.md` and `docs/PROGRESS.md`.
+   - Never implement unverified future-phase features before validating the current phase.
 
-3. **Explain → Plan → Implement → Validate Loop**  
-   1. *Explain* what will be done.  
-   2. *Plan* by enumerating tasks or subtasks.  
-   3. *Implement* in smallest atomic commits.  
-   4. *Validate* via lint + tests + CI results.
+3. **Determinism & Test-Driven Development (TDD)**
+   - All pure business logic (deck engine, probability calculations, timeline sequences, storage serializers) must be covered with unit tests in Vitest.
+   - Maintain minimum **80% test coverage** for core engine and state services.
 
-4. **Safety & Auditability**  
-   - Never delete or overwrite human-authored documentation.  
-   - Create new versions instead of destructive edits (e.g., `rules_vYYYY-MM-DD.json`).  
-   - All generated code must include minimal docstrings and type hints.
+4. **Safety & Documentation Integrity**
+   - Game rules in `rules_v2025-01-27.json` and `frontend/public/data/*.json` are canonical and immutable unless explicitly requested by the user.
+   - Always update `docs/PROGRESS.md`, `docs/SESSION_STATE.md`, and `docs/DECISIONS.md` (ADRs) when architectural changes or new modules are introduced.
 
-5. **Human Override**  
-   - The repository owner (Inbar Rose) always has higher authority.  
-   - Agents must stop on uncertainty or conflict and request clarification.
+5. **Human Override**
+   - The repository owner (Inbar Rose) has authoritative control. On ambiguity or design conflicts, document questions and request feedback before modifying core behavior.
 
 ---
 
-## 3. Repository Structure (for agents)
+## 3. Repository Architecture
 
-| Folder | Purpose |
-|--------|----------|
-| `/docs` | All human-readable specifications and phase guides. |
-| `/scripts` | Python and shell automation tools. |
-| `/src` | FastAPI app (`app/`) and engine modules (`engine/`). |
-| `/frontend` | React + TypeScript (Vite) project. |
-| `/tests` | Pytest suites (unit/integration). |
-| `.github/workflows` | CI/CD configuration. |
-
-Agents must **read** the following before writing code:
-
-- `PROJECT_CONTEXT.md`
-- `docs/SESSION_STATE.md`
-- Current phase file (e.g., `docs/phase-1-specifications.md`)
-- `LLM_OPERATING_GUIDE.md` (this file)
-
----
-
-## 4. Phase-Based Development System
-
-Each phase consists of:
-
-| Step | Description |
-|------|--------------|
-| **Spec Review** | Read the relevant `/docs/phase-N-specifications.md`. |
-| **Planning** | Generate issue/task list under `/docs/PROGRESS.md`. |
-| **Implementation** | Create or modify code limited to that phase. |
-| **Testing** | Achieve ≥ 80 % coverage via Pytest. |
-| **Quality Gate** | Run `scripts/quality-gate.py`. |
-| **Phase Closure** | Update `/docs/SESSION_STATE.md` and mark next phase active. |
-
-Active phase appears as `status: in-progress` in its YAML header.
-
----
-
-## 5. Workflows for LLM Agents
-
-### 5.1 Context Recovery
-
-When starting work:
-
-```bash
-./scripts/context-recovery.sh
+```
+world-builder-site/
+├── .github/
+│   ├── copilot-instructions.md # Quick reference for AI agents
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions deployment to GitHub Pages
+├── docs/                       # Architecture, ADRs, blueprints, and progress
+├── frontend/
+│   ├── public/
+│   │   ├── CNAME               # Custom domain config (world-building.inbarrose.com)
+│   │   └── data/               # Static card decks and stage power JSONs
+│   ├── src/
+│   │   ├── components/         # Modular UI (Map, Timeline, Entities, Layout)
+│   │   ├── engine/             # Core TypeScript engine (Deck, Rules, Storage)
+│   │   ├── pages/              # Top-level routes (Home, Rules, Play/Studio)
+│   │   ├── test/               # Vitest + React Testing Library suites
+│   │   ├── App.tsx             # Root router & layout
+│   │   └── main.tsx            # Entry point
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── vitest.config.ts
+├── AGENTS.md                   # Agent pointers
+├── LLM_OPERATING_GUIDE.md      # This guide
+├── PROJECT_CONTEXT.md          # High-level project context
+├── README.md                   # User quick-start guide
+└── rules_v2025-01-27.json      # Canonical rules data
 ```
 
-Read its output (project summary, session, phase).  
-Agents then load these files into memory before coding.
-
-### 5.2 Task Execution Protocol
-
-1. Identify all `## Tasks` checkboxes in current phase doc.  
-2. Convert them into granular implementation steps.  
-3. For each task:
-   - Generate plan
-   - Write code/tests
-   - Run local checks:  
-
-     ```bash
-     poetry run ruff check .
-     poetry run black --check .
-     poetry run pytest
-     ```
-
-   - If all pass, commit with conventional message (`feat:`, `fix:`, `test:`).
-
-4. Update the corresponding checkbox in `/docs/PROGRESS.md`.
-
-### 5.3 Pull-Request Discipline
-
-- 1 PR = 1 phase or sub-phase.
-- Include test results and coverage summary.
-- Reference the phase spec and tasks completed.
-
 ---
 
-## 6. Reasoning Framework (adapted from original guide)
+## 4. Workflows & Command Protocol
 
-### 6.1 Cognitive Steps
-
-Perceive → Clarify → Plan → Verify Plan → Implement → Test → Reflect
-
-### 6.2 Verification Layer
-
-Before writing any code:
-
-- Check context freshness: compare current phase IDs vs. cached.  
-- Validate that all dependencies of the task exist.  
-- Abort if missing files or undefined behavior.
-
-### 6.3 Reflection Layer
-
-After completing a unit of work:
-
-- Run static analysis.  
-- Compare result against spec acceptance criteria.  
-- Log reflection entry under `/docs/PROGRESS.md`.
-
----
-
-## 7. Quality and Testing Standards
-
-| Type | Framework | Coverage |
-|------|------------|-----------|
-| Unit | Pytest | ≥ 80 % |
-| Integration | Pytest (async + HTTPX) | Must cover main endpoints |
-| E2E | Playwright (frontend) | Optional for MVP |
-| Lint | Ruff + Black | No warnings |
-| Type Check | MyPy | Strict mode |
-
----
-
-## 8. Coding Conventions
-
-### Python
-
-- Use `async def` endpoints in FastAPI.
-- All public functions typed and documented.
-- Pydantic v2 models with field validation.
-
-### React/TypeScript
-
-- Functional components only.
-- CSS via Tailwind + design tokens.
-- Data fetching through typed client (OpenAPI-generated).
-
----
-
-## 9. Communication Protocol Between Frontend and Backend
-
-- API schema auto-generated by FastAPI OpenAPI.
-- Shared TypeScript types built from Python models via `datamodel-code-generator`.
-- Responses serialized through Pydantic models only.
-- WebSocket or SSE used later for collaboration (Phase 3).
-
----
-
-## 10. Security Rules (from master framework)
-
-- No secrets committed to repo; use GitHub Secrets.  
-- Sanitize all text inputs.  
-- Rate-limit public endpoints.  
-- JWT validity ≤ 24 h.  
-- Hash all tokens and sensitive data before persistence.  
-- Enforce CORS and CSRF headers.
-
----
-
-## 11. Tooling & Automation
-
-| Purpose | Script |
-|----------|---------|
-| Setup | `scripts/setup-dev.sh` |
-| Context restore | `scripts/context-recovery.sh` |
-| Quality gate | `scripts/quality-gate.py` |
-| Architecture check | `scripts/check-architecture.py` |
-| Test runner | `scripts/test-runner.py` |
-
-Agents must run these in sequence before moving phases.
-
----
-
-## 12. Collaboration Etiquette
-
-- Always respect phase boundaries.  
-- Never alter human narrative content in `/docs/rules*` or `/docs/lore*`.  
-- When uncertain about a decision, add a question entry in `/docs/DECISIONS.md`.
-
----
-
-## 13. Error Recovery Procedure
-
-If an operation fails:
-
-1. Record failure summary in `/docs/PROGRESS.md`.  
-2. Run `scripts/context-recovery.sh`.  
-3. Roll back offending commit if needed.  
-4. Re-plan before new attempt.
-
----
-
-## 14. Output Expectations
-
-Every generated code file must include the following header (example shown as plain text to avoid nested triple quotes):
-
-    Auto-generated by agent under LLM_OPERATING_GUIDE v2.0.
-    Phase: <current_phase_id>
-    Date: <YYYY-MM-DD>
-    Purpose: <short description>
-
-Every generated Markdown spec must end with a `## Tasks` section.
-
----
-
-## 15. Ethics & Attribution
-
-- Respect copyright of included assets (e.g., game-icons.net).  
-- Attribute creative assets appropriately in `/docs/assets.md`.  
-- Never leak sensitive data or API keys.
-
----
-
-## 16. Next Steps for Agents
-
-1. Verify that this guide matches the repo context.  
-2. Proceed with tasks in `/docs/phase-0-specifications.md`.  
-3. On completion, update `/docs/SESSION_STATE.md` to `Phase 1`.
-
----
-
-## 17. Appendix – Quick Command Reference
+All commands run via `npm` inside `frontend/` (or via root package.json scripts):
 
 ```bash
-# run backend locally
-poetry run uvicorn src.app.main:app --reload
+# 1. Install dependencies
+npm --prefix frontend install
 
-# run tests
-poetry run pytest
+# 2. Start local development server (http://localhost:3000)
+npm --prefix frontend run dev
 
-# run quality gate
-python scripts/quality-gate.py
+# 3. Run unit tests
+npm --prefix frontend run test:ci
 
-# run architecture check
-python scripts/check-architecture.py
+# 4. Run test coverage
+npm --prefix frontend run test:coverage
+
+# 5. Build static production distribution
+npm --prefix frontend run build
+
+# 6. Preview production build locally
+npm --prefix frontend run preview
 ```
+
+---
+
+## 5. Development Cycle for Agents
+
+```
+Perceive → Plan → Verify Plan → Implement → Test & Validate → Commit
+```
+
+1. **Perceive**: Read `PROJECT_CONTEXT.md`, `docs/SESSION_STATE.md`, and relevant specs in `docs/`.
+2. **Plan**: Formulate atomic steps and present in `implementation_plan.md`.
+3. **Implement**: Write modular TypeScript code following standard React hook patterns and functional components.
+4. **Test & Validate**:
+   - Run `npm --prefix frontend run test:ci` (all tests must pass).
+   - Run `npm --prefix frontend run build` (TypeScript compilation must pass with 0 errors).
+5. **Reflect & Document**: Update `docs/PROGRESS.md` and log ADRs in `docs/DECISIONS.md`.
+
+---
+
+## 6. Coding & Styling Standards
+
+- **TypeScript**: Strict mode enabled (`tsconfig.json`). No `any` where typed interfaces can be expressed.
+- **Components**: Functional components only. Keep presentation separated from business/engine logic.
+- **Styling**: Tailwind CSS with semantic theme classes (`bg-background`, `text-foreground`, `bg-primary`, `border-border`).
+- **Icons**: Lucide React.
+- **State Management**: React state hooks (`useState`, `useReducer`, `useContext`) combined with local storage persistence services.
+
+---
+
+## 7. Quality Gate Checklist
+
+Before submitting or committing any change:
+- [ ] TypeScript compiles cleanly (`npm run build`).
+- [ ] All Vitest unit tests pass (`npm run test:ci`).
+- [ ] No regression in existing page routes (`/`, `/rules`, `/play`).
+- [ ] `dist/CNAME` and `dist/404.html` are correctly output.
+- [ ] Documentation and ADRs updated.
 
 ---
 
 ## Tasks
 
-- [ ] Keep this file up to date when new tooling or phases are added.
-- [ ] Ensure Copilot or any agent loads this guide first when operating.
+- [ ] Maintain this operating guide as the authoritative standard for all agent interactions.
+- [ ] Ensure all subagents and tools adhere to the atomic commit and testing rules.
+

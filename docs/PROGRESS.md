@@ -1,21 +1,42 @@
 ---
 id: PROGRESS
 title: Project Progress
-version: 1.0.0
-status: draft
+version: 2.0.0
+status: active
 ---
 
-# PROGRESS.md
+# Project Progress — world-builder-site
 
-## Phase tracker
+## Phase Tracker
 
-- [x] Phase 0 scaffold created (docs, scripts, CI)
-- [ ] Phase 0 quality gates passing
-- [ ] Phase 1: Game Engine & API (in queue)
-- [ ] Phase 2: Frontend Play UI
-- [ ] Phase 3: Collaboration & Invite flows
-- [ ] Phase 4: AI features (premium)
+- [x] **Phase 0: Governance & Static Foundations**
+  - [x] Removed all Vercel/server-side code and backend configurations
+  - [x] Configured Vite with `CNAME` and `404.html` SPA routing
+  - [x] Set up GitHub Actions CI/CD to deploy to GitHub Pages (`deploy.yml`)
+  - [x] Updated `AGENTS.md`, `.github/copilot-instructions.md`, and `LLM_OPERATING_GUIDE.md`
+  - [x] Documented ADR-001 through ADR-005 in `docs/DECISIONS.md`
+  - [x] Updated architecture and functional specs
+- [ ] **Phase 1: Core Engine & Multi-World Local Persistence**
+  - [ ] Standalone TypeScript `DeckEngine` module with 100% unit test coverage
+  - [ ] `WorldStorageService` with named `localStorage` slots and auto-save
+  - [ ] JSON export / import schema validation
+- [ ] **Phase 2: Interactive Grid Map Canvas**
+  - [ ] Configurable 20x12 grid canvas component
+  - [ ] Terrain palette (12+ types with colors/patterns) & paint tools
+  - [ ] Tile inspection drawer with annotations and linked events
+  - [ ] PNG and SVG map export
+- [ ] **Phase 3: Timeline & Entity Registry**
+  - [ ] Interactive Timeline panel with filters and relative epoch/year calculation
+  - [ ] Species, Societies, and Mythic entity managers
+  - [ ] Cross-linking between tiles, entities, and events
+- [ ] **Phase 4: Integrated World Studio & Final Polish**
+  - [ ] Unified World Studio workspace layout
+  - [ ] Theme polish and full accessibility checks
+  - [ ] Automated regression tests (≥80% coverage)
+
+---
 
 ## Tasks
 
-- [ ] Update progress as tasks are completed.
+- [ ] Complete Phase 1 implementation and test verification.
+

@@ -1,6 +1,6 @@
 ---
 id: copilot-instructions
-version: 1.0.0
+version: 2.0.0
 title: Copilot/LLM Agent Instructions for world-builder-site
 status: authoritative
 ---
@@ -9,71 +9,59 @@ status: authoritative
 
 ## Mission & Scope
 
-Develop, maintain, and extend the world-builder-site (FastAPI backend, React/TypeScript frontend, Supabase DB/Auth) in a deterministic, phase-based, test-driven manner. All work must be auditable, safe, and aligned with project vision.
+Develop, maintain, and extend `world-builder-site` — a pure static Single Page Application (React 18 + TypeScript + Vite + Tailwind CSS) deployed to GitHub Pages at [world-building.inbarrose.com](https://world-building.inbarrose.com). All development must follow deterministic, phase-based, test-driven methodologies with atomic commits.
 
 ## Essential Knowledge for AI Agents
 
 ### 1. Architecture & Structure
 
-- **Backend**: Python FastAPI (`src/`), SQLModel/Pydantic v2, async endpoints, all logic/data flows through backend.
-- **Frontend**: React + TypeScript (Vite, Tailwind, `/frontend`), functional components only, API client generated from OpenAPI.
-- **Database/Auth**: Supabase (Postgres), Supabase Auth, JWT tokens (≤24h validity).
-- **Docs & Phases**: All specs, progress, and phase tasks in `/docs/`. Only work on the _current phase_ (`/docs/SESSION_STATE.md`).
+- **Framework**: React 18 with TypeScript and Vite. Functional components with hooks only.
+- **Styling**: Tailwind CSS with utility-first classes and Lucide React icons.
+- **Routing**: React Router 6. Deep linking and page refresh are supported via `dist/404.html` and `dist/CNAME`.
+- **Game Engine & Data**: All game rules, stage powers, and card decks load client-side from static JSON in `public/data/` or typed engine modules. No backend or server-side requirements.
+- **Persistence**: Browser `localStorage` for named world state storage, plus JSON file export/import.
+- **Testing**: Vitest + React Testing Library in `frontend/src/test/`.
 
-### 2. Critical Workflows
+### 2. Critical Workflows & Commands
 
-- **Context Recovery**: Run `./scripts/context-recovery.sh` before any coding. Loads project/phase/task context and checks environment.
-- **Agent Workflow**: Use `./scripts/agent-workflow.sh` for status, task execution, and quality gates. Example:
-  - `./scripts/agent-workflow.sh status`
-  - `./scripts/agent-workflow.sh execute <task_id>`
-  - `./scripts/agent-workflow.sh quality-gate`
-- **Dev Container**: Use VS Code Dev Container for consistent environment. Aliases: `wb-status`, `wb-context`, `wb-setup`, `wb-quality`, `wb-test`, `wb-lint`, `wb-format`, `wb-execute <task>`
-- **Testing**: Run `poetry run pytest` (≥80% coverage required before phase close). Lint: `poetry run ruff check .`. Format: `poetry run black --check .`. Type check: `poetry run mypy src/ --strict`.
-- **CI**: GitHub Actions runs lint, format, and tests on push/PR (`.github/workflows/ci.yml`).
+All development is centered in `frontend/` (or via root convenience scripts):
+
+```bash
+# Install dependencies
+npm --prefix frontend install
+
+# Local development server (http://localhost:3000)
+npm --prefix frontend run dev
+
+# Run unit tests
+npm --prefix frontend run test:ci
+
+# Build production static bundle (outputs to frontend/dist)
+npm --prefix frontend run build
+
+# Preview production build locally
+npm --prefix frontend run preview
+```
 
 ### 3. Project-Specific Conventions
 
-- **Phase Discipline**: Never implement features from future phases. Only edit files relevant to the current phase spec.
-- **Templates**: Use `/templates/fastapi-endpoint.py.template`, `/templates/sqlmodel-class.py.template`, `/templates/test-file.py.template` for new code. Always include the required file header (see below).
-- **Data & Rules**: Game rules are versioned JSON (`rules_vYYYY-MM-DD.json`). Never alter canonical rules or narrative content except by explicit human request.
-- **Security**: Never commit secrets. Use GitHub Secrets and `.env` for local dev. Sanitize all user input. Enforce CORS/CSRF, rate-limit endpoints, hash sensitive data.
-- **Attribution**: Attribute creative assets per `/docs/assets.md`.
+- **Atomic Commits**: The repository owner prefers small, atomic changes so they can review and commit frequently.
+- **Data & Rules**: Game rules in `rules_v2025-01-27.json` and `frontend/public/data/*.json` are canonical. Never alter rule mechanics without explicit user direction.
+- **Doc Integrity**: Keep `/docs/` and ADRs updated with any architectural decisions.
+- **File Structure**:
+  - `frontend/src/engine/` — Pure TypeScript game engine logic, types, deck calculations, and storage services.
+  - `frontend/src/components/` — Modular React UI components (Layout, Map, Timeline, Entities, etc.).
+  - `frontend/src/pages/` — Top-level view routes (`Home.tsx`, `Rules.tsx`, `Play.tsx`).
+  - `frontend/src/test/` — Unit and component tests.
+  - `frontend/public/` — Static assets, `CNAME`, and card deck data JSONs.
 
-### 4. Integration & Communication
+### 4. Output & Commit Standards
 
-- **API**: Backend is authoritative for all game logic. Frontend fetches via OpenAPI-generated client. Shared types are generated from Python models.
-- **DB Models**: Use SQLModel for all persistent entities. Migrations via Alembic.
-- **Error Recovery**: Use `scripts/error-recovery.py` for backup, analyze, and rollback. Log failures in `/docs/PROGRESS.md`.
-
-### 5. Output & Commit Standards
-
-- All generated code files must include this header:
-
-      Auto-generated by agent under LLM_OPERATING_GUIDE v2.0.
-      Phase: <current_phase_id>
-      Date: <YYYY-MM-DD>
-      Purpose: <short description>
-
-- All generated Markdown specs must end with a `## Tasks` section.
-- Use conventional commit messages. Reference task IDs and include a change summary.
-
-## Example Patterns
-
-- **API Endpoint**: See `/templates/fastapi-endpoint.py.template` for structure and required docstrings/type hints.
-- **Model**: See `/templates/sqlmodel-class.py.template` for SQLModel conventions.
-- **Test**: See `/templates/test-file.py.template` for Pytest structure and fixtures.
-- **Frontend**: All components in `/frontend/src/` are functional, use Tailwind, and fetch data via typed API client.
-
-## Quick Reference
-
-- **Start backend**: `poetry run uvicorn src.app.main:app --reload`
-- **Run tests**: `poetry run pytest`
-- **Run lint**: `poetry run ruff check .`
-- **Format code**: `poetry run black .`
-- **Check type**: `poetry run mypy src/ --strict`
-- **Frontend dev**: `cd frontend && npm install && npm run dev`
+- Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`, `chore:`, `refactor:`.
+- Ensure tests pass (`npm run test:ci`) and static build succeeds (`npm run build`) before closing tasks.
 
 ## Tasks
 
 - [ ] Keep this file up to date as project evolves.
 - [ ] Ensure all agents load and follow this file before operating.
+
