@@ -440,7 +440,56 @@ function RulesContent() {
       </Section>
 
       <Section id="glossary-of-terms" title="Glossary of Terms">
-        <p className="text-muted-foreground italic">Fill me in?</p>
+        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Draw Deck</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              The customized playing card deck drawn from during each stage to determine which power a player invokes on their turn.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Stage</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              One of the four eras of creation (Genesis, Primal, Civilization, Intrigue), each focusing on a distinct layer of the world’s development.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Power (2–10 Cards)</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              A world-shaping action determined by the drawn card’s suit (♠, ♥, ♣, ♦) and the current active Stage.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Fantastical Power (J, Q, K)</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              Triggered by drawing a face card (Jack, Queen, or King), allowing an extraordinary, magical, or larger-than-life version of that suit’s power.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Natural Disaster (Ace)</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              Triggered by drawing an Ace; unleashes a cataclysmic upheaval or upheaval appropriate to the current Stage.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Joker (Wild Fantastical)</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              Allows the player to choose any Fantastical Power from the current stage (or combine effects creatively).
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Artist, Historian & Keeper</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              The three collaborative roles: the <strong>Artist</strong> illustrates the map, the <strong>Historian</strong> chronicles the timeline, and the <strong>Keeper</strong> tracks species, societies, and factions.
+            </dd>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/40 border border-border">
+            <dt className="font-bold text-primary">Species & Societies</dt>
+            <dd className="text-sm text-muted-foreground mt-1">
+              Sentient races introduced before the Primal stage and the kingdoms, nations, or organizations they form prior to the Civilization stage.
+            </dd>
+          </div>
+        </dl>
       </Section>
 
       <Section id="reference-table" title="Reference Table">

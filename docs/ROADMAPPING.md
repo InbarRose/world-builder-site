@@ -62,8 +62,8 @@ status: active
 ## Tasks
 
 - [x] Phase 0: Governance & Static Foundations
-- [ ] Phase 1: Core Engine & Multi-World Local Persistence
-- [ ] Phase 2: Interactive Grid Map Canvas
-- [ ] Phase 3: Timeline & Entity Registry
-- [ ] Phase 4: Integrated World Studio & Polish
+- [x] Phase 1: Core Engine & Multi-World Local Persistence
+- [x] Phase 2: Interactive Grid Map Canvas
+- [x] Phase 3: Timeline & Entity Registry
+- [x] Phase 4: Integrated World Studio & Polish
 

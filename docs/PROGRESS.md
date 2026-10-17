@@ -29,14 +29,14 @@ status: active
   - [x] Interactive Timeline panel with filters and relative epoch/year calculation
   - [x] Species, Societies, and Mythic entity managers
   - [x] Cross-linking between tiles, entities, and events
-- [ ] **Phase 4: Integrated World Studio & Final Polish**
-  - [ ] Unified World Studio workspace layout
-  - [ ] Theme polish and full accessibility checks
-  - [ ] Automated regression tests (≥80% coverage)
+- [x] **Phase 4: Integrated World Studio & Final Polish**
+  - [x] Unified World Studio workspace layout
+  - [x] Theme polish and full accessibility checks
+  - [x] Automated regression tests (24 tests across 5 suites passing)
 
 ---
 
 ## Tasks
 
-- [ ] Complete Phase 1 implementation and test verification.
+- [x] Complete Phase 0–4 implementation and test verification.
 

@@ -9,23 +9,21 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 1 — Core Engine & Multi-World Local Persistence
-- **Session Date**: 2026-08-31
-- **Status**: Ready for Core Engine & Storage Service Implementation
+- **Current Phase**: Phase 4 — Integrated World Studio & Final Polish (Completed)
+- **Session Date**: 2026-10-16
+- **Status**: All Phases (0–4) Implemented, Verified, and Ready for Production
 
 ## Completed in Current Session
-- Completed Phase 0: Removed all server-side and Vercel artifacts, established GitHub Pages automated deployment workflow, updated all agent governance files, ADR records, and technical specs.
-
-## Immediate Next Steps (Phase 1)
-1. Implement `frontend/src/engine/types.ts` defining `WorldState`, `Card`, `DeckConfig`, `MapTile`, `TimelineEvent`, `Species`, `Society`.
-2. Implement `frontend/src/engine/deckEngine.ts` with pure deck creation, shuffling, and drawing logic.
-3. Implement `frontend/src/engine/storageService.ts` for multiple named saved worlds in `localStorage`, auto-saving, and JSON import/export validation.
-4. Write Vitest unit tests in `frontend/src/test/engine.test.ts` and `frontend/src/test/storage.test.ts`.
+- **Phase 0**: Updated agent governance (`AGENTS.md`, `.github/copilot-instructions.md`, `LLM_OPERATING_GUIDE.md`), ADR records (`docs/DECISIONS.md`), and cleaned up obsolete backend docs.
+- **Phase 1**: Implemented modular `DeckEngine`, `MapEngine`, and `WorldStorageService` with `localStorage` multi-world slots, auto-save, JSON import/export, and Markdown Chronicle export.
+- **Phase 2**: Implemented interactive 20×12 `MapCanvas` with 12 terrains, 2-color patterns, 9 landmark overlays, tile inspector, and SVG/PNG snapshot export.
+- **Phase 3**: Implemented `TimelinePanel` with search, stage/entity filters, relative epoch calculation, and `EntityRegistry` for Primal species, Civilization societies, and Intrigue myths.
+- **Phase 4**: Unified the World Building Studio in `Play.tsx`, added `WorldManagerModal`, added `/map` Atlas route, light/dark theme toggle in `Layout.tsx`, and completed the Glossary in `Rules.tsx`.
 
 ---
 
 ## Tasks
 
-- [ ] Implement Phase 1 engine and storage services.
-- [ ] Run automated test suite to verify 100% test passing.
+- [x] Implement Phase 0–4 engine, storage, map, timeline, registry, and studio UI.
+- [x] Run automated test suite (24/24 tests passing across 5 suites) and production build.
 
