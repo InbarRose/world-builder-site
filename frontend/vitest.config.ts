@@ -8,6 +8,8 @@ export default defineConfig({
         globals: true,
         setupFiles: ['./src/test/setup.ts'],
         pool: 'threads',
+        fileParallelism: false,
+        maxWorkers: 1,
         include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
         coverage: {
             provider: 'v8',

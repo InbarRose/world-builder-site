@@ -16,10 +16,10 @@ status: active
   - [x] Updated `AGENTS.md`, `.github/copilot-instructions.md`, and `LLM_OPERATING_GUIDE.md`
   - [x] Documented ADR-001 through ADR-005 in `docs/DECISIONS.md`
   - [x] Updated architecture and functional specs
-- [ ] **Phase 1: Core Engine & Multi-World Local Persistence**
-  - [ ] Standalone TypeScript `DeckEngine` module with 100% unit test coverage
-  - [ ] `WorldStorageService` with named `localStorage` slots and auto-save
-  - [ ] JSON export / import schema validation
+- [x] **Phase 1: Core Engine & Multi-World Local Persistence**
+  - [x] Standalone TypeScript `DeckEngine` module with 100% unit test coverage
+  - [x] `WorldStorageService` with named `localStorage` slots and auto-save
+  - [x] JSON export / import schema validation
 - [ ] **Phase 2: Interactive Grid Map Canvas**
   - [ ] Configurable 20x12 grid canvas component
   - [ ] Terrain palette (12+ types with colors/patterns) & paint tools
