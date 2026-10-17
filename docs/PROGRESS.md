@@ -25,10 +25,10 @@ status: active
   - [x] Terrain palette (12+ types with colors/patterns) & paint tools
   - [x] Tile inspection drawer with annotations and linked events
   - [x] PNG and SVG map export
-- [ ] **Phase 3: Timeline & Entity Registry**
-  - [ ] Interactive Timeline panel with filters and relative epoch/year calculation
-  - [ ] Species, Societies, and Mythic entity managers
-  - [ ] Cross-linking between tiles, entities, and events
+- [x] **Phase 3: Timeline & Entity Registry**
+  - [x] Interactive Timeline panel with filters and relative epoch/year calculation
+  - [x] Species, Societies, and Mythic entity managers
+  - [x] Cross-linking between tiles, entities, and events
 - [ ] **Phase 4: Integrated World Studio & Final Polish**
   - [ ] Unified World Studio workspace layout
   - [ ] Theme polish and full accessibility checks
