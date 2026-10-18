@@ -191,46 +191,77 @@ export function Rules() {
       {viewMode === 'quick-card' ? (
         <QuickReferenceCard />
       ) : (
-        <div className="flex gap-8">
+        <div className="flex gap-6 lg:gap-8 relative">
+          {/* Mobile Slide-Over Backdrop */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
           {/* Sidebar Navigation */}
           <aside
             className={`no-print ${
-              sidebarOpen ? 'fixed' : 'hidden'
-            } lg:block lg:sticky lg:top-20 h-fit w-64 flex-shrink-0 bg-card border rounded-lg p-4 z-10 lg:z-auto`}
-            style={{ maxHeight: 'calc(100vh - 6rem)' }}
+              sidebarOpen
+                ? 'fixed inset-y-0 left-0 z-50 w-72 shadow-2xl rounded-none'
+                : 'hidden'
+            } lg:block lg:sticky lg:top-16 h-fit lg:w-64 flex-shrink-0 bg-card border lg:rounded-lg p-4`}
+            style={{ maxHeight: sidebarOpen ? '100vh' : 'calc(100vh - 5rem)' }}
           >
-            <div className="flex items-center justify-between mb-4 lg:hidden">
-              <h2 className="font-semibold">Navigation</h2>
+            <div className="flex items-center justify-between mb-3 lg:hidden border-b border-border pb-2">
+              <h2 className="font-bold text-sm">Rules Table of Contents</h2>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1 hover:bg-accent rounded"
+                className="p-1.5 hover:bg-accent rounded"
+                aria-label="Close Contents"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 9rem)' }}>
+            <nav
+              className="space-y-1 overflow-y-auto"
+              style={{ maxHeight: sidebarOpen ? 'calc(100vh - 5rem)' : 'calc(100vh - 8rem)' }}
+            >
               {NAVIGATION.map(renderNavItem)}
             </nav>
           </aside>
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            {/* Mobile Menu Button */}
-            <div className="no-print lg:hidden mb-4">
+            {/* Mobile Sticky Contents & Quick Stage Jump Bar */}
+            <div className="no-print lg:hidden sticky top-12 z-20 mb-4 bg-card/95 backdrop-blur border border-border rounded-lg p-2 flex items-center justify-between gap-2 shadow-sm">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="btn-outline flex items-center space-x-2 px-3 py-2"
+                className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold shrink-0"
               >
                 <Menu className="h-4 w-4" />
                 <span>Contents</span>
               </button>
+              <div className="flex items-center gap-1 overflow-x-auto text-xs">
+                {[
+                  { id: '1.-genesis', label: '1. Genesis' },
+                  { id: '2.-primal', label: '2. Primal' },
+                  { id: '3.-civilization', label: '3. Civ' },
+                  { id: '4.-intrigue', label: '4. Intrigue' },
+                ].map((st) => (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => scrollToSection(st.id)}
+                    className="px-2 py-1 rounded bg-muted hover:bg-accent whitespace-nowrap font-medium"
+                  >
+                    {st.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="card p-8 space-y-8">
+            <div className="card p-4 sm:p-8 space-y-6 sm:space-y-8">
               <div className="text-center space-y-2">
-                <BookOpen className="h-12 w-12 text-primary mx-auto no-print" />
-                <h1 className="text-4xl font-bold">World Building</h1>
-                <p className="text-xl text-muted-foreground">Game Rules</p>
+                <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto no-print" />
+                <h1 className="text-2xl sm:text-4xl font-bold">World Building</h1>
+                <p className="text-base sm:text-xl text-muted-foreground">Game Rules & Reference Wiki</p>
               </div>
 
               <RulesContent />
@@ -243,25 +274,133 @@ export function Rules() {
 }
 
 function QuickReferenceCard() {
+  const [mobileStageTab, setMobileStageTab] = useState<'all' | 1 | 2 | 3 | 4>('all')
+
+  const mobileStageCards = [
+    {
+      num: 1 as const,
+      title: '1. Genesis (10,000+ Yrs Ago)',
+      pre: 'Pre-Stage: Draw basic coastlines',
+      suits: [
+        { suit: '♠', name: 'Earth', desc: 'Mountains, canyons, islands, hills, valleys, cliffs, caves, craters.' },
+        { suit: '♥', name: 'Water', desc: 'Rivers, lakes, seas, swamps, waterfalls, glaciers, bays, maelstroms.' },
+        { suit: '♣', name: 'Plant', desc: 'Forests, jungles, grasslands, reefs, marshes, giant flora, groves.' },
+        { suit: '♦', name: 'Feature', desc: 'Volcanoes, geysers, crystal caverns, monoliths, anomalies, ley lines.' },
+      ],
+    },
+    {
+      num: 2 as const,
+      title: '2. Primal (Thousands of Yrs Ago)',
+      pre: 'Pre-Stage: Each player creates a Species',
+      suits: [
+        { suit: '♠', name: 'Settlement', desc: 'Villages, camps, towns, small cities, nomadic routes, migrations.' },
+        { suit: '♥', name: 'Tradition', desc: 'Beliefs, customs, taboos, festivals, rites of passage, social codes.' },
+        { suit: '♣', name: 'Resource', desc: 'Metals, crops, livestock, timber, quarries, magical reagents.' },
+        { suit: '♦', name: 'Skill', desc: 'Crafts, magic, metallurgy, navigation, taming, astronomy, runes.' },
+      ],
+    },
+    {
+      num: 3 as const,
+      title: '3. Civilization (Hundreds of Yrs Ago)',
+      pre: 'Pre-Stage: Create Societies & Kingdoms',
+      suits: [
+        { suit: '♠', name: 'Construction', desc: 'Major cities, castles, roads, bridges, temples, universities, wonders.' },
+        { suit: '♥', name: 'Enlightenment', desc: 'Laws, governments, philosophies, academies, arts, science, dogmas.' },
+        { suit: '♣', name: 'Expansion', desc: 'Colonies, conquests, trade routes, territorial borders, outposts.' },
+        { suit: '♦', name: 'Diplomacy', desc: 'Alliances, treaties, royal marriages, trade leagues, vassals, feuds.' },
+      ],
+    },
+    {
+      num: 4 as const,
+      title: '4. Intrigue (Recent Decades)',
+      pre: 'Pre-Stage: Name Cities, Nations & Armies',
+      suits: [
+        { suit: '♠', name: 'Conflict', desc: 'Wars, battles, rebellions, sieges, rivalries, purges, ruined cities.' },
+        { suit: '♥', name: 'Cooperation', desc: 'Guilds, peace summits, shared projects, coalitions, cultural fusion.' },
+        { suit: '♣', name: 'Scheme', desc: 'Assassinations, espionage, coups, heists, betrayals, secret cabals.' },
+        { suit: '♦', name: 'Myth', desc: 'Monsters, prophecies, lost relics, curses, heroes, dungeons, planar rifts.' },
+      ],
+    },
+  ]
+
   return (
-    <div className="card print-one-page p-4 sm:p-5 space-y-3 border-2 border-foreground/20">
+    <div className="card print-one-page p-3.5 sm:p-5 space-y-3 border-2 border-foreground/20">
       <div className="flex flex-wrap items-center justify-between border-b-2 border-foreground/30 pb-2 gap-2">
         <div>
-          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight uppercase leading-tight">
+          <h1 className="text-base sm:text-xl font-extrabold tracking-tight uppercase leading-tight">
             World Building — Quick Reference Sheet
           </h1>
           <p className="text-[11px] text-muted-foreground leading-tight">
             1-Page Tabletop Cheat Sheet · Created by Inbar Rose · Draw 1 Card → Interpret Suit & Stage Power → Update Map, Timeline & Codex
           </p>
         </div>
-        <div className="text-[11px] leading-tight text-right bg-muted/50 px-2.5 py-1 rounded border border-border">
+        <div className="text-[11px] leading-tight text-left sm:text-right bg-muted/50 px-2.5 py-1 rounded border border-border w-full sm:w-auto">
           <div><strong>Standard Deck (54):</strong> 2–10, J, Q, K, 4 Aces, 2 Jokers</div>
           <div><strong>Short Game Deck (27):</strong> 2–6, K only, 2 Aces, 1 Joker</div>
         </div>
       </div>
 
+      {/* Mobile Stage Quick-Filter (Hidden in Print & Desktop) */}
+      <div className="no-print sm:hidden flex items-center gap-1 overflow-x-auto pb-1">
+        {(
+          [
+            { id: 'all', label: 'Full 4×4 Matrix' },
+            { id: 1, label: '1. Genesis' },
+            { id: 2, label: '2. Primal' },
+            { id: 3, label: '3. Civ' },
+            { id: 4, label: '4. Intrigue' },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={String(tab.id)}
+            type="button"
+            onClick={() => setMobileStageTab(tab.id)}
+            className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap border ${
+              mobileStageTab === tab.id
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-muted/40 border-border text-muted-foreground'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile Single-Stage Stacked Cards (when a specific stage is selected on phone) */}
+      {mobileStageTab !== 'all' && (
+        <div className="no-print sm:hidden space-y-2">
+          {mobileStageCards
+            .filter((s) => s.num === mobileStageTab)
+            .map((st) => (
+              <div key={st.num} className="p-3 rounded-lg border-2 border-primary/30 bg-muted/20 space-y-2">
+                <div>
+                  <div className="font-extrabold text-sm">{st.title}</div>
+                  <div className="text-xs text-primary font-semibold">{st.pre}</div>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {st.suits.map((s) => (
+                    <div key={s.suit} className="p-2.5 rounded border border-border bg-card flex items-start gap-2.5">
+                      <span
+                        className={`text-2xl font-black leading-none ${
+                          s.suit === '♥' || s.suit === '♦' ? 'text-red-600' : ''
+                        }`}
+                      >
+                        {s.suit}
+                      </span>
+                      <div>
+                        <div className="font-bold text-xs uppercase text-primary">{s.name}</div>
+                        <div className="text-xs text-muted-foreground">{s.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+
       {/* 4x4 Stage & Suit Power Reference Matrix (Dominant Centerpiece) */}
-      <div className="space-y-1.5">
+      <div className={`space-y-1.5 ${mobileStageTab !== 'all' ? 'hidden sm:block print:block' : ''}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-extrabold text-primary uppercase tracking-wider text-xs sm:text-sm">
             ★ Stage & Suit Power Matrix
@@ -271,7 +410,7 @@ function QuickReferenceCard() {
           </span>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border-2 border-foreground/35 text-xs sm:text-sm">
+          <table className="min-w-[640px] sm:min-w-full border-collapse border-2 border-foreground/35 text-xs sm:text-sm">
             <thead>
               <tr className="bg-muted">
                 <th className="border-2 border-foreground/25 p-2 text-center w-14">Suit</th>

@@ -128,10 +128,10 @@ export function Layout({ children }: LayoutProps) {
   }
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/rules', label: 'Rules & Reference', icon: BookOpen },
-    { path: '/play', label: 'Play Studio', icon: Gamepad2 },
-    { path: '/map', label: 'Map Maker', icon: MapIcon },
+    { path: '/', label: 'Home', shortLabel: 'Home', icon: Home },
+    { path: '/rules', label: 'Rules & Reference', shortLabel: 'Rules', icon: BookOpen },
+    { path: '/play', label: 'Play Studio', shortLabel: 'Play', icon: Gamepad2 },
+    { path: '/map', label: 'World Atlas', shortLabel: 'Atlas', icon: MapIcon },
   ]
 
   const modeBadge =
@@ -146,48 +146,49 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="no-print border-b border-border bg-card/90 backdrop-blur sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link to="/" className="flex items-center space-x-2.5 hover:opacity-90">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
-                <Gamepad2 className="h-5 w-5 text-primary" />
+      <header className="no-print border-b border-border bg-card/95 backdrop-blur sticky top-0 z-40">
+        <div className="container mx-auto px-2.5 sm:px-4 py-2">
+          <div className="flex items-center justify-between gap-2">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-90 shrink-0">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
+                <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <span className="text-lg font-bold tracking-tight block leading-none">
+              <div className="hidden xs:block sm:block">
+                <span className="text-sm sm:text-lg font-bold tracking-tight block leading-none">
                   World Builder
                 </span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                  Tabletop Cartography & Lore Studio
+                <span className="hidden md:block text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
+                  Tabletop Cartography & Lore
                 </span>
               </div>
             </Link>
 
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <nav className="flex items-center gap-1">
-                {navItems.map(({ path, label, icon: Icon }) => (
+            <div className="flex items-center gap-1 sm:gap-2">
+              <nav className="flex items-center gap-0.5 sm:gap-1" aria-label="Main Navigation">
+                {navItems.map(({ path, label, shortLabel, icon: Icon }) => (
                   <Link
                     key={path}
                     to={path}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       location.pathname === path
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span>{label}</span>
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="sm:hidden">{shortLabel}</span>
+                    <span className="hidden sm:inline">{label}</span>
                   </Link>
                 ))}
               </nav>
 
-              <div className="h-5 w-px bg-border hidden sm:block mx-0.5" />
+              <div className="h-4 w-px bg-border mx-0.5" />
 
               {/* Theme Switcher */}
               <button
                 type="button"
                 onClick={cycleStyleMode}
-                className="px-2.5 py-1.5 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1.5 transition-colors"
+                className="px-2 sm:px-2.5 py-1.5 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1 transition-colors"
                 aria-label="Toggle color theme"
                 title="Switch between Fantasy Atlas, Dark Slate, and Simplified Print-Friendly modes"
               >
@@ -203,11 +204,11 @@ export function Layout({ children }: LayoutProps) {
                 className="inline-flex items-center rounded-md border border-border bg-background hover:bg-accent text-xs font-medium transition-colors overflow-hidden"
                 title="View repository and star on GitHub"
               >
-                <span className="flex items-center gap-1.5 px-2.5 py-1.5 text-foreground">
+                <span className="flex items-center gap-1 px-2 py-1.5 text-foreground">
                   <GitHubMark className="h-3.5 w-3.5" />
                   <span className="hidden lg:inline">GitHub</span>
                 </span>
-                <span className="flex items-center gap-1 px-2 py-1.5 bg-muted/70 border-l border-border text-muted-foreground">
+                <span className="hidden sm:flex items-center gap-1 px-1.5 py-1.5 bg-muted/70 border-l border-border text-muted-foreground">
                   <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
                   <span>{starCount !== null ? starCount : 'Star'}</span>
                 </span>
@@ -218,7 +219,7 @@ export function Layout({ children }: LayoutProps) {
                 <button
                   type="button"
                   onClick={() => setFeedbackOpen((o) => !o)}
-                  className="px-2.5 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  className="px-2 sm:px-2.5 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   title="Report a bug or suggest a feature on GitHub"
                 >
                   <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
