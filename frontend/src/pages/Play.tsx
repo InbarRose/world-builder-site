@@ -25,9 +25,15 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
+  Lock,
+  Unlock,
+  BookOpen,
+  ArrowLeftRight,
+  Compass,
 } from 'lucide-react'
 import {
   BotPersonalityId,
+  BotPersonalityWeights,
   Card,
   CompanionViewMode,
   DrawRecord,
@@ -56,8 +62,10 @@ import {
   loadPowerData,
 } from '../engine/deckEngine'
 import {
+  branchWorldAtMove,
   createNewWorld,
   deleteWorld,
+  duplicateWorld,
   getActiveWorld,
   listSavedWorlds,
   parseImportedWorld,
@@ -75,24 +83,38 @@ import {
 } from '../engine/autoPlayEngine'
 import {
   BOT_PERSONALITIES,
+  COLOR_SWATCH_PALETTES,
+  ENTITY_ICON_GALLERY,
   EntityPreset,
+  MYTH_PRESETS,
   PLAYER_COLORS,
   RELATIONSHIP_PRESETS,
   SOCIETY_PRESETS,
   SPECIES_PRESETS,
+  STAGE_ACTION_PRESETS,
   StageActionPreset,
   getActionPresetsForDraw,
+  getEffectiveBotWeights,
 } from '../engine/presets'
 import { addSlotToTile, createInitialMap, getTileId } from '../engine/mapEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
-import { WorldManagerModal } from '../components/WorldManagerModal'
+import { CreateWorldOptions, WorldManagerModal } from '../components/WorldManagerModal'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
 type SetupWizardStep = 1 | 2 | 3 | 4
 
 const ROLES: PlayerRole[] = ['Artist', 'Historian', 'Keeper', 'Player']
+
+const WEIGHT_LABELS: { key: keyof BotPersonalityWeights; label: string; icon: string }[] = [
+  { key: 'geography', label: 'Geography', icon: '🏔️' },
+  { key: 'ecology', label: 'Ecology', icon: '🌿' },
+  { key: 'civilization', label: 'Civilization', icon: '🏛️' },
+  { key: 'diplomacy', label: 'Diplomacy', icon: '📜' },
+  { key: 'conflict', label: 'Conflict', icon: '⚔️' },
+  { key: 'myth', label: 'Myth & Magic', icon: '✨' },
+]
 
 export function Play() {
   const [world, setWorld] = useState<WorldState>(() => getActiveWorld())
@@ -113,8 +135,20 @@ export function Play() {
   const [setupWizardStep, setSetupWizardStep] = useState<SetupWizardStep>(1)
   const [showDeckDrawer, setShowDeckDrawer] = useState(false)
   const [showStageBriefDrawer, setShowStageBriefDrawer] = useState(false)
+  const [showAgesMatrix, setShowAgesMatrix] = useState(false)
   const [showMoreOptions, setShowMoreOptions] = useState(false)
   const [showDigitalPresets, setShowDigitalPresets] = useState(false)
+  const [showPresetPoolFilter, setShowPresetPoolFilter] = useState(false)
+  const [presetFilterTab, setPresetFilterTab] = useState<'species' | 'society' | 'myth' | 'actions'>('species')
+  const [expandedBotWeightSeatId, setExpandedBotWeightSeatId] = useState<string | null>(null)
+  const [generateIntoNewWorld, setGenerateIntoNewWorld] = useState(false)
+
+  // Pre-Stage Lego-Block Customizer state (for customizing plain Species/Kingdoms before spawning)
+  const [customSpawnColor, setCustomSpawnColor] = useState<string>('#10b981')
+  const [customSpawnSecondary, setCustomSpawnSecondary] = useState<string>('#d1fae5')
+  const [customSpawnIcon, setCustomSpawnIcon] = useState<string>('')
+  const [showSpawnCustomizer, setShowSpawnCustomizer] = useState(false)
+
   const [actionTargetTileCoord, setActionTargetTileCoord] = useState<string>('')
   const [actionTargetEntityId, setActionTargetEntityId] = useState<string>('')
   const [actionSecondEntityId, setActionSecondEntityId] = useState<string>('')
@@ -174,6 +208,7 @@ export function Play() {
   }, [drawnCard, currentStage, stagesEnabled])
 
   const handleDrawCard = async () => {
+    if (world.isLocked) return
     if (deck.length === 0) {
       setShowDeckEmptyDialog(true)
       return
@@ -241,6 +276,7 @@ export function Play() {
   }
 
   const handleAutoStepOneTurn = () => {
+    if (world.isLocked) return
     let currentDeck = deck.length > 0 ? [...deck] : rebuildDeck()
     const card = currentDeck.pop()!
     setDeck(currentDeck)
@@ -253,7 +289,9 @@ export function Play() {
   }
 
   const handleAutoPlayCurrentStage = () => {
-    const { world: nextWorld, deck: remainingDeck } = autoPlayStage(world, deck, 12)
+    if (world.isLocked) return
+    const turns = generationSettings.turnsPerStage ?? 12
+    const { world: nextWorld, deck: remainingDeck } = autoPlayStage(world, deck, turns)
     const saved = saveWorld(nextWorld)
     setWorld(saved)
     setSavedWorlds(listSavedWorlds())
@@ -264,7 +302,26 @@ export function Play() {
   }
 
   const handleAutoPlayFullWorld = () => {
-    const simulated = autoPlayFullWorld(world, 8)
+    const turns = generationSettings.turnsPerStage ?? 8
+    // Non-destructive guard: if user requested new world OR current world is locked, generate into a fresh saved world
+    if (generateIntoNewWorld || world.isLocked) {
+      const baseNewWorld = createNewWorld(`${world.name} (${generationSettings.seed})`)
+      baseNewWorld.generationSettings = { ...generationSettings }
+      baseNewWorld.players = [...players]
+      baseNewWorld.deckConfig = { ...deckConfig }
+      const simulated = autoPlayFullWorld(baseNewWorld, turns)
+      const saved = saveWorld(simulated)
+      setActiveWorldId(saved.id)
+      setWorld(saved)
+      setSavedWorlds(listSavedWorlds())
+      setDeck(buildShuffledDeck(saved.deckConfig))
+      if (saved.drawHistory.length > 0) {
+        setDrawnCard(saved.drawHistory[saved.drawHistory.length - 1].card)
+      }
+      return
+    }
+
+    const simulated = autoPlayFullWorld(world, turns)
     const saved = saveWorld(simulated)
     setWorld(saved)
     setSavedWorlds(listSavedWorlds())
@@ -275,8 +332,36 @@ export function Play() {
   }
 
   const handleRewindToMove = (targetMoveId: number) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => rewindWorldToMove(prev, targetMoveId))
     setDeck(rebuildDeck())
+  }
+
+  const handleBranchFromMove = (targetMoveId: number) => {
+    const branched = branchWorldAtMove(world, targetMoveId)
+    setWorld(branched)
+    setSavedWorlds(listSavedWorlds())
+    setDeck(buildShuffledDeck(branched.deckConfig))
+  }
+
+  const handleDuplicateWorld = (worldId: string) => {
+    const target = worldId === world.id ? world : savedWorlds.find((w) => w.id === worldId)
+    if (target) {
+      duplicateWorld(target)
+      setSavedWorlds(listSavedWorlds())
+    }
+  }
+
+  const handleToggleLockWorld = (worldId: string) => {
+    if (worldId === world.id) {
+      persistWorldUpdate((prev) => ({ ...prev, isLocked: !prev.isLocked }))
+    } else {
+      const target = savedWorlds.find((w) => w.id === worldId)
+      if (target) {
+        saveWorld({ ...target, isLocked: !target.isLocked })
+        setSavedWorlds(listSavedWorlds())
+      }
+    }
   }
 
   const handleAddPlayerSeat = () => {
@@ -313,6 +398,24 @@ export function Play() {
     }))
   }
 
+  const handleUpdateBotWeight = (
+    seat: PlayerSeat,
+    key: keyof BotPersonalityWeights,
+    value: number
+  ) => {
+    const currentWeights = getEffectiveBotWeights(seat)
+    handleUpdatePlayerSeat(seat.id, {
+      customWeights: {
+        ...currentWeights,
+        [key]: value,
+      },
+    })
+  }
+
+  const handleResetBotWeights = (seatId: string) => {
+    handleUpdatePlayerSeat(seatId, { customWeights: undefined })
+  }
+
   const handleRemovePlayerSeat = (seatId: string) => {
     if (players.length <= 1) return
     persistWorldUpdate((prev) => {
@@ -325,7 +428,24 @@ export function Play() {
     })
   }
 
+  const handleTogglePresetDisabled = (presetId: string) => {
+    persistWorldUpdate((prev) => {
+      const current = prev.generationSettings.disabledPresetIds || []
+      const next = current.includes(presetId)
+        ? current.filter((id) => id !== presetId)
+        : [...current, presetId]
+      return {
+        ...prev,
+        generationSettings: {
+          ...prev.generationSettings,
+          disabledPresetIds: next,
+        },
+      }
+    })
+  }
+
   const handleUpdateRecord = (recordId: string, updates: Partial<DrawRecord>) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       drawHistory: prev.drawHistory.map((r) =>
@@ -335,6 +455,7 @@ export function Play() {
   }
 
   const handleStageNoteChange = (note: string) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       stageNotes: { ...prev.stageNotes, [prev.currentStage]: note },
@@ -342,6 +463,7 @@ export function Play() {
   }
 
   const handleStageChange = (newStage: StageId) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       currentStage: newStage,
@@ -383,6 +505,7 @@ export function Play() {
   }
 
   const handleClearHistory = () => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       drawHistory: [],
@@ -391,6 +514,7 @@ export function Play() {
   }
 
   const handleMapChange = (newMap: MapState) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       map: newMap,
@@ -398,6 +522,7 @@ export function Play() {
   }
 
   const handleEntitiesChange = (newEntities: WorldEntity[]) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => ({
       ...prev,
       entities: newEntities,
@@ -521,6 +646,7 @@ export function Play() {
   }
 
   const handlePreStageSpawnPreset = (preset: EntityPreset) => {
+    if (world.isLocked) return
     persistWorldUpdate((prev) => {
       const target = findOpenLandCoord(prev.map)
       const coordStr = getTileId(target.col, target.row)
@@ -531,19 +657,26 @@ export function Play() {
       const settlementIcons =
         preset.settlementIcons || parentSpecies?.settlementIcons
 
+      const effectiveIcon = customSpawnIcon || preset.icon
+      const effectivePrimary = showSpawnCustomizer ? customSpawnColor : preset.color
+      const effectiveSecondary = showSpawnCustomizer
+        ? customSpawnSecondary
+        : preset.secondaryColor
+
       const newEntity: WorldEntity = {
         id: `ent_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         name: preset.name,
         category: preset.category,
         stageCreated: prev.currentStage,
-        description: preset.description,
-        traits: [...preset.traits],
-        abilities: [...preset.abilities],
+        // Species start plain like modular Lego blocks!
+        description: preset.category === 'species' ? '' : preset.description,
+        traits: preset.category === 'species' ? [] : [...preset.traits],
+        abilities: preset.category === 'species' ? [] : [...preset.abilities],
         status: 'Flourishing',
-        color: preset.color,
-        secondaryColor: preset.secondaryColor,
-        icon: preset.icon,
-        archetype: preset.archetype,
+        color: effectivePrimary,
+        secondaryColor: effectiveSecondary,
+        icon: effectiveIcon,
+        archetype: preset.category === 'species' ? '' : preset.archetype,
         settlementIcons,
         parentEntityId: parentSpecies?.id,
         diplomaticLinks: [],
@@ -567,7 +700,7 @@ export function Play() {
             category: 'settlement',
             type: 'camp',
             name: `${preset.name} Camp`,
-            icon: settlementIcons?.camp || preset.icon,
+            icon: settlementIcons?.camp || effectiveIcon,
             priority: 95,
             linkedEntityId: newEntity.id,
           })
@@ -580,7 +713,7 @@ export function Play() {
             category: 'settlement',
             type: 'city',
             name: `${preset.name} Capital`,
-            icon: settlementIcons?.city || preset.icon,
+            icon: settlementIcons?.city || effectiveIcon,
             priority: 99,
             linkedEntityId: newEntity.id,
           })
@@ -590,7 +723,7 @@ export function Play() {
             category: 'myth',
             type: preset.id,
             name: preset.name,
-            icon: preset.icon,
+            icon: effectiveIcon,
             priority: 92,
             linkedEntityId: newEntity.id,
           })
@@ -608,14 +741,14 @@ export function Play() {
         entities: [...prev.entities, newEntity],
         stageNotes: {
           ...prev.stageNotes,
-          [prev.currentStage]: `${stagePrefix}• Pre-Stage Created: ${preset.icon} ${preset.name} at (${coordStr})`,
+          [prev.currentStage]: `${stagePrefix}• Pre-Stage Created: ${effectiveIcon} ${preset.name} at (${coordStr})`,
         },
       }
     })
   }
 
   const handleApplyActionPreset = (preset: StageActionPreset) => {
-    if (!latestRecord) return
+    if (!latestRecord || world.isLocked) return
 
     persistWorldUpdate((prev) => {
       // Resolve target coordinate
@@ -831,11 +964,12 @@ export function Play() {
     companionMode === 'companion-tracker' || companionMode === 'full-studio'
 
   const isMobileDefaultViewOnly = typeof window !== 'undefined' && window.innerWidth < 768
+  const disabledPresets = generationSettings.disabledPresetIds || []
 
   return (
     <div className="max-w-7xl mx-auto space-y-4">
-      {/* Streamlined Studio Top Bar */}
-      <div className="no-print card p-3 sm:p-4 space-y-2.5">
+      {/* Streamlined Studio Top Bar with 2-Mode Switcher & World Protection */}
+      <div className="no-print card p-3 sm:p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
@@ -845,8 +979,13 @@ export function Play() {
               <div className="flex flex-wrap items-center gap-1.5">
                 <h1 className="text-lg sm:text-xl font-bold truncate">{world.name}</h1>
                 {currentStageData && (
-                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                    {currentStageData.number}. {currentStageData.name}
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold">
+                    Age {currentStageData.number}/4: {currentStageData.name}
+                  </span>
+                )}
+                {world.isLocked && (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-1">
+                    <Lock className="h-3 w-3" /> Read-Only
                   </span>
                 )}
                 {activePlayer && (
@@ -866,13 +1005,41 @@ export function Play() {
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground hidden sm:block">
-                {drawHistory.length} turns · {world.entities.length} codex entries · {players.length} seat(s)
+                {drawHistory.length} turns · {world.entities.length} codex entries · {players.length} seat(s) · Seed: <span className="font-mono">{generationSettings.seed}</span>
               </p>
             </div>
           </div>
 
-          {/* Primary Quick Toggles: Auto-Play, Players, Worlds & Options */}
+          {/* Primary Quick Toggles: 2-Mode Switcher, Auto-Play, Players, Worlds & Options */}
           <div className="flex flex-wrap items-center gap-1.5">
+            {/* Explicit 2-Mode Switcher: Tabletop Companion vs World Builder Studio */}
+            <div className="hidden md:flex items-center bg-muted p-0.5 rounded-lg border border-border mr-1">
+              <button
+                type="button"
+                onClick={() => handleCompanionModeChange('companion-tracker')}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                  companionMode !== 'full-studio'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Simple Card Draw & Age Reference Companion for physical play"
+              >
+                🃏 Tabletop Companion
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCompanionModeChange('full-studio')}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                  companionMode === 'full-studio'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Integrated Digital World Map, Keeper Codex, Timeline & Auto-Play Studio"
+              >
+                🌍 World Studio
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => setShowAutoPlayPanel(!showAutoPlayPanel)}
@@ -912,6 +1079,23 @@ export function Play() {
 
             <button
               type="button"
+              onClick={() => handleToggleLockWorld(world.id)}
+              className={`px-2 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 border transition-colors ${
+                world.isLocked
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-700 dark:text-amber-300'
+                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+              }`}
+              title={
+                world.isLocked
+                  ? 'World is Locked (Read-Only) — click to unlock'
+                  : 'Lock World to protect against accidental changes'
+              }
+            >
+              {world.isLocked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowMoreOptions(!showMoreOptions)}
               className={`px-2.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 border transition-colors ${
                 showMoreOptions || showSetupWizard || showDeckDrawer || showStageBriefDrawer
@@ -938,6 +1122,76 @@ export function Play() {
             />
           </div>
         </div>
+
+        {/* Prominent 4-Age Stepper & Stage Ceremony Bar */}
+        {stagesEnabled && (
+          <div className="pt-2 border-t border-border/60 flex flex-wrap items-center justify-between gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 flex-1">
+              {STAGES.map((st) => {
+                const isActiveStage = currentStage === st.id
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => handleStageChange(st.id)}
+                    className={`p-2 rounded-lg border text-left transition-all flex items-center justify-between gap-2 ${
+                      isActiveStage
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                        : 'border-border bg-muted/40 hover:bg-accent text-foreground'
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold truncate">
+                        {st.number}. {st.name}
+                      </div>
+                      <div
+                        className={`text-[10px] truncate ${
+                          isActiveStage ? 'text-primary-foreground/85' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {st.eraLabel}
+                      </div>
+                    </div>
+                    {isActiveStage && (
+                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-primary-foreground/20 text-primary-foreground shrink-0">
+                        Active
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowAgesMatrix(!showAgesMatrix)}
+                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
+                  showAgesMatrix
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background border-border hover:bg-accent'
+                }`}
+                title="Compare all 4 Ages & Suit Powers side-by-side"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>All 4 Ages Matrix</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSetupWizard(!showSetupWizard)}
+                className={`px-2.5 py-1.5 rounded-md text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
+                  showSetupWizard
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background border-border hover:bg-accent'
+                }`}
+                title="Open Pre-Stage Creation Ceremony & Game Setup Wizard"
+              >
+                <Wand2 className="h-3.5 w-3.5 text-primary" />
+                <span className="hidden sm:inline">Pre-Stage Ceremony</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Single Clean Role & Workspace Tab Bar (Mobile Horizontal Scrollable) */}
         <div
@@ -1128,6 +1382,91 @@ export function Play() {
         )}
       </div>
 
+      {/* Abilities Through the Ages Reference Matrix Drawer */}
+      {showAgesMatrix && (
+        <div className="no-print card p-5 space-y-4 border-2 border-primary/40 bg-primary/[0.02]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span>Abilities & Suit Powers Through the 4 Ages</span>
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Quick companion reference for how Hearts (♥), Clubs (♣), Diamonds (♦), Spades (♠), Face Cards (J/Q/K), Aces, and Jokers evolve across each stage
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAgesMatrix(false)}
+              className="p-1.5 hover:bg-accent rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {STAGES.map((st) => {
+              const isCurrent = st.id === currentStage
+              const suits = STAGE_POWERS[st.id] || {}
+              return (
+                <div
+                  key={st.id}
+                  className={`p-3.5 rounded-lg border space-y-2.5 ${
+                    isCurrent
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-border bg-card'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-bold">
+                        {st.number}. {st.name}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">{st.eraLabel}</div>
+                    </div>
+                    {isCurrent ? (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary text-primary-foreground">
+                        Current Age
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleStageChange(st.id)}
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded border border-border hover:bg-accent"
+                      >
+                        Switch Here
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground bg-muted/50 p-2 rounded">
+                    <strong>Pre-Stage:</strong> {STAGE_PRE_SETUP[st.id]}
+                  </p>
+
+                  <div className="space-y-1.5">
+                    {Object.entries(suits).map(([suit, power]) => (
+                      <div
+                        key={suit}
+                        className="flex items-center justify-between text-xs p-1.5 rounded bg-muted/30 border border-border/60"
+                      >
+                        <span
+                          className={`font-bold text-sm ${
+                            suit === '♥' || suit === '♦' ? 'text-red-500' : ''
+                          }`}
+                        >
+                          {suit}
+                        </span>
+                        <span className="font-semibold">{power.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Multi-Step Game Setup & Pre-Stage Ceremony Wizard */}
       {showSetupWizard && (
         <div className="no-print card p-5 space-y-5 border-2 border-primary/50 bg-primary/[0.02]">
@@ -1138,7 +1477,7 @@ export function Play() {
                 <span>Multi-Step Game Setup & Pre-Stage Creation Ceremony</span>
               </h2>
               <p className="text-xs text-muted-foreground">
-                Step through world geography, player seats, pre-stage species/kingdom creation, and deck pacing
+                Step through world geography, player seats, modular Lego-block species/kingdom creation, and deck pacing
               </p>
             </div>
             <button
@@ -1302,7 +1641,7 @@ export function Play() {
             </div>
           )}
 
-          {/* Step 3: Pre-Stage Creation Ceremony */}
+          {/* Step 3: Pre-Stage Creation Ceremony with Plain Lego-Block Species & Color Swatches */}
           {setupWizardStep === 3 && (
             <div className="space-y-4 bg-muted/30 p-4 rounded-lg border border-border">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1332,11 +1671,109 @@ export function Play() {
                 </div>
               </div>
 
-              {/* Stage 2 Primal: Spawn Species Presets with Companion Settlement Icons */}
+              {/* Optional Visual Customizer (Color Swatches + Icon Override) before spawning */}
+              {(currentStage === 'primal' || currentStage === 'civilization') && (
+                <div className="p-3 rounded-lg border border-border bg-background space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowSpawnCustomizer(!showSpawnCustomizer)}
+                      className="text-xs font-semibold text-primary flex items-center gap-1.5"
+                    >
+                      <span>🎨 Customize Color Swatches & Icon Before Spawning</span>
+                      {showSpawnCustomizer ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    {showSpawnCustomizer && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const prevPrimary = customSpawnColor
+                          setCustomSpawnColor(customSpawnSecondary)
+                          setCustomSpawnSecondary(prevPrimary)
+                        }}
+                        className="px-2 py-1 rounded border border-border text-[11px] font-medium flex items-center gap-1 hover:bg-accent"
+                      >
+                        <ArrowLeftRight className="h-3 w-3" />
+                        <span>Swap Primary ↔ Secondary</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {showSpawnCustomizer && (
+                    <div className="space-y-2 pt-1 border-t border-border/60">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] text-muted-foreground mr-1">
+                          Swatches:
+                        </span>
+                        {COLOR_SWATCH_PALETTES.map((sw) => (
+                          <button
+                            key={sw.id}
+                            type="button"
+                            onClick={() => {
+                              setCustomSpawnColor(sw.primary)
+                              setCustomSpawnSecondary(sw.secondary)
+                            }}
+                            className={`px-2 py-0.5 rounded-full border text-[10px] font-medium flex items-center gap-1 ${
+                              customSpawnColor === sw.primary
+                                ? 'border-primary ring-1 ring-primary'
+                                : 'border-border'
+                            }`}
+                          >
+                            <span
+                              className="w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: sw.primary }}
+                            />
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/10"
+                              style={{ backgroundColor: sw.secondary }}
+                            />
+                            <span>{sw.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className="text-[11px] text-muted-foreground mr-1">
+                          Custom Icon Override:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCustomSpawnIcon('')}
+                          className={`px-2 py-0.5 rounded border text-[10px] ${
+                            !customSpawnIcon ? 'bg-primary text-primary-foreground' : 'border-border'
+                          }`}
+                        >
+                          Default Preset Icon
+                        </button>
+                        {ENTITY_ICON_GALLERY.slice(0, 2).flatMap((g) => g.icons).map((ic) => (
+                          <button
+                            key={ic.icon}
+                            type="button"
+                            onClick={() => setCustomSpawnIcon(ic.icon)}
+                            title={ic.label}
+                            className={`w-6 h-6 rounded border text-xs flex items-center justify-center ${
+                              customSpawnIcon === ic.icon
+                                ? 'border-primary bg-primary/15'
+                                : 'border-border hover:bg-muted'
+                            }`}
+                          >
+                            {ic.icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Stage 2 Primal: Spawn Plain Modular Lego-Block Species Presets */}
               {currentStage === 'primal' && (
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-primary">
-                    Click a Species Preset to Spawn in Your World (includes matching Camp → Village → Town → City → Capital icons):
+                    Click a Plain Lego-Block Species to Spawn in Your World (starts with blank traits & abilities so card draws shape them!):
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {SPECIES_PRESETS.map((sp) => (
@@ -1348,16 +1785,30 @@ export function Play() {
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-bold flex items-center gap-1.5">
-                            <span>{sp.icon}</span>
+                            <span>{customSpawnIcon || sp.icon}</span>
                             <span>{sp.name}</span>
                           </span>
-                          <span
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: sp.color }}
-                          />
+                          <div className="flex items-center gap-1">
+                            <span
+                              className="w-3 h-3 rounded-full"
+                              style={{
+                                backgroundColor: showSpawnCustomizer
+                                  ? customSpawnColor
+                                  : sp.color,
+                              }}
+                            />
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/15"
+                              style={{
+                                backgroundColor: showSpawnCustomizer
+                                  ? customSpawnSecondary
+                                  : sp.secondaryColor,
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="text-[11px] text-muted-foreground line-clamp-1">
-                          {sp.description}
+                        <div className="text-[10px] text-muted-foreground">
+                          🧱 Plain Modular Species (0 starting traits/powers)
                         </div>
                         {sp.settlementIcons && (
                           <div className="text-[10px] text-muted-foreground flex items-center gap-1 pt-0.5">
@@ -1391,12 +1842,16 @@ export function Play() {
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-bold flex items-center gap-1.5">
-                            <span>{soc.icon}</span>
+                            <span>{customSpawnIcon || soc.icon}</span>
                             <span>{soc.name}</span>
                           </span>
                           <span
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: soc.color }}
+                            style={{
+                              backgroundColor: showSpawnCustomizer
+                                ? customSpawnColor
+                                : soc.color,
+                            }}
                           />
                         </div>
                         <div className="text-[11px] text-muted-foreground line-clamp-1">
@@ -1505,7 +1960,7 @@ export function Play() {
         </div>
       )}
 
-      {/* Collapsible Hotseat Players Manager (1–6 Seats) */}
+      {/* Collapsible Hotseat Players & Transparent Tweakable Bot Personalities Manager (1–6 Seats) */}
       {showPlayersPanel && (
         <div className="no-print card p-5 space-y-4 border-primary/40">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1515,7 +1970,7 @@ export function Play() {
                 <span>Hotseat Players & Bot Personalities (1–6 Seats)</span>
               </h3>
               <p className="text-xs text-muted-foreground">
-                Track whose turn it is in hotseat play, or assign Bot Personalities for hybrid human + bot world building
+                Track whose turn it is in hotseat play, or inspect and tweak transparent Bot Personality decision weights
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1541,6 +1996,10 @@ export function Play() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {players.map((seat, idx) => {
               const isCurrentTurn = idx === currentPlayerIndex % players.length
+              const botMeta = BOT_PERSONALITIES[seat.personality]
+              const effectiveWeights = getEffectiveBotWeights(seat)
+              const isWeightsExpanded = expandedBotWeightSeatId === seat.id
+
               return (
                 <div
                   key={seat.id}
@@ -1633,6 +2092,7 @@ export function Play() {
                       onChange={(e) =>
                         handleUpdatePlayerSeat(seat.id, {
                           personality: e.target.value as BotPersonalityId,
+                          customWeights: undefined,
                         })
                       }
                       className="input h-7 text-xs py-0 px-2 w-full"
@@ -1643,6 +2103,85 @@ export function Play() {
                         </option>
                       ))}
                     </select>
+                    {botMeta && (
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {botMeta.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Transparent Decision Weight Bars & Tweak Sliders */}
+                  <div className="pt-1 border-t border-border/60 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-muted-foreground">
+                        Decision Weights {seat.customWeights ? '(Custom Tweaked)' : '(Default)'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedBotWeightSeatId(isWeightsExpanded ? null : seat.id)
+                        }
+                        className="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+                      >
+                        <span>{isWeightsExpanded ? 'Hide Dials' : '🎛️ Tweak Weights'}</span>
+                      </button>
+                    </div>
+
+                    {!isWeightsExpanded ? (
+                      <div className="grid grid-cols-3 gap-1 text-[10px]">
+                        {WEIGHT_LABELS.map((w) => (
+                          <div
+                            key={w.key}
+                            className="bg-background/70 px-1.5 py-0.5 rounded border border-border/50 flex items-center justify-between"
+                            title={`${w.label}: ${effectiveWeights[w.key]}/100`}
+                          >
+                            <span>{w.icon}</span>
+                            <span className="font-mono font-semibold">
+                              {effectiveWeights[w.key]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 bg-background p-2 rounded border border-border">
+                        {WEIGHT_LABELS.map((w) => (
+                          <div key={w.key} className="space-y-0.5">
+                            <div className="flex justify-between text-[10px]">
+                              <span>
+                                {w.icon} {w.label}
+                              </span>
+                              <span className="font-mono font-bold">
+                                {effectiveWeights[w.key]}%
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="5"
+                              value={effectiveWeights[w.key]}
+                              onChange={(e) =>
+                                handleUpdateBotWeight(
+                                  seat,
+                                  w.key,
+                                  parseInt(e.target.value, 10)
+                                )
+                              }
+                              className="w-full h-1.5"
+                            />
+                          </div>
+                        ))}
+                        {seat.customWeights && (
+                          <button
+                            type="button"
+                            onClick={() => handleResetBotWeights(seat.id)}
+                            className="text-[10px] text-muted-foreground hover:text-foreground underline pt-1 block"
+                          >
+                            Reset to {botMeta?.name} Defaults
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -1651,7 +2190,7 @@ export function Play() {
         </div>
       )}
 
-      {/* Collapsible Procedural Auto-Play & Seed Panel */}
+      {/* Collapsible Procedural Auto-Play, World Dials & Studio Preset Filter Panel */}
       {showAutoPlayPanel && (
         <div className="no-print card p-5 space-y-4 border-primary/40">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1661,7 +2200,7 @@ export function Play() {
                 <span>Procedural Seeded Auto-Play & World Generator</span>
               </h3>
               <p className="text-xs text-muted-foreground">
-                Deterministic decision-tree simulation using player personalities & world constraints (no external AI/LLM)
+                Deterministic decision-tree simulation using your tweakable bot personalities, world dials, and enabled Studio Presets
               </p>
             </div>
             <button
@@ -1673,7 +2212,8 @@ export function Play() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg">
+          {/* Primary Seed, Geography & Fantasy Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg border border-border/60">
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1">
                 Random Seed
@@ -1691,7 +2231,7 @@ export function Play() {
                       },
                     }))
                   }
-                  className="input h-8 text-xs flex-1"
+                  className="input h-8 text-xs flex-1 font-mono"
                   placeholder="e.g., avalon-777"
                 />
                 <button
@@ -1762,12 +2302,260 @@ export function Play() {
             </div>
           </div>
 
+          {/* World & Game Dials (Turns/Stage, Species Count, Kingdoms Count, Spread Bias, Disasters & Fantastical) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-muted/20 p-3 rounded-lg border border-border/60 text-xs">
+            <div>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Turns per Stage</span>
+                <span className="font-mono text-primary">
+                  {generationSettings.turnsPerStage ?? 8} turns
+                </span>
+              </div>
+              <input
+                type="range"
+                min="4"
+                max="16"
+                value={generationSettings.turnsPerStage ?? 8}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      turnsPerStage: parseInt(e.target.value, 10),
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Starting Species (Stage 2)</span>
+                <span className="font-mono text-primary">
+                  {generationSettings.startingSpeciesCount ?? 3}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="8"
+                value={generationSettings.startingSpeciesCount ?? 3}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      startingSpeciesCount: parseInt(e.target.value, 10),
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Starting Kingdoms (Stage 3)</span>
+                <span className="font-mono text-primary">
+                  {generationSettings.startingKingdomsCount ?? 3}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="8"
+                value={generationSettings.startingKingdomsCount ?? 3}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      startingKingdomsCount: parseInt(e.target.value, 10),
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between font-semibold mb-1">
+                <span>Map Spread Bias</span>
+                <span className="font-mono text-primary">
+                  {generationSettings.spreadBias ?? 75}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={generationSettings.spreadBias ?? 75}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      spreadBias: parseInt(e.target.value, 10),
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Toggles for Disasters, Fantastical Prompts, and Studio Preset Pool Filter */}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={generationSettings.allowDisasters !== false}
+                  onChange={(e) =>
+                    persistWorldUpdate((prev) => ({
+                      ...prev,
+                      generationSettings: {
+                        ...prev.generationSettings,
+                        allowDisasters: e.target.checked,
+                      },
+                    }))
+                  }
+                />
+                <span>Allow Ace Cataclysms</span>
+              </label>
+
+              <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={generationSettings.allowFantastical !== false}
+                  onChange={(e) =>
+                    persistWorldUpdate((prev) => ({
+                      ...prev,
+                      generationSettings: {
+                        ...prev.generationSettings,
+                        allowFantastical: e.target.checked,
+                      },
+                    }))
+                  }
+                />
+                <span>Allow Fantastical Face Cards (J/Q/K)</span>
+              </label>
+
+              <label className="inline-flex items-center gap-1.5 cursor-pointer font-semibold text-primary">
+                <input
+                  type="checkbox"
+                  checked={generateIntoNewWorld || !!world.isLocked}
+                  onChange={(e) => setGenerateIntoNewWorld(e.target.checked)}
+                />
+                <span>Save Full Generation as New World (Safe Mode)</span>
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowPresetPoolFilter(!showPresetPoolFilter)}
+              className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1.5"
+            >
+              <span>
+                🧱 Studio Preset Pool ({disabledPresets.length} Disabled)
+              </span>
+              {showPresetPoolFilter ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
+
+          {/* Collapsible Studio Preset Pool Filter (Toggle which default Species/Kingdoms/Myths/Actions Auto-Play can use) */}
+          {showPresetPoolFilter && (
+            <div className="p-3.5 rounded-lg border border-border bg-muted/30 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex gap-1.5">
+                  {(
+                    [
+                      { id: 'species', label: `Species (${SPECIES_PRESETS.length})` },
+                      { id: 'society', label: `Kingdoms (${SOCIETY_PRESETS.length})` },
+                      { id: 'myth', label: `Myths (${MYTH_PRESETS.length})` },
+                      { id: 'actions', label: `Turn Actions (${STAGE_ACTION_PRESETS.length})` },
+                    ] as const
+                  ).map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setPresetFilterTab(t.id)}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold ${
+                        presetFilterTab === t.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background border border-border'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                {disabledPresets.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        generationSettings: {
+                          ...prev.generationSettings,
+                          disabledPresetIds: [],
+                        },
+                      }))
+                    }
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Enable All Studio Presets
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-44 overflow-y-auto pr-1">
+                {(presetFilterTab === 'species'
+                  ? SPECIES_PRESETS
+                  : presetFilterTab === 'society'
+                    ? SOCIETY_PRESETS
+                    : presetFilterTab === 'myth'
+                      ? MYTH_PRESETS
+                      : STAGE_ACTION_PRESETS
+                ).map((item) => {
+                  const isDisabled = disabledPresets.includes(item.id)
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleTogglePresetDisabled(item.id)}
+                      className={`p-1.5 rounded border text-left text-[11px] flex items-center justify-between gap-1.5 transition-colors ${
+                        isDisabled
+                          ? 'border-border bg-muted/50 opacity-50 line-through'
+                          : 'border-primary/40 bg-background font-medium'
+                      }`}
+                    >
+                      <span className="truncate">
+                        {item.icon} {item.name}
+                      </span>
+                      <span className="text-[10px] shrink-0">
+                        {isDisabled ? 'OFF' : 'ON'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleAutoStepOneTurn}
-                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+                disabled={world.isLocked}
+                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
               >
                 <PlayIcon className="h-3.5 w-3.5" />
                 <span>Auto-Play 1 Turn</span>
@@ -1775,7 +2563,8 @@ export function Play() {
               <button
                 type="button"
                 onClick={handleAutoPlayCurrentStage}
-                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+                disabled={world.isLocked}
+                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
               >
                 <FastForward className="h-3.5 w-3.5" />
                 <span>Auto-Play Current Stage</span>
@@ -1831,13 +2620,13 @@ export function Play() {
       {/* Tab Content: Cards or Split View */}
       {(activeTab === 'cards' || activeTab === 'split') && (
         <div className="space-y-4">
-          {/* Primary Action & Stage Bar — Clean & Distraction-Free */}
+          {/* Primary Action & Stage Suit Summary Bar */}
           <div className="card p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2.5">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleDrawCard}
-                disabled={deck.length === 0}
+                disabled={deck.length === 0 || world.isLocked}
                 className="btn-primary flex items-center space-x-2 px-5 sm:px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PlayIcon className="h-4 w-4" />
@@ -1846,7 +2635,8 @@ export function Play() {
               <button
                 type="button"
                 onClick={handleAutoStepOneTurn}
-                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
+                disabled={world.isLocked}
+                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold disabled:opacity-50"
                 title="Let the current player's Bot Personality resolve 1 turn automatically"
               >
                 <Bot className="h-3.5 w-3.5" />
@@ -1863,26 +2653,24 @@ export function Play() {
               </button>
             </div>
 
-            {/* Quick Stage Switcher & Stage Brief Toggle */}
-            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto">
-              {stagesEnabled && (
-                <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
-                  {STAGES.map((st) => (
-                    <button
-                      key={st.id}
-                      type="button"
-                      onClick={() => handleStageChange(st.id)}
-                      className={`px-2 sm:px-2.5 py-1 rounded text-xs font-semibold transition-colors whitespace-nowrap ${
-                        currentStage === st.id
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
+            {/* Active Stage 4-Suit Quick Pills & Stage Brief Toggle */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {stagesEnabled &&
+                Object.entries(STAGE_POWERS[currentStage] || {}).map(([suit, power]) => (
+                  <span
+                    key={suit}
+                    className="hidden xl:inline-flex items-center gap-1 px-2 py-1 rounded bg-muted/60 border border-border text-xs font-medium"
+                  >
+                    <span
+                      className={`font-bold ${
+                        suit === '♥' || suit === '♦' ? 'text-red-500' : ''
                       }`}
                     >
-                      {st.number}. {st.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+                      {suit}
+                    </span>
+                    <span>{power.name}</span>
+                  </span>
+                ))}
 
               <button
                 type="button"
@@ -1893,7 +2681,7 @@ export function Play() {
                     : 'bg-background border-border hover:bg-accent'
                 }`}
               >
-                <span>Stage Suits</span>
+                <span>Stage Suits & Setup</span>
                 {showStageBriefDrawer ? (
                   <ChevronUp className="h-3.5 w-3.5" />
                 ) : (
@@ -2120,13 +2908,48 @@ export function Play() {
                     <p>Enable Stages & Powers to see details</p>
                   </div>
                 ) : (
-                  <div className="text-center text-muted-foreground py-6 space-y-1.5">
-                    <p className="text-sm sm:text-base font-medium">
-                      Draw a card to reveal its stage power & prompt
+                  <div className="space-y-3 py-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-primary block">
+                          Current Stage · Age {currentStageData?.number} of 4
+                        </span>
+                        <h3 className="text-base sm:text-lg font-bold">
+                          {currentStageData?.name} ({currentStageData?.eraLabel})
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSetupWizardStep(3)
+                          setShowSetupWizard(true)
+                        }}
+                        className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
+                      >
+                        <Compass className="h-3.5 w-3.5 text-primary" />
+                        <span>Open Pre-Stage Ceremony</span>
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/60">
+                      <strong>Pre-Stage Ceremony:</strong> {STAGE_PRE_SETUP[currentStage]}
                     </p>
-                    <p className="text-xs">
-                      Play purely with physical paper & pencil, or record events into the Historian Timeline, Keeper Codex, and World Atlas.
-                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {Object.entries(STAGE_POWERS[currentStage] || {}).map(([suit, power]) => (
+                        <div
+                          key={suit}
+                          className="p-2 rounded-lg border border-border bg-muted/20 flex items-center justify-between"
+                        >
+                          <span
+                            className={`text-base font-bold ${
+                              suit === '♥' || suit === '♦' ? 'text-red-500' : ''
+                            }`}
+                          >
+                            {suit}
+                          </span>
+                          <span className="text-xs font-semibold">{power.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -2354,7 +3177,7 @@ export function Play() {
             drawHistory={world.drawHistory}
             entities={world.entities}
             onChange={handleMapChange}
-            initialViewOnly={isMobileDefaultViewOnly}
+            initialViewOnly={isMobileDefaultViewOnly || !!world.isLocked}
           />
         )}
 
@@ -2381,6 +3204,7 @@ export function Play() {
             onUpdateRecord={handleUpdateRecord}
             onClearHistory={handleClearHistory}
             onRewindToMove={handleRewindToMove}
+            onBranchFromMove={handleBranchFromMove}
           />
         )}
 
@@ -2397,11 +3221,31 @@ export function Play() {
           setDrawnCard(null)
           setPowerData(null)
         }}
-        onCreateWorld={(name) => {
-          const created = saveWorld(createNewWorld(name))
-          setWorld(created)
+        onCreateWorld={(name, options?: CreateWorldOptions) => {
+          let created = createNewWorld(name)
+          if (options?.geographyPreset) {
+            created.generationSettings.geographyPreset = options.geographyPreset
+          }
+          if (options?.seed) {
+            created.generationSettings.seed = `realm-${options.seed}`
+          }
+          if (options?.deckVariant === 'short') {
+            created.deckConfig = { ...created.deckConfig, ...SHORT_GAME_DECK_CONFIG }
+          }
+          created.map = createInitialMap(
+            created.map.width,
+            created.map.height,
+            created.generationSettings.geographyPreset,
+            createSeededRng(created.generationSettings.seed)
+          )
+          if (options?.autoGenerate) {
+            created = autoPlayFullWorld(created, created.generationSettings.turnsPerStage ?? 8)
+          }
+          const saved = saveWorld(created)
+          setActiveWorldId(saved.id)
+          setWorld(saved)
           setSavedWorlds(listSavedWorlds())
-          setDeck(buildShuffledDeck(created.deckConfig))
+          setDeck(buildShuffledDeck(saved.deckConfig))
           setDrawnCard(null)
           setPowerData(null)
         }}
@@ -2418,6 +3262,8 @@ export function Play() {
           setSavedWorlds(listSavedWorlds())
           setDeck(buildShuffledDeck(nextActive.deckConfig))
         }}
+        onDuplicateWorld={handleDuplicateWorld}
+        onToggleLockWorld={handleToggleLockWorld}
       />
 
       {/* Restart Dialog */}
@@ -2500,27 +3346,27 @@ export function Play() {
             </div>
             <div className="space-y-3 text-sm">
               <div>
-                <h4 className="font-semibold">1. Companion Modes</h4>
+                <h4 className="font-semibold">1. Companion vs. World Studio Modes</h4>
                 <p className="text-muted-foreground">
-                  Use the <strong>Mode</strong> bar to toggle between <em>Cards Only</em> (for physical map play), <em>Cards + Powers</em>, <em>Companion Tracker</em>, and <em>Full World Studio</em>.
+                  Toggle between <strong>Tabletop Companion</strong> (for physical map play & quick age power lookups) and <strong>World Studio</strong> (integrated map, codex, timeline, and auto-play).
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">2. Hotseat Multiplayer (1–6 Players)</h4>
+                <h4 className="font-semibold">2. Plain Lego-Block Species & Snap-On Traits</h4>
                 <p className="text-muted-foreground">
-                  Click <strong>Players</strong> to add up to 6 seats, assign Artist/Historian/Keeper roles, and mix Human players with Bot Personalities.
+                  Species start plain like modular Lego blocks—choose an icon, settlement set, and primary/secondary color swatch, then snap on traits and abilities as card draws shape their story.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">3. Seeded Auto-Play & Time-Travel Rewind</h4>
+                <h4 className="font-semibold">3. Transparent Bot Personalities & Preset Dials</h4>
                 <p className="text-muted-foreground">
-                  Click <strong>Auto-Play</strong> to step 1 turn, simulate a stage, or generate a complete 4-stage world from a deterministic seed. Click <strong>Rewind Here</strong> on any turn in the Timeline to roll back the world and branch history!
+                  Inspect and tweak each Bot Personality’s 6 decision weights, adjust world generation dials, and toggle which Studio Presets Auto-Play can use.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">4. Multi-Layer Map & Codex Wiki</h4>
+                <h4 className="font-semibold">4. Non-Destructive World & Timeline Protection</h4>
                 <p className="text-muted-foreground">
-                  Combine base biomes with relief (mountains/hills/canyons), flora (forest/jungle), rivers, roads, and faction territory borders. Use the <strong>Codex</strong> tab to load preset races and civilizations or customize your own.
+                  Lock worlds against accidental edits, duplicate worlds in the World Manager, or click <strong>Branch New World</strong> on any timeline turn to explore alternate histories safely.
                 </p>
               </div>
             </div>

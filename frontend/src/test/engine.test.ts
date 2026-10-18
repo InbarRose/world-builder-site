@@ -29,13 +29,19 @@ import {
   parseImportedWorld,
   exportWorldChronicleMarkdown,
   rewindWorldToMove,
+  duplicateWorld,
+  branchWorldAtMove,
 } from '../engine/storageService'
 import {
   createSeededRng,
   executeAutomatedTurn,
   autoPlayFullWorld,
 } from '../engine/autoPlayEngine'
-import { getActionPresetsForDraw } from '../engine/presets'
+import {
+  getActionPresetsForDraw,
+  SPECIES_PRESETS,
+  getEffectiveBotWeights,
+} from '../engine/presets'
 import { CURRENT_SCHEMA_VERSION } from '../engine/types'
 
 describe('DeckEngine', () => {
@@ -306,4 +312,48 @@ describe('AutoPlayEngine & Time-Travel Rewind', () => {
     expect(branched.drawHistory).toHaveLength(5)
     expect(branched.drawHistory[4].moveId).toBe(5)
   })
+
+  it('starts species presets as plain modular Lego blocks and respects disabledPresetIds & custom bot weights', () => {
+    localStorage.clear()
+    for (const sp of SPECIES_PRESETS) {
+      expect(sp.description).toBe('')
+      expect(sp.traits).toHaveLength(0)
+      expect(sp.abilities).toHaveLength(0)
+      expect(sp.settlementIcons).toBeDefined()
+    }
+
+    const world = createNewWorld('Modular Realm', 'seed-lego-101')
+    // Disable all species except the first one
+    world.generationSettings.disabledPresetIds = SPECIES_PRESETS.slice(1).map((s) => s.id)
+    world.generationSettings.startingSpeciesCount = 2
+    world.players[0].customWeights = {
+      geography: 10,
+      ecology: 90,
+      civilization: 20,
+      diplomacy: 80,
+      conflict: 5,
+      myth: 95,
+    }
+    expect(getEffectiveBotWeights(world.players[0]).myth).toBe(95)
+
+    const simulated = saveWorld(autoPlayFullWorld(world, 2))
+    const spawnedSpecies = simulated.entities.filter((e) => e.category === 'species')
+    expect(spawnedSpecies.length).toBeGreaterThanOrEqual(1)
+    expect(spawnedSpecies[0].name).toBe(SPECIES_PRESETS[0].name)
+
+    // Non-destructive duplicateWorld and branchWorldAtMove
+    const copy = duplicateWorld(simulated)
+    expect(copy).not.toBeNull()
+    expect(copy.id).not.toBe(simulated.id)
+    expect(copy.drawHistory).toHaveLength(simulated.drawHistory.length)
+
+    const branched = branchWorldAtMove(simulated, 3)
+    expect(branched.id).not.toBe(simulated.id)
+    expect(branched.drawHistory).toHaveLength(3)
+    // Original simulated world remains untouched at full history length!
+    const allSaved = listSavedWorlds()
+    const origReloaded = allSaved.find((w) => w.id === simulated.id)
+    expect(origReloaded?.drawHistory).toHaveLength(8)
+  })
 })
+
