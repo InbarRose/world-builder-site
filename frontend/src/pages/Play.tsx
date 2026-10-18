@@ -113,6 +113,8 @@ export function Play() {
   const [setupWizardStep, setSetupWizardStep] = useState<SetupWizardStep>(1)
   const [showDeckDrawer, setShowDeckDrawer] = useState(false)
   const [showStageBriefDrawer, setShowStageBriefDrawer] = useState(false)
+  const [showMoreOptions, setShowMoreOptions] = useState(false)
+  const [showDigitalPresets, setShowDigitalPresets] = useState(false)
   const [actionTargetTileCoord, setActionTargetTileCoord] = useState<string>('')
   const [actionTargetEntityId, setActionTargetEntityId] = useState<string>('')
   const [actionSecondEntityId, setActionSecondEntityId] = useState<string>('')
@@ -828,66 +830,67 @@ export function Play() {
   const showTimelineRecords =
     companionMode === 'companion-tracker' || companionMode === 'full-studio'
 
+  const isMobileDefaultViewOnly = typeof window !== 'undefined' && window.innerWidth < 768
+
   return (
-    <div className="max-w-7xl mx-auto space-y-5">
-      {/* Studio Top Bar */}
-      <div className="no-print card p-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-              <Globe className="h-6 w-6" />
+    <div className="max-w-7xl mx-auto space-y-4">
+      {/* Streamlined Studio Top Bar */}
+      <div className="no-print card p-3 sm:p-4 space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+              <Globe className="h-5 w-5" />
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold">{world.name}</h1>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <h1 className="text-lg sm:text-xl font-bold truncate">{world.name}</h1>
                 {currentStageData && (
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                    Stage {currentStageData.number}: {currentStageData.name}
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                    {currentStageData.number}. {currentStageData.name}
                   </span>
                 )}
                 {activePlayer && (
                   <span
-                    className="text-xs px-2.5 py-0.5 rounded-full text-white font-medium flex items-center gap-1"
+                    className="text-[11px] px-2 py-0.5 rounded-full text-white font-medium flex items-center gap-1"
                     style={{ backgroundColor: activePlayer.color }}
                   >
                     <span>
-                      Turn: {activePlayer.name} ({activePlayer.role})
+                      {activePlayer.name} ({activePlayer.role})
                     </span>
                     {activePlayer.isBot && (
                       <span>
-                        · {BOT_PERSONALITIES[activePlayer.personality]?.icon} Bot
+                        · {BOT_PERSONALITIES[activePlayer.personality]?.icon}
                       </span>
                     )}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Schema v{world.schemaVersion || 2} · {drawHistory.length} turns ·{' '}
-                {world.entities.length} codex entries · {players.length} player seat(s)
+              <p className="text-[11px] text-muted-foreground hidden sm:block">
+                {drawHistory.length} turns · {world.entities.length} codex entries · {players.length} seat(s)
               </p>
             </div>
           </div>
 
-          {/* World Management, Setup Wizard, Players, Auto-Play & File Actions */}
+          {/* Primary Quick Toggles: Auto-Play, Players, Worlds & Options */}
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
-              onClick={() => setShowSetupWizard(!showSetupWizard)}
-              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
-                showSetupWizard
+              onClick={() => setShowAutoPlayPanel(!showAutoPlayPanel)}
+              className={`px-2.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
+                showAutoPlayPanel
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
               }`}
-              title="Multi-Step World Setup & Pre-Stage Ceremony Wizard"
+              title="Procedural Seeded Auto-Play & World Generator"
             >
-              <Wand2 className="h-3.5 w-3.5" />
-              <span>Setup Wizard</span>
+              <Bot className="h-3.5 w-3.5" />
+              <span>Auto-Play</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowPlayersPanel(!showPlayersPanel)}
-              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
+              className={`px-2.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
                 showPlayersPanel
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-background border-border hover:bg-accent'
@@ -900,22 +903,8 @@ export function Play() {
 
             <button
               type="button"
-              onClick={() => setShowAutoPlayPanel(!showAutoPlayPanel)}
-              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
-                showAutoPlayPanel
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background border-border hover:bg-accent'
-              }`}
-              title="Procedural Seeded Auto-Play & World Generator"
-            >
-              <Bot className="h-3.5 w-3.5" />
-              <span>Auto-Play</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setShowWorldManager(true)}
-              className="btn-outline px-3 py-2 text-xs font-semibold flex items-center gap-1.5"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
             >
               <Globe className="h-3.5 w-3.5" />
               <span>Worlds ({savedWorlds.length})</span>
@@ -923,32 +912,23 @@ export function Play() {
 
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
-              title="Import world JSON file"
+              onClick={() => setShowMoreOptions(!showMoreOptions)}
+              className={`px-2.5 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 border transition-colors ${
+                showMoreOptions || showSetupWizard || showDeckDrawer || showStageBriefDrawer
+                  ? 'bg-secondary border-primary/40 text-foreground'
+                  : 'bg-background border-border hover:bg-accent text-muted-foreground hover:text-foreground'
+              }`}
+              title="Setup Wizard, Companion Mode, Deck Config & Export Options"
             >
-              <Upload className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Import</span>
+              <Sliders className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Options</span>
+              {showMoreOptions ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
             </button>
 
-            <button
-              type="button"
-              onClick={handleExportGameState}
-              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
-              title="Export complete world state to JSON"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Export</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowHelpDialog(true)}
-              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
-              title="Help & instructions"
-            >
-              <HelpCircle className="h-3.5 w-3.5" />
-            </button>
             <input
               ref={fileInputRef}
               type="file"
@@ -959,116 +939,193 @@ export function Play() {
           </div>
         </div>
 
-        {/* Second Row: Companion Mode Selector & Studio Workspace Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/60">
-          {/* Companion Mode Toggles */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
-              Mode:
-            </span>
-            {(
-              [
-                { id: 'cards-only', label: 'Cards Only' },
-                { id: 'cards-and-powers', label: 'Cards + Powers' },
-                { id: 'companion-tracker', label: 'Companion Tracker' },
-                { id: 'full-studio', label: 'Full World Studio' },
-              ] as const
-            ).map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => handleCompanionModeChange(m.id)}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                  companionMode === m.id
-                    ? 'bg-secondary text-foreground font-semibold ring-1 ring-primary/40'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
+        {/* Single Clean Role & Workspace Tab Bar (Mobile Horizontal Scrollable) */}
+        <div
+          className="flex items-center gap-1.5 pt-2 border-t border-border/60 overflow-x-auto pb-0.5"
+          role="tablist"
+          aria-label="Studio Workspace Tabs"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'cards'}
+            onClick={() => setActiveTab('cards')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors ${
+              activeTab === 'cards'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/70 hover:bg-accent text-foreground'
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            <span>Deck & Draw</span>
+          </button>
 
-          {/* Workspace View Tabs (Visible in Full World Studio mode) */}
-          {companionMode === 'full-studio' && (
-            <div
-              className="flex flex-wrap items-center gap-1.5"
-              role="tablist"
-              aria-label="Studio Workspace Tabs"
-            >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'timeline'}
+            onClick={() => {
+              if (companionMode !== 'full-studio' && companionMode !== 'companion-tracker') {
+                handleCompanionModeChange('full-studio')
+              }
+              setActiveTab('timeline')
+            }}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors ${
+              activeTab === 'timeline'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/70 hover:bg-accent text-foreground'
+            }`}
+            title="Historian Role — Chronological Turn & Era Log"
+          >
+            <Clock className="h-3.5 w-3.5" />
+            <span>Historian · Timeline ({drawHistory.length})</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'entities'}
+            onClick={() => {
+              if (companionMode !== 'full-studio') {
+                handleCompanionModeChange('full-studio')
+              }
+              setActiveTab('entities')
+            }}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors ${
+              activeTab === 'entities'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/70 hover:bg-accent text-foreground'
+            }`}
+            title="Keeper Role — Species, Civilizations & Myths Wiki"
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>Keeper · Codex ({world.entities.length})</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'map'}
+            onClick={() => {
+              if (companionMode !== 'full-studio') {
+                handleCompanionModeChange('full-studio')
+              }
+              setActiveTab('map')
+            }}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors ${
+              activeTab === 'map'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/70 hover:bg-accent text-foreground'
+            }`}
+            title="World Map Viewer & Atlas"
+          >
+            <MapIcon className="h-3.5 w-3.5" />
+            <span>World Map</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'split'}
+            onClick={() => {
+              if (companionMode !== 'full-studio') {
+                handleCompanionModeChange('full-studio')
+              }
+              setActiveTab('split')
+            }}
+            className={`hidden lg:flex px-3 py-1.5 rounded-md text-xs font-semibold items-center gap-1.5 shrink-0 transition-colors ${
+              activeTab === 'split'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/70 hover:bg-accent text-foreground'
+            }`}
+          >
+            <Columns className="h-3.5 w-3.5" />
+            <span>Full Studio</span>
+          </button>
+        </div>
+
+        {/* Collapsible Secondary Options Bar (Setup Wizard, Companion Mode, Deck Config, Import/Export) */}
+        {showMoreOptions && (
+          <div className="pt-2.5 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+                Interface Mode:
+              </span>
+              {(
+                [
+                  { id: 'cards-only', label: 'Simple Cards Only' },
+                  { id: 'cards-and-powers', label: 'Cards + Powers' },
+                  { id: 'companion-tracker', label: 'Tabletop Companion' },
+                  { id: 'full-studio', label: 'Full World Studio' },
+                ] as const
+              ).map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => handleCompanionModeChange(m.id)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    companionMode === m.id
+                      ? 'bg-secondary text-foreground font-semibold ring-1 ring-primary/40'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
-                role="tab"
-                aria-selected={activeTab === 'cards'}
-                onClick={() => setActiveTab('cards')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  activeTab === 'cards'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-accent text-foreground'
-                }`}
+                onClick={() => setShowSetupWizard(!showSetupWizard)}
+                className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
               >
-                <Layers className="h-3.5 w-3.5" />
-                <span>Deck & Draw</span>
+                <Wand2 className="h-3.5 w-3.5 text-primary" />
+                <span>Setup Wizard</span>
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={activeTab === 'map'}
-                onClick={() => setActiveTab('map')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  activeTab === 'map'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-accent text-foreground'
-                }`}
+                onClick={() => setShowDeckDrawer(!showDeckDrawer)}
+                className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
               >
-                <MapIcon className="h-3.5 w-3.5" />
-                <span>World Map</span>
+                <Sliders className="h-3.5 w-3.5" />
+                <span>Deck Config</span>
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={activeTab === 'timeline'}
-                onClick={() => setActiveTab('timeline')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  activeTab === 'timeline'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-accent text-foreground'
-                }`}
+                onClick={() => fileInputRef.current?.click()}
+                className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
               >
-                <Clock className="h-3.5 w-3.5" />
-                <span>Timeline ({drawHistory.length})</span>
+                <Upload className="h-3.5 w-3.5" />
+                <span>Import</span>
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={activeTab === 'entities'}
-                onClick={() => setActiveTab('entities')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  activeTab === 'entities'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-accent text-foreground'
-                }`}
+                onClick={handleExportGameState}
+                className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
               >
-                <Users className="h-3.5 w-3.5" />
-                <span>Codex ({world.entities.length})</span>
+                <Download className="h-3.5 w-3.5" />
+                <span>Export</span>
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={activeTab === 'split'}
-                onClick={() => setActiveTab('split')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  activeTab === 'split'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-accent text-foreground'
-                }`}
+                onClick={() => setShowRestartDialog(true)}
+                className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1 text-destructive"
               >
-                <Columns className="h-3.5 w-3.5" />
-                <span>Full Studio</span>
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Reset World</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowHelpDialog(true)}
+                className="btn-outline px-2 py-1 text-xs flex items-center gap-1"
+                title="Help & instructions"
+              >
+                <HelpCircle className="h-3.5 w-3.5" />
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Multi-Step Game Setup & Pre-Stage Ceremony Wizard */}
@@ -1705,46 +1762,83 @@ export function Play() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={handleAutoStepOneTurn}
-              className="btn-outline px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
-            >
-              <PlayIcon className="h-3.5 w-3.5" />
-              <span>Auto-Play 1 Turn</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleAutoPlayCurrentStage}
-              className="btn-outline px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
-            >
-              <FastForward className="h-3.5 w-3.5" />
-              <span>Auto-Play Current Stage</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleAutoPlayFullWorld}
-              className="btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Generate Full 4-Stage World</span>
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleAutoStepOneTurn}
+                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+              >
+                <PlayIcon className="h-3.5 w-3.5" />
+                <span>Auto-Play 1 Turn</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAutoPlayCurrentStage}
+                className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+              >
+                <FastForward className="h-3.5 w-3.5" />
+                <span>Auto-Play Current Stage</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAutoPlayFullWorld}
+                className="btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Generate Full 4-Stage World</span>
+              </button>
+            </div>
+
+            {drawHistory.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (companionMode !== 'full-studio') handleCompanionModeChange('full-studio')
+                    setActiveTab('map')
+                  }}
+                  className="px-2.5 py-1.5 rounded border border-primary/40 bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20"
+                >
+                  🗺️ View World Map
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (companionMode !== 'full-studio') handleCompanionModeChange('full-studio')
+                    setActiveTab('entities')
+                  }}
+                  className="px-2.5 py-1.5 rounded border border-border bg-background text-xs font-semibold hover:bg-accent"
+                >
+                  🏛️ Keeper Codex ({world.entities.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (companionMode !== 'full-studio') handleCompanionModeChange('full-studio')
+                    setActiveTab('timeline')
+                  }}
+                  className="px-2.5 py-1.5 rounded border border-border bg-background text-xs font-semibold hover:bg-accent"
+                >
+                  📜 Historian ({drawHistory.length})
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Tab Content: Cards or Split View */}
       {(activeTab === 'cards' || activeTab === 'split') && (
-        <div className="space-y-5">
-          {/* Primary Action & Stage Bar */}
-          <div className="card p-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2.5">
+        <div className="space-y-4">
+          {/* Primary Action & Stage Bar — Clean & Distraction-Free */}
+          <div className="card p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleDrawCard}
                 disabled={deck.length === 0}
-                className="btn-primary flex items-center space-x-2 px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex items-center space-x-2 px-5 sm:px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PlayIcon className="h-4 w-4" />
                 <span>Draw Card ({deck.length})</span>
@@ -1752,32 +1846,25 @@ export function Play() {
               <button
                 type="button"
                 onClick={handleAutoStepOneTurn}
-                className="btn-outline flex items-center space-x-1.5 px-3.5 py-2.5 text-xs font-semibold"
+                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
                 title="Let the current player's Bot Personality resolve 1 turn automatically"
               >
-                <Bot className="h-4 w-4" />
-                <span>Auto-Step Turn</span>
+                <Bot className="h-3.5 w-3.5" />
+                <span>Auto-Step</span>
               </button>
               <button
                 type="button"
                 onClick={handleReshuffleDeck}
-                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs"
+                className="btn-outline flex items-center space-x-1.5 px-2.5 py-2 text-xs"
+                title="Reshuffle current stage deck"
               >
                 <Shuffle className="h-3.5 w-3.5" />
-                <span>Reset Deck</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowRestartDialog(true)}
-                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>Restart World</span>
+                <span className="hidden sm:inline">Reset Deck</span>
               </button>
             </div>
 
-            {/* Quick Stage Switcher & Collapsible Drawer Toggles */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Quick Stage Switcher & Stage Brief Toggle */}
+            <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto">
               {stagesEnabled && (
                 <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
                   {STAGES.map((st) => (
@@ -1785,7 +1872,7 @@ export function Play() {
                       key={st.id}
                       type="button"
                       onClick={() => handleStageChange(st.id)}
-                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                      className={`px-2 sm:px-2.5 py-1 rounded text-xs font-semibold transition-colors whitespace-nowrap ${
                         currentStage === st.id
                           ? 'bg-primary text-primary-foreground shadow-sm'
                           : 'text-muted-foreground hover:text-foreground'
@@ -1800,72 +1887,59 @@ export function Play() {
               <button
                 type="button"
                 onClick={() => setShowStageBriefDrawer(!showStageBriefDrawer)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1 ${
+                className={`px-2.5 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1 ${
                   showStageBriefDrawer
                     ? 'bg-secondary border-primary/40 font-semibold'
                     : 'bg-background border-border hover:bg-accent'
                 }`}
               >
-                <span>Stage Brief & Suits</span>
+                <span>Stage Suits</span>
                 {showStageBriefDrawer ? (
                   <ChevronUp className="h-3.5 w-3.5" />
                 ) : (
                   <ChevronDown className="h-3.5 w-3.5" />
                 )}
               </button>
-
-              <button
-                type="button"
-                onClick={() => setShowDeckDrawer(!showDeckDrawer)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1 ${
-                  showDeckDrawer
-                    ? 'bg-secondary border-primary/40 font-semibold'
-                    : 'bg-background border-border hover:bg-accent'
-                }`}
-              >
-                <Sliders className="h-3.5 w-3.5" />
-                <span>Deck Config</span>
-              </button>
             </div>
           </div>
 
-          {/* Active Card + Power + Guided Turn Action Presets */}
+          {/* Active Card + Stage Power Display */}
           <div
             className={`grid grid-cols-1 ${
               showPowerDetails ? 'lg:grid-cols-12' : ''
-            } gap-5`}
+            } gap-4`}
           >
-            {/* Left: Card Visual (4 cols) */}
-            <div className="lg:col-span-4 card p-6 flex flex-col items-center justify-center min-h-[320px]">
+            {/* Left: Playing Card Visual (Compact on Mobile, Full Card on Desktop) */}
+            <div className="lg:col-span-4 card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[300px]">
               {drawnCard ? (
                 <div
-                  className={`w-full max-w-[210px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative`}
+                  className={`w-full max-w-[165px] sm:max-w-[205px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-xl flex flex-col items-center justify-center p-4 sm:p-6 relative`}
                 >
                   {drawnCard.value !== JOKER && (
                     <>
-                      <div className={`absolute top-2 left-3 text-2xl font-bold ${color}`}>
+                      <div className={`absolute top-2 left-3 text-xl sm:text-2xl font-bold ${color}`}>
                         {drawnCard.value}
                       </div>
-                      <div className={`absolute top-8 left-3 text-xl ${color}`}>
+                      <div className={`absolute top-7 sm:top-8 left-3 text-lg sm:text-xl ${color}`}>
                         {drawnCard.suit}
                       </div>
                     </>
                   )}
-                  <div className={`text-7xl font-bold ${color} mb-3`}>
+                  <div className={`text-5xl sm:text-7xl font-bold ${color} mb-2 sm:mb-3`}>
                     {drawnCard.value === JOKER ? '🃏' : drawnCard.suit}
                   </div>
                   {drawnCard.value !== JOKER && (
-                    <div className={`text-5xl font-bold ${color}`}>{drawnCard.value}</div>
+                    <div className={`text-4xl sm:text-5xl font-bold ${color}`}>{drawnCard.value}</div>
                   )}
                   {drawnCard.value !== JOKER && (
                     <>
                       <div
-                        className={`absolute bottom-2 right-3 text-2xl font-bold ${color} rotate-180`}
+                        className={`absolute bottom-2 right-3 text-xl sm:text-2xl font-bold ${color} rotate-180`}
                       >
                         {drawnCard.value}
                       </div>
                       <div
-                        className={`absolute bottom-8 right-3 text-xl ${color} rotate-180`}
+                        className={`absolute bottom-7 sm:bottom-8 right-3 text-lg sm:text-xl ${color} rotate-180`}
                       >
                         {drawnCard.suit}
                       </div>
@@ -1873,27 +1947,27 @@ export function Play() {
                   )}
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground">
-                  <div className="text-6xl mb-4">🃏</div>
-                  <p className="text-base font-semibold">Click "Draw Card" to begin</p>
+                <div className="text-center text-muted-foreground py-4">
+                  <div className="text-5xl mb-3">🃏</div>
+                  <p className="text-sm sm:text-base font-semibold">Tap "Draw Card" to begin</p>
                   <p className="text-xs mt-1">
-                    Deck: {deck.length} cards remaining · Or open Setup Wizard for pre-stage species & kingdoms
+                    {deck.length} cards remaining in {currentStageData?.name || 'deck'} · Or tap Auto-Play to generate a world
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Right: Stage Power Details + Guided Action Presets + Chronicle Note (8 cols) */}
+            {/* Right: Stage Power Prompt & Optional Digital Map/Codex Presets (8 cols) */}
             {showPowerDetails && (
-              <div className="lg:col-span-8 card p-6 flex flex-col justify-between space-y-4">
+              <div className="lg:col-span-8 card p-4 sm:p-6 flex flex-col justify-between space-y-4">
                 {drawnCard && stagesEnabled && powerData ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                           Stage {currentStageData?.number}: {currentStageData?.name} ({currentStageData?.eraLabel})
                         </span>
-                        <div className="text-2xl font-bold flex items-center gap-2 mt-0.5">
+                        <div className="text-xl sm:text-2xl font-bold flex flex-wrap items-center gap-2 mt-0.5">
                           <span>
                             {isFantastical && powerData.fantasticalDescription
                               ? 'Fantastical '
@@ -1913,107 +1987,131 @@ export function Play() {
                         </div>
                       </div>
                       {latestRecord?.actionTitle && (
-                        <span className="px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
-                          ✓ Action Chosen: {latestRecord.actionTitle}
+                        <span className="px-2.5 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
+                          ✓ {latestRecord.actionTitle}
                         </span>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg border border-border/60 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-muted/30 p-3.5 rounded-lg border border-border/60 text-xs">
                       <div>
-                        <span className="font-semibold text-muted-foreground block mb-0.5">
+                        <span className="font-semibold text-muted-foreground block mb-1">
                           Rule Prompt:
                         </span>
-                        <p className="text-sm">
+                        <p className="text-sm leading-relaxed">
                           {isFantastical && powerData.fantasticalDescription
                             ? powerData.fantasticalDescription
                             : powerData.description}
                         </p>
                       </div>
                       <div>
-                        <span className="font-semibold text-muted-foreground block mb-0.5">
+                        <span className="font-semibold text-muted-foreground block mb-1">
                           Inspiration & Examples:
                         </span>
-                        <p className="text-muted-foreground">{powerData.examples}</p>
+                        <p className="text-muted-foreground leading-relaxed">{powerData.examples}</p>
                       </div>
                     </div>
 
-                    {/* Guided Turn Action Presets (Connect Card -> Tile Slot & Codex Entity) */}
+                    {/* Optional Collapsible Digital Map & Codex Action Presets */}
                     {availableActionPresets.length > 0 && latestRecord && (
-                      <div className="space-y-2.5 pt-1">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                            Choose or Customize Your Turn Action Preset (Applies to Map & Chronicle):
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowDigitalPresets(!showDigitalPresets)}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-border bg-muted/40 hover:bg-accent/50 text-xs font-semibold transition-colors"
+                        >
+                          <span className="flex items-center gap-1.5 text-primary">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            <span>
+                              Apply Turn to Digital Map & Codex (Optional · {availableActionPresets.length} Presets)
+                            </span>
                           </span>
-                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                            <input
-                              type="text"
-                              value={actionTargetTileCoord}
-                              onChange={(e) => setActionTargetTileCoord(e.target.value)}
-                              placeholder="Auto tile or col,row"
-                              className="input h-7 w-32 px-2 text-xs font-mono"
-                              title="Target tile coordinate (col,row) or leave blank to auto-pick an open land tile"
-                            />
-                            {world.entities.length > 0 && (
-                              <select
-                                value={actionTargetEntityId}
-                                onChange={(e) => setActionTargetEntityId(e.target.value)}
-                                className="input h-7 text-xs py-0 px-2"
-                                title="Primary Species / Kingdom / Myth involved"
-                              >
-                                <option value="">Auto Entity ({world.entities[world.entities.length - 1]?.name})</option>
-                                {world.entities.map((ent) => (
-                                  <option key={ent.id} value={ent.id}>
-                                    {ent.icon} {ent.name}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
-                            {world.entities.length > 1 && (
-                              <select
-                                value={actionSecondEntityId}
-                                onChange={(e) => setActionSecondEntityId(e.target.value)}
-                                className="input h-7 text-xs py-0 px-2"
-                                title="Second Entity (for Diplomatic Treaties, Trade, or Wars)"
-                              >
-                                <option value="">2nd Entity (Diplomacy)</option>
-                                {world.entities.map((ent) => (
-                                  <option key={ent.id} value={ent.id}>
-                                    {ent.icon} {ent.name}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
-                          </div>
-                        </div>
+                          {showDigitalPresets ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                          {availableActionPresets.map((preset) => {
-                            const isSelected = latestRecord.presetId === preset.id
-                            return (
-                              <button
-                                key={preset.id}
-                                type="button"
-                                onClick={() => handleApplyActionPreset(preset)}
-                                className={`p-2.5 rounded-lg border text-left transition-all flex items-start gap-2 ${
-                                  isSelected
-                                    ? 'border-primary bg-primary/10 ring-1 ring-primary'
-                                    : 'border-border bg-background hover:border-primary/60 hover:bg-accent/40'
-                                }`}
-                              >
-                                <span className="text-xl shrink-0">{preset.icon}</span>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-xs font-bold truncate">
-                                    {preset.name}
-                                  </div>
-                                  <div className="text-[11px] text-muted-foreground line-clamp-2">
-                                    {preset.description}
-                                  </div>
-                                </div>
-                              </button>
-                            )
-                          })}
-                        </div>
+                        {showDigitalPresets && (
+                          <div className="mt-2.5 p-3 rounded-lg border border-border/70 bg-muted/20 space-y-2.5">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-[11px] font-semibold text-muted-foreground">
+                                Target Tile / Entities (leave blank for smart auto-placement):
+                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                                <input
+                                  type="text"
+                                  value={actionTargetTileCoord}
+                                  onChange={(e) => setActionTargetTileCoord(e.target.value)}
+                                  placeholder="Auto tile or col,row"
+                                  className="input h-7 w-32 px-2 text-xs font-mono"
+                                  title="Target tile coordinate (col,row) or leave blank to auto-pick an open land tile"
+                                />
+                                {world.entities.length > 0 && (
+                                  <select
+                                    value={actionTargetEntityId}
+                                    onChange={(e) => setActionTargetEntityId(e.target.value)}
+                                    className="input h-7 text-xs py-0 px-2"
+                                    title="Primary Species / Kingdom / Myth involved"
+                                  >
+                                    <option value="">
+                                      Auto Entity ({world.entities[world.entities.length - 1]?.name})
+                                    </option>
+                                    {world.entities.map((ent) => (
+                                      <option key={ent.id} value={ent.id}>
+                                        {ent.icon} {ent.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                                {world.entities.length > 1 && (
+                                  <select
+                                    value={actionSecondEntityId}
+                                    onChange={(e) => setActionSecondEntityId(e.target.value)}
+                                    className="input h-7 text-xs py-0 px-2"
+                                    title="Second Entity (for Diplomatic Treaties, Trade, or Wars)"
+                                  >
+                                    <option value="">2nd Entity (Diplomacy)</option>
+                                    {world.entities.map((ent) => (
+                                      <option key={ent.id} value={ent.id}>
+                                        {ent.icon} {ent.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                              {availableActionPresets.map((preset) => {
+                                const isSelected = latestRecord.presetId === preset.id
+                                return (
+                                  <button
+                                    key={preset.id}
+                                    type="button"
+                                    onClick={() => handleApplyActionPreset(preset)}
+                                    className={`p-2.5 rounded-lg border text-left transition-all flex items-start gap-2 ${
+                                      isSelected
+                                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                                        : 'border-border bg-background hover:border-primary/60 hover:bg-accent/40'
+                                    }`}
+                                  >
+                                    <span className="text-xl shrink-0">{preset.icon}</span>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-xs font-bold truncate">
+                                        {preset.name}
+                                      </div>
+                                      <div className="text-[11px] text-muted-foreground line-clamp-2">
+                                        {preset.description}
+                                      </div>
+                                    </div>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2022,12 +2120,12 @@ export function Play() {
                     <p>Enable Stages & Powers to see details</p>
                   </div>
                 ) : (
-                  <div className="text-center text-muted-foreground py-8 space-y-2">
-                    <p className="text-base font-medium">
-                      Draw a card to reveal its world-shaping power & guided action presets
+                  <div className="text-center text-muted-foreground py-6 space-y-1.5">
+                    <p className="text-sm sm:text-base font-medium">
+                      Draw a card to reveal its stage power & prompt
                     </p>
                     <p className="text-xs">
-                      Every card draw lets you place terrain slots, adapt species, forge diplomatic relationships, or trigger mythic events with full historical lineage.
+                      Play purely with physical paper & pencil, or record events into the Historian Timeline, Keeper Codex, and World Atlas.
                     </p>
                   </div>
                 )}
@@ -2036,7 +2134,7 @@ export function Play() {
                   <div className="border-t border-border pt-3 space-y-1.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <label className="text-xs font-semibold text-muted-foreground">
-                        Turn #{latestRecord.moveId} Chronicle Note
+                        Turn #{latestRecord.moveId} Historian Note
                         {latestRecord.playerName ? ` (${latestRecord.playerName})` : ''}:
                       </label>
                       {latestRecord.linkedTileIds && latestRecord.linkedTileIds.length > 0 && (
@@ -2045,13 +2143,14 @@ export function Play() {
                         </span>
                       )}
                     </div>
-                    <textarea
+                    <input
+                      type="text"
                       value={latestRecord.note || ''}
                       onChange={(e) =>
                         handleUpdateRecord(latestRecord.id, { note: e.target.value })
                       }
-                      placeholder="Describe what you created or changed on this turn (or click an Action Preset above)..."
-                      className="input w-full text-sm min-h-[62px]"
+                      placeholder="Optional note for this turn (e.g., 'Created the Whispering Peaks')..."
+                      className="input w-full text-xs sm:text-sm h-9"
                     />
                   </div>
                 )}
@@ -2246,7 +2345,7 @@ export function Play() {
         </div>
       )}
 
-      {/* Map View */}
+      {/* Map View (Defaults to Clutter-Free View Atlas Mode on Mobile) */}
       {companionMode === 'full-studio' &&
         (activeTab === 'map' || activeTab === 'split') && (
           <MapCanvas
@@ -2255,6 +2354,7 @@ export function Play() {
             drawHistory={world.drawHistory}
             entities={world.entities}
             onChange={handleMapChange}
+            initialViewOnly={isMobileDefaultViewOnly}
           />
         )}
 
