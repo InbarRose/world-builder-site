@@ -22,6 +22,15 @@ export type BotPersonalityId =
 
 export type PlayerRole = 'Artist' | 'Historian' | 'Keeper' | 'Player'
 
+export interface BotPersonalityWeights {
+  geography: number // 0–100
+  ecology: number // 0–100
+  civilization: number // 0–100
+  diplomacy: number // 0–100
+  conflict: number // 0–100
+  myth: number // 0–100
+}
+
 export interface PlayerSeat {
   id: string
   name: string
@@ -29,6 +38,7 @@ export interface PlayerSeat {
   role: PlayerRole
   isBot: boolean
   personality: BotPersonalityId
+  customWeights?: BotPersonalityWeights
 }
 
 export type GeographyPreset =
@@ -43,6 +53,13 @@ export interface GenerationSettings {
   geographyPreset: GeographyPreset
   fantasyLevel: 'low' | 'medium' | 'high'
   disasterIntensity: 'mild' | 'standard' | 'cataclysmic'
+  turnsPerStage?: number
+  startingSpeciesCount?: number
+  startingKingdomsCount?: number
+  spreadBias?: number
+  allowDisasters?: boolean
+  allowFantastical?: boolean
+  disabledPresetIds?: string[]
 }
 
 export interface Card {
@@ -261,6 +278,7 @@ export interface WorldState {
   name: string
   createdAt: string
   updatedAt: string
+  isLocked?: boolean
   deckConfig: DeckConfig
   currentStage: StageId
   stageNotes: Record<string, string>

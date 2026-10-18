@@ -22,6 +22,7 @@ export function createNewWorld(name: string = 'Untitled Realm', seed?: string): 
     name: name.trim() || 'Untitled Realm',
     createdAt: now,
     updatedAt: now,
+    isLocked: false,
     deckConfig: { ...DEFAULT_DECK_CONFIG },
     currentStage: 'genesis',
     stageNotes: {},
@@ -36,6 +37,13 @@ export function createNewWorld(name: string = 'Untitled Realm', seed?: string): 
       geographyPreset: 'continent',
       fantasyLevel: 'medium',
       disasterIntensity: 'standard',
+      turnsPerStage: 8,
+      startingSpeciesCount: 3,
+      startingKingdomsCount: 3,
+      spreadBias: 75,
+      allowDisasters: true,
+      allowFantastical: true,
+      disabledPresetIds: [],
     },
     snapshots: [],
   }
@@ -67,6 +75,8 @@ export function migrateWorldState(raw: any): WorldState {
           : new Date(item.timestamp || Date.now()).toISOString(),
       stage: itemStage,
       power: item.power,
+      actionTitle: item.actionTitle,
+      presetId: item.presetId,
       note: item.note || '',
       linkedTileIds: Array.isArray(item.linkedTileIds) ? item.linkedTileIds : [],
       linkedEntityIds: Array.isArray(item.linkedEntityIds) ? item.linkedEntityIds : [],
@@ -75,6 +85,8 @@ export function migrateWorldState(raw: any): WorldState {
       playerName: item.playerName,
       playerColor: item.playerColor,
       isAutoPlayed: Boolean(item.isAutoPlayed),
+      slotChanges: Array.isArray(item.slotChanges) ? item.slotChanges : undefined,
+      relationshipCreated: item.relationshipCreated,
     }
   })
 
@@ -113,6 +125,7 @@ export function migrateWorldState(raw: any): WorldState {
     name: raw.name || 'Imported World',
     createdAt: raw.createdAt || raw.timestamp || base.createdAt,
     updatedAt: raw.updatedAt || new Date().toISOString(),
+    isLocked: Boolean(raw.isLocked),
     deckConfig: {
       numberRange: raw.deckConfig?.numberRange || base.deckConfig.numberRange,
       faceCards: raw.deckConfig?.faceCards || base.deckConfig.faceCards,
@@ -167,6 +180,31 @@ export function cloneMapState(map: WorldState['map']): WorldState['map'] {
     height: map.height,
     tiles: clonedTiles,
   }
+}
+
+export function duplicateWorld(world: WorldState, customName?: string): WorldState {
+  const now = new Date().toISOString()
+  const cloned = migrateWorldState(JSON.parse(JSON.stringify(world)))
+  return {
+    ...cloned,
+    id: `world_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    name: customName?.trim() || `${world.name} (Copy)`,
+    createdAt: now,
+    updatedAt: now,
+    isLocked: false,
+  }
+}
+
+export function branchWorldAtMove(
+  world: WorldState,
+  targetMoveId: number,
+  customName?: string
+): WorldState {
+  const rewound = rewindWorldToMove(world, targetMoveId)
+  return duplicateWorld(
+    rewound,
+    customName?.trim() || `${world.name} (Branch @ Turn #${targetMoveId})`
+  )
 }
 
 export function recordTurnSnapshot(world: WorldState, moveId: number): TurnSnapshot {

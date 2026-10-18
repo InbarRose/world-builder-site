@@ -1,5 +1,6 @@
 import {
   BotPersonalityId,
+  BotPersonalityWeights,
   CompanionSettlementIcons,
   EntityCategory,
   FloraType,
@@ -20,6 +21,7 @@ export interface BotPersonalityMeta {
   icon: string
   description: string
   preferredTerrains: TerrainType[]
+  defaultWeights: BotPersonalityWeights
 }
 
 export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
@@ -31,6 +33,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Shapes dramatic mountain ranges, canyons, volcanic islands, and mineral-rich highlands.',
     preferredTerrains: ['mountain', 'earth', 'canyon', 'volcano'],
+    defaultWeights: {
+      geography: 95,
+      ecology: 40,
+      civilization: 45,
+      diplomacy: 30,
+      conflict: 40,
+      myth: 50,
+    },
   },
   naturalist: {
     id: 'naturalist',
@@ -40,6 +50,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Cultivates lush forests, river basins, sacred groves, diverse species, and harmonious pacts.',
     preferredTerrains: ['forest', 'jungle', 'water', 'plains'],
+    defaultWeights: {
+      geography: 45,
+      ecology: 95,
+      civilization: 40,
+      diplomacy: 75,
+      conflict: 20,
+      myth: 55,
+    },
   },
   architect: {
     id: 'architect',
@@ -49,6 +67,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Establishes coastal ports, trade roads, fortresses, grand monuments, and sprawling empires.',
     preferredTerrains: ['plains', 'water', 'earth', 'desert'],
+    defaultWeights: {
+      geography: 50,
+      ecology: 35,
+      civilization: 95,
+      diplomacy: 70,
+      conflict: 35,
+      myth: 30,
+    },
   },
   chronicler: {
     id: 'chronicler',
@@ -58,6 +84,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Fosters cultural traditions, philosophical enlightenment, libraries, treaties, and alliances.',
     preferredTerrains: ['plains', 'forest', 'water', 'tundra'],
+    defaultWeights: {
+      geography: 35,
+      ecology: 55,
+      civilization: 75,
+      diplomacy: 95,
+      conflict: 25,
+      myth: 65,
+    },
   },
   catalyst: {
     id: 'catalyst',
@@ -67,6 +101,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Sparks border rivalries, secret cabals, dramatic upheavals, and high-stakes conflicts.',
     preferredTerrains: ['desert', 'swamp', 'canyon', 'volcano'],
+    defaultWeights: {
+      geography: 65,
+      ecology: 25,
+      civilization: 55,
+      diplomacy: 25,
+      conflict: 95,
+      myth: 75,
+    },
   },
   mythmaker: {
     id: 'mythmaker',
@@ -76,6 +118,14 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonalityMeta> = {
     description:
       'Weaves fantastical wonders, ancient ruins, slumbering dragons, prophecies, and lost relics.',
     preferredTerrains: ['mountain', 'forest', 'tundra', 'swamp'],
+    defaultWeights: {
+      geography: 55,
+      ecology: 60,
+      civilization: 40,
+      diplomacy: 50,
+      conflict: 45,
+      myth: 95,
+    },
   },
 }
 
@@ -94,6 +144,11 @@ export interface EntityPreset {
   settlementIcons: CompanionSettlementIcons
 }
 
+/**
+ * Species presets start completely PLAIN and MODULAR (like Lego blocks):
+ * No pre-baked descriptions, traits, or powers! Players and card draws snap
+ * adaptations, traditions, and powers onto each species over the course of the game.
+ */
 export const SPECIES_PRESETS: EntityPreset[] = [
   {
     id: 'preset_sylvan_elves',
@@ -102,11 +157,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🧝',
     color: '#10b981',
     secondaryColor: '#fef3c7',
-    archetype: 'Immortal Forest Guardians',
-    description:
-      'Graceful, long-lived beings attuned to ancient canopies and starlight magic.',
-    traits: ['Starlight Navigation', 'Canopy Architecture', 'Oral Song-Lore'],
-    abilities: ['Whispering Woods Empathy', 'Master Archery', 'Astral Weaving'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['forest', 'jungle'],
     settlementIcons: {
       camp: '🍃',
@@ -124,11 +178,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '⛏️',
     color: '#f59e0b',
     secondaryColor: '#78350f',
-    archetype: 'Subterranean Master Smiths',
-    description:
-      'Stout artisans who carve subterranean halls into living granite and forge runic alloys.',
-    traits: ['Clan Ancestor Veneration', 'Runic Metallurgy', 'Guild Oaths'],
-    abilities: ['Deep-Stone Sense', 'Geothermal Engineering', 'Unbreakable Phalanx'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['mountain', 'earth', 'volcano'],
     settlementIcons: {
       camp: '⛺',
@@ -146,11 +199,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🛡️',
     color: '#2563eb',
     secondaryColor: '#dbeafe',
-    archetype: 'Adaptable Realm-Builders',
-    description:
-      'Ambitious settlers, pioneers, and diplomats who build thriving river towns and trade leagues.',
-    traits: ['Chartered Guilds', 'Heraldic Chivalry', 'Crossroad Markets'],
-    abilities: ['Rapid Colonization', 'Combined Arms', 'Diplomatic Envoy'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['plains', 'earth', 'water'],
     settlementIcons: {
       camp: '⛺',
@@ -168,11 +220,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🐺',
     color: '#dc2626',
     secondaryColor: '#fde68a',
-    archetype: 'Honor-Bound Steppe Riders',
-    description:
-      'Fierce, spirit-guided clans who ride giant steppe beasts and raise towering war-banners.',
-    traits: ['Blood-Oath Brotherhood', 'Ancestor Totems', 'Great Herd Migration'],
-    abilities: ['Thunder Cavalry', 'Storm-Caller Shamanism', 'Iron Endurance'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['plains', 'earth', 'canyon'],
     settlementIcons: {
       camp: '⛺',
@@ -190,11 +241,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🌾',
     color: '#84cc16',
     secondaryColor: '#fef9c3',
-    archetype: 'Pastoral River Folk',
-    description:
-      'Hospitality-loving communities of fertile valleys, famous for river barges and festivals.',
-    traits: ['Harvest Festivals', 'Hearth-Hospitality', 'River Barge Trade'],
-    abilities: ['Bountiful Agronomy', 'Swift Messenger Network', 'Luck of the Small'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['plains', 'water'],
     settlementIcons: {
       camp: '🏕️',
@@ -212,11 +262,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🦎',
     color: '#eab308',
     secondaryColor: '#991b1b',
-    archetype: 'Desert & Mesa Astronomers',
-    description:
-      'Reptilian philosopher-warriors who build stepped ziggurats across sun-baked canyons.',
-    traits: ['Solar Calendar', 'Ziggurat Observatories', 'Obsidian Craft'],
-    abilities: ['Heat Resilience', 'Monolith Masonry', 'Mirage Lore'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['desert', 'canyon', 'jungle'],
     settlementIcons: {
       camp: '☀️',
@@ -234,11 +283,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🔱',
     color: '#06b6d4',
     secondaryColor: '#cffafe',
-    archetype: 'Amphibious Reef Navigators',
-    description:
-      'Coral-shaping mariners who dwell between sunken atolls and coastal cliffs.',
-    traits: ['Tidal Reckoning', 'Pearl-Script Archives', 'Leviathan Respect'],
-    abilities: ['Current Shaping', 'Deep-Diving Physiology', 'Storm-Calling'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['water', 'ocean'],
     settlementIcons: {
       camp: '🐚',
@@ -256,11 +304,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '⚙️',
     color: '#6366f1',
     secondaryColor: '#fcd34d',
-    archetype: 'Sentient Brass & Crystal Constructs',
-    description:
-      'Awakened constructs powered by resonant crystals and intricate clockwork cores.',
-    traits: ['Harmonic Resonance', 'Memory Crystals', 'Precision Guilds'],
-    abilities: ['Tireless Labor', 'Arcane Conduit', 'Modular Adaptation'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['earth', 'mountain', 'canyon'],
     settlementIcons: {
       camp: '🔩',
@@ -278,11 +325,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '❄️',
     color: '#38bdf8',
     secondaryColor: '#e0f2fe',
-    archetype: 'Nomadic Tundra Wayfarers',
-    description:
-      'Towering wanderers of the frozen north who carve sagas into glacial monoliths.',
-    traits: ['Sky-Burial Rites', 'Mammoth Herding', 'Aurora Augury'],
-    abilities: ['Frost Endurance', 'Megalithic Strength', 'Blizzard Stride'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['tundra', 'mountain'],
     settlementIcons: {
       camp: '❄️',
@@ -300,11 +346,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🍄',
     color: '#a855f7',
     secondaryColor: '#86efac',
-    archetype: 'Symbiotic Marsh Collective',
-    description:
-      'Bioluminescent fungal beings connected by a shared subterranean root-consciousness.',
-    traits: ['Spore Telepathy', 'Bioluminescent Groves', 'Alchemical Renewal'],
-    abilities: ['Mycelial Network', 'Herbal Transmutation', 'Mist Camouflage'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['swamp', 'forest', 'jungle'],
     settlementIcons: {
       camp: '🍄',
@@ -322,11 +367,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '🦋',
     color: '#ec4899',
     secondaryColor: '#f3e8ff',
-    archetype: 'Mercurial Glamour-Weavers',
-    description:
-      'Otherworldly spirits of autumn glades who trade in riddles, oaths, and illusions.',
-    traits: ['Unbreakable Word-Binds', 'Moonlit Masquerades', 'Fairy Ring Portals'],
-    abilities: ['Glamour Weaving', 'Fey-Step', 'Enchanted Artisanship'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['forest', 'plains', 'swamp'],
     settlementIcons: {
       camp: '🦋',
@@ -344,11 +388,10 @@ export const SPECIES_PRESETS: EntityPreset[] = [
     icon: '💎',
     color: '#14b8a6',
     secondaryColor: '#f0fdfa',
-    archetype: 'Crystalline Resonance Singers',
-    description:
-      'Living mineral entities who commune through harmonic vibrations and refract sunlight into energy.',
-    traits: ['Chimes of Consensus', 'Geode Sanctuaries', 'Light-Refraction Art'],
-    abilities: ['Crystalline Carapace', 'Seismic Singing', 'Solar Prism Beam'],
+    archetype: '',
+    description: '',
+    traits: [],
+    abilities: [],
     preferredTerrains: ['canyon', 'mountain', 'desert'],
     settlementIcons: {
       camp: '🔹',
@@ -1644,3 +1687,287 @@ export const DEFAULT_PLAYERS: PlayerSeat[] = [
     personality: 'shaper',
   },
 ]
+
+export function getEffectiveBotWeights(seat?: PlayerSeat): BotPersonalityWeights {
+  if (!seat) return { ...BOT_PERSONALITIES.shaper.defaultWeights }
+  if (seat.customWeights) return { ...seat.customWeights }
+  return {
+    ...(BOT_PERSONALITIES[seat.personality]?.defaultWeights ||
+      BOT_PERSONALITIES.shaper.defaultWeights),
+  }
+}
+
+export interface ColorSwatchPalette {
+  id: string
+  name: string
+  primary: string
+  secondary: string
+}
+
+export const COLOR_SWATCH_PALETTES: ColorSwatchPalette[] = [
+  { id: 'emerald-star', name: 'Emerald & Starlight', primary: '#10b981', secondary: '#fef3c7' },
+  { id: 'amber-iron', name: 'Amber & Deep Bronze', primary: '#f59e0b', secondary: '#78350f' },
+  { id: 'azure-dawn', name: 'Royal Azure & Sky', primary: '#2563eb', secondary: '#dbeafe' },
+  { id: 'crimson-gold', name: 'Crimson & Imperial Gold', primary: '#dc2626', secondary: '#fde047' },
+  { id: 'meadow-sun', name: 'Meadow & Harvest', primary: '#84cc16', secondary: '#fef9c3' },
+  { id: 'solar-terracotta', name: 'Solar Gold & Terracotta', primary: '#eab308', secondary: '#991b1b' },
+  { id: 'tidal-pearl', name: 'Tidal Cyan & Pearl', primary: '#06b6d4', secondary: '#cffafe' },
+  { id: 'aether-brass', name: 'Aether Indigo & Brass', primary: '#6366f1', secondary: '#fcd34d' },
+  { id: 'frost-aurora', name: 'Glacial Frost & Ice', primary: '#38bdf8', secondary: '#e0f2fe' },
+  { id: 'spore-jade', name: 'Amethyst & Biolume Jade', primary: '#a855f7', secondary: '#86efac' },
+  { id: 'twilight-rose', name: 'Twilight Rose & Moon', primary: '#ec4899', secondary: '#f3e8ff' },
+  { id: 'prism-teal', name: 'Prism Teal & Quartz', primary: '#14b8a6', secondary: '#f0fdfa' },
+]
+
+export interface IconGalleryGroup {
+  category: string
+  icons: { icon: string; label: string }[]
+}
+
+export const ENTITY_ICON_GALLERY: IconGalleryGroup[] = [
+  {
+    category: 'Ancestries & Folk',
+    icons: [
+      { icon: '🧝', label: 'Elven / Sylvan' },
+      { icon: '⛏️', label: 'Delver / Dwarf' },
+      { icon: '🛡️', label: 'Warden / Human' },
+      { icon: '🐺', label: 'Wolf-Clan / Steppe' },
+      { icon: '🌾', label: 'Halfling / Agrarian' },
+      { icon: '🦎', label: 'Saurian / Scaled' },
+      { icon: '🔱', label: 'Tideborn / Aquatic' },
+      { icon: '⚙️', label: 'Automata / Clockwork' },
+      { icon: '❄️', label: 'Frost-Kin / Giant' },
+      { icon: '🍄', label: 'Myconid / Spore' },
+      { icon: '🦋', label: 'Fae / Sidhe' },
+      { icon: '💎', label: 'Lithid / Crystal' },
+      { icon: '🦅', label: 'Avian / Sky-Folk' },
+      { icon: '🦊', label: 'Kitsune / Fox-Folk' },
+      { icon: '🦁', label: 'Leonin / Pride' },
+      { icon: '🐢', label: 'Tortle / Shell-Kin' },
+    ],
+  },
+  {
+    category: 'Kingdoms & Banners',
+    icons: [
+      { icon: '👑', label: 'Royal Crown' },
+      { icon: '🏰', label: 'Grand Citadel' },
+      { icon: '🏛️', label: 'Senate / Republic' },
+      { icon: '⛵', label: 'Maritime League' },
+      { icon: '⚔️', label: 'Martial Order' },
+      { icon: '⚖️', label: 'Merchant Syndicate' },
+      { icon: '📜', label: 'Scholar Conclave' },
+      { icon: '🚩', label: 'Khaganate Banner' },
+      { icon: '🗼', label: 'High Spire' },
+      { icon: '⚒️', label: 'Forge Guild' },
+      { icon: '🕯️', label: 'Sacred Covenant' },
+      { icon: '🎭', label: 'Shadow Court' },
+    ],
+  },
+  {
+    category: 'Myths, Beasts & Relics',
+    icons: [
+      { icon: '🐉', label: 'Elder Dragon' },
+      { icon: '💀', label: 'Necropolis / Lich' },
+      { icon: '🔮', label: 'Arcane Orb' },
+      { icon: '✨', label: 'Astral Wonder' },
+      { icon: '🌋', label: 'Primordial Titan' },
+      { icon: '🌊', label: 'Abyssal Leviathan' },
+      { icon: '🌳', label: 'World-Tree' },
+      { icon: '☄️', label: 'Fallen Star' },
+      { icon: '👁️', label: 'All-Seeing Cabal' },
+      { icon: '🗡️', label: 'Cursed Blade' },
+      { icon: '🏺', label: 'First-Age Relic' },
+      { icon: '🌀', label: 'Planar Rift' },
+    ],
+  },
+]
+
+export interface SettlementIconSetPreset {
+  id: string
+  name: string
+  icons: CompanionSettlementIcons
+}
+
+export const SETTLEMENT_ICON_SETS: SettlementIconSetPreset[] = [
+  {
+    id: 'set_canopy',
+    name: 'Canopy Spires',
+    icons: {
+      camp: '🍃',
+      village: '🌳',
+      town: '🎋',
+      city: '🗼',
+      metropolis: '🌟',
+      architectureStyle: 'Living Canopy Spires',
+    },
+  },
+  {
+    id: 'set_granite',
+    name: 'Mountain Holds',
+    icons: {
+      camp: '⛺',
+      village: '🪨',
+      town: '⚒️',
+      city: '🏰',
+      metropolis: '🏔️',
+      architectureStyle: 'Carved Granite Holds',
+    },
+  },
+  {
+    id: 'set_feudal',
+    name: 'Walled Keeps',
+    icons: {
+      camp: '⛺',
+      village: '🏡',
+      town: '🏘️',
+      city: '🏰',
+      metropolis: '👑',
+      architectureStyle: 'Timber & Stone Walled Keeps',
+    },
+  },
+  {
+    id: 'set_steppe',
+    name: 'Steppe War-Camps',
+    icons: {
+      camp: '⛺',
+      village: '🔥',
+      town: '🛡️',
+      city: '⚔️',
+      metropolis: '🚩',
+      architectureStyle: 'Great Horned War-Camps',
+    },
+  },
+  {
+    id: 'set_ziggurat',
+    name: 'Sun Ziggurats',
+    icons: {
+      camp: '☀️',
+      village: '🏜️',
+      town: '🛕',
+      city: '🏛️',
+      metropolis: '🌞',
+      architectureStyle: 'Golden Stepped Ziggurats',
+    },
+  },
+  {
+    id: 'set_atoll',
+    name: 'Coral Atolls',
+    icons: {
+      camp: '🐚',
+      village: '⚓',
+      town: '⛵',
+      city: '🔱',
+      metropolis: '🌊',
+      architectureStyle: 'Coral Spires & Floating Atolls',
+    },
+  },
+  {
+    id: 'set_clockwork',
+    name: 'Clockwork Towers',
+    icons: {
+      camp: '🔩',
+      village: '⚙️',
+      town: '🏭',
+      city: '⚡',
+      metropolis: '🔮',
+      architectureStyle: 'Clockwork Foundry-Towers',
+    },
+  },
+  {
+    id: 'set_biolume',
+    name: 'Fungal & Fey Domes',
+    icons: {
+      camp: '🍄',
+      village: '🌿',
+      town: '🌙',
+      city: '🌺',
+      metropolis: '✨',
+      architectureStyle: 'Bioluminescent Domes & Glades',
+    },
+  },
+]
+
+export interface ModularBlockGroup {
+  category: string
+  suitHint: Suit
+  items: { label: string; icon: string }[]
+}
+
+export const MODULAR_TRAIT_BLOCKS: ModularBlockGroup[] = [
+  {
+    category: 'Traditions & Culture',
+    suitHint: '♦',
+    items: [
+      { label: 'Oral Song-Lore', icon: '🎵' },
+      { label: 'Ancestor Veneration', icon: '🕯️' },
+      { label: 'Starlight Navigation', icon: '✨' },
+      { label: 'Harvest Festivals', icon: '🌾' },
+      { label: 'Solar Calendar', icon: '☀️' },
+      { label: 'Unbreakable Oaths', icon: '🤝' },
+    ],
+  },
+  {
+    category: 'Ecology & Habitat',
+    suitHint: '♣',
+    items: [
+      { label: 'Canopy Dwellers', icon: '🌳' },
+      { label: 'Subterranean Delvers', icon: '⛏️' },
+      { label: 'Nomadic Herders', icon: '🐎' },
+      { label: 'Reef & Atoll Mariners', icon: '🐚' },
+      { label: 'Glacial Wayfarers', icon: '❄️' },
+      { label: 'Symbiotic Grove-Kin', icon: '🍄' },
+    ],
+  },
+  {
+    category: 'Craft & Governance',
+    suitHint: '♥',
+    items: [
+      { label: 'Runic Metallurgy', icon: '⚒️' },
+      { label: 'Chartered Guilds', icon: '⚖️' },
+      { label: 'Ziggurat Masonry', icon: '🛕' },
+      { label: 'Clockwork Artifice', icon: '⚙️' },
+      { label: 'Council of Elders', icon: '🏛️' },
+      { label: 'Caravan Safe-Conduct', icon: '🐪' },
+    ],
+  },
+]
+
+export const MODULAR_ABILITY_BLOCKS: ModularBlockGroup[] = [
+  {
+    category: 'Adaptations & Physiology',
+    suitHint: '♥',
+    items: [
+      { label: 'Deep-Stone Sense', icon: '🪨' },
+      { label: 'Amphibious Respiration', icon: '🌊' },
+      { label: 'Thermal & Fire Resilience', icon: '🔥' },
+      { label: 'Frost Endurance', icon: '❄️' },
+      { label: 'Night-Sight & Camouflage', icon: '🌙' },
+      { label: 'Crystalline Carapace', icon: '💎' },
+    ],
+  },
+  {
+    category: 'Skills & Mastery',
+    suitHint: '♠',
+    items: [
+      { label: 'Master Archery', icon: '🏹' },
+      { label: 'Unbreakable Phalanx', icon: '🛡️' },
+      { label: 'Thunder Cavalry', icon: '🐎' },
+      { label: 'Grand Armada Navigation', icon: '⛵' },
+      { label: 'Siege Engineering', icon: '🏰' },
+      { label: 'Beast Taming', icon: '🐺' },
+    ],
+  },
+  {
+    category: 'Arcane & Wonder',
+    suitHint: '♦',
+    items: [
+      { label: 'Astral Weaving', icon: '✨' },
+      { label: 'Storm-Calling', icon: '⚡' },
+      { label: 'Mycelial Telepathy', icon: '🍄' },
+      { label: 'Glamour & Illusion', icon: '🦋' },
+      { label: 'Harmonic Resonance', icon: '🔮' },
+      { label: 'Geomantic Shaping', icon: '🏔️' },
+    ],
+  },
+]
+

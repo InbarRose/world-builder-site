@@ -15,6 +15,7 @@ import {
   SPECIES_PRESETS,
   StageActionPreset,
   getActionPresetsForDraw,
+  getEffectiveBotWeights,
 } from './presets'
 import { cloneMapState, recordTurnSnapshot } from './storageService'
 import {
@@ -94,6 +95,7 @@ function findBestLandTile(
   const landTiles = allTiles.filter((t) => t.terrain !== 'ocean')
   const pool = landTiles.length > 0 ? landTiles : allTiles
   const preferredTerrains = BOT_PERSONALITIES[personality]?.preferredTerrains || ['plains']
+  const spreadFactor = (world.generationSettings.spreadBias ?? 75) / 75
 
   const scored = pool.map((tile) => {
     let score = 1 + rng() * 2.2
@@ -101,15 +103,15 @@ function findBestLandTile(
     const slotCount = (tile.slots || []).length + (tile.overlay !== 'none' ? 1 : 0)
 
     if (preferUnlabeled) {
-      // Spread features out across the map so we don't crowd a single tile
-      if (!tile.label && slotCount === 0) score += 3.5
+      // Spread features out across the map according to spreadBias dial
+      if (!tile.label && slotCount === 0) score += 3.5 * spreadFactor
       else if (slotCount === 1) score += 1.0
-      else score -= slotCount * 1.5
+      else score -= slotCount * 1.5 * spreadFactor
     } else {
       // In later stages, occasionally build upon existing settlements/features, but still penalize overcrowded tiles
       if (slotCount === 1 || slotCount === 2) score += 2.0
-      else if (slotCount === 0) score += 1.2
-      else if (slotCount >= 3) score -= (slotCount - 2) * 2.0
+      else if (slotCount === 0) score += 1.2 * spreadFactor
+      else if (slotCount >= 3) score -= (slotCount - 2) * 2.0 * spreadFactor
     }
     return { tile, score }
   })
@@ -126,13 +128,21 @@ export function ensurePreStageEntities(
 ): WorldState {
   let updatedMap = cloneMapState(world.map)
   const updatedEntities = [...world.entities]
+  const disabledSet = new Set(world.generationSettings.disabledPresetIds || [])
 
   if (stage === 'primal') {
     const existingSpecies = updatedEntities.filter((e) => e.category === 'species')
-    const targetCount = Math.max(2, world.players.length)
+    const targetCount =
+      world.generationSettings.startingSpeciesCount ?? Math.max(2, world.players.length)
     if (existingSpecies.length < targetCount) {
       const usedNames = new Set(existingSpecies.map((s) => s.name))
-      const availablePresets = SPECIES_PRESETS.filter((p) => !usedNames.has(p.name))
+      const enabledPool = SPECIES_PRESETS.filter(
+        (p) => !disabledSet.has(p.id) && !usedNames.has(p.name)
+      )
+      const availablePresets =
+        enabledPool.length > 0
+          ? enabledPool
+          : SPECIES_PRESETS.filter((p) => !usedNames.has(p.name))
 
       const needed = targetCount - existingSpecies.length
       for (let i = 0; i < needed && i < availablePresets.length; i++) {
@@ -146,6 +156,7 @@ export function ensurePreStageEntities(
         )
         const entityId = `entity_sp_${world.drawHistory.length}_${i}_${Math.floor(rng() * 10000)}`
 
+        // Races start plain & modular (Lego blocks) — traits & abilities are added as cards are drawn!
         const newSpecies: WorldEntity = {
           id: entityId,
           name: preset.name,
@@ -188,10 +199,17 @@ export function ensurePreStageEntities(
   } else if (stage === 'civilization') {
     const existingSocieties = updatedEntities.filter((e) => e.category === 'society')
     const existingSpecies = updatedEntities.filter((e) => e.category === 'species')
-    const targetCount = Math.max(2, world.players.length)
+    const targetCount =
+      world.generationSettings.startingKingdomsCount ?? Math.max(2, world.players.length)
     if (existingSocieties.length < targetCount) {
       const usedNames = new Set(existingSocieties.map((s) => s.name))
-      const availablePresets = SOCIETY_PRESETS.filter((p) => !usedNames.has(p.name))
+      const enabledPool = SOCIETY_PRESETS.filter(
+        (p) => !disabledSet.has(p.id) && !usedNames.has(p.name)
+      )
+      const availablePresets =
+        enabledPool.length > 0
+          ? enabledPool
+          : SOCIETY_PRESETS.filter((p) => !usedNames.has(p.name))
 
       const needed = targetCount - existingSocieties.length
       for (let i = 0; i < needed && i < availablePresets.length; i++) {
@@ -268,36 +286,47 @@ export function executeAutomatedTurn(
 ): WorldState {
   const stage = initialWorld.currentStage
   const world = ensurePreStageEntities(initialWorld, stage, rng)
+  const disabledSet = new Set(world.generationSettings.disabledPresetIds || [])
 
   const players = world.players.length > 0 ? world.players : []
   const activePlayer = players[world.currentPlayerIndex % Math.max(1, players.length)]
   const personality: BotPersonalityId = activePlayer?.personality || 'shaper'
   const personalityMeta = BOT_PERSONALITIES[personality]
+  const weights = getEffectiveBotWeights(activePlayer)
 
   const isFantastical =
-    isFantasticalCard(card) && world.generationSettings.fantasyLevel !== 'low'
-  const isDisaster = card.value === 'A'
+    isFantasticalCard(card) &&
+    world.generationSettings.fantasyLevel !== 'low' &&
+    world.generationSettings.allowFantastical !== false
+  const isDisaster =
+    card.value === 'A' && world.generationSettings.allowDisasters !== false
   const isJoker = card.value === JOKER
 
-  // Determine effective suit for Joker based on personality preference
+  // Determine effective suit for Joker based on transparent tweakable bot weights
   const effectiveSuit = isJoker
-    ? personality === 'shaper' || personality === 'architect' || personality === 'catalyst'
+    ? weights.geography + weights.conflict >= weights.ecology + weights.diplomacy &&
+      weights.geography + weights.conflict >= weights.civilization + weights.myth
       ? '♠'
-      : personality === 'naturalist' || personality === 'chronicler'
+      : weights.ecology + weights.diplomacy >= weights.civilization + weights.myth
       ? '♥'
-      : '♦'
+      : weights.myth >= weights.civilization
+      ? '♦'
+      : '♣'
     : card.suit || '♠'
 
   const powerName = isDisaster
     ? 'Natural Disaster'
     : STAGE_POWERS[stage]?.[effectiveSuit]?.name || 'World Power'
 
-  const candidatePresets = getActionPresetsForDraw(
+  const rawCandidates = getActionPresetsForDraw(
     stage,
     effectiveSuit,
     isFantastical,
     isDisaster
   )
+  const enabledCandidates = rawCandidates.filter((p) => !disabledSet.has(p.id))
+  const candidatePresets =
+    enabledCandidates.length > 0 ? enabledCandidates : rawCandidates
   const chosenPreset: StageActionPreset | undefined =
     candidatePresets.length > 0 ? pickRandom(candidatePresets, rng) : undefined
 
@@ -842,8 +871,12 @@ export function executeAutomatedTurn(
         chosenSociety?.name || 'the Royal Court'
       } set "${schemeName}" into motion at (${targetTile.id}), shifting the balance of power in secret.`
     } else {
-      // Myth
-      const mythPreset = pickRandom(MYTH_PRESETS, rng)
+      // Myth — strictly use enabled Studio MYTH_PRESETS
+      const enabledMyths = MYTH_PRESETS.filter((p) => !disabledSet.has(p.id))
+      const mythPreset = pickRandom(
+        enabledMyths.length > 0 ? enabledMyths : MYTH_PRESETS,
+        rng
+      )
       const mythId = `entity_myth_${moveId}_${Math.floor(rng() * 10000)}`
       const newMyth: WorldEntity = {
         id: mythId,
@@ -929,8 +962,9 @@ export function executeAutomatedTurn(
 export function autoPlayStage(
   world: WorldState,
   deck: Card[],
-  maxTurns: number = 12
+  maxTurns?: number
 ): { world: WorldState; deck: Card[] } {
+  const resolvedTurns = maxTurns ?? world.generationSettings.turnsPerStage ?? 8
   const rng = createSeededRng(
     `${world.generationSettings.seed}-${world.currentStage}-${world.drawHistory.length}`
   )
@@ -938,7 +972,7 @@ export function autoPlayStage(
   let currentDeck =
     deck.length > 0 ? [...deck] : buildShuffledDeck(world.deckConfig, rng)
 
-  const turnsToRun = Math.min(maxTurns, currentDeck.length)
+  const turnsToRun = Math.min(resolvedTurns, currentDeck.length)
   for (let i = 0; i < turnsToRun; i++) {
     const card = currentDeck.pop()!
     currentWorld = executeAutomatedTurn(currentWorld, card, rng)
@@ -949,8 +983,10 @@ export function autoPlayStage(
 
 export function autoPlayFullWorld(
   initialWorld: WorldState,
-  turnsPerStage: number = 8
+  turnsPerStage?: number
 ): WorldState {
+  const resolvedTurns =
+    turnsPerStage ?? initialWorld.generationSettings.turnsPerStage ?? 8
   const seed = initialWorld.generationSettings.seed || 'world-seed-1'
   const rng = createSeededRng(seed)
 
@@ -985,7 +1021,7 @@ export function autoPlayFullWorld(
       },
     }
     const stageDeck = buildShuffledDeck(currentWorld.deckConfig, rng)
-    const count = Math.min(turnsPerStage, stageDeck.length)
+    const count = Math.min(resolvedTurns, stageDeck.length)
     for (let i = 0; i < count; i++) {
       const card = stageDeck.pop()!
       currentWorld = executeAutomatedTurn(currentWorld, card, rng)
