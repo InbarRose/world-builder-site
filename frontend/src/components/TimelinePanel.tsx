@@ -257,6 +257,11 @@ export function TimelinePanel({
                     <div>
                       <div className="font-semibold text-sm flex flex-wrap items-center gap-2">
                         <span>{record.power || 'Card Draw'}</span>
+                        {record.actionTitle && (
+                          <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-semibold">
+                            ✦ {record.actionTitle}
+                          </span>
+                        )}
                         {stageObj && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-background border border-border text-muted-foreground">
                             {stageObj.number}. {stageObj.name}
@@ -297,6 +302,26 @@ export function TimelinePanel({
                     </span>
                   </div>
                 </div>
+
+                {/* Slot Modifications & Diplomatic Lineage */}
+                {((record.slotChanges && record.slotChanges.length > 0) ||
+                  record.relationshipCreated) && (
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    {record.slotChanges?.map((change, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded bg-background border border-border text-[11px] font-medium"
+                      >
+                        {change.slotIcon} +{change.slotName} ({change.tileId})
+                      </span>
+                    ))}
+                    {record.relationshipCreated && (
+                      <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[11px] font-semibold">
+                        {record.relationshipCreated.icon} {record.relationshipCreated.label}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Narrative Note */}
                 <div>

@@ -14,7 +14,6 @@ import {
   Layers,
   Plus,
   Trash2,
-  Eye,
   Sliders,
 } from 'lucide-react'
 import {
