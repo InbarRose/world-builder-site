@@ -94,6 +94,7 @@ export function migrateWorldState(raw: any): WorldState {
             id: key,
             col: c,
             row: r,
+            slots: Array.isArray(t.slots) ? t.slots.map((s: any) => ({ ...s })) : [],
             tags: Array.isArray(t.tags) ? t.tags : [],
             linkedEventIds: Array.isArray(t.linkedEventIds) ? t.linkedEventIds : [],
             linkedEntityIds: Array.isArray(t.linkedEntityIds) ? t.linkedEntityIds : [],
@@ -154,6 +155,8 @@ export function cloneMapState(map: WorldState['map']): WorldState['map'] {
   for (const [k, v] of Object.entries(map.tiles)) {
     clonedTiles[k] = {
       ...v,
+      customColors: v.customColors ? { ...v.customColors } : undefined,
+      slots: v.slots ? v.slots.map((s) => ({ ...s })) : [],
       tags: [...v.tags],
       linkedEventIds: [...v.linkedEventIds],
       linkedEntityIds: [...v.linkedEntityIds],
@@ -176,6 +179,8 @@ export function recordTurnSnapshot(world: WorldState, moveId: number): TurnSnaps
       ...e,
       traits: [...e.traits],
       abilities: e.abilities ? [...e.abilities] : [],
+      settlementIcons: e.settlementIcons ? { ...e.settlementIcons } : undefined,
+      diplomaticLinks: e.diplomaticLinks ? e.diplomaticLinks.map((d) => ({ ...d })) : [],
     })),
   }
 }

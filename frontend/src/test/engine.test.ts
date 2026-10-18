@@ -16,6 +16,9 @@ import {
   exportMapToSvgString,
   getTileId,
   resizeMap,
+  addSlotToTile,
+  getEffectiveTileSlots,
+  getTileDomain,
 } from '../engine/mapEngine'
 import {
   createNewWorld,
@@ -32,6 +35,7 @@ import {
   executeAutomatedTurn,
   autoPlayFullWorld,
 } from '../engine/autoPlayEngine'
+import { getActionPresetsForDraw } from '../engine/presets'
 import { CURRENT_SCHEMA_VERSION } from '../engine/types'
 
 describe('DeckEngine', () => {
@@ -146,6 +150,58 @@ describe('MapEngine', () => {
     expect(svg).toContain('<svg')
     expect(svg).toContain('Test Realm')
     expect(svg).toContain('Silverwood')
+  })
+
+  it('enforces zero-noise empty tiles, priority slot ordering, and land/water domain rules', () => {
+    const map = createInitialMap(10, 8)
+    // Empty plains tile should return 0 effective slots (zero icon noise!)
+    let plainsTile = paintTile(map, 5, 4, {
+      terrain: 'plains',
+      relief: 'none',
+      flora: 'none',
+      overlay: 'none',
+      slots: [],
+    }).tiles['5,4']
+    expect(getTileDomain(plainsTile)).toBe('land')
+    expect(getEffectiveTileSlots(plainsTile)).toHaveLength(0)
+
+    // Adding a Lake slot + Mountain slot + Settlement slot keeps domain='land' and orders Settlement first
+    plainsTile = addSlotToTile(plainsTile, {
+      category: 'hydrology',
+      type: 'lake',
+      name: 'Mirror Lake',
+      icon: '💧',
+      priority: 66,
+    })
+    plainsTile = addSlotToTile(plainsTile, {
+      category: 'elevation',
+      type: 'mountain',
+      name: 'Frost Peak',
+      icon: '🏔️',
+      priority: 75,
+    })
+    plainsTile = addSlotToTile(plainsTile, {
+      category: 'settlement',
+      type: 'city',
+      name: 'Highhearth',
+      icon: '🏰',
+      priority: 95,
+    })
+
+    expect(getTileDomain(plainsTile)).toBe('land')
+    const orderedSlots = getEffectiveTileSlots(plainsTile)
+    expect(orderedSlots).toHaveLength(3)
+    expect(orderedSlots[0].name).toBe('Highhearth')
+    expect(orderedSlots[1].name).toBe('Frost Peak')
+    expect(orderedSlots[2].name).toBe('Mirror Lake')
+
+    // Stage action presets return appropriate options for normal, fantastical, and disaster draws
+    const genSpades = getActionPresetsForDraw('genesis', '♠', false, false)
+    expect(genSpades.length).toBeGreaterThanOrEqual(2)
+    const genFantastical = getActionPresetsForDraw('genesis', '♠', true, false)
+    expect(genFantastical[0].isFantastical).toBe(true)
+    const disasterPresets = getActionPresetsForDraw('civilization', '♥', false, true)
+    expect(disasterPresets[0].isDisaster).toBe(true)
   })
 })
 

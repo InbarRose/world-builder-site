@@ -70,6 +70,29 @@ export interface PowerData {
   examples: string
 }
 
+export type TileSlotCategory =
+  | 'elevation'
+  | 'vegetation'
+  | 'hydrology'
+  | 'settlement'
+  | 'structure'
+  | 'resource'
+  | 'myth'
+
+export interface TileSlot {
+  id: string
+  category: TileSlotCategory
+  type: string
+  name: string
+  icon: string
+  priority: number // 10–100: higher priority renders in primary center slot
+  color?: string
+  secondaryColor?: string
+  linkedEntityId?: string
+  linkedEventId?: string
+  moveId?: number
+}
+
 export interface DrawRecord {
   id: string
   moveId: number
@@ -77,6 +100,8 @@ export interface DrawRecord {
   timestamp: string
   stage?: StageId
   power?: string
+  actionTitle?: string
+  presetId?: string
   note: string
   linkedTileIds?: string[]
   linkedEntityIds?: string[]
@@ -85,6 +110,18 @@ export interface DrawRecord {
   playerName?: string
   playerColor?: string
   isAutoPlayed?: boolean
+  slotChanges?: {
+    tileId: string
+    slotName: string
+    slotIcon: string
+    category: TileSlotCategory
+  }[]
+  relationshipCreated?: {
+    sourceId: string
+    targetId: string
+    label: string
+    icon: string
+  }
 }
 
 export type TerrainType =
@@ -122,15 +159,24 @@ export type TileOverlay =
 
 export type TilePattern = 'solid' | 'diagonal' | 'horizontal' | 'vertical' | 'checkered'
 
+export type TileColoringMode = 'fill' | 'outline' | 'patterned'
+
 export interface MapTile {
   id: string // "col,row"
   col: number
   row: number
+  domain?: 'land' | 'water'
   terrain: TerrainType
   relief?: ReliefType
   flora?: FloraType
   secondaryTerrain?: TerrainType
   pattern?: TilePattern
+  coloringMode?: TileColoringMode
+  customColors?: {
+    primary?: string
+    secondary?: string
+  }
+  slots?: TileSlot[]
   overlay: TileOverlay
   hasRiver?: boolean
   hasRoad?: boolean
@@ -150,11 +196,43 @@ export interface MapState {
 
 export type EntityCategory = 'species' | 'society' | 'myth'
 
+export interface CompanionSettlementIcons {
+  camp: string
+  village: string
+  town: string
+  city: string
+  metropolis: string
+  architectureStyle?: string
+}
+
+export type RelationshipType =
+  | 'alliance'
+  | 'trade_pact'
+  | 'royal_marriage'
+  | 'rivalry'
+  | 'war'
+  | 'vassalage'
+  | 'shared_faith'
+  | 'cultural_exchange'
+
+export interface EntityRelationship {
+  id: string
+  targetEntityId: string
+  targetEntityName: string
+  type: RelationshipType
+  label: string
+  icon: string
+  createdAtMove?: number
+  linkedEventId?: string
+  description?: string
+}
+
 export interface WorldEntity {
   id: string
   name: string
   category: EntityCategory
   stageCreated: StageId
+  parentEntityId?: string
   originTileId?: string
   description: string
   traits: string[]
@@ -162,8 +240,11 @@ export interface WorldEntity {
   status: string
   icon?: string
   color?: string
+  secondaryColor?: string
   archetype?: string
+  settlementIcons?: CompanionSettlementIcons
   relationships?: string
+  diplomaticLinks?: EntityRelationship[]
 }
 
 export interface TurnSnapshot {

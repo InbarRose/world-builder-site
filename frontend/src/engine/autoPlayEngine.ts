@@ -6,21 +6,26 @@ import {
   getNextStage,
   isFantasticalCard,
 } from './deckEngine'
-import { createInitialMap, paintTile } from './mapEngine'
+import { addSlotToTile, createInitialMap, paintTile } from './mapEngine'
 import {
   BOT_PERSONALITIES,
   MYTH_PRESETS,
+  RELATIONSHIP_PRESETS,
   SOCIETY_PRESETS,
   SPECIES_PRESETS,
+  StageActionPreset,
+  getActionPresetsForDraw,
 } from './presets'
 import { cloneMapState, recordTurnSnapshot } from './storageService'
 import {
   BotPersonalityId,
   Card,
   DrawRecord,
+  EntityRelationship,
   MapTile,
   StageId,
   TerrainType,
+  TileSlotCategory,
   WorldEntity,
   WorldState,
 } from './types'
@@ -75,7 +80,7 @@ const LANDMARK_NOUNS: Record<string, string[]> = {
   water: ['River', 'Falls', 'Bay', 'Fjord', 'Straits'],
   forest: ['Weald', 'Canopy', 'Woods', 'Grove', 'Timberlands'],
   settlement: ['Outpost', 'Crossing', 'Hearth', 'Haven', 'Camp'],
-  city: ['Citadel', 'spire', 'Bastion', 'Harbor', 'Sanctuary'],
+  city: ['Citadel', 'Spire', 'Bastion', 'Harbor', 'Sanctuary'],
   monument: ['Obelisk', 'Colossus', 'Grand Archive', 'Sky-Bridge', 'Temple'],
 }
 
@@ -91,15 +96,26 @@ function findBestLandTile(
   const preferredTerrains = BOT_PERSONALITIES[personality]?.preferredTerrains || ['plains']
 
   const scored = pool.map((tile) => {
-    let score = 1 + rng() * 2
-    if (preferredTerrains.includes(tile.terrain)) score += 3
-    if (preferUnlabeled && !tile.label) score += 1.5
-    if (!preferUnlabeled && (tile.label || tile.overlay !== 'none')) score += 2
+    let score = 1 + rng() * 2.2
+    if (preferredTerrains.includes(tile.terrain)) score += 2.5
+    const slotCount = (tile.slots || []).length + (tile.overlay !== 'none' ? 1 : 0)
+
+    if (preferUnlabeled) {
+      // Spread features out across the map so we don't crowd a single tile
+      if (!tile.label && slotCount === 0) score += 3.5
+      else if (slotCount === 1) score += 1.0
+      else score -= slotCount * 1.5
+    } else {
+      // In later stages, occasionally build upon existing settlements/features, but still penalize overcrowded tiles
+      if (slotCount === 1 || slotCount === 2) score += 2.0
+      else if (slotCount === 0) score += 1.2
+      else if (slotCount >= 3) score -= (slotCount - 2) * 2.0
+    }
     return { tile, score }
   })
 
   scored.sort((a, b) => b.score - a.score)
-  const topCandidates = scored.slice(0, Math.min(6, scored.length))
+  const topCandidates = scored.slice(0, Math.min(8, scored.length))
   return pickRandom(topCandidates, rng).tile
 }
 
@@ -122,7 +138,12 @@ export function ensurePreStageEntities(
       for (let i = 0; i < needed && i < availablePresets.length; i++) {
         const player = world.players[i % world.players.length]
         const preset = availablePresets[i]
-        const originTile = findBestLandTile(world, player.personality, rng, true)
+        const originTile = findBestLandTile(
+          { ...world, map: updatedMap },
+          player?.personality || 'shaper',
+          rng,
+          true
+        )
         const entityId = `entity_sp_${world.drawHistory.length}_${i}_${Math.floor(rng() * 10000)}`
 
         const newSpecies: WorldEntity = {
@@ -137,20 +158,36 @@ export function ensurePreStageEntities(
           status: 'Flourishing',
           icon: preset.icon,
           color: preset.color,
+          secondaryColor: preset.secondaryColor,
           archetype: preset.archetype,
+          settlementIcons: { ...preset.settlementIcons },
+          diplomaticLinks: [],
         }
         updatedEntities.push(newSpecies)
+
+        const currentTile = updatedMap.tiles[originTile.id] || originTile
+        const tileWithSlot = addSlotToTile(currentTile, {
+          category: 'settlement',
+          type: 'village',
+          name: `${preset.name.split(' ')[0]} Cradle`,
+          icon: preset.settlementIcons.village,
+          priority: 92,
+          color: preset.color,
+          linkedEntityId: entityId,
+        })
 
         updatedMap = paintTile(updatedMap, originTile.col, originTile.row, {
           overlay: originTile.overlay === 'none' ? 'settlement' : originTile.overlay,
           territoryId: entityId,
           label: originTile.label || `${preset.name.split(' ')[0]} Cradle`,
+          slots: tileWithSlot.slots,
           linkedEntityIds: [...originTile.linkedEntityIds, entityId],
         })
       }
     }
   } else if (stage === 'civilization') {
     const existingSocieties = updatedEntities.filter((e) => e.category === 'society')
+    const existingSpecies = updatedEntities.filter((e) => e.category === 'species')
     const targetCount = Math.max(2, world.players.length)
     if (existingSocieties.length < targetCount) {
       const usedNames = new Set(existingSocieties.map((s) => s.name))
@@ -160,7 +197,16 @@ export function ensurePreStageEntities(
       for (let i = 0; i < needed && i < availablePresets.length; i++) {
         const player = world.players[i % world.players.length]
         const preset = availablePresets[i]
-        const capitalTile = findBestLandTile(world, player.personality, rng, false)
+        const parentSpecies =
+          existingSpecies.length > 0
+            ? existingSpecies[i % existingSpecies.length]
+            : undefined
+        const capitalTile = findBestLandTile(
+          { ...world, map: updatedMap },
+          player?.personality || 'architect',
+          rng,
+          true
+        )
         const entityId = `entity_soc_${world.drawHistory.length}_${i}_${Math.floor(rng() * 10000)}`
 
         const newSociety: WorldEntity = {
@@ -168,6 +214,7 @@ export function ensurePreStageEntities(
           name: preset.name,
           category: 'society',
           stageCreated: 'civilization',
+          parentEntityId: parentSpecies?.id,
           originTileId: capitalTile.id,
           description: preset.description,
           traits: [...preset.traits],
@@ -175,15 +222,32 @@ export function ensurePreStageEntities(
           status: 'Expanding',
           icon: preset.icon,
           color: preset.color,
+          secondaryColor: preset.secondaryColor,
           archetype: preset.archetype,
+          settlementIcons: parentSpecies?.settlementIcons
+            ? { ...parentSpecies.settlementIcons }
+            : { ...preset.settlementIcons },
+          diplomaticLinks: [],
         }
         updatedEntities.push(newSociety)
+
+        const currentTile = updatedMap.tiles[capitalTile.id] || capitalTile
+        const tileWithSlot = addSlotToTile(currentTile, {
+          category: 'settlement',
+          type: 'capital',
+          name: `${preset.name.split(' ')[0]} Capital`,
+          icon: newSociety.settlementIcons?.metropolis || '👑',
+          priority: 99,
+          color: preset.color,
+          linkedEntityId: entityId,
+        })
 
         updatedMap = paintTile(updatedMap, capitalTile.col, capitalTile.row, {
           overlay: 'capital',
           territoryId: entityId,
           hasRoad: true,
           label: `${preset.name.split(' ')[0]} Capital`,
+          slots: tileWithSlot.slots,
           linkedEntityIds: [...capitalTile.linkedEntityIds, entityId],
         })
       }
@@ -228,6 +292,15 @@ export function executeAutomatedTurn(
     ? 'Natural Disaster'
     : STAGE_POWERS[stage]?.[effectiveSuit]?.name || 'World Power'
 
+  const candidatePresets = getActionPresetsForDraw(
+    stage,
+    effectiveSuit,
+    isFantastical,
+    isDisaster
+  )
+  const chosenPreset: StageActionPreset | undefined =
+    candidatePresets.length > 0 ? pickRandom(candidatePresets, rng) : undefined
+
   const moveId = world.drawHistory.length + 1
   const eventId = `draw_${moveId}_${Math.floor(rng() * 100000)}`
   const adj = pickRandom(REGION_NAMES, rng)
@@ -237,40 +310,114 @@ export function executeAutomatedTurn(
     ...e,
     traits: [...e.traits],
     abilities: e.abilities ? [...e.abilities] : [],
+    settlementIcons: e.settlementIcons ? { ...e.settlementIcons } : undefined,
+    diplomaticLinks: e.diplomaticLinks ? e.diplomaticLinks.map((d) => ({ ...d })) : [],
   }))
   const linkedTileIds: string[] = []
   const linkedEntityIds: string[] = []
+  const slotChanges: {
+    tileId: string
+    slotName: string
+    slotIcon: string
+    category: TileSlotCategory
+  }[] = []
+  let relationshipCreated: DrawRecord['relationshipCreated'] | undefined
   let note = ''
+
+  const addTrackedSlot = (
+    tile: MapTile,
+    category: TileSlotCategory,
+    type: string,
+    name: string,
+    icon: string,
+    priority: number,
+    entityId?: string,
+    color?: string
+  ): MapTile => {
+    slotChanges.push({
+      tileId: tile.id,
+      slotName: name,
+      slotIcon: icon,
+      category,
+    })
+    return addSlotToTile(tile, {
+      category,
+      type,
+      name,
+      icon,
+      priority,
+      color,
+      linkedEntityId: entityId,
+      linkedEventId: eventId,
+      moveId,
+    })
+  }
 
   if (isDisaster) {
     const targetTile = findBestLandTile(world, personality, rng, false)
     linkedTileIds.push(targetTile.id)
     if (stage === 'genesis') {
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'elevation',
+        'volcano',
+        `Mount ${adj}`,
+        '🌋',
+        90
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         terrain: 'volcano',
         relief: 'volcano',
         label: `Mount ${adj}`,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `[Cataclysm] A primordial tectonic upheaval erupts at (${targetTile.id}), raising the volcanic cone of Mount ${adj} and reshaping the surrounding coastline.`
     } else if (stage === 'primal') {
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'hydrology',
+        'deluge',
+        `${adj} Sunken Fen`,
+        '🌊',
+        88
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         terrain: 'swamp',
         flora: 'marsh',
         overlay: 'ruins',
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `[Great Deluge] A世代-spanning flood inundates (${targetTile.id}), turning ancient hunting grounds into sunken marshlands and forcing early tribes to migrate.`
+      note = `[Great Deluge] A generational flood inundates (${targetTile.id}), turning ancient hunting grounds into sunken marshlands and forcing early tribes to migrate.`
     } else if (stage === 'civilization') {
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        'ruins',
+        `Ruins of ${targetTile.label || adj}`,
+        '🏚️',
+        90
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: 'ruins',
         relief: 'canyon',
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `[Imperial Calamity] An earthquake and arcane storm shatter the fortifications at (${targetTile.id}), leaving ancient ruins in their wake.`
     } else {
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'myth',
+        'cataclysm',
+        `${adj} Comet Crater`,
+        '☄️',
+        94
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: 'historic_site',
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `[Ominous Cataclysm] The ${adj} Comet blazes across the sky above (${targetTile.id}), triggering upheaval and prophetic unrest across the realms.`
@@ -285,40 +432,64 @@ export function executeAutomatedTurn(
       const newTerrain: TerrainType = isCanyon ? 'canyon' : 'mountain'
       const noun = pickRandom(LANDMARK_NOUNS[isCanyon ? 'canyon' : 'mountain'], rng)
       const label = `${adj} ${noun}`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'elevation',
+        isCanyon ? 'canyon' : 'mountain',
+        label,
+        isFantastical ? '✨' : isCanyon ? '🏜️' : '🏔️',
+        isFantastical ? 88 : 75
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         terrain: newTerrain,
         relief: isCanyon ? 'canyon' : 'mountain',
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = isFantastical
         ? `✨ [Fantastical Earth] Floating sky-crags and crystalline peaks rise at ${label} (${targetTile.id}), defying gravity.`
         : `Colossal ${isCanyon ? 'canyons' : 'mountain peaks'} are forged at ${label} (${targetTile.id}).`
     } else if (effectiveSuit === '♥') {
-      // Water
+      // Water (Lakes & Rivers on land remain land tiles!)
       const noun = pickRandom(LANDMARK_NOUNS.water, rng)
       const label = `${adj} ${noun}`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'hydrology',
+        'lake_river',
+        label,
+        isFantastical ? '🌀' : '💧',
+        isFantastical ? 86 : 66
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         hasRiver: true,
-        secondaryTerrain: 'water',
-        pattern: 'diagonal',
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = isFantastical
         ? `✨ [Fantastical Water] The luminous waters of ${label} (${targetTile.id}) flow with restorative, shimmering currents.`
-        : `The ${label} carves a fertile river valley through (${targetTile.id}) toward the sea.`
+        : `The ${label} carves a fertile river basin and highland lake through (${targetTile.id}) toward the sea.`
     } else if (effectiveSuit === '♣') {
       // Plant
       const isJungle = rng() > 0.6
       const noun = pickRandom(LANDMARK_NOUNS.forest, rng)
       const label = `${adj} ${noun}`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'vegetation',
+        isJungle ? 'jungle' : 'forest',
+        label,
+        isFantastical ? '🌳' : isJungle ? '🌴' : '🌲',
+        isFantastical ? 89 : 64
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         terrain: isJungle ? 'jungle' : 'forest',
         flora: isJungle ? 'jungle' : 'forest',
-        // Keep relief if already hills/mountain so we get Mountain + Forest composite!
         relief: targetTile.relief !== 'none' ? targetTile.relief : 'hills',
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = isFantastical
@@ -329,9 +500,18 @@ export function executeAutomatedTurn(
     } else {
       // Feature
       const label = `${adj} Cavern`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        isFantastical ? 'myth' : 'resource',
+        isFantastical ? 'leyline' : 'cavern',
+        label,
+        isFantastical ? '💎' : '♨️',
+        isFantastical ? 88 : 68
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: isFantastical ? 'myth' : 'cave',
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = isFantastical
@@ -342,7 +522,7 @@ export function executeAutomatedTurn(
     const speciesList = updatedEntities.filter((e) => e.category === 'species')
     const chosenSpecies =
       speciesList.length > 0 ? pickRandom(speciesList, rng) : undefined
-    const targetTile = findBestLandTile(world, personality, rng, false)
+    const targetTile = findBestLandTile(world, personality, rng, true)
     linkedTileIds.push(targetTile.id)
     if (chosenSpecies) linkedEntityIds.push(chosenSpecies.id)
     const spName = chosenSpecies?.name || 'Early Tribes'
@@ -351,10 +531,23 @@ export function executeAutomatedTurn(
       // Settlement
       const noun = pickRandom(LANDMARK_NOUNS.settlement, rng)
       const label = `${adj} ${noun}`
+      const settleIcon =
+        chosenSpecies?.settlementIcons?.village || (isFantastical ? '🏯' : '🏡')
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'settlement',
+        'village',
+        label,
+        settleIcon,
+        92,
+        chosenSpecies?.id,
+        chosenSpecies?.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: 'settlement',
         territoryId: chosenSpecies?.id || targetTile.territoryId,
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
         linkedEntityIds: chosenSpecies
           ? Array.from(new Set([...targetTile.linkedEntityIds, chosenSpecies.id]))
@@ -371,16 +564,37 @@ export function executeAutomatedTurn(
       if (chosenSpecies && !chosenSpecies.traits.includes(tradition)) {
         chosenSpecies.traits.push(tradition)
       }
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        'shrine',
+        tradition,
+        '🕯️',
+        72,
+        chosenSpecies?.id,
+        chosenSpecies?.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `${spName} adopt the cultural tradition of "${tradition}" near (${targetTile.id}), uniting their clans.`
     } else if (effectiveSuit === '♣') {
       // Resource
       const resourceName = isFantastical ? `${adj} Aether-Ore` : `${adj} Iron & Timber`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'resource',
+        'resource',
+        resourceName,
+        isFantastical ? '💎' : '⛏️',
+        68,
+        chosenSpecies?.id
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: targetTile.overlay === 'none' ? 'resource' : targetTile.overlay,
         tags: Array.from(new Set([...targetTile.tags, resourceName])),
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `${spName} harness rich deposits of ${resourceName} at (${targetTile.id}), fueling their early growth.`
@@ -392,7 +606,17 @@ export function executeAutomatedTurn(
           new Set([...(chosenSpecies.abilities || []), skillName])
         )
       }
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        'guild',
+        skillName,
+        '⚒️',
+        66,
+        chosenSpecies?.id
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `${spName} master the art of ${skillName} at (${targetTile.id}), setting them apart from neighboring peoples.`
@@ -410,11 +634,24 @@ export function executeAutomatedTurn(
       // Construction
       const noun = pickRandom(LANDMARK_NOUNS.monument, rng)
       const label = `${adj} ${noun}`
+      const icon =
+        chosenSociety?.settlementIcons?.city || (isFantastical ? '🏛️' : '🏰')
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        isFantastical ? 'wonder' : 'fortress',
+        label,
+        icon,
+        isFantastical ? 96 : 89,
+        chosenSociety?.id,
+        chosenSociety?.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: isFantastical ? 'monument' : 'castle',
         hasRoad: true,
         territoryId: chosenSociety?.id || targetTile.territoryId,
         label,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = isFantastical
@@ -426,26 +663,74 @@ export function executeAutomatedTurn(
       if (chosenSociety && !chosenSociety.traits.includes(idea)) {
         chosenSociety.traits.push(idea)
       }
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        'academy',
+        idea,
+        '📜',
+        80,
+        chosenSociety?.id,
+        chosenSociety?.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `Scholars of ${socName} usher in a golden age of enlightenment with the "${idea}" at (${targetTile.id}).`
     } else if (effectiveSuit === '♣') {
       // Expansion
+      const cityLabel = targetTile.label || `Port ${adj}`
+      const cityIcon = chosenSociety?.settlementIcons?.town || '🏘️'
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'settlement',
+        'city',
+        cityLabel,
+        cityIcon,
+        95,
+        chosenSociety?.id,
+        chosenSociety?.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: targetTile.overlay === 'none' ? 'town' : 'city',
         hasRoad: true,
         territoryId: chosenSociety?.id || targetTile.territoryId,
-        label: targetTile.label || `Port ${adj}`,
+        label: cityLabel,
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${socName} expands its borders into (${targetTile.id}), establishing ${
-        targetTile.label || `Port ${adj}`
-      } and connecting it by road.`
+      note = `${socName} expands its borders into (${targetTile.id}), establishing ${cityLabel} and connecting it by road.`
     } else {
       // Diplomacy
       const otherSociety = societyList.find((s) => s.id !== chosenSociety?.id)
-      if (otherSociety) linkedEntityIds.push(otherSociety.id)
+      if (otherSociety && chosenSociety) {
+        linkedEntityIds.push(otherSociety.id)
+        const relPreset =
+          card.value === '2'
+            ? RELATIONSHIP_PRESETS.find((r) => r.type === 'royal_marriage')!
+            : RELATIONSHIP_PRESETS.find((r) => r.type === 'trade_pact')!
+        const relEntry: EntityRelationship = {
+          id: `rel_${moveId}`,
+          targetEntityId: otherSociety.id,
+          targetEntityName: otherSociety.name,
+          type: relPreset.type,
+          label: `${adj} ${relPreset.label}`,
+          icon: relPreset.icon,
+          createdAtMove: moveId,
+          linkedEventId: eventId,
+        }
+        chosenSociety.diplomaticLinks = [
+          ...(chosenSociety.diplomaticLinks || []),
+          relEntry,
+        ]
+        relationshipCreated = {
+          sourceId: chosenSociety.id,
+          targetId: otherSociety.id,
+          label: relEntry.label,
+          icon: relEntry.icon,
+        }
+      }
       const partnerName = otherSociety?.name || 'neighboring free cities'
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         hasRoad: true,
@@ -465,9 +750,41 @@ export function executeAutomatedTurn(
 
     if (effectiveSuit === '♠') {
       // Conflict
-      if (rivalSociety) linkedEntityIds.push(rivalSociety.id)
+      if (rivalSociety && chosenSociety) {
+        linkedEntityIds.push(rivalSociety.id)
+        const relEntry: EntityRelationship = {
+          id: `rel_${moveId}`,
+          targetEntityId: rivalSociety.id,
+          targetEntityName: rivalSociety.name,
+          type: 'war',
+          label: `War of ${targetTile.label || adj}`,
+          icon: '⚔️',
+          createdAtMove: moveId,
+          linkedEventId: eventId,
+        }
+        chosenSociety.diplomaticLinks = [
+          ...(chosenSociety.diplomaticLinks || []),
+          relEntry,
+        ]
+        relationshipCreated = {
+          sourceId: chosenSociety.id,
+          targetId: rivalSociety.id,
+          label: relEntry.label,
+          icon: '⚔️',
+        }
+      }
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'structure',
+        'battleground',
+        `Battle of ${targetTile.label || adj}`,
+        '⚔️',
+        87,
+        chosenSociety?.id
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: 'battle',
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `⚔️ [Conflict] Forces of ${chosenSociety?.name || 'the Crown'} and ${
@@ -475,7 +792,29 @@ export function executeAutomatedTurn(
       } clash at the Battle of ${targetTile.label || `(${targetTile.id})`}.`
     } else if (effectiveSuit === '♥') {
       // Cooperation
-      if (rivalSociety) linkedEntityIds.push(rivalSociety.id)
+      if (rivalSociety && chosenSociety) {
+        linkedEntityIds.push(rivalSociety.id)
+        const relEntry: EntityRelationship = {
+          id: `rel_${moveId}`,
+          targetEntityId: rivalSociety.id,
+          targetEntityName: rivalSociety.name,
+          type: 'alliance',
+          label: `${adj} Grand Coalition`,
+          icon: '🤝',
+          createdAtMove: moveId,
+          linkedEventId: eventId,
+        }
+        chosenSociety.diplomaticLinks = [
+          ...(chosenSociety.diplomaticLinks || []),
+          relEntry,
+        ]
+        relationshipCreated = {
+          sourceId: chosenSociety.id,
+          targetId: rivalSociety.id,
+          label: relEntry.label,
+          icon: '🤝',
+        }
+      }
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: targetTile.overlay === 'battle' ? 'city' : targetTile.overlay,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
@@ -486,7 +825,17 @@ export function executeAutomatedTurn(
     } else if (effectiveSuit === '♣') {
       // Scheme
       const schemeName = `The ${adj} Conspiracy`
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'myth',
+        'scheme',
+        schemeName,
+        '🎭',
+        84,
+        chosenSociety?.id
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
       note = `🗡️ [Scheme] Agents within ${
@@ -508,14 +857,26 @@ export function executeAutomatedTurn(
         status: 'Active',
         icon: mythPreset.icon,
         color: mythPreset.color,
+        secondaryColor: mythPreset.secondaryColor,
         archetype: mythPreset.archetype,
       }
       updatedEntities.push(newMyth)
       linkedEntityIds.push(mythId)
 
+      const slotTile = addTrackedSlot(
+        targetTile,
+        'myth',
+        'myth_lair',
+        newMyth.name,
+        mythPreset.icon,
+        93,
+        mythId,
+        mythPreset.color
+      )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: 'myth',
         label: targetTile.label || adj + ' Lair',
+        slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
         linkedEntityIds: [...targetTile.linkedEntityIds, mythId],
       })
@@ -530,6 +891,8 @@ export function executeAutomatedTurn(
     timestamp: new Date().toISOString(),
     stage,
     power: powerName,
+    actionTitle: chosenPreset?.name || powerName,
+    presetId: chosenPreset?.id,
     note: `${activePlayer ? `[${activePlayer.name} · ${personalityMeta.name}] ` : ''}${note}`,
     linkedTileIds,
     linkedEntityIds,
@@ -538,6 +901,8 @@ export function executeAutomatedTurn(
     playerName: activePlayer?.name,
     playerColor: activePlayer?.color,
     isAutoPlayed: true,
+    slotChanges: slotChanges.length > 0 ? slotChanges : undefined,
+    relationshipCreated,
   }
 
   const nextPlayerIndex =
