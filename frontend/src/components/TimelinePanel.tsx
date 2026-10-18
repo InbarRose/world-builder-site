@@ -11,6 +11,9 @@ import {
   ArrowUpDown,
   RotateCcw,
   Printer,
+  Lock,
+  Unlock,
+  GitBranch,
 } from 'lucide-react'
 import { DrawRecord, StageId, WorldEntity, WorldState } from '../engine/types'
 import { DEFAULT_CARD_COLORS, STAGES, getCardDisplay } from '../engine/deckEngine'
@@ -22,6 +25,7 @@ interface TimelinePanelProps {
   onUpdateRecord: (recordId: string, updates: Partial<DrawRecord>) => void
   onClearHistory: () => void
   onRewindToMove?: (moveId: number) => void
+  onBranchFromMove?: (moveId: number) => void
 }
 
 export function TimelinePanel({
@@ -30,12 +34,16 @@ export function TimelinePanel({
   onUpdateRecord,
   onClearHistory,
   onRewindToMove,
+  onBranchFromMove,
 }: TimelinePanelProps) {
   const [stageFilter, setStageFilter] = useState<StageId | 'all'>('all')
   const [entityFilter, setEntityFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortAsc, setSortAsc] = useState(false)
   const [coordInputs, setCoordInputs] = useState<Record<string, string>>({})
+  const [unlockedRecordIds, setUnlockedRecordIds] = useState<Record<string, boolean>>({})
+  const [confirmRewindMoveId, setConfirmRewindMoveId] = useState<number | null>(null)
+  const [confirmClearHistory, setConfirmClearHistory] = useState(false)
 
   const filteredRecords = world.drawHistory
     .filter((rec) => {
@@ -63,6 +71,10 @@ export function TimelinePanel({
 
   if (!sortAsc) {
     filteredRecords.reverse()
+  }
+
+  const toggleUnlockRecord = (id: string) => {
+    setUnlockedRecordIds((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
   const handleCopyText = () => {
@@ -116,15 +128,21 @@ export function TimelinePanel({
   }
 
   return (
-    <div className="card p-6 space-y-6">
+    <div className="card p-5 sm:p-6 space-y-5">
       {/* Header & Export Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Clock className="h-6 w-6 text-primary" />
+        <div className="flex items-center gap-2.5">
+          <Clock className="h-6 w-6 text-primary shrink-0" />
           <div>
-            <h3 className="text-xl font-bold">World Chronicle & Timeline</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold">World Chronicle & Timeline</h3>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground flex items-center gap-1">
+                <Lock className="h-3 w-3" />
+                <span>Past Events Protected</span>
+              </span>
+            </div>
             <p className="text-xs text-muted-foreground">
-              {world.drawHistory.length} historical turns recorded · Edit notes or rewind to any turn to branch history
+              {world.drawHistory.length} historical turns recorded · Past events are locked by default to prevent accidental edits (click Unlock to edit or Branch to fork a new world)
             </p>
           </div>
         </div>
@@ -167,15 +185,40 @@ export function TimelinePanel({
             <Printer className="h-3.5 w-3.5" />
             <span>Print</span>
           </button>
-          <button
-            type="button"
-            onClick={onClearHistory}
-            disabled={world.drawHistory.length === 0}
-            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs text-destructive disabled:opacity-50"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Clear</span>
-          </button>
+          {!world.isLocked && (
+            confirmClearHistory ? (
+              <div className="inline-flex items-center gap-1 bg-destructive/10 border border-destructive/30 px-2 py-1 rounded text-xs">
+                <span className="text-destructive font-semibold">Clear all turns?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClearHistory()
+                    setConfirmClearHistory(false)
+                  }}
+                  className="px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold"
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClearHistory(false)}
+                  className="px-2 py-0.5 rounded bg-background border border-border"
+                >
+                  No
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmClearHistory(true)}
+                disabled={world.drawHistory.length === 0}
+                className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs text-destructive disabled:opacity-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Clear</span>
+              </button>
+            )
+          )}
         </div>
       </div>
 
@@ -242,11 +285,17 @@ export function TimelinePanel({
             const { display, color } = getCardDisplay(record.card, cardColors)
             const stageObj = STAGES.find((s) => s.id === record.stage)
             const isLatestTurn = record.moveId === world.drawHistory.length
+            const isUnlocked =
+              !world.isLocked && (isLatestTurn || Boolean(unlockedRecordIds[record.id]))
 
             return (
               <div
                 key={record.id}
-                className="p-4 bg-muted/40 border border-border rounded-lg space-y-3 transition-colors hover:bg-muted/60"
+                className={`p-4 border rounded-lg space-y-2.5 transition-colors ${
+                  isLatestTurn
+                    ? 'bg-primary/[0.03] border-primary/40'
+                    : 'bg-muted/30 border-border hover:bg-muted/50'
+                }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2.5">
@@ -285,19 +334,84 @@ export function TimelinePanel({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {onRewindToMove && !isLatestTurn && (
+                  {/* Safe Turn Actions: Unlock Edit, Non-Destructive Branch New World, and Guarded Rewind */}
+                  <div className="no-print flex flex-wrap items-center gap-1.5">
+                    {!world.isLocked && !isLatestTurn && (
                       <button
                         type="button"
-                        onClick={() => onRewindToMove(record.moveId)}
-                        className="no-print btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
-                        title={`Rewind world state to Turn #${record.moveId} and branch history from here`}
+                        onClick={() => toggleUnlockRecord(record.id)}
+                        className={`px-2 py-1 rounded border text-[11px] font-medium flex items-center gap-1 transition-colors ${
+                          isUnlocked
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                        title={
+                          isUnlocked
+                            ? 'Lock this past turn to prevent accidental edits'
+                            : 'Unlock this past turn to edit its note or links'
+                        }
                       >
-                        <RotateCcw className="h-3 w-3" />
-                        <span>Rewind Here</span>
+                        {isUnlocked ? (
+                          <>
+                            <Unlock className="h-3 w-3" />
+                            <span>Editing</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-3 w-3" />
+                            <span>Unlock Edit</span>
+                          </>
+                        )}
                       </button>
                     )}
-                    <span className="text-xs text-muted-foreground">
+
+                    {onBranchFromMove && !isLatestTurn && (
+                      <button
+                        type="button"
+                        onClick={() => onBranchFromMove(record.moveId)}
+                        className="px-2.5 py-1 rounded border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 text-[11px] font-semibold flex items-center gap-1"
+                        title={`Create a new saved world branched at Turn #${record.moveId} without modifying "${world.name}"`}
+                      >
+                        <GitBranch className="h-3 w-3" />
+                        <span>Branch New World</span>
+                      </button>
+                    )}
+
+                    {onRewindToMove && !isLatestTurn && !world.isLocked && (
+                      confirmRewindMoveId === record.moveId ? (
+                        <div className="inline-flex items-center gap-1 bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 rounded text-[11px]">
+                          <span className="font-semibold">Rewind to #{record.moveId}?</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onRewindToMove(record.moveId)
+                              setConfirmRewindMoveId(null)
+                            }}
+                            className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground font-bold"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmRewindMoveId(null)}
+                            className="px-1.5 py-0.5 rounded bg-background border border-border"
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRewindMoveId(record.moveId)}
+                          className="btn-outline px-2 py-1 text-[11px] flex items-center gap-1"
+                          title={`Rewind current world to Turn #${record.moveId}`}
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          <span>Rewind</span>
+                        </button>
+                      )
+                    )}
+                    <span className="text-[11px] text-muted-foreground">
                       {new Date(record.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
@@ -323,13 +437,25 @@ export function TimelinePanel({
                   </div>
                 )}
 
-                {/* Narrative Note */}
+                {/* Narrative Note (Read-Only for past turns unless unlocked!) */}
                 <div>
                   <textarea
                     value={record.note || ''}
-                    onChange={(e) => onUpdateRecord(record.id, { note: e.target.value })}
-                    placeholder="Chronicle what happened in the world during this turn..."
-                    className="input w-full text-sm min-h-[58px]"
+                    readOnly={!isUnlocked}
+                    onChange={(e) => {
+                      if (!isUnlocked) return
+                      onUpdateRecord(record.id, { note: e.target.value })
+                    }}
+                    placeholder={
+                      isUnlocked
+                        ? 'Chronicle what happened in the world during this turn...'
+                        : 'No chronicle note recorded for this turn.'
+                    }
+                    className={`input w-full text-xs sm:text-sm min-h-[50px] ${
+                      !isUnlocked
+                        ? 'bg-background/50 cursor-default border-border/50 text-foreground/90'
+                        : ''
+                    }`}
                   />
                 </div>
 
@@ -347,40 +473,44 @@ export function TimelinePanel({
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border font-mono text-[11px]"
                       >
                         ({tId})
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTileLink(record, tId)}
-                          className="hover:text-destructive"
-                          aria-label={`Unlink tile ${tId}`}
-                        >
-                          ×
-                        </button>
+                        {isUnlocked && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTileLink(record, tId)}
+                            className="hover:text-destructive"
+                            aria-label={`Unlink tile ${tId}`}
+                          >
+                            ×
+                          </button>
+                        )}
                       </span>
                     ))}
-                    <div className="inline-flex items-center gap-1">
-                      <input
-                        type="text"
-                        value={coordInputs[record.id] || ''}
-                        onChange={(e) =>
-                          setCoordInputs({ ...coordInputs, [record.id]: e.target.value })
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            handleAddTileLink(record)
+                    {isUnlocked && (
+                      <div className="inline-flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={coordInputs[record.id] || ''}
+                          onChange={(e) =>
+                            setCoordInputs({ ...coordInputs, [record.id]: e.target.value })
                           }
-                        }}
-                        placeholder="col,row"
-                        className="input h-6 w-16 px-1.5 text-[11px]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleAddTileLink(record)}
-                        className="btn-outline h-6 px-2 text-[11px]"
-                      >
-                        + Tile
-                      </button>
-                    </div>
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              handleAddTileLink(record)
+                            }
+                          }}
+                          placeholder="col,row"
+                          className="input h-6 w-16 px-1.5 text-[11px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddTileLink(record)}
+                          className="btn-outline h-6 px-2 text-[11px]"
+                        >
+                          + Tile
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Linked Entities */}
@@ -389,11 +519,16 @@ export function TimelinePanel({
                       <span className="text-muted-foreground font-medium">Codex:</span>
                       {world.entities.map((ent) => {
                         const isLinked = (record.linkedEntityIds || []).includes(ent.id)
+                        if (!isUnlocked && !isLinked) return null
                         return (
                           <button
                             key={ent.id}
                             type="button"
-                            onClick={() => handleToggleEntityLink(record, ent.id)}
+                            disabled={!isUnlocked}
+                            onClick={() => {
+                              if (!isUnlocked) return
+                              handleToggleEntityLink(record, ent.id)
+                            }}
                             className={`px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
                               isLinked
                                 ? 'bg-primary text-primary-foreground border-primary'

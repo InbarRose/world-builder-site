@@ -10,6 +10,9 @@ import {
   Wand2,
   Shield,
   Link2,
+  ArrowLeftRight,
+  Palette,
+  Sliders,
 } from 'lucide-react'
 import {
   CompanionSettlementIcons,
@@ -22,10 +25,15 @@ import {
   WorldEntity,
 } from '../engine/types'
 import {
+  COLOR_SWATCH_PALETTES,
+  ENTITY_ICON_GALLERY,
   EntityPreset,
+  MODULAR_ABILITY_BLOCKS,
+  MODULAR_TRAIT_BLOCKS,
   MYTH_PRESETS,
   PLAYER_COLORS,
   RELATIONSHIP_PRESETS,
+  SETTLEMENT_ICON_SETS,
   SOCIETY_PRESETS,
   SPECIES_PRESETS,
 } from '../engine/presets'
@@ -52,9 +60,10 @@ const CATEGORIES: {
   {
     id: 'species',
     label: 'Races & Species',
-    stageHint: '2. Primal Stage — Origin races, settlement icons, traditions, resources & skills',
+    stageHint:
+      '2. Primal Stage — Start plain like Lego blocks! Pick icon, colors & settlements, then snap on traits & powers over time.',
     placeholderName: 'e.g., Sylvan Elves, Ironforge Dwarves...',
-    placeholderArchetype: 'e.g., Immortal Forest Guardians',
+    placeholderArchetype: 'Optional subtitle (or leave blank)',
     placeholderTraits: 'e.g., Master Sailors, Sun Worship, Obsidian Smithing',
     placeholderAbilities: 'e.g., Astral Weaving, Deep-Stone Sense',
     icon: Users,
@@ -128,6 +137,11 @@ export function EntityRegistry({
     ...DEFAULT_SETTLEMENT_ICONS,
   })
 
+  // Visual & Lego-Block Picker Drawers
+  const [showIconPicker, setShowIconPicker] = useState(false)
+  const [showLegoBlocksDrawer, setShowLegoBlocksDrawer] = useState(false)
+  const [editingEntityId, setEditingEntityId] = useState<string | null>(null)
+
   // Relationship Builder state
   const [relSourceId, setRelSourceId] = useState('')
   const [relTargetId, setRelTargetId] = useState('')
@@ -144,16 +158,48 @@ export function EntityRegistry({
       ? SOCIETY_PRESETS
       : MYTH_PRESETS
 
+  const parseCommaList = (raw: string): string[] =>
+    raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+
+  const currentTraitsList = parseCommaList(traitsInput)
+  const currentAbilitiesList = parseCommaList(abilitiesInput)
+
+  const toggleFormTraitBlock = (traitLabel: string) => {
+    const list = parseCommaList(traitsInput)
+    const next = list.includes(traitLabel)
+      ? list.filter((t) => t !== traitLabel)
+      : [...list, traitLabel]
+    setTraitsInput(next.join(', '))
+  }
+
+  const toggleFormAbilityBlock = (abilityLabel: string) => {
+    const list = parseCommaList(abilitiesInput)
+    const next = list.includes(abilityLabel)
+      ? list.filter((a) => a !== abilityLabel)
+      : [...list, abilityLabel]
+    setAbilitiesInput(next.join(', '))
+  }
+
+  const handleSwapFormColors = () => {
+    const prevPrimary = color
+    setColor(secondaryColor)
+    setSecondaryColor(prevPrimary)
+  }
+
   const handleApplyPreset = (preset: EntityPreset) => {
     setCategory(preset.category)
     setName(preset.name)
     setIcon(preset.icon)
     setColor(preset.color)
     setSecondaryColor(preset.secondaryColor || '#fef3c7')
-    setArchetype(preset.archetype)
-    setDescription(preset.description)
-    setTraitsInput(preset.traits.join(', '))
-    setAbilitiesInput(preset.abilities.join(', '))
+    setArchetype(preset.archetype || '')
+    // Species presets start completely plain & modular (no pre-baked description/traits/abilities)
+    setDescription(preset.description || '')
+    setTraitsInput((preset.traits || []).join(', '))
+    setAbilitiesInput((preset.abilities || []).join(', '))
     if (preset.settlementIcons) {
       setSettlementIcons({ ...preset.settlementIcons })
     }
@@ -171,14 +217,8 @@ export function EntityRegistry({
       parentEntityId: parentEntityId || undefined,
       originTileId: originTileId.trim() || undefined,
       description: description.trim(),
-      traits: traitsInput
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean),
-      abilities: abilitiesInput
-        .split(',')
-        .map((a) => a.trim())
-        .filter(Boolean),
+      traits: parseCommaList(traitsInput),
+      abilities: parseCommaList(abilitiesInput),
       status,
       icon: icon.trim() || activeCategoryMeta.defaultEmoji,
       color,
@@ -198,6 +238,27 @@ export function EntityRegistry({
     setDescription('')
     setTraitsInput('')
     setAbilitiesInput('')
+  }
+
+  const handleUpdateEntity = (id: string, updates: Partial<WorldEntity>) => {
+    onChange(entities.map((ent) => (ent.id === id ? { ...ent, ...updates } : ent)))
+  }
+
+  const handleToggleEntityTrait = (ent: WorldEntity, traitLabel: string) => {
+    const exists = ent.traits.includes(traitLabel)
+    const nextTraits = exists
+      ? ent.traits.filter((t) => t !== traitLabel)
+      : [...ent.traits, traitLabel]
+    handleUpdateEntity(ent.id, { traits: nextTraits })
+  }
+
+  const handleToggleEntityAbility = (ent: WorldEntity, abilityLabel: string) => {
+    const current = ent.abilities || []
+    const exists = current.includes(abilityLabel)
+    const nextAbilities = exists
+      ? current.filter((a) => a !== abilityLabel)
+      : [...current, abilityLabel]
+    handleUpdateEntity(ent.id, { abilities: nextAbilities })
   }
 
   const handleCreateRelationship = () => {
@@ -252,9 +313,7 @@ export function EntityRegistry({
   }
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    onChange(
-      entities.map((ent) => (ent.id === id ? { ...ent, status: newStatus } : ent))
-    )
+    handleUpdateEntity(id, { status: newStatus })
   }
 
   const visibleEntities =
@@ -271,15 +330,15 @@ export function EntityRegistry({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Left: Codex Creator & Preset Library (5 cols) */}
+      {/* Left: Modular Lego-Block Creator & Preset Library (5 cols) */}
       <div className="lg:col-span-5 space-y-5">
         <div className="card p-5 space-y-4">
           <div className="flex items-center gap-2 border-b border-border pb-3">
             <BookOpen className="h-5 w-5 text-primary" />
             <div>
-              <h3 className="text-lg font-bold">Register WorldEntity</h3>
+              <h3 className="text-lg font-bold">Modular Codex Builder</h3>
               <p className="text-xs text-muted-foreground">
-                Choose a template preset or customize races, settlement icons & kingdoms
+                Start with a plain Lego-block visual base, then snap on traits, powers & color swatches
               </p>
             </div>
           </div>
@@ -323,11 +382,18 @@ export function EntityRegistry({
             </p>
           </div>
 
-          {/* Built-in Presets Bar */}
+          {/* Built-in Presets Bar (Plain Lego Base for Species!) */}
           <div className="bg-muted/40 p-3 rounded-lg border border-border space-y-2">
-            <div className="text-xs font-semibold flex items-center gap-1.5 text-primary">
-              <Wand2 className="h-3.5 w-3.5" />
-              <span>Quick Presets (Click to Load & Customize)</span>
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-semibold flex items-center gap-1.5 text-primary">
+                <Wand2 className="h-3.5 w-3.5" />
+                <span>Quick Presets (Click to Load Visual Base)</span>
+              </div>
+              {category === 'species' && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                  🧱 Plain Lego Base
+                </span>
+              )}
             </div>
             <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
               {presetsForCategory.map((preset) => (
@@ -335,9 +401,15 @@ export function EntityRegistry({
                   key={preset.id}
                   type="button"
                   onClick={() => handleApplyPreset(preset)}
-                  className="px-2 py-1 rounded border border-border bg-background hover:bg-accent text-xs flex items-center gap-1 transition-colors"
-                  title={preset.description}
+                  className="px-2 py-1 rounded border border-border bg-background hover:bg-accent text-xs flex items-center gap-1.5 transition-colors"
+                  title={`${preset.name} (${preset.settlementIcons.camp}→${preset.settlementIcons.metropolis})`}
                 >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/20"
+                    style={{
+                      background: `linear-gradient(135deg, ${preset.color} 50%, ${preset.secondaryColor} 50%)`,
+                    }}
+                  />
                   <span>{preset.icon}</span>
                   <span>{preset.name}</span>
                 </button>
@@ -345,9 +417,10 @@ export function EntityRegistry({
             </div>
           </div>
 
-          <form onSubmit={handleCreateEntity} className="space-y-3">
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-3">
+          <form onSubmit={handleCreateEntity} className="space-y-3.5">
+            {/* Name & Emblem + Visual Preview */}
+            <div className="grid grid-cols-12 gap-2 items-end">
+              <div className="col-span-7">
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">
                   Name *
                 </label>
@@ -360,56 +433,160 @@ export function EntityRegistry({
                   className="input w-full text-sm h-9"
                 />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Emblem
+                  Icon
                 </label>
                 <input
                   type="text"
                   value={icon}
                   onChange={(e) => setIcon(e.target.value)}
-                  className="input w-full text-center text-base h-9"
+                  className="input w-full text-center text-base h-9 px-1"
                   maxLength={4}
                 />
               </div>
+              <div className="col-span-3">
+                <button
+                  type="button"
+                  onClick={() => setShowIconPicker(!showIconPicker)}
+                  className={`w-full h-9 rounded border text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
+                    showIconPicker
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  <span>{icon}</span>
+                  <span>Icons</span>
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Archetype / Style
-                </label>
-                <input
-                  type="text"
-                  value={archetype}
-                  onChange={(e) => setArchetype(e.target.value)}
-                  placeholder={activeCategoryMeta.placeholderArchetype}
-                  className="input w-full text-xs h-9"
-                />
+            {/* Expandable Categorized Icon Gallery */}
+            {showIconPicker && (
+              <div className="p-3 rounded-lg border border-primary/40 bg-muted/30 space-y-2.5 max-h-56 overflow-y-auto">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-primary">
+                    Choose an Emblem Icon
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowIconPicker(false)}
+                    className="text-[11px] text-muted-foreground hover:text-foreground"
+                  >
+                    Done
+                  </button>
+                </div>
+                {ENTITY_ICON_GALLERY.map((group) => (
+                  <div key={group.category} className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                      {group.category}
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {group.icons.map((item) => (
+                        <button
+                          key={item.icon + item.label}
+                          type="button"
+                          onClick={() => setIcon(item.icon)}
+                          className={`w-8 h-8 rounded border flex items-center justify-center text-base transition-all ${
+                            icon === item.icon
+                              ? 'border-primary bg-primary/15 ring-1 ring-primary scale-105'
+                              : 'border-border bg-background hover:bg-accent'
+                          }`}
+                          title={item.label}
+                        >
+                          {item.icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Primary
-                </label>
-                <input
-                  type="color"
-                  aria-label="Entity Banner Color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="h-9 w-full rounded border border-border bg-background p-1 cursor-pointer"
-                />
+            )}
+
+            {/* Primary & Secondary Color Swatch Picker + 1-Click Swap */}
+            <div className="p-3 rounded-lg bg-muted/30 border border-border space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5 text-primary" />
+                  <span>Primary & Secondary Color Swatches</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSwapFormColors}
+                  className="px-2 py-0.5 rounded border border-border bg-background hover:bg-accent text-[11px] font-medium flex items-center gap-1"
+                  title="Swap Primary and Secondary colors"
+                >
+                  <ArrowLeftRight className="h-3 w-3" />
+                  <span>Swap Primary ↔ Secondary</span>
+                </button>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Secondary
-                </label>
-                <input
-                  type="color"
-                  aria-label="Entity Secondary Color"
-                  value={secondaryColor}
-                  onChange={(e) => setSecondaryColor(e.target.value)}
-                  className="h-9 w-full rounded border border-border bg-background p-1 cursor-pointer"
-                />
+
+              <div className="grid grid-cols-12 gap-2 items-center">
+                <div className="col-span-4 flex items-center gap-1.5">
+                  <input
+                    type="color"
+                    aria-label="Entity Banner Color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="h-8 w-10 rounded border border-border bg-background p-0.5 cursor-pointer"
+                  />
+                  <span className="text-[11px] text-muted-foreground">Primary</span>
+                </div>
+                <div className="col-span-4 flex items-center gap-1.5">
+                  <input
+                    type="color"
+                    aria-label="Entity Secondary Color"
+                    value={secondaryColor}
+                    onChange={(e) => setSecondaryColor(e.target.value)}
+                    className="h-8 w-10 rounded border border-border bg-background p-0.5 cursor-pointer"
+                  />
+                  <span className="text-[11px] text-muted-foreground">Secondary</span>
+                </div>
+                <div className="col-span-4 flex items-center justify-end">
+                  <div
+                    className="px-2.5 py-1 rounded-md border-2 text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                    style={{
+                      borderColor: color,
+                      backgroundColor: `${secondaryColor}44`,
+                    }}
+                  >
+                    <span>{icon}</span>
+                    <span className="truncate max-w-[70px]">{name || 'Preview'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 12 Curated Dual-Color Swatch Pills */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {COLOR_SWATCH_PALETTES.map((sw) => {
+                  const isMatch =
+                    color.toLowerCase() === sw.primary.toLowerCase() &&
+                    secondaryColor.toLowerCase() === sw.secondary.toLowerCase()
+                  return (
+                    <button
+                      key={sw.id}
+                      type="button"
+                      onClick={() => {
+                        setColor(sw.primary)
+                        setSecondaryColor(sw.secondary)
+                      }}
+                      className={`h-6 px-2 rounded-full border text-[10px] font-medium flex items-center gap-1.5 transition-all ${
+                        isMatch
+                          ? 'border-primary ring-2 ring-primary/40 bg-background font-bold'
+                          : 'border-border bg-background/80 hover:bg-accent'
+                      }`}
+                      title={sw.name}
+                    >
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${sw.primary} 50%, ${sw.secondary} 50%)`,
+                        }}
+                      />
+                      <span className="hidden sm:inline">{sw.name.split(' ')[0]}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -436,13 +613,23 @@ export function EntityRegistry({
             {/* Companion Settlement Icons Progression (Camp -> Village -> Town -> City -> Metropolis) */}
             {(category === 'species' || category === 'society') && (
               <div className="p-2.5 rounded-lg bg-muted/40 border border-border space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-1">
                   <span className="text-[11px] font-bold text-primary">
                     Companion Map Settlement Icons
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Used on map as settlements grow
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {SETTLEMENT_ICON_SETS.map((setPreset) => (
+                      <button
+                        key={setPreset.id}
+                        type="button"
+                        onClick={() => setSettlementIcons({ ...setPreset.icons })}
+                        className="px-1.5 py-0.5 rounded border border-border bg-background hover:bg-accent text-[10px]"
+                        title={`Load ${setPreset.name}: ${setPreset.icons.camp}→${setPreset.icons.metropolis}`}
+                      >
+                        {setPreset.icons.camp}→{setPreset.icons.metropolis}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5 text-center">
                   {(
@@ -476,20 +663,31 @@ export function EntityRegistry({
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Origin / Capital Tile (col,row)
+                  Subtitle / Style
+                </label>
+                <input
+                  type="text"
+                  value={archetype}
+                  onChange={(e) => setArchetype(e.target.value)}
+                  placeholder={activeCategoryMeta.placeholderArchetype}
+                  className="input w-full text-xs h-8"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  Seat Tile (col,row)
                 </label>
                 <input
                   type="text"
                   value={originTileId}
                   onChange={(e) => setOriginTileId(e.target.value)}
                   placeholder="e.g., 10,6"
-                  className="input w-full text-xs h-9"
+                  className="input w-full text-xs h-8"
                 />
               </div>
-
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">
                   Status
@@ -497,7 +695,7 @@ export function EntityRegistry({
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="input w-full text-xs h-9"
+                  className="input w-full text-xs h-8 py-0"
                 >
                   {STATUS_OPTIONS.map((st) => (
                     <option key={st} value={st}>
@@ -508,41 +706,114 @@ export function EntityRegistry({
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Cultural Traditions & Resources (comma-separated)
-              </label>
+            {/* Snap-On Modular Lego Blocks Toggle */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Modular Traits & Powers (Optional — leave blank for plain start)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowLegoBlocksDrawer(!showLegoBlocksDrawer)}
+                  className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                >
+                  <span>🧱 {showLegoBlocksDrawer ? 'Hide Lego Blocks' : 'Snap Modular Blocks'}</span>
+                </button>
+              </div>
+
+              {showLegoBlocksDrawer && (
+                <div className="p-3 rounded-lg border border-primary/40 bg-primary/[0.03] space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-bold text-primary block">
+                      Snap-On Trait & Tradition Blocks:
+                    </span>
+                    {MODULAR_TRAIT_BLOCKS.map((grp) => (
+                      <div key={grp.category} className="space-y-1">
+                        <span className="text-[10px] text-muted-foreground font-semibold block">
+                          {grp.suitHint} {grp.category}
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {grp.items.map((item) => {
+                            const active = currentTraitsList.includes(item.label)
+                            return (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => toggleFormTraitBlock(item.label)}
+                                className={`px-2 py-0.5 rounded text-[11px] border transition-colors ${
+                                  active
+                                    ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                                    : 'bg-background border-border hover:bg-accent'
+                                }`}
+                              >
+                                {item.icon} {item.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-1.5 pt-2 border-t border-border/60">
+                    <span className="text-[11px] font-bold text-primary block">
+                      Snap-On Power & Ability Blocks:
+                    </span>
+                    {MODULAR_ABILITY_BLOCKS.map((grp) => (
+                      <div key={grp.category} className="space-y-1">
+                        <span className="text-[10px] text-muted-foreground font-semibold block">
+                          {grp.suitHint} {grp.category}
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {grp.items.map((item) => {
+                            const active = currentAbilitiesList.includes(item.label)
+                            return (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => toggleFormAbilityBlock(item.label)}
+                                className={`px-2 py-0.5 rounded text-[11px] border transition-colors ${
+                                  active
+                                    ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                                    : 'bg-background border-border hover:bg-accent'
+                                }`}
+                              >
+                                {item.icon} {item.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <input
                 type="text"
                 value={traitsInput}
                 onChange={(e) => setTraitsInput(e.target.value)}
                 placeholder={activeCategoryMeta.placeholderTraits}
-                className="input w-full text-xs h-9"
+                className="input w-full text-xs h-8"
               />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Powers, Skills & Special Abilities (comma-separated)
-              </label>
               <input
                 type="text"
                 value={abilitiesInput}
                 onChange={(e) => setAbilitiesInput(e.target.value)}
                 placeholder={activeCategoryMeta.placeholderAbilities}
-                className="input w-full text-xs h-9"
+                className="input w-full text-xs h-8"
               />
             </div>
 
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Codex Lore & History
+                Codex Notes / Lore (Optional)
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe their origins, culture, monuments, or ambitions..."
-                className="input w-full text-sm min-h-[70px]"
+                placeholder="Leave blank to start plain, or record notes as their story unfolds..."
+                className="input w-full text-xs min-h-[54px]"
               />
             </div>
 
@@ -640,7 +911,7 @@ export function EntityRegistry({
               World Codex & Wiki ({visibleEntities.length})
             </h3>
             <p className="text-xs text-muted-foreground">
-              Encyclopedia of sentient species, kingdoms, companion icons, and diplomatic lineage
+              Snap modular traits, powers, icons, and color swatches onto any race or kingdom as history unfolds
             </p>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -685,6 +956,7 @@ export function EntityRegistry({
               const parentSpecies = ent.parentEntityId
                 ? entities.find((e) => e.id === ent.parentEntityId)
                 : undefined
+              const isCustomizing = editingEntityId === ent.id
 
               return (
                 <div
@@ -699,11 +971,11 @@ export function EntityRegistry({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <span
-                          className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shadow-sm border border-border bg-background"
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shadow-sm border-2 bg-background shrink-0"
                           style={{
                             borderColor: ent.color,
                             backgroundColor: ent.secondaryColor
-                              ? `${ent.secondaryColor}33`
+                              ? `${ent.secondaryColor}44`
                               : undefined,
                           }}
                         >
@@ -727,6 +999,21 @@ export function EntityRegistry({
                       </div>
 
                       <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingEntityId(isCustomizing ? null : ent.id)
+                          }
+                          className={`px-2 py-1 rounded border text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                            isCustomizing
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-background border-border hover:bg-accent'
+                          }`}
+                          title="Snap modular traits, powers, icons, or swap color swatches"
+                        >
+                          <Sliders className="h-3 w-3" />
+                          <span>🧱 Snap</span>
+                        </button>
                         <select
                           aria-label={`Status for ${ent.name}`}
                           value={ent.status}
@@ -777,7 +1064,10 @@ export function EntityRegistry({
                         <span className="text-muted-foreground font-medium">
                           {ent.settlementIcons.architectureStyle || 'Settlements'}:
                         </span>
-                        <span className="flex items-center gap-1.5 text-sm" title="Camp → Village → Town → City → Capital">
+                        <span
+                          className="flex items-center gap-1.5 text-sm"
+                          title="Camp → Village → Town → City → Capital"
+                        >
                           <span>{ent.settlementIcons.camp}</span>
                           <span className="text-[9px] text-muted-foreground">→</span>
                           <span>{ent.settlementIcons.village}</span>
@@ -791,10 +1081,128 @@ export function EntityRegistry({
                       </div>
                     )}
 
-                    {ent.description && (
+                    {/* Inline Modular Lego-Block & Swatch Customizer */}
+                    {isCustomizing && (
+                      <div className="p-3 rounded-lg border border-primary/40 bg-background space-y-2.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-primary">
+                            🧱 Modular Blocks & Swatches
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateEntity(ent.id, {
+                                color: ent.secondaryColor || '#fef3c7',
+                                secondaryColor: ent.color || '#10b981',
+                              })
+                            }
+                            className="px-2 py-0.5 rounded border border-border hover:bg-accent text-[10px] font-semibold flex items-center gap-1"
+                          >
+                            <ArrowLeftRight className="h-3 w-3" />
+                            <span>Swap Primary ↔ Secondary</span>
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1">
+                          {COLOR_SWATCH_PALETTES.slice(0, 8).map((sw) => (
+                            <button
+                              key={sw.id}
+                              type="button"
+                              onClick={() =>
+                                handleUpdateEntity(ent.id, {
+                                  color: sw.primary,
+                                  secondaryColor: sw.secondary,
+                                })
+                              }
+                              className="w-5 h-5 rounded-full border border-black/20"
+                              style={{
+                                background: `linear-gradient(135deg, ${sw.primary} 50%, ${sw.secondary} 50%)`,
+                              }}
+                              title={sw.name}
+                            />
+                          ))}
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-semibold text-muted-foreground block mb-1">
+                            Click to Snap/Unsnap Traits:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {MODULAR_TRAIT_BLOCKS.flatMap((g) => g.items)
+                              .slice(0, 10)
+                              .map((item) => {
+                                const has = ent.traits.includes(item.label)
+                                return (
+                                  <button
+                                    key={item.label}
+                                    type="button"
+                                    onClick={() =>
+                                      handleToggleEntityTrait(ent, item.label)
+                                    }
+                                    className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                                      has
+                                        ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                                        : 'bg-muted/40 border-border hover:bg-accent'
+                                    }`}
+                                  >
+                                    {item.icon} {item.label}
+                                  </button>
+                                )
+                              })}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-semibold text-muted-foreground block mb-1">
+                            Click to Snap/Unsnap Powers:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {MODULAR_ABILITY_BLOCKS.flatMap((g) => g.items)
+                              .slice(0, 10)
+                              .map((item) => {
+                                const has = (ent.abilities || []).includes(item.label)
+                                return (
+                                  <button
+                                    key={item.label}
+                                    type="button"
+                                    onClick={() =>
+                                      handleToggleEntityAbility(ent, item.label)
+                                    }
+                                    className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                                      has
+                                        ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                                        : 'bg-muted/40 border-border hover:bg-accent'
+                                    }`}
+                                  >
+                                    {item.icon} {item.label}
+                                  </button>
+                                )
+                              })}
+                          </div>
+                        </div>
+
+                        <textarea
+                          value={ent.description || ''}
+                          onChange={(e) =>
+                            handleUpdateEntity(ent.id, { description: e.target.value })
+                          }
+                          placeholder="Add custom lore or description..."
+                          className="input w-full text-xs min-h-[46px]"
+                        />
+                      </div>
+                    )}
+
+                    {ent.description ? (
                       <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
                         {ent.description}
                       </p>
+                    ) : (
+                      ent.traits.length === 0 &&
+                      (!ent.abilities || ent.abilities.length === 0) && (
+                        <p className="text-[11px] italic text-muted-foreground">
+                          Plain modular foundation — draw cards or click "🧱 Snap" to add traits, traditions & powers.
+                        </p>
+                      )
                     )}
 
                     {ent.traits.length > 0 && (
