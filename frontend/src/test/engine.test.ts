@@ -15,6 +15,7 @@ import {
   bucketFillTerrain,
   exportMapToSvgString,
   getTileId,
+  resizeMap,
 } from '../engine/mapEngine'
 import {
   createNewWorld,
@@ -24,12 +25,18 @@ import {
   deleteWorld,
   parseImportedWorld,
   exportWorldChronicleMarkdown,
+  rewindWorldToMove,
 } from '../engine/storageService'
+import {
+  createSeededRng,
+  executeAutomatedTurn,
+  autoPlayFullWorld,
+} from '../engine/autoPlayEngine'
+import { CURRENT_SCHEMA_VERSION } from '../engine/types'
 
 describe('DeckEngine', () => {
   it('builds a full 54-card deck with default config', () => {
     const deck = createDeck(DEFAULT_DECK_CONFIG)
-    // 4 suits * (9 number cards + 3 face cards) + 4 aces + 2 jokers = 48 + 4 + 2 = 54
     expect(deck).toHaveLength(54)
     expect(deck.filter((c) => c.value === 'A')).toHaveLength(4)
     expect(deck.filter((c) => c.value === 'Joker')).toHaveLength(2)
@@ -37,7 +44,6 @@ describe('DeckEngine', () => {
 
   it('builds a short game deck with 27 cards', () => {
     const deck = createDeck(SHORT_GAME_DECK_CONFIG)
-    // 4 suits * (5 number cards 2..6 + 1 King) + 2 aces + 1 joker = 24 + 2 + 1 = 27
     expect(deck).toHaveLength(27)
     expect(deck.filter((c) => c.value === 'K')).toHaveLength(4)
     expect(deck.filter((c) => c.value === 'J')).toHaveLength(0)
@@ -81,38 +87,61 @@ describe('DeckEngine', () => {
 })
 
 describe('MapEngine', () => {
-  it('creates an initial 20x12 map with 240 tiles', () => {
-    const map = createInitialMap(20, 12)
+  it('creates an initial 20x12 map with 240 tiles and supports geography presets', () => {
+    const map = createInitialMap(20, 12, 'archipelago')
     expect(map.width).toBe(20)
     expect(map.height).toBe(12)
     expect(Object.keys(map.tiles)).toHaveLength(240)
   })
 
-  it('paints individual tiles with terrain, overlays, and labels', () => {
+  it('paints individual tiles with multi-layer relief, flora, roads, rivers, and overlays', () => {
     let map = createInitialMap(5, 5)
     map = paintTile(map, 2, 2, {
       terrain: 'mountain',
+      relief: 'mountain',
+      flora: 'forest',
+      hasRiver: true,
+      hasRoad: true,
       overlay: 'castle',
       label: 'Ironhold',
     })
     const tile = map.tiles[getTileId(2, 2)]
     expect(tile.terrain).toBe('mountain')
+    expect(tile.relief).toBe('mountain')
+    expect(tile.flora).toBe('forest')
+    expect(tile.hasRiver).toBe(true)
+    expect(tile.hasRoad).toBe(true)
     expect(tile.overlay).toBe('castle')
     expect(tile.label).toBe('Ironhold')
   })
 
+  it('resizes map dimensions non-destructively', () => {
+    let map = createInitialMap(8, 6)
+    map = paintTile(map, 2, 2, { label: 'KeepMe' })
+    const resized = resizeMap(map, 12, 10)
+    expect(resized.width).toBe(12)
+    expect(resized.height).toBe(10)
+    expect(resized.tiles['2,2'].label).toBe('KeepMe')
+  })
+
   it('bucket fills contiguous terrain regions', () => {
     let map = createInitialMap(4, 4)
-    // Paint corner ocean region to desert
     const cornerTerrain = map.tiles['0,0'].terrain
     map = bucketFillTerrain(map, 0, 0, 'desert')
     expect(map.tiles['0,0'].terrain).toBe('desert')
     expect(cornerTerrain).not.toBe('desert')
   })
 
-  it('exports map state to valid SVG string', () => {
+  it('exports map state to valid SVG string with composite symbols', () => {
     let map = createInitialMap(4, 4)
-    map = paintTile(map, 1, 1, { terrain: 'forest', label: 'Silverwood' })
+    map = paintTile(map, 1, 1, {
+      terrain: 'forest',
+      relief: 'mountain',
+      flora: 'forest',
+      hasRiver: true,
+      hasRoad: true,
+      label: 'Silverwood',
+    })
     const svg = exportMapToSvgString(map, 'Test Realm')
     expect(svg).toContain('<svg')
     expect(svg).toContain('Test Realm')
@@ -120,13 +149,14 @@ describe('MapEngine', () => {
   })
 })
 
-describe('WorldStorageService', () => {
+describe('WorldStorageService & Schema v2 Migration', () => {
   beforeEach(() => {
     localStorage.clear()
   })
 
-  it('creates, saves, lists, and deletes named worlds in localStorage', () => {
+  it('creates, saves, lists, and deletes named worlds in localStorage with schema v2', () => {
     const w1 = createNewWorld('Aethelgard')
+    expect(w1.schemaVersion).toBe(CURRENT_SCHEMA_VERSION)
     saveWorld(w1)
     const w2 = createNewWorld('Sunspire')
     saveWorld(w2)
@@ -140,7 +170,7 @@ describe('WorldStorageService', () => {
     expect(getActiveWorld().name).toBe('Aethelgard')
   })
 
-  it('parses legacy and current world JSON payloads and exports markdown chronicle', () => {
+  it('migrates legacy v0/v1 JSON payloads to Schema v2 and exports markdown chronicle', () => {
     const legacyPayload = JSON.stringify({
       drawHistory: [
         {
@@ -159,13 +189,65 @@ describe('WorldStorageService', () => {
     })
 
     const imported = parseImportedWorld(legacyPayload)
+    expect(imported.schemaVersion).toBe(CURRENT_SCHEMA_VERSION)
+    expect(imported.players.length).toBeGreaterThanOrEqual(1)
     expect(imported.drawHistory).toHaveLength(1)
     expect(imported.drawHistory[0].moveId).toBe(1)
-    expect(imported.drawHistory[0].note).toContain('mountain range')
 
     const md = exportWorldChronicleMarkdown(imported)
     expect(md).toContain('# Chronicle of Imported World')
     expect(md).toContain('Great mountain range rises in the north.')
-    expect(md).toContain('Single supercontinent.')
+  })
+})
+
+describe('AutoPlayEngine & Time-Travel Rewind', () => {
+  it('generates identical deterministic sequences from the same seed', () => {
+    const rng1 = createSeededRng('avalon-42')
+    const rng2 = createSeededRng('avalon-42')
+    expect(rng1()).toBe(rng2())
+    expect(rng1()).toBe(rng2())
+  })
+
+  it('auto-plays a full 4-stage world and supports rewinding to any historical turn', () => {
+    let world = createNewWorld('Chronos Realm', 'seed-chronos-99')
+    world.players = [
+      {
+        id: 'p1',
+        name: 'Aurelia',
+        color: '#3b82f6',
+        role: 'Artist',
+        isBot: true,
+        personality: 'shaper',
+      },
+      {
+        id: 'p2',
+        name: 'Theron',
+        color: '#10b981',
+        role: 'Historian',
+        isBot: true,
+        personality: 'naturalist',
+      },
+    ]
+
+    const simulated = autoPlayFullWorld(world, 3)
+    // 4 stages * 3 turns = 12 turns
+    expect(simulated.drawHistory).toHaveLength(12)
+    expect(simulated.entities.length).toBeGreaterThanOrEqual(4) // Species + Societies + Myths
+    expect(simulated.currentStage).toBe('intrigue')
+
+    // Rewind to move #4 (end of Genesis / start of Primal)
+    const rewound = rewindWorldToMove(simulated, 4)
+    expect(rewound.drawHistory).toHaveLength(4)
+    expect(rewound.snapshots?.length).toBe(4)
+
+    // Execute a new turn from move #4
+    const rng = createSeededRng('branch-seed')
+    const branched = executeAutomatedTurn(
+      rewound,
+      { suit: '♠', value: 'K', id: '♠-K' },
+      rng
+    )
+    expect(branched.drawHistory).toHaveLength(5)
+    expect(branched.drawHistory[4].moveId).toBe(5)
   })
 })

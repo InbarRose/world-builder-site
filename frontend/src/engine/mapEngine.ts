@@ -1,4 +1,14 @@
-import { MapState, MapTile, TerrainType, TileOverlay, TilePattern } from './types'
+import {
+  FloraType,
+  GeographyPreset,
+  MapState,
+  MapTile,
+  ReliefType,
+  TerrainType,
+  TileOverlay,
+  TilePattern,
+  WorldEntity,
+} from './types'
 
 export const DEFAULT_MAP_WIDTH = 20
 export const DEFAULT_MAP_HEIGHT = 12
@@ -21,7 +31,7 @@ export const TERRAIN_PALETTE: Record<TerrainType, TerrainMetadata> = {
   },
   water: {
     id: 'water',
-    label: 'Coastal / River',
+    label: 'Coastal / Lake',
     color: '#3b82f6',
     borderColor: '#2563eb',
     symbol: '💧',
@@ -36,15 +46,15 @@ export const TERRAIN_PALETTE: Record<TerrainType, TerrainMetadata> = {
   earth: {
     id: 'earth',
     label: 'Highlands / Hills',
-    color: '#a8a29e',
-    borderColor: '#78716c',
+    color: '#d6d3d1',
+    borderColor: '#a8a29e',
     symbol: '⛰️',
   },
   forest: {
     id: 'forest',
-    label: 'Forest',
-    color: '#166534',
-    borderColor: '#14532d',
+    label: 'Woodland',
+    color: '#22c55e',
+    borderColor: '#16a34a',
     symbol: '🌲',
   },
   jungle: {
@@ -56,30 +66,30 @@ export const TERRAIN_PALETTE: Record<TerrainType, TerrainMetadata> = {
   },
   mountain: {
     id: 'mountain',
-    label: 'Mountain Peaks',
-    color: '#57534e',
-    borderColor: '#44403c',
+    label: 'Alpine Peaks',
+    color: '#78716c',
+    borderColor: '#57534e',
     symbol: '🏔️',
   },
   canyon: {
     id: 'canyon',
-    label: 'Canyon / Rift',
-    color: '#9a3412',
-    borderColor: '#7c2d12',
+    label: 'Canyon / Badlands',
+    color: '#c2410c',
+    borderColor: '#9a3412',
     symbol: '🏜️',
   },
   desert: {
     id: 'desert',
-    label: 'Arid Desert',
+    label: 'Golden Dunes',
     color: '#fde047',
-    borderColor: '#facc15',
+    borderColor: '#eab308',
     symbol: '☀️',
   },
   swamp: {
     id: 'swamp',
-    label: 'Marsh / Swamp',
-    color: '#3f6212',
-    borderColor: '#365314',
+    label: 'Marsh / Fen',
+    color: '#4d7c0f',
+    borderColor: '#3f6212',
     symbol: '🐊',
   },
   tundra: {
@@ -92,10 +102,27 @@ export const TERRAIN_PALETTE: Record<TerrainType, TerrainMetadata> = {
   volcano: {
     id: 'volcano',
     label: 'Volcanic Lands',
-    color: '#dc2626',
-    borderColor: '#991b1b',
+    color: '#b91c1c',
+    borderColor: '#7f1d1d',
     symbol: '🌋',
   },
+}
+
+export const RELIEF_PALETTE: Record<ReliefType, { id: ReliefType; label: string; symbol: string }> =
+  {
+    none: { id: 'none', label: 'Flat', symbol: '' },
+    hills: { id: 'hills', label: 'Rolling Hills', symbol: '⛰️' },
+    mountain: { id: 'mountain', label: 'Mountain Range', symbol: '🏔️' },
+    canyon: { id: 'canyon', label: 'Deep Canyon', symbol: '🕳️' },
+    volcano: { id: 'volcano', label: 'Active Volcano', symbol: '🌋' },
+  }
+
+export const FLORA_PALETTE: Record<FloraType, { id: FloraType; label: string; symbol: string }> = {
+  none: { id: 'none', label: 'None', symbol: '' },
+  forest: { id: 'forest', label: 'Pine / Oak Forest', symbol: '🌲' },
+  jungle: { id: 'jungle', label: 'Tropical Canopy', symbol: '🌴' },
+  marsh: { id: 'marsh', label: 'Wetland Reeds', symbol: '🌿' },
+  oasis: { id: 'oasis', label: 'Lush Oasis', symbol: '🏝️' },
 }
 
 export interface OverlayMetadata {
@@ -106,15 +133,18 @@ export interface OverlayMetadata {
 
 export const OVERLAY_PALETTE: Record<TileOverlay, OverlayMetadata> = {
   none: { id: 'none', label: 'None', symbol: '' },
-  settlement: { id: 'settlement', label: 'Village / Settlement', symbol: '⛺' },
-  city: { id: 'city', label: 'Major City', symbol: '🏛️' },
+  settlement: { id: 'settlement', label: 'Village / Outpost', symbol: '⛺' },
+  town: { id: 'town', label: 'Trading Town', symbol: '🏘️' },
+  city: { id: 'city', label: 'Walled City', symbol: '🏛️' },
+  capital: { id: 'capital', label: 'Grand Capital', symbol: '👑' },
   castle: { id: 'castle', label: 'Fortress / Citadel', symbol: '🏰' },
-  monument: { id: 'monument', label: 'Grand Monument', symbol: '🗿' },
+  monument: { id: 'monument', label: 'Wonder / Monument', symbol: '🗿' },
   ruins: { id: 'ruins', label: 'Ancient Ruins', symbol: '🏚️' },
   cave: { id: 'cave', label: 'Cavern / Lair', symbol: '🕳️' },
-  resource: { id: 'resource', label: 'Rich Resource', symbol: '💎' },
-  battle: { id: 'battle', label: 'Battleground', symbol: '⚔️' },
+  resource: { id: 'resource', label: 'Strategic Resource', symbol: '💎' },
+  battle: { id: 'battle', label: 'Historic Battleground', symbol: '⚔️' },
   myth: { id: 'myth', label: 'Mythic Anomaly', symbol: '✨' },
+  historic_site: { id: 'historic_site', label: 'Historic Landmark', symbol: '📍' },
 }
 
 export function getTileId(col: number, row: number): string {
@@ -131,8 +161,12 @@ export function createDefaultTile(
     col,
     row,
     terrain,
+    relief: 'none',
+    flora: 'none',
     pattern: 'solid',
     overlay: 'none',
+    hasRiver: false,
+    hasRoad: false,
     tags: [],
     linkedEventIds: [],
     linkedEntityIds: [],
@@ -141,7 +175,9 @@ export function createDefaultTile(
 
 export function createInitialMap(
   width: number = DEFAULT_MAP_WIDTH,
-  height: number = DEFAULT_MAP_HEIGHT
+  height: number = DEFAULT_MAP_HEIGHT,
+  preset: GeographyPreset = 'continent',
+  rng?: () => number
 ): MapState {
   const tiles: Record<string, MapTile> = {}
   const centerX = (width - 1) / 2
@@ -151,22 +187,126 @@ export function createInitialMap(
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      // Create a gentle default central continent surrounded by ocean
-      const normDist =
-        Math.pow((col - centerX) / radiusX, 2) + Math.pow((row - centerY) / radiusY, 2)
+      const jitter = rng ? (rng() - 0.5) * 0.28 : 0
       let terrain: TerrainType = 'ocean'
-      if (normDist < 0.35) {
-        terrain = 'earth'
-      } else if (normDist < 0.85) {
-        terrain = 'plains'
-      } else if (normDist < 1.05) {
-        terrain = 'water'
+      let relief: ReliefType = 'none'
+      let flora: FloraType = 'none'
+
+      if (preset === 'archipelago') {
+        const c1 =
+          Math.pow((col - width * 0.25) / (width * 0.16), 2) +
+          Math.pow((row - height * 0.35) / (height * 0.22), 2)
+        const c2 =
+          Math.pow((col - width * 0.65) / (width * 0.18), 2) +
+          Math.pow((row - height * 0.6) / (height * 0.22), 2)
+        const c3 =
+          Math.pow((col - width * 0.5) / (width * 0.12), 2) +
+          Math.pow((row - height * 0.25) / (height * 0.16), 2)
+        const minDist = Math.min(c1, c2, c3) + jitter
+        if (minDist < 0.4) {
+          terrain = 'earth'
+          relief = 'hills'
+        } else if (minDist < 0.85) {
+          terrain = 'plains'
+          flora = minDist < 0.6 ? 'forest' : 'none'
+        } else if (minDist < 1.15) {
+          terrain = 'water'
+        }
+      } else if (preset === 'twin-continents') {
+        const leftDist =
+          Math.pow((col - width * 0.26) / (width * 0.2), 2) +
+          Math.pow((row - centerY) / (height * 0.36), 2) +
+          jitter
+        const rightDist =
+          Math.pow((col - width * 0.74) / (width * 0.2), 2) +
+          Math.pow((row - centerY) / (height * 0.36), 2) +
+          jitter
+        const d = Math.min(leftDist, rightDist)
+        if (d < 0.3) {
+          terrain = 'earth'
+          relief = 'mountain'
+        } else if (d < 0.85) {
+          terrain = 'plains'
+        } else if (d < 1.1) {
+          terrain = 'water'
+        }
+      } else if (preset === 'inland-sea') {
+        const distFromCenter =
+          Math.pow((col - centerX) / radiusX, 2) +
+          Math.pow((row - centerY) / radiusY, 2) +
+          jitter
+        if (distFromCenter < 0.35) {
+          terrain = 'water'
+        } else if (distFromCenter < 1.2) {
+          terrain = 'plains'
+          if (distFromCenter > 0.9) relief = 'hills'
+        } else {
+          terrain = 'earth'
+          relief = 'mountain'
+        }
+      } else if (preset === 'pangaea') {
+        const normDist =
+          Math.pow((col - centerX) / (width * 0.44), 2) +
+          Math.pow((row - centerY) / (height * 0.44), 2) +
+          jitter
+        if (normDist < 0.25) {
+          terrain = 'mountain'
+          relief = 'mountain'
+        } else if (normDist < 0.5) {
+          terrain = 'earth'
+          relief = 'hills'
+        } else if (normDist < 0.92) {
+          terrain = 'plains'
+        } else if (normDist < 1.08) {
+          terrain = 'water'
+        }
+      } else {
+        // Standard central continent
+        const normDist =
+          Math.pow((col - centerX) / radiusX, 2) +
+          Math.pow((row - centerY) / radiusY, 2) +
+          jitter
+        if (normDist < 0.35) {
+          terrain = 'earth'
+          relief = 'hills'
+        } else if (normDist < 0.85) {
+          terrain = 'plains'
+        } else if (normDist < 1.05) {
+          terrain = 'water'
+        }
       }
-      tiles[getTileId(col, row)] = createDefaultTile(col, row, terrain)
+
+      const tile = createDefaultTile(col, row, terrain)
+      tile.relief = relief
+      tile.flora = flora
+      tiles[tile.id] = tile
     }
   }
 
   return { width, height, tiles }
+}
+
+export function resizeMap(map: MapState, newWidth: number, newHeight: number): MapState {
+  const clampedW = Math.max(6, Math.min(40, newWidth))
+  const clampedH = Math.max(6, Math.min(30, newHeight))
+  const tiles: Record<string, MapTile> = {}
+
+  for (let row = 0; row < clampedH; row++) {
+    for (let col = 0; col < clampedW; col++) {
+      const id = getTileId(col, row)
+      if (map.tiles[id]) {
+        tiles[id] = { ...map.tiles[id], col, row, id }
+      } else {
+        tiles[id] = createDefaultTile(col, row, 'ocean')
+      }
+    }
+  }
+
+  return {
+    width: clampedW,
+    height: clampedH,
+    tiles,
+  }
 }
 
 export function paintTile(
@@ -252,10 +392,21 @@ export function bucketFillTerrain(
   }
 }
 
-export function exportMapToSvgString(map: MapState, worldName: string = 'World Map'): string {
+export function exportMapToSvgString(
+  map: MapState,
+  worldName: string = 'World Map',
+  entities: WorldEntity[] = []
+): string {
   const tileSize = 48
   const svgWidth = map.width * tileSize
   const svgHeight = map.height * tileSize
+
+  const entityColorMap: Record<string, string> = {}
+  for (const ent of entities) {
+    if (ent.color) {
+      entityColorMap[ent.id] = ent.color
+    }
+  }
 
   let rects = ''
   for (let row = 0; row < map.height; row++) {
@@ -267,7 +418,11 @@ export function exportMapToSvgString(map: MapState, worldName: string = 'World M
       const x = col * tileSize
       const y = row * tileSize
 
-      rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${meta.color}" stroke="${meta.borderColor}" stroke-width="1" />`
+      const territoryColor = tile.territoryId ? entityColorMap[tile.territoryId] : undefined
+      const strokeColor = territoryColor || meta.borderColor
+      const strokeWidth = territoryColor ? '2.5' : '1'
+
+      rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${meta.color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
 
       if (tile.secondaryTerrain && tile.pattern && tile.pattern !== 'solid') {
         const secColor = TERRAIN_PALETTE[tile.secondaryTerrain]?.color || meta.color
@@ -280,9 +435,28 @@ export function exportMapToSvgString(map: MapState, worldName: string = 'World M
         }
       }
 
-      const displaySymbol = overlayMeta.symbol || meta.symbol
-      if (displaySymbol) {
-        rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 5}" font-size="18" text-anchor="middle">${displaySymbol}</text>`
+      if (tile.hasRiver) {
+        rects += `<path d="M ${x} ${y + tileSize * 0.3} Q ${x + tileSize * 0.5} ${y + tileSize * 0.7}, ${x + tileSize} ${y + tileSize * 0.4}" stroke="#2563eb" stroke-width="3.5" fill="none" />`
+      }
+
+      if (tile.hasRoad) {
+        rects += `<line x1="${x}" y1="${y + tileSize * 0.5}" x2="${x + tileSize}" y2="${y + tileSize * 0.5}" stroke="#78350f" stroke-width="2" stroke-dasharray="4 2" />`
+      }
+
+      // Composite symbols (relief + flora + overlay)
+      const reliefSym =
+        tile.relief && tile.relief !== 'none' ? RELIEF_PALETTE[tile.relief]?.symbol : ''
+      const floraSym =
+        tile.flora && tile.flora !== 'none' ? FLORA_PALETTE[tile.flora]?.symbol : ''
+
+      if (reliefSym && floraSym && overlayMeta.id === 'none') {
+        rects += `<text x="${x + 14}" y="${y + 24}" font-size="14" text-anchor="middle">${reliefSym}</text>`
+        rects += `<text x="${x + 34}" y="${y + 30}" font-size="14" text-anchor="middle">${floraSym}</text>`
+      } else {
+        const displaySymbol = overlayMeta.symbol || floraSym || reliefSym || meta.symbol
+        if (displaySymbol) {
+          rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 5}" font-size="18" text-anchor="middle">${displaySymbol}</text>`
+        }
       }
 
       if (tile.label) {
