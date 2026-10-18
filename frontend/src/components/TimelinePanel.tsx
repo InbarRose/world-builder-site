@@ -9,6 +9,8 @@ import {
   MapPin,
   Users,
   ArrowUpDown,
+  RotateCcw,
+  Printer,
 } from 'lucide-react'
 import { DrawRecord, StageId, WorldEntity, WorldState } from '../engine/types'
 import { DEFAULT_CARD_COLORS, STAGES, getCardDisplay } from '../engine/deckEngine'
@@ -19,6 +21,7 @@ interface TimelinePanelProps {
   cardColors?: Record<string, string>
   onUpdateRecord: (recordId: string, updates: Partial<DrawRecord>) => void
   onClearHistory: () => void
+  onRewindToMove?: (moveId: number) => void
 }
 
 export function TimelinePanel({
@@ -26,6 +29,7 @@ export function TimelinePanel({
   cardColors = DEFAULT_CARD_COLORS,
   onUpdateRecord,
   onClearHistory,
+  onRewindToMove,
 }: TimelinePanelProps) {
   const [stageFilter, setStageFilter] = useState<StageId | 'all'>('all')
   const [entityFilter, setEntityFilter] = useState<string>('all')
@@ -47,8 +51,11 @@ export function TimelinePanel({
         const matchNote = rec.note?.toLowerCase().includes(q)
         const matchPower = rec.power?.toLowerCase().includes(q)
         const matchEpoch = rec.epochYear?.toLowerCase().includes(q)
+        const matchPlayer = rec.playerName?.toLowerCase().includes(q)
         const matchTile = rec.linkedTileIds?.some((t) => t.toLowerCase().includes(q))
-        if (!matchNote && !matchPower && !matchEpoch && !matchTile) return false
+        if (!matchNote && !matchPower && !matchEpoch && !matchPlayer && !matchTile) {
+          return false
+        }
       }
       return true
     })
@@ -64,8 +71,9 @@ export function TimelinePanel({
         const { display } = getCardDisplay(rec.card, cardColors)
         const stageName = STAGES.find((s) => s.id === rec.stage)?.name || 'Custom'
         const epoch = rec.epochYear ? ` [${rec.epochYear}]` : ''
+        const player = rec.playerName ? ` (${rec.playerName})` : ''
         const noteText = rec.note ? ` — ${rec.note}` : ''
-        return `Turn #${rec.moveId}${epoch} (${stageName} · ${display} ${rec.power || ''})${noteText}`
+        return `Turn #${rec.moveId}${epoch}${player} (${stageName} · ${display} ${rec.power || ''})${noteText}`
       })
       .join('\n')
     navigator.clipboard?.writeText(text)
@@ -116,12 +124,12 @@ export function TimelinePanel({
           <div>
             <h3 className="text-xl font-bold">World Chronicle & Timeline</h3>
             <p className="text-xs text-muted-foreground">
-              {world.drawHistory.length} historical turns recorded across the ages
+              {world.drawHistory.length} historical turns recorded · Edit notes or rewind to any turn to branch history
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="no-print flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setSortAsc(!sortAsc)}
@@ -151,6 +159,16 @@ export function TimelinePanel({
           </button>
           <button
             type="button"
+            onClick={() => window.print()}
+            disabled={world.drawHistory.length === 0}
+            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
+            title="Print World Chronicle"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print</span>
+          </button>
+          <button
+            type="button"
             onClick={onClearHistory}
             disabled={world.drawHistory.length === 0}
             className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs text-destructive disabled:opacity-50"
@@ -162,14 +180,14 @@ export function TimelinePanel({
       </div>
 
       {/* Filter Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg">
+      <div className="no-print grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg">
         <div className="relative">
           <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-2.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search events, powers, notes, tiles..."
+            placeholder="Search events, powers, players, notes, tiles..."
             className="input w-full pl-9 text-xs h-9"
           />
         </div>
@@ -202,7 +220,7 @@ export function TimelinePanel({
             <option value="all">All Species, Civilizations & Myths</option>
             {world.entities.map((ent: WorldEntity) => (
               <option key={ent.id} value={ent.id}>
-                {ent.name} ({ent.category})
+                {ent.icon || ''} {ent.name} ({ent.category})
               </option>
             ))}
           </select>
@@ -214,15 +232,16 @@ export function TimelinePanel({
         <div className="text-center py-10 text-muted-foreground border-2 border-dashed border-border rounded-lg">
           <p className="text-sm">
             {world.drawHistory.length === 0
-              ? 'No cards drawn yet. Draw cards to weave your world’s history!'
+              ? 'No cards drawn yet. Draw a card or run Auto-Play to weave your world’s history!'
               : 'No timeline events match your active filters.'}
           </p>
         </div>
       ) : (
-        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+        <div className="space-y-3 max-h-[640px] overflow-y-auto pr-1">
           {filteredRecords.map((record) => {
             const { display, color } = getCardDisplay(record.card, cardColors)
             const stageObj = STAGES.find((s) => s.id === record.stage)
+            const isLatestTurn = record.moveId === world.drawHistory.length
 
             return (
               <div
@@ -230,17 +249,28 @@ export function TimelinePanel({
                 className="p-4 bg-muted/40 border border-border rounded-lg space-y-3 transition-colors hover:bg-muted/60"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-bold">
                       Turn #{record.moveId}
                     </span>
                     <span className={`text-2xl font-bold ${color}`}>{display}</span>
                     <div>
-                      <div className="font-semibold text-sm flex items-center gap-2">
+                      <div className="font-semibold text-sm flex flex-wrap items-center gap-2">
                         <span>{record.power || 'Card Draw'}</span>
                         {stageObj && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-background border border-border text-muted-foreground">
                             {stageObj.number}. {stageObj.name}
+                          </span>
+                        )}
+                        {record.playerName && (
+                          <span
+                            className="text-xs px-2 py-0.5 rounded-full font-medium text-white"
+                            style={{
+                              backgroundColor: record.playerColor || '#3b82f6',
+                            }}
+                          >
+                            {record.playerName}
+                            {record.isAutoPlayed ? ' (Bot)' : ''}
                           </span>
                         )}
                       </div>
@@ -249,8 +279,22 @@ export function TimelinePanel({
                       )}
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(record.timestamp).toLocaleTimeString()}
+
+                  <div className="flex items-center gap-2">
+                    {onRewindToMove && !isLatestTurn && (
+                      <button
+                        type="button"
+                        onClick={() => onRewindToMove(record.moveId)}
+                        className="no-print btn-outline px-2.5 py-1 text-xs flex items-center gap-1"
+                        title={`Rewind world state to Turn #${record.moveId} and branch history from here`}
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        <span>Rewind Here</span>
+                      </button>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(record.timestamp).toLocaleTimeString()}
+                    </span>
                   </div>
                 </div>
 
@@ -260,12 +304,12 @@ export function TimelinePanel({
                     value={record.note || ''}
                     onChange={(e) => onUpdateRecord(record.id, { note: e.target.value })}
                     placeholder="Chronicle what happened in the world during this turn..."
-                    className="input w-full text-sm min-h-[60px]"
+                    className="input w-full text-sm min-h-[58px]"
                   />
                 </div>
 
                 {/* Spatial & Entity Linkages */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/60 text-xs">
+                <div className="no-print flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/60 text-xs">
                   {/* Linked Map Coordinates */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-muted-foreground flex items-center gap-1 font-medium">
@@ -317,7 +361,7 @@ export function TimelinePanel({
                   {/* Linked Entities */}
                   {world.entities.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-muted-foreground font-medium">Entities:</span>
+                      <span className="text-muted-foreground font-medium">Codex:</span>
                       {world.entities.map((ent) => {
                         const isLinked = (record.linkedEntityIds || []).includes(ent.id)
                         return (
@@ -331,7 +375,7 @@ export function TimelinePanel({
                                 : 'bg-background border-border text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            {ent.name}
+                            {ent.icon} {ent.name}
                           </button>
                         )
                       })}

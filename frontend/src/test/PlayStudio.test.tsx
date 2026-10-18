@@ -23,7 +23,7 @@ describe('Play Studio & Rules Integration', () => {
     )
   })
 
-  it('renders Play Studio with default world, draws a card, and logs turn in timeline', async () => {
+  it('renders Play Studio with default world, draws a card, and logs turn with player attribution', async () => {
     render(
       <BrowserRouter>
         <Play />
@@ -41,27 +41,43 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByText('Turn #1')).toBeInTheDocument()
   })
 
-  it('switches between studio workspace tabs and opens World Manager modal', () => {
+  it('supports Companion Mode toggles, Hotseat Players, Auto-Play, and Codex tabs', () => {
     render(
       <BrowserRouter>
         <Play />
       </BrowserRouter>
     )
 
+    // Toggle Players Panel & add a hotseat player
+    fireEvent.click(screen.getByRole('button', { name: /Players \(1\)/i }))
+    expect(
+      screen.getByText(/Hotseat Players & Bot Personalities/i)
+    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Add Player Seat/i }))
+    expect(screen.getByRole('button', { name: /Players \(2\)/i })).toBeInTheDocument()
+
+    // Toggle Auto-Play Panel & run 1 auto turn
+    fireEvent.click(screen.getByRole('button', { name: /Auto-Play/i }))
+    expect(
+      screen.getByText(/Procedural Seeded Auto-Play & World Generator/i)
+    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Auto-Play 1 Turn/i }))
+    expect(screen.getByText('Turn #1')).toBeInTheDocument()
+
     // Switch to World Map tab
     fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
     expect(screen.getByRole('grid', { name: /World Map Grid/i })).toBeInTheDocument()
 
-    // Switch to Registry tab
-    fireEvent.click(screen.getByRole('tab', { name: /Registry/i }))
-    expect(screen.getByText(/Register World Entity/i)).toBeInTheDocument()
+    // Switch to Codex tab
+    fireEvent.click(screen.getByRole('tab', { name: /Codex/i }))
+    expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
 
     // Open World Manager Modal
     fireEvent.click(screen.getByRole('button', { name: /Worlds \(1\)/i }))
     expect(screen.getByRole('dialog', { name: /World Manager/i })).toBeInTheDocument()
   })
 
-  it('renders Rules page with completed Glossary of Terms', () => {
+  it('renders Rules page with Glossary and switches to 1-Page Quick Reference Card', () => {
     render(
       <BrowserRouter>
         <Rules />
@@ -70,6 +86,12 @@ describe('Play Studio & Rules Integration', () => {
 
     expect(screen.getByRole('heading', { name: 'Glossary of Terms' })).toBeInTheDocument()
     expect(screen.getByText('Fantastical Power (J, Q, K)')).toBeInTheDocument()
-    expect(screen.getByText('Artist, Historian & Keeper')).toBeInTheDocument()
+
+    // Switch to 1-Page Quick Reference Card
+    fireEvent.click(screen.getByRole('tab', { name: /1-Page Quick Reference Card/i }))
+    expect(
+      screen.getByText(/World Building — Quick Reference Sheet/i)
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Stage & Suit Power Matrix/i)).toBeInTheDocument()
   })
 })

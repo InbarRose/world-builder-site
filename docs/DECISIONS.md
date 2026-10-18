@@ -63,7 +63,30 @@ status: active
 
 ---
 
+## ADR-006: Deterministic Seeded Auto-Play Engine & Time-Travel Snapshots (No LLM/AI)
+
+- **Status**: Accepted
+- **Context**: Players and developers need a way to simulate single turns, stages, or entire world histories automatically, test how worlds evolve under different strategic tendencies, or mix human and automated seats in 1–6 player hotseat mode — without relying on external AI/LLM APIs. Furthermore, players want to rewind to any historical turn, edit details, and re-run from that point.
+- **Decision**: Implement a pure deterministic seeded PRNG (`mulberry32`) and heuristic decision-tree `AutoPlayEngine` (`frontend/src/engine/autoPlayEngine.ts`) with 6 distinct bot personalities (`shaper`, `naturalist`, `architect`, `chronicler`, `catalyst`, `mythmaker`), paired with per-turn `TurnSnapshot` state checkpoints (`recordTurnSnapshot` / `rewindWorldToMove`).
+- **Consequences**:
+  - 100% offline, instant, deterministic world generation with zero API cost or latency.
+  - Same seed + settings produce identical worlds, making testing and sharing seeds effortless.
+  - Non-destructive time-travel rewind (`rewindWorldToMove`) lets players roll back the world state to any turn, edit notes/tiles, and branch history.
+
+---
+
+## ADR-007: Schema v2 Backwards-Compatible Migration & Multi-Layer Cartography
+
+- **Status**: Accepted
+- **Context**: Enhancements to the map maker (composite relief + flora overlays, rivers, roads, faction territory borders, adjustable grid dimensions) and world state (hotseat players, companion view modes, visual styles, snapshots) expand the persisted JSON schema.
+- **Decision**: Introduce `CURRENT_SCHEMA_VERSION = 2` with an automatic `migrateWorldState(raw)` pipeline in `storageService.ts` that upgrades legacy v0/v1 saves seamlessly upon load or import, plus 3 visual themes (`atlas`, `dark`, `simplified`) and `@media print` stylesheets for offline tabletop play and the 1-Page Quick Reference Card.
+- **Consequences**:
+  - Existing v1 worlds load and import without data loss.
+  - Rich composite SVG cartography (`mountain + forest`, rivers, roads, territory borders) works in both interactive play and standalone map maker modes.
+
+---
+
 ## Tasks
 
-- [ ] Add future ADRs whenever new foundational technical decisions are made.
+- [x] Add ADR-006 and ADR-007 documenting Seeded Auto-Play, Time-Travel Snapshots, and Schema v2 Migration.
 

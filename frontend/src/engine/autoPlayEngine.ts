@@ -6,7 +6,7 @@ import {
   getNextStage,
   isFantasticalCard,
 } from './deckEngine'
-import { createInitialMap, getTileId, paintTile } from './mapEngine'
+import { createInitialMap, paintTile } from './mapEngine'
 import {
   BOT_PERSONALITIES,
   MYTH_PRESETS,
@@ -233,7 +233,7 @@ export function executeAutomatedTurn(
   const adj = pickRandom(REGION_NAMES, rng)
 
   let updatedMap = cloneMapState(world.map)
-  const updatedEntities = world.entities.map((e) => ({
+  const updatedEntities: WorldEntity[] = world.entities.map((e) => ({
     ...e,
     traits: [...e.traits],
     abilities: e.abilities ? [...e.abilities] : [],

@@ -44,14 +44,14 @@ describe('TimelinePanel & EntityRegistry Components', () => {
     expect(screen.getByDisplayValue(/Shattered peaks rise/i)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Festival of the Silver Moon/i)).toBeInTheDocument()
 
-    const searchInput = screen.getByPlaceholderText(/Search events, powers, notes/i)
+    const searchInput = screen.getByPlaceholderText(/Search events, powers/i)
     fireEvent.change(searchInput, { target: { value: 'Silver Moon' } })
 
     expect(screen.queryByDisplayValue(/Shattered peaks rise/i)).not.toBeInTheDocument()
     expect(screen.getByDisplayValue(/Festival of the Silver Moon/i)).toBeInTheDocument()
   })
 
-  it('registers a new species in EntityRegistry', () => {
+  it('registers a new species and loads a preset in EntityRegistry', () => {
     const handleChange = vi.fn()
 
     render(
@@ -63,7 +63,13 @@ describe('TimelinePanel & EntityRegistry Components', () => {
       />
     )
 
-    const nameInput = screen.getByPlaceholderText(/Sylvan Elves/i)
+    // Test loading a species preset
+    const presetBtn = screen.getByRole('button', { name: /Sylvan Star-Elves/i })
+    fireEvent.click(presetBtn)
+
+    const nameInput = screen.getByPlaceholderText(/Sylvan Elves/i) as HTMLInputElement
+    expect(nameInput.value).toBe('Sylvan Star-Elves')
+
     fireEvent.change(nameInput, { target: { value: 'Starborn Elves' } })
 
     const traitsInput = screen.getByPlaceholderText(/Master Sailors/i)

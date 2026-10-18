@@ -32,11 +32,20 @@ status: active
 - [x] **Phase 4: Integrated World Studio & Final Polish**
   - [x] Unified World Studio workspace layout
   - [x] Theme polish and full accessibility checks
-  - [x] Automated regression tests (24 tests across 5 suites passing)
+  - [x] Automated regression tests
+- [x] **Phase 5: Vision Refinement & v2.1 Studio Polish**
+  - [x] Printable Rules & 1-Page Quick Reference Card with `@media print` CSS
+  - [x] Play Companion View Toggles (`Cards Only`, `Cards + Powers`, `Companion Tracker`, `Full World Studio`)
+  - [x] Hotseat Multiplayer (1–6 human or bot seats with roles and turn attribution)
+  - [x] Multi-layer SVG Map Maker (relief + flora overlays, rivers, roads, faction territories, custom grid dimensions, geography templates)
+  - [x] World Codex & Wiki with built-in presets for Species, Civilizations, and Myths
+  - [x] Deterministic Seeded Auto-Play Engine (6 bot personalities, no AI/LLM) & Time-Travel Turn Rewind
+  - [x] Visual Styles (`Fantasy Atlas`, `Dark Theme`, `Simplified / Print`) & Schema v2 backwards-compatible migration
 
 ---
 
 ## Tasks
 
-- [x] Complete Phase 0–4 implementation and test verification.
+- [x] Complete Phase 0–5 implementation and test verification (27/27 tests passing).
+
 

@@ -14,11 +14,22 @@ import {
   Users,
   Layers,
   Columns,
+  Bot,
+  Sparkles,
+  UserPlus,
+  Trash2,
+  FastForward,
+  Dices,
 } from 'lucide-react'
 import {
+  BotPersonalityId,
   Card,
+  CompanionViewMode,
   DrawRecord,
+  GeographyPreset,
   MapState,
+  PlayerRole,
+  PlayerSeat,
   PowerData,
   StageId,
   WorldEntity,
@@ -45,16 +56,27 @@ import {
   getActiveWorld,
   listSavedWorlds,
   parseImportedWorld,
+  recordTurnSnapshot,
+  rewindWorldToMove,
   saveWorld,
   serializeWorld,
   setActiveWorldId,
 } from '../engine/storageService'
+import {
+  autoPlayFullWorld,
+  autoPlayStage,
+  createSeededRng,
+  executeAutomatedTurn,
+} from '../engine/autoPlayEngine'
+import { BOT_PERSONALITIES, PLAYER_COLORS } from '../engine/presets'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
 import { WorldManagerModal } from '../components/WorldManagerModal'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
+
+const ROLES: PlayerRole[] = ['Artist', 'Historian', 'Keeper', 'Player']
 
 export function Play() {
   const [world, setWorld] = useState<WorldState>(() => getActiveWorld())
@@ -69,13 +91,29 @@ export function Play() {
   const [showHelpDialog, setShowHelpDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showWorldManager, setShowWorldManager] = useState(false)
+  const [showPlayersPanel, setShowPlayersPanel] = useState(false)
+  const [showAutoPlayPanel, setShowAutoPlayPanel] = useState(false)
   const [exportFileName, setExportFileName] = useState('')
   const [cardColors, setCardColors] = useState<Record<string, string>>(DEFAULT_CARD_COLORS)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { deckConfig, currentStage, stageNotes, drawHistory } = world
+  const {
+    deckConfig,
+    currentStage,
+    stageNotes,
+    drawHistory,
+    players,
+    currentPlayerIndex,
+    companionMode,
+    generationSettings,
+  } = world
   const { numberRange, faceCards, aceCount, jokerCount, stagesEnabled } = deckConfig
+
+  const activePlayer: PlayerSeat | undefined =
+    players && players.length > 0
+      ? players[currentPlayerIndex % players.length]
+      : undefined
 
   const persistWorldUpdate = useCallback((updater: (prev: WorldState) => WorldState) => {
     setWorld((prev) => {
@@ -121,6 +159,18 @@ export function Play() {
     setDeck(newDeck)
     setDrawnCard(card)
 
+    // If the active seat is set to Auto-Bot, run the bot's intelligent turn!
+    if (activePlayer?.isBot) {
+      const rng = createSeededRng(
+        `${generationSettings.seed}-${drawHistory.length}-${card.id}`
+      )
+      persistWorldUpdate((prev) => executeAutomatedTurn(prev, card, rng))
+      if (newDeck.length === 0) {
+        setShowDeckEmptyDialog(true)
+      }
+      return
+    }
+
     let power: string | undefined = undefined
     if (stagesEnabled) {
       const data = await loadPowerData(currentStage, card)
@@ -139,16 +189,115 @@ export function Play() {
       linkedTileIds: [],
       linkedEntityIds: [],
       epochYear: calculateEpochYear(stagesEnabled ? currentStage : undefined, moveId),
+      playerId: activePlayer?.id,
+      playerName: activePlayer?.name,
+      playerColor: activePlayer?.color,
+      isAutoPlayed: false,
     }
 
-    persistWorldUpdate((prev) => ({
-      ...prev,
-      drawHistory: [...prev.drawHistory, record],
-    }))
+    persistWorldUpdate((prev) => {
+      const nextPlayerIdx =
+        prev.players.length > 0
+          ? (prev.currentPlayerIndex + 1) % prev.players.length
+          : 0
+      const updated: WorldState = {
+        ...prev,
+        drawHistory: [...prev.drawHistory, record],
+        currentPlayerIndex: nextPlayerIdx,
+      }
+      const snap = recordTurnSnapshot(updated, moveId)
+      updated.snapshots = [...(updated.snapshots || []), snap]
+      return updated
+    })
 
     if (newDeck.length === 0) {
       setShowDeckEmptyDialog(true)
     }
+  }
+
+  const handleAutoStepOneTurn = () => {
+    let currentDeck = deck.length > 0 ? [...deck] : rebuildDeck()
+    const card = currentDeck.pop()!
+    setDeck(currentDeck)
+    setDrawnCard(card)
+
+    const rng = createSeededRng(
+      `${generationSettings.seed}-step-${drawHistory.length}-${card.id}`
+    )
+    persistWorldUpdate((prev) => executeAutomatedTurn(prev, card, rng))
+  }
+
+  const handleAutoPlayCurrentStage = () => {
+    const { world: nextWorld, deck: remainingDeck } = autoPlayStage(world, deck, 12)
+    const saved = saveWorld(nextWorld)
+    setWorld(saved)
+    setSavedWorlds(listSavedWorlds())
+    setDeck(remainingDeck)
+    if (saved.drawHistory.length > 0) {
+      setDrawnCard(saved.drawHistory[saved.drawHistory.length - 1].card)
+    }
+  }
+
+  const handleAutoPlayFullWorld = () => {
+    const simulated = autoPlayFullWorld(world, 8)
+    const saved = saveWorld(simulated)
+    setWorld(saved)
+    setSavedWorlds(listSavedWorlds())
+    setDeck(buildShuffledDeck(saved.deckConfig))
+    if (saved.drawHistory.length > 0) {
+      setDrawnCard(saved.drawHistory[saved.drawHistory.length - 1].card)
+    }
+  }
+
+  const handleRewindToMove = (targetMoveId: number) => {
+    persistWorldUpdate((prev) => rewindWorldToMove(prev, targetMoveId))
+    setDeck(rebuildDeck())
+  }
+
+  const handleAddPlayerSeat = () => {
+    if (players.length >= 6) return
+    const idx = players.length
+    const defaultRole: PlayerRole =
+      idx === 0 ? 'Artist' : idx === 1 ? 'Historian' : idx === 2 ? 'Keeper' : 'Player'
+    const personalities: BotPersonalityId[] = [
+      'shaper',
+      'naturalist',
+      'architect',
+      'chronicler',
+      'catalyst',
+      'mythmaker',
+    ]
+    const newSeat: PlayerSeat = {
+      id: `player_${Date.now()}_${idx}`,
+      name: `Player ${idx + 1}`,
+      color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
+      role: defaultRole,
+      isBot: false,
+      personality: personalities[idx % personalities.length],
+    }
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      players: [...prev.players, newSeat],
+    }))
+  }
+
+  const handleUpdatePlayerSeat = (seatId: string, updates: Partial<PlayerSeat>) => {
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      players: prev.players.map((p) => (p.id === seatId ? { ...p, ...updates } : p)),
+    }))
+  }
+
+  const handleRemovePlayerSeat = (seatId: string) => {
+    if (players.length <= 1) return
+    persistWorldUpdate((prev) => {
+      const filtered = prev.players.filter((p) => p.id !== seatId)
+      return {
+        ...prev,
+        players: filtered,
+        currentPlayerIndex: prev.currentPlayerIndex % filtered.length,
+      }
+    })
   }
 
   const handleUpdateRecord = (recordId: string, updates: Partial<DrawRecord>) => {
@@ -212,6 +361,7 @@ export function Play() {
     persistWorldUpdate((prev) => ({
       ...prev,
       drawHistory: [],
+      snapshots: [],
     }))
   }
 
@@ -227,6 +377,16 @@ export function Play() {
       ...prev,
       entities: newEntities,
     }))
+  }
+
+  const handleCompanionModeChange = (mode: CompanionViewMode) => {
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      companionMode: mode,
+    }))
+    if (mode !== 'full-studio') {
+      setActiveTab('cards')
+    }
   }
 
   const handleExportGameState = () => {
@@ -319,162 +479,542 @@ export function Play() {
   const latestRecord =
     drawHistory.length > 0 ? drawHistory[drawHistory.length - 1] : null
 
+  const showPowerDetails = companionMode !== 'cards-only'
+  const showTimelineRecords =
+    companionMode === 'companion-tracker' || companionMode === 'full-studio'
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-5">
       {/* Studio Top Bar */}
-      <div className="card p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-            <Globe className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{world.name}</h1>
-              {currentStageData && (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                  Stage {currentStageData.number}: {currentStageData.name}
-                </span>
-              )}
+      <div className="no-print card p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+              <Globe className="h-6 w-6" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Auto-saved locally · {drawHistory.length} turns · {world.entities.length} entities
-            </p>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold">{world.name}</h1>
+                {currentStageData && (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                    Stage {currentStageData.number}: {currentStageData.name}
+                  </span>
+                )}
+                {activePlayer && (
+                  <span
+                    className="text-xs px-2.5 py-0.5 rounded-full text-white font-medium flex items-center gap-1"
+                    style={{ backgroundColor: activePlayer.color }}
+                  >
+                    <span>
+                      Turn: {activePlayer.name} ({activePlayer.role})
+                    </span>
+                    {activePlayer.isBot && (
+                      <span>
+                        · {BOT_PERSONALITIES[activePlayer.personality]?.icon} Bot
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Schema v{world.schemaVersion || 2} · {drawHistory.length} turns ·{' '}
+                {world.entities.length} codex entries · {players.length} player seat(s)
+              </p>
+            </div>
+          </div>
+
+          {/* World Management, Players, Auto-Play & File Actions */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowPlayersPanel(!showPlayersPanel)}
+              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
+                showPlayersPanel
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background border-border hover:bg-accent'
+              }`}
+              title="Configure 1–6 Hotseat Players or Bot Seats"
+            >
+              <Users className="h-3.5 w-3.5" />
+              <span>Players ({players.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowAutoPlayPanel(!showAutoPlayPanel)}
+              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
+                showAutoPlayPanel
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background border-border hover:bg-accent'
+              }`}
+              title="Procedural Seeded Auto-Play & World Generator"
+            >
+              <Bot className="h-3.5 w-3.5" />
+              <span>Auto-Play</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowWorldManager(true)}
+              className="btn-outline px-3 py-2 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span>Worlds ({savedWorlds.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
+              title="Import world JSON file"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              <span>Import</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportGameState}
+              className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
+              title="Export complete world state to JSON"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Export JSON</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowHelpDialog(true)}
+              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
+              title="Help & instructions"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Help</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileImport}
+              className="hidden"
+            />
           </div>
         </div>
 
-        {/* Workspace View Selector */}
-        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Studio Workspace Tabs">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'cards'}
-            onClick={() => setActiveTab('cards')}
-            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              activeTab === 'cards'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <Layers className="h-4 w-4" />
-            <span>Deck & Draw</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'map'}
-            onClick={() => setActiveTab('map')}
-            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              activeTab === 'map'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <MapIcon className="h-4 w-4" />
-            <span>World Map</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'timeline'}
-            onClick={() => setActiveTab('timeline')}
-            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              activeTab === 'timeline'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <Clock className="h-4 w-4" />
-            <span>Timeline ({drawHistory.length})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'entities'}
-            onClick={() => setActiveTab('entities')}
-            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              activeTab === 'entities'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <Users className="h-4 w-4" />
-            <span>Registry ({world.entities.length})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'split'}
-            onClick={() => setActiveTab('split')}
-            className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              activeTab === 'split'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <Columns className="h-4 w-4" />
-            <span>Full Studio</span>
-          </button>
-        </div>
+        {/* Second Row: Companion Mode Selector & Studio Workspace Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/60">
+          {/* Companion Mode Toggles */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+              Mode:
+            </span>
+            {(
+              [
+                { id: 'cards-only', label: 'Cards Only' },
+                { id: 'cards-and-powers', label: 'Cards + Powers' },
+                { id: 'companion-tracker', label: 'Companion Tracker' },
+                { id: 'full-studio', label: 'Full World Studio' },
+              ] as const
+            ).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => handleCompanionModeChange(m.id)}
+                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                  companionMode === m.id
+                    ? 'bg-secondary text-foreground font-semibold ring-1 ring-primary/40'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
 
-        {/* World Management & File Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowWorldManager(true)}
-            className="btn-outline px-3 py-2 text-xs font-semibold flex items-center gap-1.5"
-          >
-            <Globe className="h-3.5 w-3.5" />
-            <span>Worlds ({savedWorlds.length})</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
-            title="Import world JSON file"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            <span>Import</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleExportGameState}
-            className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
-            title="Export complete world state to JSON"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Export JSON</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowHelpDialog(true)}
-            className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
-            title="Help & instructions"
-          >
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>Help</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleFileImport}
-            className="hidden"
-          />
+          {/* Workspace View Tabs (Visible in Full World Studio mode) */}
+          {companionMode === 'full-studio' && (
+            <div
+              className="flex flex-wrap items-center gap-1.5"
+              role="tablist"
+              aria-label="Studio Workspace Tabs"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'cards'}
+                onClick={() => setActiveTab('cards')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  activeTab === 'cards'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-accent text-foreground'
+                }`}
+              >
+                <Layers className="h-3.5 w-3.5" />
+                <span>Deck & Draw</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'map'}
+                onClick={() => setActiveTab('map')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  activeTab === 'map'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-accent text-foreground'
+                }`}
+              >
+                <MapIcon className="h-3.5 w-3.5" />
+                <span>World Map</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'timeline'}
+                onClick={() => setActiveTab('timeline')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  activeTab === 'timeline'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-accent text-foreground'
+                }`}
+              >
+                <Clock className="h-3.5 w-3.5" />
+                <span>Timeline ({drawHistory.length})</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'entities'}
+                onClick={() => setActiveTab('entities')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  activeTab === 'entities'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-accent text-foreground'
+                }`}
+              >
+                <Users className="h-3.5 w-3.5" />
+                <span>Codex ({world.entities.length})</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'split'}
+                onClick={() => setActiveTab('split')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  activeTab === 'split'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted hover:bg-accent text-foreground'
+                }`}
+              >
+                <Columns className="h-3.5 w-3.5" />
+                <span>Full Studio</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Collapsible Hotseat Players Manager (1–6 Seats) */}
+      {showPlayersPanel && (
+        <div className="no-print card p-5 space-y-4 border-primary/40">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                <span>Hotseat Players & Bot Personalities (1–6 Seats)</span>
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Track whose turn it is in hotseat play, or assign Bot Personalities for hybrid human + bot world building
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleAddPlayerSeat}
+                disabled={players.length >= 6}
+                className="btn-primary px-3 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                <span>Add Player Seat ({players.length}/6)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPlayersPanel(false)}
+                className="p-1 hover:bg-accent rounded"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {players.map((seat, idx) => {
+              const isCurrentTurn = idx === currentPlayerIndex % players.length
+              return (
+                <div
+                  key={seat.id}
+                  className={`p-3 rounded-lg border space-y-2.5 ${
+                    isCurrentTurn
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-border bg-muted/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="color"
+                        value={seat.color}
+                        onChange={(e) =>
+                          handleUpdatePlayerSeat(seat.id, { color: e.target.value })
+                        }
+                        className="w-6 h-6 rounded border-0 p-0 cursor-pointer"
+                        title="Player badge color"
+                      />
+                      <input
+                        type="text"
+                        value={seat.name}
+                        onChange={(e) =>
+                          handleUpdatePlayerSeat(seat.id, { name: e.target.value })
+                        }
+                        className="input h-7 text-xs font-semibold flex-1 px-2"
+                      />
+                    </div>
+                    {players.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePlayerSeat(seat.id)}
+                        className="text-muted-foreground hover:text-destructive p-1"
+                        title="Remove seat"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block">
+                        Tabletop Role
+                      </label>
+                      <select
+                        value={seat.role}
+                        onChange={(e) =>
+                          handleUpdatePlayerSeat(seat.id, {
+                            role: e.target.value as PlayerRole,
+                          })
+                        }
+                        className="input h-7 text-xs py-0 px-2"
+                      >
+                        {ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] text-muted-foreground block">
+                        Seat Control
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdatePlayerSeat(seat.id, { isBot: !seat.isBot })
+                        }
+                        className={`w-full h-7 rounded border text-xs font-medium px-2 flex items-center justify-center gap-1 ${
+                          seat.isBot
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border'
+                        }`}
+                      >
+                        {seat.isBot ? '🤖 Auto-Bot' : '👤 Human'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-muted-foreground block">
+                      Bot / Auto-Play Personality
+                    </label>
+                    <select
+                      value={seat.personality}
+                      onChange={(e) =>
+                        handleUpdatePlayerSeat(seat.id, {
+                          personality: e.target.value as BotPersonalityId,
+                        })
+                      }
+                      className="input h-7 text-xs py-0 px-2 w-full"
+                    >
+                      {Object.values(BOT_PERSONALITIES).map((bp) => (
+                        <option key={bp.id} value={bp.id}>
+                          {bp.icon} {bp.name} — {bp.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Collapsible Procedural Auto-Play & Seed Panel */}
+      {showAutoPlayPanel && (
+        <div className="no-print card p-5 space-y-4 border-primary/40">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span>Procedural Seeded Auto-Play & World Generator</span>
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Deterministic decision-tree simulation using player personalities & world constraints (no external AI/LLM)
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAutoPlayPanel(false)}
+              className="p-1 hover:bg-accent rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                Random Seed
+              </label>
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  value={generationSettings.seed}
+                  onChange={(e) =>
+                    persistWorldUpdate((prev) => ({
+                      ...prev,
+                      generationSettings: {
+                        ...prev.generationSettings,
+                        seed: e.target.value,
+                      },
+                    }))
+                  }
+                  className="input h-8 text-xs flex-1"
+                  placeholder="e.g., avalon-777"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    persistWorldUpdate((prev) => ({
+                      ...prev,
+                      generationSettings: {
+                        ...prev.generationSettings,
+                        seed: `realm-${Math.floor(1000 + Math.random() * 9000)}`,
+                      },
+                    }))
+                  }
+                  className="btn-outline px-2.5 h-8 text-xs"
+                  title="Generate new random seed"
+                >
+                  <Dices className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                Geography Direction
+              </label>
+              <select
+                value={generationSettings.geographyPreset}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      geographyPreset: e.target.value as GeographyPreset,
+                    },
+                  }))
+                }
+                className="input h-8 text-xs py-0"
+              >
+                <option value="continent">Central Continent</option>
+                <option value="archipelago">Island Archipelago</option>
+                <option value="twin-continents">Twin Continents</option>
+                <option value="inland-sea">Inland Sea Basin</option>
+                <option value="pangaea">Supercontinent (Pangaea)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                Fantasy Level
+              </label>
+              <select
+                value={generationSettings.fantasyLevel}
+                onChange={(e) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    generationSettings: {
+                      ...prev.generationSettings,
+                      fantasyLevel: e.target.value as 'low' | 'medium' | 'high',
+                    },
+                  }))
+                }
+                className="input h-8 text-xs py-0"
+              >
+                <option value="low">Low Fantasy (Grounded & Historical)</option>
+                <option value="medium">Standard Fantasy (Balanced)</option>
+                <option value="high">High Mythic Fantasy (Extraordinary)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleAutoStepOneTurn}
+              className="btn-outline px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <PlayIcon className="h-3.5 w-3.5" />
+              <span>Auto-Play 1 Turn</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleAutoPlayCurrentStage}
+              className="btn-outline px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <FastForward className="h-3.5 w-3.5" />
+              <span>Auto-Play Current Stage</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleAutoPlayFullWorld}
+              className="btn-primary px-4 py-2 text-xs font-semibold flex items-center gap-1.5"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Generate Full 4-Stage World</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tab Content: Cards or Split View */}
       {(activeTab === 'cards' || activeTab === 'split') && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Card Area */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              className={`grid grid-cols-1 ${
+                showPowerDetails ? 'md:grid-cols-2' : ''
+              } gap-6`}
+            >
               {/* Left: Card Visual */}
               <div className="card p-6">
-                <div className="flex flex-col items-center justify-center min-h-[360px]">
+                <div className="flex flex-col items-center justify-center min-h-[340px]">
                   {drawnCard ? (
                     <div
-                      className={`w-full max-w-[240px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative`}
+                      className={`w-full max-w-[230px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative`}
                     >
                       {drawnCard.value !== JOKER && (
                         <>
@@ -518,71 +1058,76 @@ export function Play() {
               </div>
 
               {/* Right: Stage Power Details + Immediate Note Box */}
-              <div className="card p-6 flex flex-col justify-between space-y-4">
-                {drawnCard && stagesEnabled && powerData ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Stage {currentStageData?.number}: {currentStageData?.name}
-                      </span>
-                      {isFantastical && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">
-                          ✨ Fantastical
+              {showPowerDetails && (
+                <div className="card p-6 flex flex-col justify-between space-y-4">
+                  {drawnCard && stagesEnabled && powerData ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Stage {currentStageData?.number}: {currentStageData?.name}
                         </span>
-                      )}
-                    </div>
+                        {isFantastical && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                            ✨ Fantastical
+                          </span>
+                        )}
+                      </div>
 
-                    <div>
-                      <div className="text-2xl font-bold">
-                        {isFantastical && powerData.fantasticalDescription ? 'Fantastical ' : ''}
-                        {powerData.power}
+                      <div>
+                        <div className="text-2xl font-bold">
+                          {isFantastical && powerData.fantasticalDescription
+                            ? 'Fantastical '
+                            : ''}
+                          {powerData.power}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-xs font-semibold text-muted-foreground mb-1">
+                          Description
+                        </div>
+                        <p className="text-sm">
+                          {isFantastical && powerData.fantasticalDescription
+                            ? powerData.fantasticalDescription
+                            : powerData.description}
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="text-xs font-semibold text-muted-foreground mb-1">
+                          Examples
+                        </div>
+                        <p className="text-xs text-muted-foreground">{powerData.examples}</p>
                       </div>
                     </div>
-
-                    <div>
-                      <div className="text-xs font-semibold text-muted-foreground mb-1">
-                        Description
-                      </div>
-                      <p className="text-sm">
-                        {isFantastical && powerData.fantasticalDescription
-                          ? powerData.fantasticalDescription
-                          : powerData.description}
-                      </p>
+                  ) : drawnCard ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      <p>Enable Stages & Powers to see details</p>
                     </div>
-
-                    <div>
-                      <div className="text-xs font-semibold text-muted-foreground mb-1">
-                        Examples
-                      </div>
-                      <p className="text-xs text-muted-foreground">{powerData.examples}</p>
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                      <p>Draw a card to reveal its world-shaping power</p>
                     </div>
-                  </div>
-                ) : drawnCard ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    <p>Enable Stages & Powers to see details</p>
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <p>Draw a card to reveal its world-shaping power</p>
-                  </div>
-                )}
+                  )}
 
-                {latestRecord && (
-                  <div className="border-t border-border pt-3 space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground block">
-                      Turn #{latestRecord.moveId} Chronicle Note:
-                    </label>
-                    <textarea
-                      value={latestRecord.note || ''}
-                      onChange={(e) =>
-                        handleUpdateRecord(latestRecord.id, { note: e.target.value })
-                      }
-                      placeholder="Describe what you created or changed on this turn..."
-                      className="input w-full text-sm min-h-[68px]"
-                    />
-                  </div>
-                )}
-              </div>
+                  {showTimelineRecords && latestRecord && (
+                    <div className="border-t border-border pt-3 space-y-1.5">
+                      <label className="text-xs font-semibold text-muted-foreground block">
+                        Turn #{latestRecord.moveId} Chronicle Note
+                        {latestRecord.playerName ? ` (${latestRecord.playerName})` : ''}:
+                      </label>
+                      <textarea
+                        value={latestRecord.note || ''}
+                        onChange={(e) =>
+                          handleUpdateRecord(latestRecord.id, { note: e.target.value })
+                        }
+                        placeholder="Describe what you created or changed on this turn..."
+                        className="input w-full text-sm min-h-[68px]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Controls */}
@@ -598,8 +1143,17 @@ export function Play() {
               </button>
               <button
                 type="button"
+                onClick={handleAutoStepOneTurn}
+                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
+                title="Let the current player's Bot Personality resolve 1 turn automatically"
+              >
+                <Bot className="h-4 w-4" />
+                <span>Auto-Step Turn</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleReshuffleDeck}
-                className="btn-outline flex items-center space-x-2 px-5 py-3 text-sm"
+                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
               >
                 <Shuffle className="h-4 w-4" />
                 <span>Reset Deck</span>
@@ -607,7 +1161,7 @@ export function Play() {
               <button
                 type="button"
                 onClick={() => setShowRestartDialog(true)}
-                className="btn-outline flex items-center space-x-2 px-5 py-3 text-sm"
+                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span>Restart World</span>
@@ -615,7 +1169,7 @@ export function Play() {
             </div>
 
             {/* Stage Pre-Setup & Suit Legend */}
-            {stagesEnabled && currentStageData && (
+            {showPowerDetails && stagesEnabled && currentStageData && (
               <div className="card p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -642,17 +1196,19 @@ export function Play() {
                     </p>
                     <p className="text-sm">{STAGE_PRE_SETUP[currentStage]}</p>
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                      Stage Preparation Notes:
-                    </label>
-                    <textarea
-                      value={stageNotes[currentStage] || ''}
-                      onChange={(e) => handleStageNoteChange(e.target.value)}
-                      placeholder="Record your species, societies, or starting geography for this stage..."
-                      className="input w-full text-sm min-h-[68px]"
-                    />
-                  </div>
+                  {showTimelineRecords && (
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                        Stage Preparation Notes:
+                      </label>
+                      <textarea
+                        value={stageNotes[currentStage] || ''}
+                        onChange={(e) => handleStageNoteChange(e.target.value)}
+                        placeholder="Record your species, societies, or starting geography for this stage..."
+                        className="input w-full text-sm min-h-[64px]"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -907,35 +1463,42 @@ export function Play() {
       )}
 
       {/* Map View */}
-      {(activeTab === 'map' || activeTab === 'split') && (
-        <MapCanvas
-          map={world.map}
-          worldName={world.name}
-          drawHistory={world.drawHistory}
-          entities={world.entities}
-          onChange={handleMapChange}
-        />
-      )}
+      {companionMode === 'full-studio' &&
+        (activeTab === 'map' || activeTab === 'split') && (
+          <MapCanvas
+            map={world.map}
+            worldName={world.name}
+            drawHistory={world.drawHistory}
+            entities={world.entities}
+            onChange={handleMapChange}
+          />
+        )}
 
-      {/* Entities View */}
-      {(activeTab === 'entities' || activeTab === 'split') && (
-        <EntityRegistry
-          entities={world.entities}
-          currentStage={currentStage}
-          drawHistory={world.drawHistory}
-          onChange={handleEntitiesChange}
-        />
-      )}
+      {/* Entities / Codex View */}
+      {companionMode === 'full-studio' &&
+        (activeTab === 'entities' || activeTab === 'split') && (
+          <EntityRegistry
+            entities={world.entities}
+            currentStage={currentStage}
+            drawHistory={world.drawHistory}
+            map={world.map}
+            onChange={handleEntitiesChange}
+          />
+        )}
 
-      {/* Timeline View (Always shown at bottom of 'cards', 'timeline', and 'split' tabs) */}
-      {(activeTab === 'cards' || activeTab === 'timeline' || activeTab === 'split') && (
-        <TimelinePanel
-          world={world}
-          cardColors={cardColors}
-          onUpdateRecord={handleUpdateRecord}
-          onClearHistory={handleClearHistory}
-        />
-      )}
+      {/* Timeline View */}
+      {showTimelineRecords &&
+        (activeTab === 'cards' ||
+          activeTab === 'timeline' ||
+          activeTab === 'split') && (
+          <TimelinePanel
+            world={world}
+            cardColors={cardColors}
+            onUpdateRecord={handleUpdateRecord}
+            onClearHistory={handleClearHistory}
+            onRewindToMove={handleRewindToMove}
+          />
+        )}
 
       {/* World Manager Modal */}
       <WorldManagerModal
@@ -1053,27 +1616,27 @@ export function Play() {
             </div>
             <div className="space-y-3 text-sm">
               <div>
-                <h4 className="font-semibold">1. Deck & Card Draws</h4>
+                <h4 className="font-semibold">1. Companion Modes</h4>
                 <p className="text-muted-foreground">
-                  Draw cards to trigger stage powers (Genesis, Primal, Civilization, Intrigue). Record what you create in the turn note box.
+                  Use the <strong>Mode</strong> bar to toggle between <em>Cards Only</em> (for physical map play), <em>Cards + Powers</em>, <em>Companion Tracker</em>, and <em>Full World Studio</em>.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">2. Interactive 20×12 Map Canvas</h4>
+                <h4 className="font-semibold">2. Hotseat Multiplayer (1–6 Players)</h4>
                 <p className="text-muted-foreground">
-                  Switch to the <strong>World Map</strong> tab to paint terrain, mix 2-color patterns, stamp settlements/monuments, and inspect individual tile histories. Export your map to SVG or PNG at any time.
+                  Click <strong>Players</strong> to add up to 6 seats, assign Artist/Historian/Keeper roles, and mix Human players with Bot Personalities.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">3. Species, Civilizations & Myths</h4>
+                <h4 className="font-semibold">3. Seeded Auto-Play & Time-Travel Rewind</h4>
                 <p className="text-muted-foreground">
-                  Use the <strong>Registry</strong> tab to log sentient species in Primal, kingdoms in Civilization, and schemes/myths in Intrigue. Link entities and map coordinates directly to timeline turns.
+                  Click <strong>Auto-Play</strong> to step 1 turn, simulate a stage, or generate a complete 4-stage world from a deterministic seed. Click <strong>Rewind Here</strong> on any turn in the Timeline to roll back the world and branch history!
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold">4. Automatic Local Save & JSON / Markdown Export</h4>
+                <h4 className="font-semibold">4. Multi-Layer Map & Codex Wiki</h4>
                 <p className="text-muted-foreground">
-                  Every move is automatically saved in your browser. Click <strong>Worlds</strong> to manage multiple worlds, <strong>Export JSON</strong> to save a backup file, or <strong>Export Chronicle (.md)</strong> in the Timeline to download a formatted history book.
+                  Combine base biomes with relief (mountains/hills/canyons), flora (forest/jungle), rivers, roads, and faction territory borders. Use the <strong>Codex</strong> tab to load preset races and civilizations or customize your own.
                 </p>
               </div>
             </div>
@@ -1085,7 +1648,7 @@ export function Play() {
       {showExportDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="card p-6 max-w-md w-full mx-4 space-y-4">
-            <h3 className="text-xl font-semibold">Export World JSON</h3>
+            <h3 className="text-xl font-semibold">Export World JSON (Schema v2)</h3>
             <div>
               <label className="text-sm font-medium mb-2 block">File Name</label>
               <input
@@ -1097,7 +1660,7 @@ export function Play() {
                 autoFocus
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Includes deck config, timeline turns, map grid, and registered entities
+                Includes deck config, timeline turns, snapshots, multi-layer map grid, hotseat players, and codex entries
               </p>
             </div>
             <div className="flex gap-3">
