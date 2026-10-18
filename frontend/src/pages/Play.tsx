@@ -20,6 +20,11 @@ import {
   Trash2,
   FastForward,
   Dices,
+  Sliders,
+  Wand2,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
 } from 'lucide-react'
 import {
   BotPersonalityId,
@@ -68,13 +73,24 @@ import {
   createSeededRng,
   executeAutomatedTurn,
 } from '../engine/autoPlayEngine'
-import { BOT_PERSONALITIES, PLAYER_COLORS } from '../engine/presets'
+import {
+  BOT_PERSONALITIES,
+  EntityPreset,
+  PLAYER_COLORS,
+  RELATIONSHIP_PRESETS,
+  SOCIETY_PRESETS,
+  SPECIES_PRESETS,
+  StageActionPreset,
+  getActionPresetsForDraw,
+} from '../engine/presets'
+import { addSlotToTile, createInitialMap, getTileId } from '../engine/mapEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
 import { WorldManagerModal } from '../components/WorldManagerModal'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
+type SetupWizardStep = 1 | 2 | 3 | 4
 
 const ROLES: PlayerRole[] = ['Artist', 'Historian', 'Keeper', 'Player']
 
@@ -93,6 +109,13 @@ export function Play() {
   const [showWorldManager, setShowWorldManager] = useState(false)
   const [showPlayersPanel, setShowPlayersPanel] = useState(false)
   const [showAutoPlayPanel, setShowAutoPlayPanel] = useState(false)
+  const [showSetupWizard, setShowSetupWizard] = useState(false)
+  const [setupWizardStep, setSetupWizardStep] = useState<SetupWizardStep>(1)
+  const [showDeckDrawer, setShowDeckDrawer] = useState(false)
+  const [showStageBriefDrawer, setShowStageBriefDrawer] = useState(false)
+  const [actionTargetTileCoord, setActionTargetTileCoord] = useState<string>('')
+  const [actionTargetEntityId, setActionTargetEntityId] = useState<string>('')
+  const [actionSecondEntityId, setActionSecondEntityId] = useState<string>('')
   const [exportFileName, setExportFileName] = useState('')
   const [cardColors, setCardColors] = useState<Record<string, string>>(DEFAULT_CARD_COLORS)
 
@@ -471,7 +494,329 @@ export function Play() {
     return `${baseUrl}#${stageMap[stageId] || stageId}`
   }
 
+  const findOpenLandCoord = (mapState: MapState): { col: number; row: number } => {
+    const landCandidates: { col: number; row: number; score: number }[] = []
+    for (let r = 0; r < mapState.height; r++) {
+      for (let c = 0; c < mapState.width; c++) {
+        const id = getTileId(c, r)
+        const t = mapState.tiles[id]
+        if (!t) continue
+        const isLand = t.terrain !== 'ocean' && t.terrain !== 'water'
+        const slotCount = (t.slots || []).length + (t.overlay !== 'none' ? 2 : 0)
+        if (isLand) {
+          landCandidates.push({ col: c, row: r, score: 20 - slotCount * 5 })
+        }
+      }
+    }
+    if (landCandidates.length > 0) {
+      landCandidates.sort((a, b) => b.score - a.score)
+      return { col: landCandidates[0].col, row: landCandidates[0].row }
+    }
+    return {
+      col: Math.floor(mapState.width / 2),
+      row: Math.floor(mapState.height / 2),
+    }
+  }
+
+  const handlePreStageSpawnPreset = (preset: EntityPreset) => {
+    persistWorldUpdate((prev) => {
+      const target = findOpenLandCoord(prev.map)
+      const coordStr = getTileId(target.col, target.row)
+      const parentSpecies =
+        preset.category === 'society'
+          ? prev.entities.find((e) => e.category === 'species')
+          : undefined
+      const settlementIcons =
+        preset.settlementIcons || parentSpecies?.settlementIcons
+
+      const newEntity: WorldEntity = {
+        id: `ent_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        name: preset.name,
+        category: preset.category,
+        stageCreated: prev.currentStage,
+        description: preset.description,
+        traits: [...preset.traits],
+        abilities: [...preset.abilities],
+        status: 'Flourishing',
+        color: preset.color,
+        secondaryColor: preset.secondaryColor,
+        icon: preset.icon,
+        archetype: preset.archetype,
+        settlementIcons,
+        parentEntityId: parentSpecies?.id,
+        diplomaticLinks: [],
+        originTileId: coordStr,
+      }
+
+      const existingTile = prev.map.tiles[coordStr]
+      const nextTiles = { ...prev.map.tiles }
+
+      if (existingTile) {
+        let updated = {
+          ...existingTile,
+          linkedEntityIds: Array.from(
+            new Set([...existingTile.linkedEntityIds, newEntity.id])
+          ),
+        }
+        if (preset.category === 'species') {
+          updated.overlay = updated.overlay === 'none' ? 'settlement' : updated.overlay
+          updated.label = updated.label || `${preset.name} Homeland`
+          updated = addSlotToTile(updated, {
+            category: 'settlement',
+            type: 'camp',
+            name: `${preset.name} Camp`,
+            icon: settlementIcons?.camp || preset.icon,
+            priority: 95,
+            linkedEntityId: newEntity.id,
+          })
+        } else if (preset.category === 'society') {
+          updated.overlay = 'capital'
+          updated.territoryId = newEntity.id
+          updated.coloringMode = 'fill'
+          updated.label = `${preset.name} Capital`
+          updated = addSlotToTile(updated, {
+            category: 'settlement',
+            type: 'city',
+            name: `${preset.name} Capital`,
+            icon: settlementIcons?.city || preset.icon,
+            priority: 99,
+            linkedEntityId: newEntity.id,
+          })
+        } else {
+          updated.overlay = 'myth'
+          updated = addSlotToTile(updated, {
+            category: 'myth',
+            type: preset.id,
+            name: preset.name,
+            icon: preset.icon,
+            priority: 92,
+            linkedEntityId: newEntity.id,
+          })
+        }
+        nextTiles[coordStr] = updated
+      }
+
+      const stagePrefix = prev.stageNotes[prev.currentStage]
+        ? `${prev.stageNotes[prev.currentStage]}\n`
+        : ''
+
+      return {
+        ...prev,
+        map: { ...prev.map, tiles: nextTiles },
+        entities: [...prev.entities, newEntity],
+        stageNotes: {
+          ...prev.stageNotes,
+          [prev.currentStage]: `${stagePrefix}• Pre-Stage Created: ${preset.icon} ${preset.name} at (${coordStr})`,
+        },
+      }
+    })
+  }
+
+  const handleApplyActionPreset = (preset: StageActionPreset) => {
+    if (!latestRecord) return
+
+    persistWorldUpdate((prev) => {
+      // Resolve target coordinate
+      let targetCoordObj = findOpenLandCoord(prev.map)
+      if (actionTargetTileCoord.includes(',')) {
+        const [cStr, rStr] = actionTargetTileCoord.split(',')
+        const c = parseInt(cStr.trim(), 10)
+        const r = parseInt(rStr.trim(), 10)
+        if (
+          !isNaN(c) &&
+          !isNaN(r) &&
+          r >= 0 &&
+          r < prev.map.height &&
+          c >= 0 &&
+          c < prev.map.width
+        ) {
+          targetCoordObj = { col: c, row: r }
+        }
+      }
+      const coordStr = getTileId(targetCoordObj.col, targetCoordObj.row)
+
+      // Resolve target entities
+      const primaryEnt =
+        prev.entities.find((e) => e.id === actionTargetEntityId) ||
+        prev.entities[prev.entities.length - 1]
+      const secondaryEnt =
+        prev.entities.find(
+          (e) => e.id === actionSecondEntityId && e.id !== primaryEnt?.id
+        ) || prev.entities.find((e) => e.id !== primaryEnt?.id)
+
+      const slotChanges = [...(latestRecord.slotChanges || [])]
+      let relationshipCreated = latestRecord.relationshipCreated
+
+      const nextTiles = { ...prev.map.tiles }
+      const existingTile = nextTiles[coordStr]
+      if (existingTile) {
+        let updated = { ...existingTile }
+        if (preset.terrainChange) {
+          updated.terrain = preset.terrainChange
+        }
+        if (preset.primaryColor || preset.secondaryColor) {
+          updated.customColors = {
+            primary: preset.primaryColor || updated.customColors?.primary,
+            secondary: preset.secondaryColor || updated.customColors?.secondary,
+          }
+        }
+        if (preset.reliefChange) {
+          updated.relief = preset.reliefChange
+        }
+        if (preset.floraChange) {
+          updated.flora = preset.floraChange
+        }
+        if (preset.overlayChange) {
+          updated.overlay = preset.overlayChange
+        }
+        if (preset.hasRiver) {
+          updated.hasRiver = true
+        }
+        if (preset.hasRoad) {
+          updated.hasRoad = true
+        }
+
+        // Determine slot icon (use companion settlement icon if settlement)
+        let slotIcon = preset.icon
+        if (preset.slotCategory === 'settlement' && primaryEnt?.settlementIcons) {
+          slotIcon = primaryEnt.settlementIcons.town || preset.icon
+        }
+
+        updated = addSlotToTile(updated, {
+          category: preset.slotCategory,
+          type: preset.id,
+          name: preset.name,
+          icon: slotIcon,
+          priority: preset.slotPriority,
+          linkedEntityId: primaryEnt?.id,
+          linkedEventId: latestRecord.id,
+          moveId: latestRecord.moveId,
+        })
+
+        slotChanges.push({
+          tileId: coordStr,
+          slotName: preset.name,
+          slotIcon,
+          category: preset.slotCategory,
+        })
+
+        if (!updated.linkedEventIds.includes(latestRecord.id)) {
+          updated.linkedEventIds = [...updated.linkedEventIds, latestRecord.id]
+        }
+        if (primaryEnt && !updated.linkedEntityIds.includes(primaryEnt.id)) {
+          updated.linkedEntityIds = [...updated.linkedEntityIds, primaryEnt.id]
+        }
+        nextTiles[coordStr] = updated
+      }
+
+      let nextEntities = [...prev.entities]
+      const linkedEntityIds = new Set<string>(latestRecord.linkedEntityIds || [])
+
+      if (primaryEnt) {
+        linkedEntityIds.add(primaryEnt.id)
+        if (preset.traitGranted) {
+          nextEntities = nextEntities.map((ent) =>
+            ent.id === primaryEnt.id && !ent.traits.includes(preset.traitGranted!)
+              ? { ...ent, traits: [...ent.traits, preset.traitGranted!] }
+              : ent
+          )
+        }
+        if (preset.abilityGranted) {
+          nextEntities = nextEntities.map((ent) =>
+            ent.id === primaryEnt.id &&
+            !(ent.abilities || []).includes(preset.abilityGranted!)
+              ? {
+                  ...ent,
+                  abilities: [...(ent.abilities || []), preset.abilityGranted!],
+                }
+              : ent
+          )
+        }
+      }
+
+      if (preset.relationshipType && primaryEnt && secondaryEnt) {
+        linkedEntityIds.add(primaryEnt.id)
+        linkedEntityIds.add(secondaryEnt.id)
+        const relMeta = RELATIONSHIP_PRESETS.find(
+          (r) => r.type === preset.relationshipType
+        )
+        const relLabel = relMeta?.label || preset.name
+        const relIcon = relMeta?.icon || preset.icon
+        relationshipCreated = {
+          sourceId: primaryEnt.id,
+          targetId: secondaryEnt.id,
+          label: `${relLabel}: ${primaryEnt.name} ↔ ${secondaryEnt.name}`,
+          icon: relIcon,
+        }
+        nextEntities = nextEntities.map((ent) =>
+          ent.id === primaryEnt.id
+            ? {
+                ...ent,
+                diplomaticLinks: [
+                  ...(ent.diplomaticLinks || []),
+                  {
+                    id: `rel_${Date.now()}`,
+                    targetEntityId: secondaryEnt.id,
+                    targetEntityName: secondaryEnt.name,
+                    type: preset.relationshipType!,
+                    label: relLabel,
+                    icon: relIcon,
+                    description: `${relLabel} forged with ${secondaryEnt.name}`,
+                    createdAtMove: latestRecord.moveId,
+                    linkedEventId: latestRecord.id,
+                  },
+                ],
+              }
+            : ent
+        )
+      }
+
+      const linkedTileIds = Array.from(
+        new Set([...(latestRecord.linkedTileIds || []), coordStr])
+      )
+      const entityNames = nextEntities
+        .filter((e) => linkedEntityIds.has(e.id))
+        .map((e) => e.name)
+
+      const noteLine = `${preset.icon} ${preset.name}: ${preset.description} at (${coordStr})${
+        entityNames.length > 0 ? ` [${entityNames.join(' & ')}]` : ''
+      }.`
+
+      const nextHistory = prev.drawHistory.map((rec) =>
+        rec.id === latestRecord.id
+          ? {
+              ...rec,
+              actionTitle: preset.name,
+              presetId: preset.id,
+              note: rec.note ? `${rec.note} ${noteLine}` : noteLine,
+              linkedTileIds,
+              linkedEntityIds: Array.from(linkedEntityIds),
+              slotChanges,
+              relationshipCreated,
+            }
+          : rec
+      )
+
+      return {
+        ...prev,
+        map: { ...prev.map, tiles: nextTiles },
+        entities: nextEntities,
+        drawHistory: nextHistory,
+      }
+    })
+  }
+
   const isFantastical = isFantasticalCard(drawnCard)
+  const isDisasterAce = drawnCard?.value === 'A'
+  const availableActionPresets = drawnCard
+    ? getActionPresetsForDraw(
+        currentStage,
+        drawnCard.value === JOKER ? '♠' : drawnCard.suit,
+        isFantastical,
+        isDisasterAce
+      )
+    : []
+
   const { color, bgColor } = drawnCard
     ? getCardDisplay(drawnCard, cardColors)
     : { color: '', bgColor: '' }
@@ -523,8 +868,22 @@ export function Play() {
             </div>
           </div>
 
-          {/* World Management, Players, Auto-Play & File Actions */}
+          {/* World Management, Setup Wizard, Players, Auto-Play & File Actions */}
           <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowSetupWizard(!showSetupWizard)}
+              className={`px-3 py-2 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition-colors ${
+                showSetupWizard
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
+              }`}
+              title="Multi-Step World Setup & Pre-Stage Ceremony Wizard"
+            >
+              <Wand2 className="h-3.5 w-3.5" />
+              <span>Setup Wizard</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowPlayersPanel(!showPlayersPanel)}
@@ -565,21 +924,21 @@ export function Play() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
+              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
               title="Import world JSON file"
             >
               <Upload className="h-3.5 w-3.5" />
-              <span>Import</span>
+              <span className="hidden sm:inline">Import</span>
             </button>
 
             <button
               type="button"
               onClick={handleExportGameState}
-              className="btn-outline px-3 py-2 text-xs flex items-center gap-1.5"
+              className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
               title="Export complete world state to JSON"
             >
               <Download className="h-3.5 w-3.5" />
-              <span>Export JSON</span>
+              <span className="hidden sm:inline">Export</span>
             </button>
 
             <button
@@ -589,7 +948,6 @@ export function Play() {
               title="Help & instructions"
             >
               <HelpCircle className="h-3.5 w-3.5" />
-              <span>Help</span>
             </button>
             <input
               ref={fileInputRef}
@@ -712,6 +1070,383 @@ export function Play() {
           )}
         </div>
       </div>
+
+      {/* Multi-Step Game Setup & Pre-Stage Ceremony Wizard */}
+      {showSetupWizard && (
+        <div className="no-print card p-5 space-y-5 border-2 border-primary/50 bg-primary/[0.02]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Wand2 className="h-5 w-5 text-primary" />
+                <span>Multi-Step Game Setup & Pre-Stage Creation Ceremony</span>
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Step through world geography, player seats, pre-stage species/kingdom creation, and deck pacing
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSetupWizard(false)}
+              className="p-1.5 hover:bg-accent rounded"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Step Navigation */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(
+              [
+                { step: 1, title: '1. World & Geography', sub: 'Name, Map & Seed' },
+                { step: 2, title: '2. Players & Bots', sub: `${players.length} Seat(s)` },
+                {
+                  step: 3,
+                  title: '3. Pre-Stage Ceremony',
+                  sub: `Stage: ${currentStageData?.name || currentStage}`,
+                },
+                { step: 4, title: '4. Deck & Pacing', sub: `${deck.length} Cards` },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.step}
+                type="button"
+                onClick={() => setSetupWizardStep(item.step)}
+                className={`p-2.5 rounded-lg border text-left transition-all ${
+                  setupWizardStep === item.step
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                    : 'border-border bg-muted/40 hover:bg-accent'
+                }`}
+              >
+                <div className="text-xs font-bold">{item.title}</div>
+                <div
+                  className={`text-[10px] ${
+                    setupWizardStep === item.step
+                      ? 'text-primary-foreground/80'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {item.sub}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Step 1: World & Geography */}
+          {setupWizardStep === 1 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  World Name
+                </label>
+                <input
+                  type="text"
+                  value={world.name}
+                  onChange={(e) =>
+                    persistWorldUpdate((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="input h-9 text-sm w-full font-semibold"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  Starting Geography Template
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={generationSettings.geographyPreset}
+                    onChange={(e) => {
+                      const preset = e.target.value as GeographyPreset
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        map: createInitialMap(
+                          prev.map.width,
+                          prev.map.height,
+                          preset,
+                          createSeededRng(prev.generationSettings.seed)
+                        ),
+                        generationSettings: {
+                          ...prev.generationSettings,
+                          geographyPreset: preset,
+                        },
+                      }))
+                    }}
+                    className="input h-9 text-xs flex-1 py-0"
+                  >
+                    <option value="continent">Central Continent</option>
+                    <option value="archipelago">Island Archipelago</option>
+                    <option value="twin-continents">Twin Continents</option>
+                    <option value="inland-sea">Inland Sea Basin</option>
+                    <option value="pangaea">Supercontinent (Pangaea)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  Active Stage of History
+                </label>
+                <select
+                  value={currentStage}
+                  onChange={(e) => handleStageChange(e.target.value as StageId)}
+                  className="input h-9 text-xs w-full py-0"
+                >
+                  {STAGES.map((stage) => (
+                    <option key={stage.id} value={stage.id}>
+                      Stage {stage.number}: {stage.name} ({stage.eraLabel})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Players & Bots */}
+          {setupWizardStep === 2 && (
+            <div className="space-y-3 bg-muted/30 p-4 rounded-lg border border-border">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Configure 1–6 Hotseat Players or Deterministic Bot Personalities
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAddPlayerSeat}
+                  disabled={players.length >= 6}
+                  className="btn-primary px-3 py-1.5 text-xs flex items-center gap-1.5"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>Add Seat ({players.length}/6)</span>
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                {players.map((seat) => (
+                  <div
+                    key={seat.id}
+                    className="p-2.5 rounded border border-border bg-background flex items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: seat.color }}
+                      />
+                      <span className="font-semibold truncate">{seat.name}</span>
+                      <span className="text-muted-foreground">({seat.role})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleUpdatePlayerSeat(seat.id, { isBot: !seat.isBot })
+                      }
+                      className="px-2 py-0.5 rounded border border-border text-[11px]"
+                    >
+                      {seat.isBot ? '🤖 Bot' : '👤 Human'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Pre-Stage Creation Ceremony */}
+          {setupWizardStep === 3 && (
+            <div className="space-y-4 bg-muted/30 p-4 rounded-lg border border-border">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-sm font-bold">
+                    Stage {currentStageData?.number}: {currentStageData?.name} — Pre-Stage Ceremony
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {STAGE_PRE_SETUP[currentStage]}
+                  </p>
+                </div>
+                <div className="flex gap-1.5">
+                  {STAGES.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handleStageChange(s.id)}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold ${
+                        currentStage === s.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background border border-border'
+                      }`}
+                    >
+                      {s.number}. {s.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stage 2 Primal: Spawn Species Presets with Companion Settlement Icons */}
+              {currentStage === 'primal' && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-primary">
+                    Click a Species Preset to Spawn in Your World (includes matching Camp → Village → Town → City → Capital icons):
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {SPECIES_PRESETS.map((sp) => (
+                      <button
+                        key={sp.id}
+                        type="button"
+                        onClick={() => handlePreStageSpawnPreset(sp)}
+                        className="p-2.5 rounded-lg border border-border bg-background hover:border-primary text-left transition-all space-y-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold flex items-center gap-1.5">
+                            <span>{sp.icon}</span>
+                            <span>{sp.name}</span>
+                          </span>
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: sp.color }}
+                          />
+                        </div>
+                        <div className="text-[11px] text-muted-foreground line-clamp-1">
+                          {sp.description}
+                        </div>
+                        {sp.settlementIcons && (
+                          <div className="text-[10px] text-muted-foreground flex items-center gap-1 pt-0.5">
+                            <span>Settlements:</span>
+                            <span>{sp.settlementIcons.camp}</span>→
+                            <span>{sp.settlementIcons.village}</span>→
+                            <span>{sp.settlementIcons.town}</span>→
+                            <span>{sp.settlementIcons.city}</span>→
+                            <span>{sp.settlementIcons.metropolis}</span>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Stage 3 Civilization: Found Initial Kingdoms & Borders */}
+              {currentStage === 'civilization' && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-primary">
+                    Click a Kingdom / Civilization Preset to Found Its Capital & Claim Territory Borders:
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    {SOCIETY_PRESETS.map((soc) => (
+                      <button
+                        key={soc.id}
+                        type="button"
+                        onClick={() => handlePreStageSpawnPreset(soc)}
+                        className="p-2.5 rounded-lg border border-border bg-background hover:border-primary text-left transition-all space-y-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold flex items-center gap-1.5">
+                            <span>{soc.icon}</span>
+                            <span>{soc.name}</span>
+                          </span>
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: soc.color }}
+                          />
+                        </div>
+                        <div className="text-[11px] text-muted-foreground line-clamp-1">
+                          {soc.description}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                  Stage {currentStageData?.number} Preparation Notes:
+                </label>
+                <textarea
+                  value={stageNotes[currentStage] || ''}
+                  onChange={(e) => handleStageNoteChange(e.target.value)}
+                  placeholder="Record your species, kingdoms, or starting geography for this stage..."
+                  className="input w-full text-xs min-h-[56px]"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Deck & Pacing */}
+          {setupWizardStep === 4 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">
+                  Game Length Preset
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('all')}
+                    className="btn-outline flex-1 text-xs py-2"
+                  >
+                    Standard (54 Cards)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('short')}
+                    className="btn-outline flex-1 text-xs py-2"
+                  >
+                    Short Game (27 Cards)
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground block">
+                  Aces ({aceCount}) & Jokers ({jokerCount})
+                </label>
+                <div className="flex items-center gap-3 text-xs">
+                  <span>Aces:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="4"
+                    value={aceCount}
+                    onChange={(e) =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        deckConfig: {
+                          ...prev.deckConfig,
+                          aceCount: parseInt(e.target.value, 10),
+                        },
+                      }))
+                    }
+                    className="flex-1"
+                  />
+                  <span>Jokers:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    value={jokerCount}
+                    onChange={(e) =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        deckConfig: {
+                          ...prev.deckConfig,
+                          jokerCount: parseInt(e.target.value, 10),
+                        },
+                      }))
+                    }
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleReshuffleDeck()
+                    setShowSetupWizard(false)
+                  }}
+                  className="btn-primary w-full py-2 text-xs font-semibold flex items-center justify-center gap-1.5"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Apply Setup & Start Playing</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Collapsible Hotseat Players Manager (1–6 Seats) */}
       {showPlayersPanel && (
@@ -1001,150 +1736,23 @@ export function Play() {
 
       {/* Tab Content: Cards or Split View */}
       {(activeTab === 'cards' || activeTab === 'split') && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Card Area */}
-          <div className="lg:col-span-2 space-y-6">
-            <div
-              className={`grid grid-cols-1 ${
-                showPowerDetails ? 'md:grid-cols-2' : ''
-              } gap-6`}
-            >
-              {/* Left: Card Visual */}
-              <div className="card p-6">
-                <div className="flex flex-col items-center justify-center min-h-[340px]">
-                  {drawnCard ? (
-                    <div
-                      className={`w-full max-w-[230px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative`}
-                    >
-                      {drawnCard.value !== JOKER && (
-                        <>
-                          <div className={`absolute top-2 left-3 text-2xl font-bold ${color}`}>
-                            {drawnCard.value}
-                          </div>
-                          <div className={`absolute top-8 left-3 text-xl ${color}`}>
-                            {drawnCard.suit}
-                          </div>
-                        </>
-                      )}
-                      <div className={`text-7xl font-bold ${color} mb-3`}>
-                        {drawnCard.value === JOKER ? '🃏' : drawnCard.suit}
-                      </div>
-                      {drawnCard.value !== JOKER && (
-                        <div className={`text-5xl font-bold ${color}`}>{drawnCard.value}</div>
-                      )}
-                      {drawnCard.value !== JOKER && (
-                        <>
-                          <div
-                            className={`absolute bottom-2 right-3 text-2xl font-bold ${color} rotate-180`}
-                          >
-                            {drawnCard.value}
-                          </div>
-                          <div
-                            className={`absolute bottom-8 right-3 text-xl ${color} rotate-180`}
-                          >
-                            {drawnCard.suit}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground">
-                      <div className="text-6xl mb-4">🃏</div>
-                      <p className="text-lg font-medium">Click "Draw Card" to begin</p>
-                      <p className="text-sm mt-1">Deck: {deck.length} cards remaining</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right: Stage Power Details + Immediate Note Box */}
-              {showPowerDetails && (
-                <div className="card p-6 flex flex-col justify-between space-y-4">
-                  {drawnCard && stagesEnabled && powerData ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Stage {currentStageData?.number}: {currentStageData?.name}
-                        </span>
-                        {isFantastical && (
-                          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">
-                            ✨ Fantastical
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <div className="text-2xl font-bold">
-                          {isFantastical && powerData.fantasticalDescription
-                            ? 'Fantastical '
-                            : ''}
-                          {powerData.power}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="text-xs font-semibold text-muted-foreground mb-1">
-                          Description
-                        </div>
-                        <p className="text-sm">
-                          {isFantastical && powerData.fantasticalDescription
-                            ? powerData.fantasticalDescription
-                            : powerData.description}
-                        </p>
-                      </div>
-
-                      <div>
-                        <div className="text-xs font-semibold text-muted-foreground mb-1">
-                          Examples
-                        </div>
-                        <p className="text-xs text-muted-foreground">{powerData.examples}</p>
-                      </div>
-                    </div>
-                  ) : drawnCard ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      <p>Enable Stages & Powers to see details</p>
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      <p>Draw a card to reveal its world-shaping power</p>
-                    </div>
-                  )}
-
-                  {showTimelineRecords && latestRecord && (
-                    <div className="border-t border-border pt-3 space-y-1.5">
-                      <label className="text-xs font-semibold text-muted-foreground block">
-                        Turn #{latestRecord.moveId} Chronicle Note
-                        {latestRecord.playerName ? ` (${latestRecord.playerName})` : ''}:
-                      </label>
-                      <textarea
-                        value={latestRecord.note || ''}
-                        onChange={(e) =>
-                          handleUpdateRecord(latestRecord.id, { note: e.target.value })
-                        }
-                        placeholder="Describe what you created or changed on this turn..."
-                        className="input w-full text-sm min-h-[68px]"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Action Controls */}
-            <div className="flex flex-wrap gap-3">
+        <div className="space-y-5">
+          {/* Primary Action & Stage Bar */}
+          <div className="card p-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
                 onClick={handleDrawCard}
                 disabled={deck.length === 0}
-                className="btn-primary flex items-center space-x-2 px-6 py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex items-center space-x-2 px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <PlayIcon className="h-5 w-5" />
+                <PlayIcon className="h-4 w-4" />
                 <span>Draw Card ({deck.length})</span>
               </button>
               <button
                 type="button"
                 onClick={handleAutoStepOneTurn}
-                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
+                className="btn-outline flex items-center space-x-1.5 px-3.5 py-2.5 text-xs font-semibold"
                 title="Let the current player's Bot Personality resolve 1 turn automatically"
               >
                 <Bot className="h-4 w-4" />
@@ -1153,181 +1761,448 @@ export function Play() {
               <button
                 type="button"
                 onClick={handleReshuffleDeck}
-                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
+                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs"
               >
-                <Shuffle className="h-4 w-4" />
+                <Shuffle className="h-3.5 w-3.5" />
                 <span>Reset Deck</span>
               </button>
               <button
                 type="button"
                 onClick={() => setShowRestartDialog(true)}
-                className="btn-outline flex items-center space-x-2 px-4 py-3 text-sm"
+                className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-3.5 w-3.5" />
                 <span>Restart World</span>
               </button>
             </div>
 
-            {/* Stage Pre-Setup & Suit Legend */}
-            {showPowerDetails && stagesEnabled && currentStageData && (
-              <div className="card p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold">
-                      {currentStageData.number}. {currentStageData.name} Stage
-                    </h3>
-                    <p className="text-xs text-muted-foreground">{currentStageData.eraLabel}</p>
-                  </div>
-                  <a
-                    href={getStageRulesUrl(currentStage)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-outline flex items-center space-x-1.5 px-3 py-1.5 text-xs"
-                  >
-                    <span>Stage Rules</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+            {/* Quick Stage Switcher & Collapsible Drawer Toggles */}
+            <div className="flex flex-wrap items-center gap-2">
+              {stagesEnabled && (
+                <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
+                  {STAGES.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => handleStageChange(st.id)}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                        currentStage === st.id
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {st.number}. {st.name}
+                    </button>
+                  ))}
                 </div>
+              )}
 
-                <div className="bg-muted/50 p-4 rounded-lg space-y-3">
-                  <div>
-                    <p className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                      Pre-Stage Setup:
-                    </p>
-                    <p className="text-sm">{STAGE_PRE_SETUP[currentStage]}</p>
+              <button
+                type="button"
+                onClick={() => setShowStageBriefDrawer(!showStageBriefDrawer)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1 ${
+                  showStageBriefDrawer
+                    ? 'bg-secondary border-primary/40 font-semibold'
+                    : 'bg-background border-border hover:bg-accent'
+                }`}
+              >
+                <span>Stage Brief & Suits</span>
+                {showStageBriefDrawer ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDeckDrawer(!showDeckDrawer)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1 ${
+                  showDeckDrawer
+                    ? 'bg-secondary border-primary/40 font-semibold'
+                    : 'bg-background border-border hover:bg-accent'
+                }`}
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                <span>Deck Config</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Active Card + Power + Guided Turn Action Presets */}
+          <div
+            className={`grid grid-cols-1 ${
+              showPowerDetails ? 'lg:grid-cols-12' : ''
+            } gap-5`}
+          >
+            {/* Left: Card Visual (4 cols) */}
+            <div className="lg:col-span-4 card p-6 flex flex-col items-center justify-center min-h-[320px]">
+              {drawnCard ? (
+                <div
+                  className={`w-full max-w-[210px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative`}
+                >
+                  {drawnCard.value !== JOKER && (
+                    <>
+                      <div className={`absolute top-2 left-3 text-2xl font-bold ${color}`}>
+                        {drawnCard.value}
+                      </div>
+                      <div className={`absolute top-8 left-3 text-xl ${color}`}>
+                        {drawnCard.suit}
+                      </div>
+                    </>
+                  )}
+                  <div className={`text-7xl font-bold ${color} mb-3`}>
+                    {drawnCard.value === JOKER ? '🃏' : drawnCard.suit}
                   </div>
-                  {showTimelineRecords && (
-                    <div>
-                      <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                        Stage Preparation Notes:
-                      </label>
-                      <textarea
-                        value={stageNotes[currentStage] || ''}
-                        onChange={(e) => handleStageNoteChange(e.target.value)}
-                        placeholder="Record your species, societies, or starting geography for this stage..."
-                        className="input w-full text-sm min-h-[64px]"
-                      />
-                    </div>
+                  {drawnCard.value !== JOKER && (
+                    <div className={`text-5xl font-bold ${color}`}>{drawnCard.value}</div>
+                  )}
+                  {drawnCard.value !== JOKER && (
+                    <>
+                      <div
+                        className={`absolute bottom-2 right-3 text-2xl font-bold ${color} rotate-180`}
+                      >
+                        {drawnCard.value}
+                      </div>
+                      <div
+                        className={`absolute bottom-8 right-3 text-xl ${color} rotate-180`}
+                      >
+                        {drawnCard.suit}
+                      </div>
+                    </>
                   )}
                 </div>
-
-                <div>
-                  <p className="font-semibold mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-                    Powers by Suit:
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  <div className="text-6xl mb-4">🃏</div>
+                  <p className="text-base font-semibold">Click "Draw Card" to begin</p>
+                  <p className="text-xs mt-1">
+                    Deck: {deck.length} cards remaining · Or open Setup Wizard for pre-stage species & kingdoms
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {Object.entries(STAGE_POWERS[currentStage] || {}).map(([suit, power]) => (
-                      <div
-                        key={suit}
-                        className="flex items-center justify-between p-2.5 bg-muted/40 border border-border rounded-md"
-                      >
-                        <span className="text-lg font-bold">{suit}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-medium">{power.name}</span>
-                          <a
-                            href={getStageRulesUrl(currentStage, power.id)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                            title={`View ${power.name} rules`}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Stage Power Details + Guided Action Presets + Chronicle Note (8 cols) */}
+            {showPowerDetails && (
+              <div className="lg:col-span-8 card p-6 flex flex-col justify-between space-y-4">
+                {drawnCard && stagesEnabled && powerData ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                          Stage {currentStageData?.number}: {currentStageData?.name} ({currentStageData?.eraLabel})
+                        </span>
+                        <div className="text-2xl font-bold flex items-center gap-2 mt-0.5">
+                          <span>
+                            {isFantastical && powerData.fantasticalDescription
+                              ? 'Fantastical '
+                              : ''}
+                            {powerData.power}
+                          </span>
+                          {isFantastical && (
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                              ✨ Fantastical Face Card
+                            </span>
+                          )}
+                          {isDisasterAce && (
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-destructive/15 text-destructive">
+                              🌋 Ace Cataclysm
+                            </span>
+                          )}
                         </div>
                       </div>
-                    ))}
+                      {latestRecord?.actionTitle && (
+                        <span className="px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-bold">
+                          ✓ Action Chosen: {latestRecord.actionTitle}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg border border-border/60 text-xs">
+                      <div>
+                        <span className="font-semibold text-muted-foreground block mb-0.5">
+                          Rule Prompt:
+                        </span>
+                        <p className="text-sm">
+                          {isFantastical && powerData.fantasticalDescription
+                            ? powerData.fantasticalDescription
+                            : powerData.description}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-muted-foreground block mb-0.5">
+                          Inspiration & Examples:
+                        </span>
+                        <p className="text-muted-foreground">{powerData.examples}</p>
+                      </div>
+                    </div>
+
+                    {/* Guided Turn Action Presets (Connect Card -> Tile Slot & Codex Entity) */}
+                    {availableActionPresets.length > 0 && latestRecord && (
+                      <div className="space-y-2.5 pt-1">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                            Choose or Customize Your Turn Action Preset (Applies to Map & Chronicle):
+                          </span>
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                            <input
+                              type="text"
+                              value={actionTargetTileCoord}
+                              onChange={(e) => setActionTargetTileCoord(e.target.value)}
+                              placeholder="Auto tile or col,row"
+                              className="input h-7 w-32 px-2 text-xs font-mono"
+                              title="Target tile coordinate (col,row) or leave blank to auto-pick an open land tile"
+                            />
+                            {world.entities.length > 0 && (
+                              <select
+                                value={actionTargetEntityId}
+                                onChange={(e) => setActionTargetEntityId(e.target.value)}
+                                className="input h-7 text-xs py-0 px-2"
+                                title="Primary Species / Kingdom / Myth involved"
+                              >
+                                <option value="">Auto Entity ({world.entities[world.entities.length - 1]?.name})</option>
+                                {world.entities.map((ent) => (
+                                  <option key={ent.id} value={ent.id}>
+                                    {ent.icon} {ent.name}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                            {world.entities.length > 1 && (
+                              <select
+                                value={actionSecondEntityId}
+                                onChange={(e) => setActionSecondEntityId(e.target.value)}
+                                className="input h-7 text-xs py-0 px-2"
+                                title="Second Entity (for Diplomatic Treaties, Trade, or Wars)"
+                              >
+                                <option value="">2nd Entity (Diplomacy)</option>
+                                {world.entities.map((ent) => (
+                                  <option key={ent.id} value={ent.id}>
+                                    {ent.icon} {ent.name}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                          {availableActionPresets.map((preset) => {
+                            const isSelected = latestRecord.presetId === preset.id
+                            return (
+                              <button
+                                key={preset.id}
+                                type="button"
+                                onClick={() => handleApplyActionPreset(preset)}
+                                className={`p-2.5 rounded-lg border text-left transition-all flex items-start gap-2 ${
+                                  isSelected
+                                    ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                                    : 'border-border bg-background hover:border-primary/60 hover:bg-accent/40'
+                                }`}
+                              >
+                                <span className="text-xl shrink-0">{preset.icon}</span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs font-bold truncate">
+                                    {preset.name}
+                                  </div>
+                                  <div className="text-[11px] text-muted-foreground line-clamp-2">
+                                    {preset.description}
+                                  </div>
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                ) : drawnCard ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>Enable Stages & Powers to see details</p>
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground py-8 space-y-2">
+                    <p className="text-base font-medium">
+                      Draw a card to reveal its world-shaping power & guided action presets
+                    </p>
+                    <p className="text-xs">
+                      Every card draw lets you place terrain slots, adapt species, forge diplomatic relationships, or trigger mythic events with full historical lineage.
+                    </p>
+                  </div>
+                )}
+
+                {showTimelineRecords && latestRecord && (
+                  <div className="border-t border-border pt-3 space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="text-xs font-semibold text-muted-foreground">
+                        Turn #{latestRecord.moveId} Chronicle Note
+                        {latestRecord.playerName ? ` (${latestRecord.playerName})` : ''}:
+                      </label>
+                      {latestRecord.linkedTileIds && latestRecord.linkedTileIds.length > 0 && (
+                        <span className="text-[11px] font-mono text-primary">
+                          📍 Linked Tile(s): {latestRecord.linkedTileIds.map((t) => `(${t})`).join(', ')}
+                        </span>
+                      )}
+                    </div>
+                    <textarea
+                      value={latestRecord.note || ''}
+                      onChange={(e) =>
+                        handleUpdateRecord(latestRecord.id, { note: e.target.value })
+                      }
+                      placeholder="Describe what you created or changed on this turn (or click an Action Preset above)..."
+                      className="input w-full text-sm min-h-[62px]"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Right Sidebar: Deck Configuration */}
-          <div className="space-y-6">
-            <div className="card p-6">
-              <h3 className="text-lg font-bold mb-4">Deck Configuration</h3>
-
-              <div className="space-y-5">
-                {/* Presets */}
+          {/* Collapsible Stage Pre-Setup & Suit Legend Drawer */}
+          {showStageBriefDrawer && showPowerDetails && stagesEnabled && currentStageData && (
+            <div className="card p-5 space-y-4 border-primary/30">
+              <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                  <h3 className="text-base font-bold">
+                    {currentStageData.number}. {currentStageData.name} Stage Brief & Suit Matrix
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{currentStageData.eraLabel}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={getStageRulesUrl(currentStage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-outline flex items-center space-x-1.5 px-3 py-1 text-xs"
+                  >
+                    <span>Stage Rules</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowStageBriefDrawer(false)}
+                    className="p-1 hover:bg-accent rounded"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-muted/50 p-3.5 rounded-lg space-y-2.5">
+                <div>
+                  <p className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-0.5">
+                    Pre-Stage Setup:
+                  </p>
+                  <p className="text-xs">{STAGE_PRE_SETUP[currentStage]}</p>
+                </div>
+                {showTimelineRecords && (
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                      Stage Preparation Notes:
+                    </label>
+                    <textarea
+                      value={stageNotes[currentStage] || ''}
+                      onChange={(e) => handleStageNoteChange(e.target.value)}
+                      placeholder="Record your species, societies, or starting geography for this stage..."
+                      className="input w-full text-xs min-h-[54px]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {Object.entries(STAGE_POWERS[currentStage] || {}).map(([suit, power]) => (
+                  <div
+                    key={suit}
+                    className="flex items-center justify-between p-2.5 bg-muted/40 border border-border rounded-md"
+                  >
+                    <span className="text-lg font-bold">{suit}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold">{power.name}</span>
+                      <a
+                        href={getStageRulesUrl(currentStage, power.id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                        title={`View ${power.name} rules`}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Collapsible Deck Configuration Drawer */}
+          {showDeckDrawer && (
+            <div className="card p-5 space-y-4 border-primary/30">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold">Deck & Stage Configuration</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowDeckDrawer(false)}
+                  className="p-1 hover:bg-accent rounded"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
                     Presets
                   </label>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => applyPreset('all')}
-                      className="btn-outline flex-1 text-xs py-2"
+                      className="btn-outline flex-1 text-xs py-1.5"
                     >
                       Standard (54)
                     </button>
                     <button
                       type="button"
                       onClick={() => applyPreset('short')}
-                      className="btn-outline flex-1 text-xs py-2"
+                      className="btn-outline flex-1 text-xs py-1.5"
                     >
                       Short Game (27)
                     </button>
                   </div>
                 </div>
 
-                {/* Numbered Cards Range */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
                     Numbered Cards: {numberRange[0]} – {numberRange[1]}
                   </label>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground w-8">Min:</span>
-                      <input
-                        type="range"
-                        min="2"
-                        max="10"
-                        value={numberRange[0]}
-                        onChange={(e) => {
-                          const min = parseInt(e.target.value, 10)
-                          persistWorldUpdate((prev) => ({
-                            ...prev,
-                            deckConfig: {
-                              ...prev.deckConfig,
-                              numberRange: [min, Math.max(min, prev.deckConfig.numberRange[1])],
-                            },
-                          }))
-                        }}
-                        className="flex-1"
-                      />
-                      <span className="text-xs font-semibold w-6">{numberRange[0]}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground w-8">Max:</span>
-                      <input
-                        type="range"
-                        min="2"
-                        max="10"
-                        value={numberRange[1]}
-                        onChange={(e) => {
-                          const max = parseInt(e.target.value, 10)
-                          persistWorldUpdate((prev) => ({
-                            ...prev,
-                            deckConfig: {
-                              ...prev.deckConfig,
-                              numberRange: [Math.min(prev.deckConfig.numberRange[0], max), max],
-                            },
-                          }))
-                        }}
-                        className="flex-1"
-                      />
-                      <span className="text-xs font-semibold w-6">{numberRange[1]}</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="2"
+                      max="10"
+                      value={numberRange[1]}
+                      onChange={(e) => {
+                        const max = parseInt(e.target.value, 10)
+                        persistWorldUpdate((prev) => ({
+                          ...prev,
+                          deckConfig: {
+                            ...prev.deckConfig,
+                            numberRange: [Math.min(prev.deckConfig.numberRange[0], max), max],
+                          },
+                        }))
+                      }}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
 
-                {/* Face Cards */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
                     Fantastical Face Cards
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     {(['J', 'Q', 'K'] as const).map((face) => (
                       <button
                         key={face}
@@ -1344,7 +2219,7 @@ export function Play() {
                             },
                           }))
                         }
-                        className={`flex-1 py-1.5 px-3 rounded border text-xs font-semibold ${
+                        className={`flex-1 py-1 px-2 rounded border text-xs font-semibold ${
                           faceCards[face]
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'bg-background border-border hover:bg-accent'
@@ -1356,109 +2231,18 @@ export function Play() {
                   </div>
                 </div>
 
-                {/* Aces & Jokers */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                      Aces (Disasters): {aceCount}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="4"
-                      value={aceCount}
-                      onChange={(e) =>
-                        persistWorldUpdate((prev) => ({
-                          ...prev,
-                          deckConfig: {
-                            ...prev.deckConfig,
-                            aceCount: parseInt(e.target.value, 10),
-                          },
-                        }))
-                      }
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                      Jokers (Wild): {jokerCount}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="2"
-                      value={jokerCount}
-                      onChange={(e) =>
-                        persistWorldUpdate((prev) => ({
-                          ...prev,
-                          deckConfig: {
-                            ...prev.deckConfig,
-                            jokerCount: parseInt(e.target.value, 10),
-                          },
-                        }))
-                      }
-                      className="w-full"
-                    />
-                  </div>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={handleReshuffleDeck}
+                    className="btn-primary w-full py-1.5 text-xs font-semibold"
+                  >
+                    Apply & Rebuild Deck
+                  </button>
                 </div>
-
-                {/* Stages Selector */}
-                <div className="border-t border-border pt-4 space-y-2">
-                  <label className="flex items-center space-x-2 text-xs font-medium">
-                    <input
-                      type="checkbox"
-                      checked={stagesEnabled}
-                      onChange={(e) =>
-                        persistWorldUpdate((prev) => ({
-                          ...prev,
-                          deckConfig: {
-                            ...prev.deckConfig,
-                            stagesEnabled: e.target.checked,
-                          },
-                        }))
-                      }
-                      className="rounded"
-                    />
-                    <span>Enable Stages & Powers Overlay</span>
-                  </label>
-                  {stagesEnabled && (
-                    <select
-                      aria-label="Current Stage"
-                      value={currentStage}
-                      onChange={(e) => handleStageChange(e.target.value as StageId)}
-                      className="input w-full text-sm h-9"
-                    >
-                      {STAGES.map((stage) => (
-                        <option key={stage.id} value={stage.id}>
-                          {stage.number}. {stage.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleReshuffleDeck}
-                  className="btn-primary w-full py-2 text-sm"
-                >
-                  Apply & Rebuild Deck
-                </button>
               </div>
             </div>
-
-            {/* Deck Status */}
-            <div className="card p-5 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cards Remaining</span>
-                <span className="font-bold">{deck.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Historical Turns</span>
-                <span className="font-bold">{drawHistory.length}</span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
