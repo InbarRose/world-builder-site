@@ -112,10 +112,15 @@
 }
 
 @media print {
+  @page {
+    margin: 0.35in;
+  }
+
   body {
     background: #ffffff !important;
     color: #000000 !important;
-    font-size: 11pt;
+    font-size: 9.5pt;
+    line-height: 1.25;
   }
 
   header,
@@ -128,15 +133,49 @@
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
   }
 
   .card {
     box-shadow: none !important;
-    border: 1px solid #cccccc !important;
+    border: 1px solid #999999 !important;
     break-inside: avoid;
+  }
+
+  .print-one-page {
+    max-height: 9.8in !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    padding: 0.2in !important;
+    border: 1.5px solid #222222 !important;
   }
 
   .print-only {
     display: block !important;
   }
 }
+
+/* 2.5D Fantasy Atlas Perspective Container */
+.atlas-perspective-stage {
+  perspective: 1400px;
+}
+
+.atlas-perspective-plane {
+  transform: rotateX(24deg) scale(0.97);
+  transform-origin: center 52%;
+  box-shadow:
+    0 22px 38px -12px rgba(25, 18, 10, 0.45),
+    0 6px 0 0 #6b533b,
+    0 10px 0 0 #4a3725,
+    inset 0 0 24px rgba(120, 88, 45, 0.25);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.atlas-flat-plane {
+  transform: none;
+  box-shadow: 0 6px 20px -6px rgba(15, 23, 42, 0.18);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+

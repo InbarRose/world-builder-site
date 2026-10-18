@@ -1,10 +1,47 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Gamepad2, BookOpen, Map as MapIcon, Moon, Sun, FileText } from 'lucide-react'
+import {
+  Home,
+  Gamepad2,
+  BookOpen,
+  Map as MapIcon,
+  Moon,
+  Sun,
+  FileText,
+  Star,
+  Bug,
+  Lightbulb,
+  MessageSquarePlus,
+  ExternalLink,
+  ChevronDown,
+} from 'lucide-react'
 import { VisualStyleMode } from '../engine/types'
 
 interface LayoutProps {
   children: React.ReactNode
+}
+
+const GITHUB_REPO = 'InbarRose/world-builder-site'
+const GITHUB_URL = `https://github.com/${GITHUB_REPO}`
+const BUG_REPORT_URL = `${GITHUB_URL}/issues/new?template=bug_report.md&labels=bug&title=%5BBug%5D%3A+`
+const FEATURE_REQUEST_URL = `${GITHUB_URL}/issues/new?template=feature_request.md&labels=enhancement&title=%5BSuggestion%5D%3A+`
+const ISSUES_URL = `${GITHUB_URL}/issues`
+
+function GitHubMark({ className = 'h-4 w-4' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      className={className}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+      />
+    </svg>
+  )
 }
 
 export function Layout({ children }: LayoutProps) {
@@ -20,6 +57,10 @@ export function Layout({ children }: LayoutProps) {
       return 'fantasy'
     }
   })
+
+  const [starCount, setStarCount] = useState<number | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const feedbackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const root = document.documentElement
@@ -38,6 +79,48 @@ export function Layout({ children }: LayoutProps) {
     }
   }, [styleMode])
 
+  useEffect(() => {
+    let active = true
+    try {
+      const cached = sessionStorage.getItem('wb_gh_stars')
+      if (cached !== null) {
+        const parsed = parseInt(cached, 10)
+        if (!Number.isNaN(parsed)) {
+          setStarCount(parsed)
+          return
+        }
+      }
+      if (typeof fetch === 'function') {
+        fetch(`https://api.github.com/repos/${GITHUB_REPO}`)
+          .then((res) => (res && res.ok ? res.json() : null))
+          .then((data) => {
+            if (active && data && typeof data.stargazers_count === 'number') {
+              setStarCount(data.stargazers_count)
+              sessionStorage.setItem('wb_gh_stars', String(data.stargazers_count))
+            }
+          })
+          .catch(() => {
+            // graceful offline fallback
+          })
+      }
+    } catch {
+      // ignore
+    }
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (feedbackRef.current && !feedbackRef.current.contains(e.target as Node)) {
+        setFeedbackOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const cycleStyleMode = () => {
     setStyleMode((prev) =>
       prev === 'fantasy' ? 'dark' : prev === 'dark' ? 'simplified' : 'fantasy'
@@ -46,30 +129,32 @@ export function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
-    { path: '/rules', label: 'Rules & Cheat Sheet', icon: BookOpen },
+    { path: '/rules', label: 'Rules & Reference', icon: BookOpen },
     { path: '/play', label: 'Play Studio', icon: Gamepad2 },
     { path: '/map', label: 'Map Maker', icon: MapIcon },
   ]
 
   const modeBadge =
     styleMode === 'fantasy'
-      ? { label: 'Atlas Theme', icon: Sun }
+      ? { label: 'Atlas', icon: Sun }
       : styleMode === 'dark'
-      ? { label: 'Dark Theme', icon: Moon }
-      : { label: 'Simplified / Print', icon: FileText }
+      ? { label: 'Dark', icon: Moon }
+      : { label: 'Print', icon: FileText }
 
   const ModeIcon = modeBadge.icon
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="no-print border-b border-border bg-card/85 backdrop-blur sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-3">
+      <header className="no-print border-b border-border bg-card/90 backdrop-blur sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link to="/" className="flex items-center space-x-2 hover:opacity-90">
-              <Gamepad2 className="h-7 w-7 text-primary" />
+            <Link to="/" className="flex items-center space-x-2.5 hover:opacity-90">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
+                <Gamepad2 className="h-5 w-5 text-primary" />
+              </div>
               <div>
-                <span className="text-xl font-bold tracking-tight block leading-none">
+                <span className="text-lg font-bold tracking-tight block leading-none">
                   World Builder
                 </span>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
@@ -77,15 +162,16 @@ export function Layout({ children }: LayoutProps) {
                 </span>
               </div>
             </Link>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <nav className="flex items-center space-x-1 sm:space-x-1.5">
+
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <nav className="flex items-center gap-1">
                 {navItems.map(({ path, label, icon: Icon }) => (
                   <Link
                     key={path}
                     to={path}
-                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       location.pathname === path
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`}
                   >
@@ -94,31 +180,143 @@ export function Layout({ children }: LayoutProps) {
                   </Link>
                 ))}
               </nav>
+
+              <div className="h-5 w-px bg-border hidden sm:block mx-0.5" />
+
+              {/* Theme Switcher */}
               <button
                 type="button"
                 onClick={cycleStyleMode}
-                className="px-2.5 py-2 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1.5 transition-colors"
                 aria-label="Toggle color theme"
                 title="Switch between Fantasy Atlas, Dark Slate, and Simplified Print-Friendly modes"
               >
-                <ModeIcon className="h-4 w-4" />
+                <ModeIcon className="h-3.5 w-3.5" />
                 <span className="hidden md:inline">{modeBadge.label}</span>
               </button>
+
+              {/* GitHub Star Pill */}
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-md border border-border bg-background hover:bg-accent text-xs font-medium transition-colors overflow-hidden"
+                title="View repository and star on GitHub"
+              >
+                <span className="flex items-center gap-1.5 px-2.5 py-1.5 text-foreground">
+                  <GitHubMark className="h-3.5 w-3.5" />
+                  <span className="hidden lg:inline">GitHub</span>
+                </span>
+                <span className="flex items-center gap-1 px-2 py-1.5 bg-muted/70 border-l border-border text-muted-foreground">
+                  <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                  <span>{starCount !== null ? starCount : 'Star'}</span>
+                </span>
+              </a>
+
+              {/* Friendly Issue / Feedback Dropdown */}
+              <div className="relative" ref={feedbackRef}>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen((o) => !o)}
+                  className="px-2.5 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  title="Report a bug or suggest a feature on GitHub"
+                >
+                  <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
+                  <span className="hidden xl:inline">Feedback</span>
+                  <ChevronDown className="h-3 w-3 opacity-70" />
+                </button>
+
+                {feedbackOpen && (
+                  <div className="absolute right-0 mt-1.5 w-56 rounded-lg border border-border bg-card shadow-lg py-1.5 z-50 text-xs">
+                    <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                      GitHub Issues & Ideas
+                    </div>
+                    <a
+                      href={BUG_REPORT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setFeedbackOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 hover:bg-accent text-foreground transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Bug className="h-3.5 w-3.5 text-rose-500" />
+                        <span>Report a Bug</span>
+                      </span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
+                    <a
+                      href={FEATURE_REQUEST_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setFeedbackOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 hover:bg-accent text-foreground transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                        <span>Suggest a Feature</span>
+                      </span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
+                    <a
+                      href={ISSUES_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setFeedbackOpen(false)}
+                      className="flex items-center justify-between px-3 py-2 hover:bg-accent text-muted-foreground hover:text-foreground border-t border-border/60 transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <GitHubMark className="h-3.5 w-3.5" />
+                        <span>Browse Open Issues</span>
+                      </span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 flex-1">{children}</main>
+      <main className="container mx-auto px-4 py-5 flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="no-print border-t border-border mt-auto bg-card/40">
-        <div className="container mx-auto px-4 py-5">
-          <div className="text-center text-muted-foreground text-xs">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-muted-foreground text-xs">
             <p>
-              World Builder Studio — Created by Inbar Rose · Offline-Ready Static Edition (Schema v2)
+              World Builder Studio — Created by Inbar Rose · Offline-Ready Static Edition
             </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <GitHubMark className="h-3.5 w-3.5" />
+                <span>GitHub Repo</span>
+              </a>
+              <a
+                href={BUG_REPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <Bug className="h-3.5 w-3.5 text-rose-500" />
+                <span>Report Bug</span>
+              </a>
+              <a
+                href={FEATURE_REQUEST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                <span>Suggest Idea</span>
+              </a>
+            </div>
           </div>
         </div>
       </footer>

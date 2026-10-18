@@ -244,96 +244,62 @@ export function Rules() {
 
 function QuickReferenceCard() {
   return (
-    <div className="card p-6 sm:p-8 space-y-6">
-      <div className="flex flex-wrap items-center justify-between border-b border-border pb-4 gap-2">
+    <div className="card print-one-page p-4 sm:p-5 space-y-3 border-2 border-foreground/20">
+      <div className="flex flex-wrap items-center justify-between border-b-2 border-foreground/30 pb-2 gap-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-lg sm:text-xl font-extrabold tracking-tight uppercase leading-tight">
             World Building — Quick Reference Sheet
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Tabletop Cheat Sheet for Offline Play · Created by Inbar Rose
+          <p className="text-[11px] text-muted-foreground leading-tight">
+            1-Page Tabletop Cheat Sheet · Created by Inbar Rose · Draw 1 Card → Interpret Suit & Stage Power → Update Map, Timeline & Codex
           </p>
         </div>
-        <div className="text-xs text-right text-muted-foreground">
-          <div><strong>Standard Deck:</strong> 2–10, J, Q, K, 4 Aces, 2 Jokers (54 cards)</div>
-          <div><strong>Short Game Deck:</strong> 2–6, K only, 2 Aces, 1 Joker (27 cards)</div>
+        <div className="text-[11px] leading-tight text-right bg-muted/50 px-2.5 py-1 rounded border border-border">
+          <div><strong>Standard Deck (54):</strong> 2–10, J, Q, K, 4 Aces, 2 Jokers</div>
+          <div><strong>Short Game Deck (27):</strong> 2–6, K only, 2 Aces, 1 Joker</div>
         </div>
       </div>
 
-      {/* Card Ranks & Roles Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-        <div className="p-4 rounded-lg bg-muted/40 border border-border space-y-2">
-          <h2 className="font-bold text-primary uppercase tracking-wider text-xs">
-            Card Ranks & Meanings
+      {/* 4x4 Stage & Suit Power Reference Matrix (Dominant Centerpiece) */}
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-extrabold text-primary uppercase tracking-wider text-xs sm:text-sm">
+            ★ Stage & Suit Power Matrix
           </h2>
-          <ul className="space-y-1.5">
-            <li>
-              <strong>Numbered Cards (2–10):</strong> Perform the standard Power for that card’s suit in the current Stage.
-            </li>
-            <li>
-              <strong>Face Cards (J, Q, K):</strong> Perform a <em>Fantastical</em> (magical or extraordinary) version of that suit’s Power.
-            </li>
-            <li>
-              <strong>Aces (A):</strong> Trigger a <em>Natural Disaster</em> or upheaval appropriate to the current Stage.
-            </li>
-            <li>
-              <strong>Jokers (🃏):</strong> Wild — perform a <em>Fantastical</em> version of <strong>any</strong> Power in the current Stage.
-            </li>
-          </ul>
+          <span className="text-[11px] font-medium text-muted-foreground">
+            Play rounds until the stage deck is empty, then perform the next Pre-Stage step
+          </span>
         </div>
-
-        <div className="p-4 rounded-lg bg-muted/40 border border-border space-y-2">
-          <h2 className="font-bold text-primary uppercase tracking-wider text-xs">
-            Collaborative Roles & Turn Flow
-          </h2>
-          <ul className="space-y-1.5">
-            <li>
-              <strong>Artist:</strong> Draws terrain, settlements, monuments, and borders on the shared map.
-            </li>
-            <li>
-              <strong>Historian:</strong> Chronicles each turn’s events and eras in the world timeline.
-            </li>
-            <li>
-              <strong>Keeper:</strong> Tracks sentient species, civilizations, traits, resources, and schemes.
-            </li>
-            <li>
-              <strong>Turn Loop:</strong> Draw 1 Card → Interpret Power & Collaborate → Update Map, Timeline & Codex → Next Player.
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* 4x4 Stage & Suit Power Reference Matrix */}
-      <div className="space-y-2">
-        <h2 className="font-bold text-primary uppercase tracking-wider text-xs">
-          Stage & Suit Power Matrix
-        </h2>
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-border text-xs sm:text-sm">
+          <table className="min-w-full border-collapse border-2 border-foreground/35 text-xs sm:text-sm">
             <thead>
               <tr className="bg-muted">
-                <th className="border border-border p-2.5 text-left w-14">Suit</th>
-                <th className="border border-border p-2.5 text-left">
-                  <div>1. Genesis</div>
-                  <div className="text-[11px] font-normal text-muted-foreground">
+                <th className="border-2 border-foreground/25 p-2 text-center w-14">Suit</th>
+                <th className="border-2 border-foreground/25 p-2 text-left">
+                  <div className="font-extrabold">1. Genesis</div>
+                  <div className="text-[10px] font-semibold text-primary">10,000+ Yrs Ago (Pre-History)</div>
+                  <div className="text-[10px] font-normal text-muted-foreground">
                     Pre-Stage: Draw basic coastlines
                   </div>
                 </th>
-                <th className="border border-border p-2.5 text-left">
-                  <div>2. Primal</div>
-                  <div className="text-[11px] font-normal text-muted-foreground">
+                <th className="border-2 border-foreground/25 p-2 text-left">
+                  <div className="font-extrabold">2. Primal</div>
+                  <div className="text-[10px] font-semibold text-primary">Thousands of Yrs Ago (Origins)</div>
+                  <div className="text-[10px] font-normal text-muted-foreground">
                     Pre-Stage: Each player creates a Species
                   </div>
                 </th>
-                <th className="border border-border p-2.5 text-left">
-                  <div>3. Civilization</div>
-                  <div className="text-[11px] font-normal text-muted-foreground">
+                <th className="border-2 border-foreground/25 p-2 text-left">
+                  <div className="font-extrabold">3. Civilization</div>
+                  <div className="text-[10px] font-semibold text-primary">Hundreds of Yrs Ago (Kingdoms)</div>
+                  <div className="text-[10px] font-normal text-muted-foreground">
                     Pre-Stage: Create Societies & Kingdoms
                   </div>
                 </th>
-                <th className="border border-border p-2.5 text-left">
-                  <div>4. Intrigue</div>
-                  <div className="text-[11px] font-normal text-muted-foreground">
+                <th className="border-2 border-foreground/25 p-2 text-left">
+                  <div className="font-extrabold">4. Intrigue</div>
+                  <div className="text-[10px] font-semibold text-primary">Recent Decades (Modern Plots)</div>
+                  <div className="text-[10px] font-normal text-muted-foreground">
                     Pre-Stage: Name Cities, Nations & Armies
                   </div>
                 </th>
@@ -341,63 +307,79 @@ function QuickReferenceCard() {
             </thead>
             <tbody>
               <tr>
-                <td className="border border-border p-2.5 font-bold text-lg text-center">♠</td>
-                <td className="border border-border p-2.5">
-                  <strong>Earth:</strong> Mountains, canyons, islands, hills, valleys, craters.
+                <td className="border-2 border-foreground/25 p-2 font-black text-xl text-center bg-muted/30">♠</td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Earth</div>
+                  <div className="text-xs leading-snug">Mountains, canyons, islands, hills, valleys, cliffs, caves, craters.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Settlement:</strong> Villages, camps, nomadic routes, migrations.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Settlement</div>
+                  <div className="text-xs leading-snug">Villages, camps, towns, small cities, nomadic routes, migrations.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Construction:</strong> Castles, roads, temples, walls, grand wonders.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Construction</div>
+                  <div className="text-xs leading-snug">Major cities, castles, roads, bridges, temples, universities, wonders.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Conflict:</strong> Wars, battles, rebellions, sieges, rivalries.
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-border p-2.5 font-bold text-lg text-center text-red-600">♥</td>
-                <td className="border border-border p-2.5">
-                  <strong>Water:</strong> Rivers, lakes, seas, swamps, glaciers, bays.
-                </td>
-                <td className="border border-border p-2.5">
-                  <strong>Tradition:</strong> Beliefs, customs, taboos, festivals, social structures.
-                </td>
-                <td className="border border-border p-2.5">
-                  <strong>Enlightenment:</strong> Laws, philosophies, academies, arts, discoveries.
-                </td>
-                <td className="border border-border p-2.5">
-                  <strong>Cooperation:</strong> Alliances, trade pacts, joint quests, shared defense.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Conflict</div>
+                  <div className="text-xs leading-snug">Wars, battles, rebellions, sieges, rivalries, purges, ruined cities.</div>
                 </td>
               </tr>
               <tr>
-                <td className="border border-border p-2.5 font-bold text-lg text-center">♣</td>
-                <td className="border border-border p-2.5">
-                  <strong>Plant:</strong> Forests, jungles, grasslands, reefs, unique flora.
+                <td className="border-2 border-foreground/25 p-2 font-black text-xl text-center text-red-600 bg-muted/30">♥</td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Water</div>
+                  <div className="text-xs leading-snug">Rivers, lakes, seas, swamps, waterfalls, glaciers, bays, maelstroms.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Resource:</strong> Ore veins, fertile soil, beasts of burden, herbs.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Tradition</div>
+                  <div className="text-xs leading-snug">Beliefs, customs, taboos, festivals, rites of passage, social codes.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Expansion:</strong> New cities, colonies, territorial growth, influence.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Enlightenment</div>
+                  <div className="text-xs leading-snug">Laws, governments, philosophies, academies, arts, science, dogmas.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Scheme:</strong> Espionage, secret cabals, assassinations, plots.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Cooperation</div>
+                  <div className="text-xs leading-snug">Alliances, trade pacts, joint quests, shared defense against threats.</div>
                 </td>
               </tr>
               <tr>
-                <td className="border border-border p-2.5 font-bold text-lg text-center text-red-600">♦</td>
-                <td className="border border-border p-2.5">
-                  <strong>Feature:</strong> Caves, geysers, monoliths, natural wonders, beasts.
+                <td className="border-2 border-foreground/25 p-2 font-black text-xl text-center bg-muted/30">♣</td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Plant</div>
+                  <div className="text-xs leading-snug">Forests, jungles, grasslands, marshes, reefs, ancient groves.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Skill:</strong> Seafaring, smithing, archery, magic, craftsmanship.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Resource</div>
+                  <div className="text-xs leading-snug">Ore veins, fertile soil, beasts of burden, timber, stone, rare herbs.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Diplomacy:</strong> Treaties, embassies, royal marriages, trade routes.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Expansion</div>
+                  <div className="text-xs leading-snug">New colonies, border growth, conquest, forming kingdoms & empires.</div>
                 </td>
-                <td className="border border-border p-2.5">
-                  <strong>Myth:</strong> Dragons, ancient ruins, lost artifacts, lich lairs, prophecies.
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Scheme</div>
+                  <div className="text-xs leading-snug">Espionage, secret cabals, assassinations, black markets, plots.</div>
+                </td>
+              </tr>
+              <tr>
+                <td className="border-2 border-foreground/25 p-2 font-black text-xl text-center text-red-600 bg-muted/30">♦</td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Feature</div>
+                  <div className="text-xs leading-snug">Geysers, lava flows, salt flats, currents, monoliths, natural wonders.</div>
+                </td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Skill</div>
+                  <div className="text-xs leading-snug">Seafaring, smithing, archery, magic, craftsmanship, hunting.</div>
+                </td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Diplomacy</div>
+                  <div className="text-xs leading-snug">Treaties, embassies, royal marriages, trade routes, brokering peace.</div>
+                </td>
+                <td className="border-2 border-foreground/25 p-2">
+                  <div className="font-bold text-primary uppercase text-xs">Myth</div>
+                  <div className="text-xs leading-snug">Dragons, ancient ruins, lost artifacts, lich lairs, prophecies.</div>
                 </td>
               </tr>
             </tbody>
@@ -405,23 +387,27 @@ function QuickReferenceCard() {
         </div>
       </div>
 
-      {/* Era & Scale of Time Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="p-3 rounded border border-border bg-muted/20">
-          <div className="font-bold">1. Genesis Era</div>
-          <div className="text-muted-foreground">Dawn of Time (10,000+ years ago)</div>
+      {/* Compact Single-Row Card Ranks & Roles Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 text-xs leading-snug">
+        <div className="md:col-span-7 p-2.5 rounded border border-foreground/25 bg-muted/30">
+          <h2 className="font-bold text-primary uppercase tracking-wider text-[11px] mb-1">
+            Card Ranks & Meanings
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
+            <div><strong>2–10 (Numbered):</strong> Standard Suit Power in active Stage.</div>
+            <div><strong>J, Q, K (Face Cards):</strong> <em>Fantastical</em> (magical/extraordinary) Suit Power.</div>
+            <div><strong>Aces (A):</strong> <em>Natural Disaster</em> or cataclysmic upheaval.</div>
+            <div><strong>Jokers (🃏):</strong> Wild — <em>Fantastical</em> version of <strong>any</strong> Power.</div>
+          </div>
         </div>
-        <div className="p-3 rounded border border-border bg-muted/20">
-          <div className="font-bold">2. Primal Era</div>
-          <div className="text-muted-foreground">Ancient Antiquity (Thousands of years ago)</div>
-        </div>
-        <div className="p-3 rounded border border-border bg-muted/20">
-          <div className="font-bold">3. Civilization Era</div>
-          <div className="text-muted-foreground">Age of Kingdoms (Hundreds of years ago)</div>
-        </div>
-        <div className="p-3 rounded border border-border bg-muted/20">
-          <div className="font-bold">4. Intrigue Era</div>
-          <div className="text-muted-foreground">Recent History (Last few decades to Present)</div>
+        <div className="md:col-span-5 p-2.5 rounded border border-foreground/25 bg-muted/30">
+          <h2 className="font-bold text-primary uppercase tracking-wider text-[11px] mb-1">
+            Collaborative Roles & Golden Rule
+          </h2>
+          <div className="text-[11px] space-y-0.5">
+            <div><strong>Artist:</strong> Draws map · <strong>Historian:</strong> Logs timeline · <strong>Keeper:</strong> Tracks species & factions.</div>
+            <div className="text-muted-foreground"><strong>Shared Ownership:</strong> Anything created belongs to everyone at the table to build upon or transform!</div>
+          </div>
         </div>
       </div>
     </div>
