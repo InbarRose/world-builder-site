@@ -57,6 +57,7 @@ interface MapCanvasProps {
   worldName: string
   drawHistory?: DrawRecord[]
   entities?: WorldEntity[]
+  initialViewOnly?: boolean
   onChange: (newMap: MapState) => void
 }
 
@@ -311,11 +312,14 @@ export function MapCanvas({
   worldName,
   drawHistory = [],
   entities = [],
+  initialViewOnly = false,
   onChange,
 }: MapCanvasProps) {
+  const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
+  const [tileSizePx, setTileSizePx] = useState<number>(42)
   const [activeTool, setActiveTool] = useState<MapTool>('brush')
   const [renderStyle, setRenderStyle] = useState<AtlasRenderStyle>('tilt-25d')
-  const [showPaletteDrawer, setShowPaletteDrawer] = useState(true)
+  const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
 
   const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('forest')
@@ -365,7 +369,7 @@ export function MapCanvas({
     const id = getTileId(col, row)
     setSelectedTileId(id)
 
-    if (activeTool === 'inspect') {
+    if (isViewOnly || activeTool === 'inspect') {
       return
     }
 
@@ -615,88 +619,150 @@ export function MapCanvas({
       {/* Sleek Top Cartography Bar */}
       <div className="no-print card p-3 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Primary Interaction Tools */}
+          {/* Left: View Only vs Edit Map Toggle + Painting Tools */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setActiveTool('brush')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                activeTool === 'brush'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+            {/* View Atlas vs Edit Map Switcher */}
+            <div
+              className="inline-flex rounded-md border border-border p-0.5 bg-muted/50"
+              role="group"
+              aria-label="Atlas Mode"
             >
-              <Paintbrush className="h-3.5 w-3.5" />
-              <span>Paint Brush</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTool('fill')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                activeTool === 'fill'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
-            >
-              <PaintBucket className="h-3.5 w-3.5" />
-              <span>Bucket Fill</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTool('inspect')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                activeTool === 'inspect'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
-            >
-              <MousePointer className="h-3.5 w-3.5" />
-              <span>Inspect Tile</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTool('erase')}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                activeTool === 'erase'
-                  ? 'bg-destructive text-destructive-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
-            >
-              <Eraser className="h-3.5 w-3.5" />
-              <span>Erase</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsViewOnly(true)}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                  isViewOnly
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Clutter-free Map Viewer (Tap any tile to inspect lore & slots)"
+              >
+                👁️ View Atlas
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsViewOnly(false)}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                  !isViewOnly
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Full Map Creation & Painting Studio"
+              >
+                🖌️ Edit Map
+              </button>
+            </div>
 
-            <div className="h-5 w-px bg-border mx-1 hidden sm:block" />
+            {!isViewOnly && (
+              <>
+                <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('brush')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'brush'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  <Paintbrush className="h-3.5 w-3.5" />
+                  <span>Paint Brush</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('fill')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'fill'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  <PaintBucket className="h-3.5 w-3.5" />
+                  <span>Bucket Fill</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('inspect')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'inspect'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  <MousePointer className="h-3.5 w-3.5" />
+                  <span>Inspect Tile</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('erase')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'erase'
+                      ? 'bg-destructive text-destructive-foreground'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  <Eraser className="h-3.5 w-3.5" />
+                  <span>Erase</span>
+                </button>
 
-            {/* Drawer Toggles to Prevent Clutter */}
-            <button
-              type="button"
-              onClick={() => setShowPaletteDrawer((v) => !v)}
-              className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
-                showPaletteDrawer
-                  ? 'bg-accent border-primary/40 text-foreground'
-                  : 'border-border text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Sliders className="h-3.5 w-3.5" />
-              <span>Palette & Overlays</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowGridDrawer((v) => !v)}
-              className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
-                showGridDrawer
-                  ? 'bg-accent border-primary/40 text-foreground'
-                  : 'border-border text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-              <span>Dimensions & Templates</span>
-            </button>
+                <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
+
+                {/* Drawer Toggles to Prevent Clutter */}
+                <button
+                  type="button"
+                  onClick={() => setShowPaletteDrawer((v) => !v)}
+                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+                    showPaletteDrawer
+                      ? 'bg-accent border-primary/40 text-foreground'
+                      : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Sliders className="h-3.5 w-3.5" />
+                  <span>Palette & Overlays</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGridDrawer((v) => !v)}
+                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+                    showGridDrawer
+                      ? 'bg-accent border-primary/40 text-foreground'
+                      : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  <span>Dimensions & Templates</span>
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Right: Perspective Mode Switcher & Exports */}
+          {/* Right: Zoom, Perspective Mode Switcher & Exports */}
           <div className="flex flex-wrap items-center gap-1.5">
+            {/* Touch/Mobile Friendly Zoom Controls */}
+            <div className="inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setTileSizePx((s) => Math.max(28, s - 6))}
+                className="px-2 py-0.5 hover:bg-accent rounded font-bold"
+                title="Zoom Out Map"
+                aria-label="Zoom Out Map"
+              >
+                −
+              </button>
+              <span className="px-1.5 text-[10px] font-mono text-muted-foreground">
+                {Math.round((tileSizePx / 42) * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => setTileSizePx((s) => Math.min(60, s + 6))}
+                className="px-2 py-0.5 hover:bg-accent rounded font-bold"
+                title="Zoom In Map"
+                aria-label="Zoom In Map"
+              >
+                +
+              </button>
+            </div>
+
             <div
               className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
               role="group"
@@ -740,27 +806,29 @@ export function MapCanvas({
               </button>
             </div>
 
-            {/* Quick Dimension Presets */}
-            <div className="flex items-center gap-1">
-              {[
-                { label: '14×9', w: 14, h: 9 },
-                { label: '20×12', w: 20, h: 12 },
-                { label: '26×15', w: 26, h: 15 },
-              ].map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => handleResizeGrid(preset.w, preset.h)}
-                  className={`px-2 py-1 rounded border text-[11px] font-medium ${
-                    map.width === preset.w && map.height === preset.h
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background border-border hover:bg-accent'
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
+            {/* Quick Dimension Presets (Visible in Edit Mode) */}
+            {!isViewOnly && (
+              <div className="flex items-center gap-1">
+                {[
+                  { label: '14×9', w: 14, h: 9 },
+                  { label: '20×12', w: 20, h: 12 },
+                  { label: '26×15', w: 26, h: 15 },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => handleResizeGrid(preset.w, preset.h)}
+                    className={`px-2 py-1 rounded border text-[11px] font-medium ${
+                      map.width === preset.w && map.height === preset.h
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background border-border hover:bg-accent'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <button
               type="button"
@@ -782,7 +850,7 @@ export function MapCanvas({
         </div>
 
         {/* Collapsible Dimensions & Geography Template Drawer */}
-        {showGridDrawer && (
+        {!isViewOnly && showGridDrawer && (
           <div className="pt-2 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-muted-foreground">Custom Grid:</span>
@@ -843,7 +911,7 @@ export function MapCanvas({
         )}
 
         {/* Collapsible Brush Palette & Multi-Layer Overlay Drawer */}
-        {showPaletteDrawer && (activeTool === 'brush' || activeTool === 'fill') && (
+        {!isViewOnly && showPaletteDrawer && (activeTool === 'brush' || activeTool === 'fill') && (
           <div className="pt-2 border-t border-border space-y-3">
             {/* Base Terrain Row */}
             <div>
@@ -1027,9 +1095,9 @@ export function MapCanvas({
       </div>
 
       {/* Main Grid & Tile Slot Inspector Split */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
         {/* Interactive Fantasy Cartography Canvas (8 cols) */}
-        <div className="xl:col-span-8 card p-4 sm:p-5 overflow-x-auto bg-gradient-to-b from-amber-50/40 to-stone-100/50 dark:from-slate-900 dark:to-slate-950">
+        <div className="xl:col-span-8 card p-3 sm:p-5 overflow-x-auto bg-gradient-to-b from-amber-50/40 to-stone-100/50 dark:from-slate-900 dark:to-slate-950">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <Compass className="h-4 w-4 text-primary" />
@@ -1037,7 +1105,9 @@ export function MapCanvas({
                 {worldName} Atlas ({map.width} × {map.height})
               </span>
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                {renderStyle === 'tilt-25d'
+                {isViewOnly
+                  ? 'Tap Tile to Inspect'
+                  : renderStyle === 'tilt-25d'
                   ? '2.5D Tabletop Perspective'
                   : renderStyle === 'flat-illustrated'
                   ? 'Illustrated Plan'
@@ -1068,7 +1138,7 @@ export function MapCanvas({
           </div>
 
           {/* 2.5D Perspective Stage Wrapper */}
-          <div className="atlas-perspective-stage py-2 flex justify-center">
+          <div className="atlas-perspective-stage py-2 flex justify-start sm:justify-center overflow-x-auto">
             <div
               className={`inline-grid border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden ${
                 renderStyle === 'tilt-25d'
@@ -1076,7 +1146,7 @@ export function MapCanvas({
                   : 'atlas-flat-plane'
               }`}
               style={{
-                gridTemplateColumns: `repeat(${map.width}, minmax(42px, 1fr))`,
+                gridTemplateColumns: `repeat(${map.width}, ${tileSizePx}px)`,
               }}
               role="grid"
               aria-label="World Map Grid"
@@ -1113,7 +1183,11 @@ export function MapCanvas({
                         applyToolToTile(col, row)
                       }}
                       onMouseEnter={() => handleTileMouseEnter(col, row)}
-                      style={getTileBackgroundStyle(tile)}
+                      style={{
+                        ...getTileBackgroundStyle(tile),
+                        width: `${tileSizePx}px`,
+                        height: `${tileSizePx}px`,
+                      }}
                       title={`(${col}, ${row}) [${getTileDomain(tile).toUpperCase()}] ${
                         terrainMeta.label
                       }${
@@ -1121,7 +1195,7 @@ export function MapCanvas({
                           ? ` · Slots: ${effectiveSlots.map((s) => s.name).join(', ')}`
                           : ''
                       }${tile.label ? ` — ${tile.label}` : ''}`}
-                      className={`relative aspect-square w-11 sm:w-12 border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
+                      className={`relative border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
                         isSelected
                           ? 'ring-2 ring-white z-20 scale-110 shadow-xl'
                           : 'hover:brightness-105'
@@ -1205,13 +1279,13 @@ export function MapCanvas({
         </div>
 
         {/* Right: Tile Slot & Lineage Inspector (4 cols) */}
-        <div className="xl:col-span-4 card p-5 space-y-4 h-fit">
+        <div className="xl:col-span-4 card p-4 sm:p-5 space-y-4 h-fit">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
                 <h3 className="text-base font-bold">
-                  Tile ({inspectedTile.col}, {inspectedTile.row})
+                  {inspectedTile.label || `Tile (${inspectedTile.col}, ${inspectedTile.row})`}
                 </h3>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
@@ -1224,6 +1298,7 @@ export function MapCanvas({
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
+                Coord ({inspectedTile.col}, {inspectedTile.row}) ·{' '}
                 {TERRAIN_PALETTE[inspectedTile.terrain]?.label} · {inspectedSlots.length}{' '}
                 active slot(s)
               </p>
@@ -1235,19 +1310,21 @@ export function MapCanvas({
           </div>
 
           <div className="space-y-3.5">
-            {/* Location Name */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                Location Name / Label
-              </label>
-              <input
-                type="text"
-                value={inspectedTile.label || ''}
-                onChange={(e) => handleUpdateInspectedTile({ label: e.target.value })}
-                placeholder="e.g., Mount Doom, Silverwood..."
-                className="input w-full text-sm h-8"
-              />
-            </div>
+            {/* Location Name (Editable in Edit Mode) */}
+            {!isViewOnly && (
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  Location Name / Label
+                </label>
+                <input
+                  type="text"
+                  value={inspectedTile.label || ''}
+                  onChange={(e) => handleUpdateInspectedTile({ label: e.target.value })}
+                  placeholder="e.g., Mount Doom, Silverwood..."
+                  className="input w-full text-sm h-8"
+                />
+              </div>
+            )}
 
             {/* Active Tile Slots & Priority Queue */}
             <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2">
@@ -1263,7 +1340,7 @@ export function MapCanvas({
 
               {inspectedSlots.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground italic">
-                  Calm background {inspectedDomain} tile (no extra icons shown). Add a feature, lake, forest, or settlement slot below!
+                  Calm background {inspectedDomain} tile (no extra icons shown).
                 </p>
               ) : (
                 <div className="space-y-1.5">
@@ -1290,306 +1367,320 @@ export function MapCanvas({
                           </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSlotFromInspected(slot.id)}
-                        className="text-muted-foreground hover:text-destructive p-1"
-                        title="Remove slot from tile"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {!isViewOnly && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSlotFromInspected(slot.id)}
+                          className="text-muted-foreground hover:text-destructive p-1"
+                          title="Remove slot from tile"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Quick Add Slot to Tile */}
-              <div className="pt-2 border-t border-border/60 space-y-2">
-                <div className="text-[11px] font-semibold text-muted-foreground">
-                  + Add Feature / Slot to Tile
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {SLOT_ICON_PALETTE.map((group) => (
-                    <button
-                      key={group.category}
-                      type="button"
-                      onClick={() => {
-                        setNewSlotCategory(group.category)
-                        setNewSlotIcon(group.icons[0].icon)
-                        setNewSlotName(group.icons[0].name)
-                      }}
-                      className={`px-2 py-0.5 rounded text-[10px] border ${
-                        newSlotCategory === group.category
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background border-border'
-                      }`}
-                    >
-                      {group.category}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Preset Icons for Selected Slot Category */}
-                <div className="flex flex-wrap gap-1">
-                  {SLOT_ICON_PALETTE.find((g) => g.category === newSlotCategory)?.icons.map(
-                    (item) => (
+              {/* Quick Add Slot to Tile (Edit Mode Only) */}
+              {!isViewOnly && (
+                <div className="pt-2 border-t border-border/60 space-y-2">
+                  <div className="text-[11px] font-semibold text-muted-foreground">
+                    + Add Feature / Slot to Tile
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {SLOT_ICON_PALETTE.map((group) => (
                       <button
-                        key={item.name}
+                        key={group.category}
                         type="button"
                         onClick={() => {
-                          const group = SLOT_ICON_PALETTE.find(
-                            (g) => g.category === newSlotCategory
-                          )!
-                          handleAddCustomSlotToInspected(
-                            newSlotCategory,
-                            item.name,
-                            item.icon,
-                            group.defaultPriority
-                          )
+                          setNewSlotCategory(group.category)
+                          setNewSlotIcon(group.icons[0].icon)
+                          setNewSlotName(group.icons[0].name)
                         }}
-                        className="px-2 py-1 rounded border border-border bg-background hover:bg-accent text-[11px] flex items-center gap-1"
-                        title={`Add ${item.name} slot to tile`}
+                        className={`px-2 py-0.5 rounded text-[10px] border ${
+                          newSlotCategory === group.category
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border'
+                        }`}
                       >
-                        <span>{item.icon}</span>
-                        <span>{item.name}</span>
+                        {group.category}
                       </button>
-                    )
+                    ))}
+                  </div>
+
+                  {/* Preset Icons for Selected Slot Category */}
+                  <div className="flex flex-wrap gap-1">
+                    {SLOT_ICON_PALETTE.find((g) => g.category === newSlotCategory)?.icons.map(
+                      (item) => (
+                        <button
+                          key={item.name}
+                          type="button"
+                          onClick={() => {
+                            const group = SLOT_ICON_PALETTE.find(
+                              (g) => g.category === newSlotCategory
+                            )!
+                            handleAddCustomSlotToInspected(
+                              newSlotCategory,
+                              item.name,
+                              item.icon,
+                              group.defaultPriority
+                            )
+                          }}
+                          className="px-2 py-1 rounded border border-border bg-background hover:bg-accent text-[11px] flex items-center gap-1"
+                          title={`Add ${item.name} slot to tile`}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.name}</span>
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  {/* Custom Slot Name + Icon Input */}
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={newSlotIcon}
+                      onChange={(e) => setNewSlotIcon(e.target.value)}
+                      className="input w-11 h-7 text-center text-xs px-1"
+                      maxLength={4}
+                      title="Custom Slot Icon"
+                    />
+                    <input
+                      type="text"
+                      value={newSlotName}
+                      onChange={(e) => setNewSlotName(e.target.value)}
+                      placeholder="Custom slot name (e.g. Crater Lake)..."
+                      className="input flex-1 h-7 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const group = SLOT_ICON_PALETTE.find(
+                          (g) => g.category === newSlotCategory
+                        )
+                        handleAddCustomSlotToInspected(
+                          newSlotCategory,
+                          newSlotName || 'Feature',
+                          newSlotIcon || '✨',
+                          group?.defaultPriority || 70
+                        )
+                      }}
+                      className="btn-primary px-2.5 h-7 text-xs flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {!isViewOnly && (
+              <>
+                {/* Base Terrain, Coloring Style & Custom Colors */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Base Biome
+                    </label>
+                    <select
+                      value={inspectedTile.terrain}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          terrain: e.target.value as TerrainType,
+                        })
+                      }
+                      className="input w-full text-xs py-1 h-8"
+                    >
+                      {Object.values(TERRAIN_PALETTE).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.symbol} {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Coloring Mode
+                    </label>
+                    <select
+                      value={inspectedTile.coloringMode || 'fill'}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          coloringMode: e.target.value as TileColoringMode,
+                        })
+                      }
+                      className="input w-full text-xs py-1 h-8"
+                    >
+                      {COLORING_MODES.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Custom Primary & Secondary Tile Palette Overrides */}
+                <div className="flex items-center justify-between gap-2 text-xs bg-muted/30 p-2 rounded border border-border">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      Primary:
+                    </label>
+                    <input
+                      type="color"
+                      aria-label="Tile Primary Color"
+                      value={
+                        inspectedTile.customColors?.primary ||
+                        TERRAIN_PALETTE[inspectedTile.terrain]?.color ||
+                        '#86efac'
+                      }
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          customColors: {
+                            ...inspectedTile.customColors,
+                            primary: e.target.value,
+                          },
+                        })
+                      }
+                      className="h-6 w-8 rounded border border-border cursor-pointer"
+                    />
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      Secondary:
+                    </label>
+                    <input
+                      type="color"
+                      aria-label="Tile Secondary Color"
+                      value={
+                        inspectedTile.customColors?.secondary ||
+                        TERRAIN_PALETTE[inspectedTile.terrain]?.secondaryColor ||
+                        '#4ade80'
+                      }
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          customColors: {
+                            ...inspectedTile.customColors,
+                            secondary: e.target.value,
+                          },
+                        })
+                      }
+                      className="h-6 w-8 rounded border border-border cursor-pointer"
+                    />
+                  </div>
+                  {inspectedTile.customColors && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateInspectedTile({ customColors: undefined })}
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline"
+                    >
+                      Reset Colors
+                    </button>
                   )}
                 </div>
 
-                {/* Custom Slot Name + Icon Input */}
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    value={newSlotIcon}
-                    onChange={(e) => setNewSlotIcon(e.target.value)}
-                    className="input w-11 h-7 text-center text-xs px-1"
-                    maxLength={4}
-                    title="Custom Slot Icon"
-                  />
-                  <input
-                    type="text"
-                    value={newSlotName}
-                    onChange={(e) => setNewSlotName(e.target.value)}
-                    placeholder="Custom slot name (e.g. Crater Lake)..."
-                    className="input flex-1 h-7 text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const group = SLOT_ICON_PALETTE.find(
-                        (g) => g.category === newSlotCategory
-                      )
-                      handleAddCustomSlotToInspected(
-                        newSlotCategory,
-                        newSlotName || 'Feature',
-                        newSlotIcon || '✨',
-                        group?.defaultPriority || 70
-                      )
-                    }}
-                    className="btn-primary px-2.5 h-7 text-xs flex items-center gap-1"
-                  >
-                    <Plus className="h-3 w-3" />
-                    <span>Add</span>
-                  </button>
+                {/* River, Road & Territory Inspector Controls */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(inspectedTile.hasRiver)}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({ hasRiver: e.target.checked })
+                      }
+                      className="rounded"
+                    />
+                    <span>💧 River</span>
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(inspectedTile.hasRoad)}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({ hasRoad: e.target.checked })
+                      }
+                      className="rounded"
+                    />
+                    <span>🛤️ Trade Road</span>
+                  </label>
                 </div>
-              </div>
-            </div>
 
-            {/* Base Terrain, Coloring Style & Custom Colors */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Base Biome
-                </label>
-                <select
-                  value={inspectedTile.terrain}
-                  onChange={(e) =>
-                    handleUpdateInspectedTile({ terrain: e.target.value as TerrainType })
-                  }
-                  className="input w-full text-xs py-1 h-8"
-                >
-                  {Object.values(TERRAIN_PALETTE).map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.symbol} {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Coloring Mode
-                </label>
-                <select
-                  value={inspectedTile.coloringMode || 'fill'}
-                  onChange={(e) =>
-                    handleUpdateInspectedTile({
-                      coloringMode: e.target.value as TileColoringMode,
-                    })
-                  }
-                  className="input w-full text-xs py-1 h-8"
-                >
-                  {COLORING_MODES.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Custom Primary & Secondary Tile Palette Overrides */}
-            <div className="flex items-center justify-between gap-2 text-xs bg-muted/30 p-2 rounded border border-border">
-              <div className="flex items-center gap-2">
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Primary:
-                </label>
-                <input
-                  type="color"
-                  aria-label="Tile Primary Color"
-                  value={
-                    inspectedTile.customColors?.primary ||
-                    TERRAIN_PALETTE[inspectedTile.terrain]?.color ||
-                    '#86efac'
-                  }
-                  onChange={(e) =>
-                    handleUpdateInspectedTile({
-                      customColors: {
-                        ...inspectedTile.customColors,
-                        primary: e.target.value,
-                      },
-                    })
-                  }
-                  className="h-6 w-8 rounded border border-border cursor-pointer"
-                />
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Secondary:
-                </label>
-                <input
-                  type="color"
-                  aria-label="Tile Secondary Color"
-                  value={
-                    inspectedTile.customColors?.secondary ||
-                    TERRAIN_PALETTE[inspectedTile.terrain]?.secondaryColor ||
-                    '#4ade80'
-                  }
-                  onChange={(e) =>
-                    handleUpdateInspectedTile({
-                      customColors: {
-                        ...inspectedTile.customColors,
-                        secondary: e.target.value,
-                      },
-                    })
-                  }
-                  className="h-6 w-8 rounded border border-border cursor-pointer"
-                />
-              </div>
-              {inspectedTile.customColors && (
-                <button
-                  type="button"
-                  onClick={() => handleUpdateInspectedTile({ customColors: undefined })}
-                  className="text-[10px] text-muted-foreground hover:text-foreground underline"
-                >
-                  Reset Colors
-                </button>
-              )}
-            </div>
-
-            {/* River, Road & Territory Inspector Controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(inspectedTile.hasRiver)}
-                  onChange={(e) => handleUpdateInspectedTile({ hasRiver: e.target.checked })}
-                  className="rounded"
-                />
-                <span>💧 River</span>
-              </label>
-              <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(inspectedTile.hasRoad)}
-                  onChange={(e) => handleUpdateInspectedTile({ hasRoad: e.target.checked })}
-                  className="rounded"
-                />
-                <span>🛤️ Trade Road</span>
-              </label>
-            </div>
-
-            {entities.length > 0 && (
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Controlling Faction / Territory
-                </label>
-                <select
-                  value={inspectedTile.territoryId || ''}
-                  onChange={(e) =>
-                    handleUpdateInspectedTile({
-                      territoryId: e.target.value || undefined,
-                    })
-                  }
-                  className="input w-full text-xs py-1 h-8"
-                >
-                  <option value="">Unclaimed / Neutral</option>
-                  {entities.map((ent) => (
-                    <option key={ent.id} value={ent.id}>
-                      {ent.icon || '🚩'} {ent.name} ({ent.category})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Tags */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1 mb-1">
-                <Tag className="h-3 w-3" />
-                <span>Tags (Resources, Features, Factions)</span>
-              </label>
-              <div className="flex gap-1.5 mb-1.5">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleAddTag()
-                    }
-                  }}
-                  placeholder="Add tag..."
-                  className="input flex-1 text-xs h-7"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddTag}
-                  className="btn-outline px-2.5 text-xs h-7"
-                >
-                  Add
-                </button>
-              </div>
-              {inspectedTile.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {inspectedTile.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium"
+                {entities.length > 0 && (
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Controlling Faction / Territory
+                    </label>
+                    <select
+                      value={inspectedTile.territoryId || ''}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          territoryId: e.target.value || undefined,
+                        })
+                      }
+                      className="input w-full text-xs py-1 h-8"
                     >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-destructive"
-                        aria-label={`Remove tag ${tag}`}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
+                      <option value="">Unclaimed / Neutral</option>
+                      {entities.map((ent) => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.icon || '🚩'} {ent.name} ({ent.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Tags */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1 mb-1">
+                    <Tag className="h-3 w-3" />
+                    <span>Tags (Resources, Features, Factions)</span>
+                  </label>
+                  <div className="flex gap-1.5 mb-1.5">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddTag()
+                        }
+                      }}
+                      placeholder="Add tag..."
+                      className="input flex-1 text-xs h-7"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTag}
+                      className="btn-outline px-2.5 text-xs h-7"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {inspectedTile.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {inspectedTile.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="hover:text-destructive"
+                            aria-label={`Remove tag ${tag}`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
 
             {/* Full Traceable Event & Entity Lineage for this Tile */}
             <div className="border-t border-border pt-3 space-y-2">

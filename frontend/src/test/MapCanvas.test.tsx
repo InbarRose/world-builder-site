@@ -47,4 +47,31 @@ describe('MapCanvas Component', () => {
 
     expect(handleChange).toHaveBeenCalled()
   })
+
+  it('supports clutter-free View Atlas mode (initialViewOnly) that inspects tiles without painting', () => {
+    const map = createInitialMap(4, 4)
+    const handleChange = vi.fn()
+
+    render(
+      <MapCanvas
+        map={map}
+        worldName="Eldoria"
+        onChange={handleChange}
+        initialViewOnly={true}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: /Paint Brush/i })).not.toBeInTheDocument()
+    const tileBtn = screen.getByTestId('map-tile-1-2')
+    fireEvent.mouseDown(tileBtn)
+
+    // Should inspect tile (1, 2) without triggering map mutation
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(screen.getByText(/Tile \(1, 2\)/i)).toBeInTheDocument()
+
+    // Switching to Edit Map reveals painting tools
+    fireEvent.click(screen.getByRole('button', { name: /Edit Map/i }))
+    expect(screen.getByRole('button', { name: /Paint Brush/i })).toBeInTheDocument()
+  })
 })
+
