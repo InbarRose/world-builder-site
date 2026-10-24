@@ -1,10 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Wand2,
-  Compass,
-  Users,
-  Layers,
-  Sparkles,
   CheckCircle2,
   X,
   ChevronRight,
@@ -12,17 +8,13 @@ import {
 } from 'lucide-react'
 import {
   DeckConfig,
-  DeckVariant,
   GenerationSettings,
   GeographyPreset,
-  PlayerRole,
   PlayerSeat,
   WorldState,
 } from '../engine/types'
 import { SHORT_GAME_DECK_CONFIG } from '../engine/deckEngine'
-import { BOT_PERSONALITIES, PLAYER_COLORS } from '../engine/presets'
-import { createInitialMap } from '../engine/mapEngine'
-import { createSeededRng } from '../engine/autoPlayEngine'
+import { PLAYER_COLORS } from '../engine/presets'
 
 interface GameSetupWizardModalProps {
   isOpen: boolean
@@ -289,7 +281,7 @@ export function GameSetupWizardModal({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {players.map((seat, idx) => (
+              {players.map((seat) => (
                 <div
                   key={seat.id}
                   className="p-2.5 rounded-lg border border-border bg-background flex items-center justify-between gap-2"

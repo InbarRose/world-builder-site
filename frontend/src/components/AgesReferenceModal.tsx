@@ -1,4 +1,3 @@
-import React from 'react'
 import { BookOpen, ExternalLink, X } from 'lucide-react'
 import { STAGES, STAGE_POWERS, STAGE_PRE_SETUP } from '../engine/deckEngine'
 import { StageId } from '../engine/types'

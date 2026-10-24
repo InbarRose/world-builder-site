@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Users, UserPlus, Trash2, X, Sliders } from 'lucide-react'
 import { BotPersonalityId, BotPersonalityWeights, PlayerRole, PlayerSeat } from '../engine/types'
-import { BOT_PERSONALITIES, PLAYER_COLORS, getEffectiveBotWeights } from '../engine/presets'
+import { BOT_PERSONALITIES, getEffectiveBotWeights } from '../engine/presets'
 
 interface PlayerRosterModalProps {
   isOpen: boolean

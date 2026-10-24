@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Download,
   FileText,
   FileJson,
   Layers,
   Image as ImageIcon,
-  Check,
   X,
   Compass,
 } from 'lucide-react'

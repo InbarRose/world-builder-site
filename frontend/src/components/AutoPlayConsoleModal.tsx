@@ -1,16 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Sparkles,
-  Bot,
   Play as PlayIcon,
   FastForward,
   Dices,
-  Sliders,
-  Check,
   X,
-  Layers,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react'
 import { GenerationSettings, GeographyPreset, WorldState } from '../engine/types'
 import {
