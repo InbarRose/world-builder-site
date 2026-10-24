@@ -42,6 +42,11 @@ import {
   SPECIES_PRESETS,
   getEffectiveBotWeights,
 } from '../engine/presets'
+import {
+  exportWorldMarkdown,
+  exportWorldYaml,
+  exportMapLayeredJson,
+} from '../engine/exportService'
 import { CURRENT_SCHEMA_VERSION } from '../engine/types'
 
 describe('DeckEngine', () => {
@@ -354,6 +359,77 @@ describe('AutoPlayEngine & Time-Travel Rewind', () => {
     const allSaved = listSavedWorlds()
     const origReloaded = allSaved.find((w) => w.id === simulated.id)
     expect(origReloaded?.drawHistory).toHaveLength(8)
+  })
+
+  it('exports comprehensive world markdown, structured YAML, and layered map JSON', () => {
+    let world = createNewWorld('Exportia Prime')
+    world.gameMode = 'studio'
+    world.entities = [
+      {
+        id: 'sp_1',
+        name: 'Moonfolk',
+        category: 'species',
+        stageCreated: 'primal',
+        description: 'Nocturnal stargazers.',
+        traits: ['Night Vision'],
+        abilities: ['Lunar Telepathy'],
+        status: 'Flourishing',
+      },
+      {
+        id: 'soc_1',
+        name: 'Moon Citadel',
+        category: 'society',
+        stageCreated: 'civilization',
+        description: 'A fortress of silver spires.',
+        traits: ['High Magic'],
+        abilities: ['Shield Arrays'],
+        status: 'Sovereign',
+        diplomaticLinks: [
+          {
+            id: 'link_1',
+            targetEntityId: 'sp_1',
+            targetEntityName: 'Moonfolk',
+            type: 'alliance',
+            label: 'Eternal Compact',
+            icon: '🤝',
+          },
+        ],
+      },
+    ]
+
+    world.drawHistory = [
+      {
+        id: 'rec_1',
+        moveId: 1,
+        card: { suit: '♠', value: '10', id: '♠-10' },
+        timestamp: '2026-10-23T00:00:00.000Z',
+        stage: 'genesis',
+        power: 'Earth',
+        note: 'Towering quartz spires emerge.',
+        epochYear: 'Eon I: 100',
+        playerName: 'Architect',
+      },
+    ]
+
+    // Markdown Export
+    const md = exportWorldMarkdown(world)
+    expect(md).toContain('# Chronicle & Codex of Exportia Prime')
+    expect(md).toContain('Moonfolk')
+    expect(md).toContain('Moon Citadel')
+    expect(md).toContain('Eternal Compact')
+    expect(md).toContain('Towering quartz spires emerge.')
+
+    // YAML Export
+    const yaml = exportWorldYaml(world)
+    expect(yaml).toContain('name: Exportia Prime')
+    expect(yaml).toContain('Moon Citadel')
+
+    // Layered Map JSON Export
+    const layered = exportMapLayeredJson(world)
+    expect(layered.worldName).toBe('Exportia Prime')
+    expect(layered.terrainGrid.length).toBe(world.map.width * world.map.height)
+    expect(Array.isArray(layered.reliefObjects)).toBe(true)
+    expect(Array.isArray(layered.hydrologyObjects)).toBe(true)
   })
 })
 

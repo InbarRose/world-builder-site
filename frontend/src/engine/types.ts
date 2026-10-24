@@ -4,6 +4,10 @@ export type Suit = '♠' | '♥' | '♣' | '♦' | ''
 
 export type StageId = 'genesis' | 'primal' | 'civilization' | 'intrigue'
 
+export type GameMode = 'studio' | 'companion' | 'free-create'
+
+export type TurnPhase = 'await_draw' | 'action_select' | 'verify' | 'completed'
+
 export type CompanionViewMode =
   | 'cards-only'
   | 'cards-and-powers'
@@ -272,6 +276,64 @@ export interface TurnSnapshot {
   entities: WorldEntity[]
 }
 
+export interface SelectiveExportOptions {
+  includeWorldMetadata?: boolean
+  includeTimeline?: boolean
+  includeCodex?: boolean
+  includeMapState?: boolean
+  includeGenerationSettings?: boolean
+  includePlayers?: boolean
+  stageFilter?: StageId | 'all'
+}
+
+export interface LayeredMapExport {
+  schemaVersion: number
+  worldName: string
+  dimensions: { width: number; height: number }
+  exportedAt: string
+  terrainGrid: {
+    tileId: string
+    col: number
+    row: number
+    terrain: TerrainType
+    domain: 'land' | 'water'
+    label?: string
+  }[]
+  reliefObjects: {
+    tileId: string
+    relief: ReliefType
+  }[]
+  floraObjects: {
+    tileId: string
+    flora: FloraType
+  }[]
+  hydrologyObjects: {
+    tileId: string
+    hasRiver: boolean
+    hasLake: boolean
+  }[]
+  transportObjects: {
+    tileId: string
+    hasRoad: boolean
+  }[]
+  slotObjects: {
+    tileId: string
+    slot: TileSlot
+  }[]
+  overlayObjects: {
+    tileId: string
+    overlay: TileOverlay
+    territoryId?: string
+    coloringMode?: string
+  }[]
+  territories: {
+    entityId: string
+    name: string
+    color: string
+    claimedTileIds: string[]
+  }[]
+}
+
 export interface WorldState {
   schemaVersion: number
   id: string
@@ -279,6 +341,7 @@ export interface WorldState {
   createdAt: string
   updatedAt: string
   isLocked?: boolean
+  gameMode?: GameMode
   deckConfig: DeckConfig
   currentStage: StageId
   stageNotes: Record<string, string>
