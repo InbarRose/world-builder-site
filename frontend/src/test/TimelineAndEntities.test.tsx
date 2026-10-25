@@ -84,4 +84,29 @@ describe('TimelinePanel & EntityRegistry Components', () => {
     expect(createdList[0].name).toBe('Starborn Elves')
     expect(createdList[0].traits).toEqual(['Astral Magic', 'Longevity'])
   })
+
+  it('supports Wiki Browse Mode vs Creator Drawer toggle and custom event logging', () => {
+    const world = createNewWorld('Aethelgard')
+    const handleAddCustomRecord = vi.fn()
+
+    render(
+      <TimelinePanel
+        world={world}
+        onUpdateRecord={vi.fn()}
+        onClearHistory={vi.fn()}
+        onAddCustomRecord={handleAddCustomRecord}
+      />
+    )
+
+    // Open Custom Lore Event drawer and submit
+    fireEvent.click(screen.getByRole('button', { name: /\+ Log Custom Event/i }))
+    const noteInput = screen.getByPlaceholderText(
+      /Describe what happened in the world/i
+    )
+    fireEvent.change(noteInput, {
+      target: { value: 'The Obsidian Concord is signed at the Spire.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Save Event/i }))
+    expect(handleAddCustomRecord).toHaveBeenCalledTimes(1)
+  })
 })

@@ -14,15 +14,19 @@ import {
   Lock,
   Unlock,
   GitBranch,
+  Plus,
 } from 'lucide-react'
 import { DrawRecord, StageId, WorldEntity, WorldState } from '../engine/types'
-import { DEFAULT_CARD_COLORS, STAGES, getCardDisplay } from '../engine/deckEngine'
+import { DEFAULT_CARD_COLORS, STAGES, calculateEpochYear, getCardDisplay } from '../engine/deckEngine'
 import { exportWorldChronicleMarkdown } from '../engine/storageService'
 
 interface TimelinePanelProps {
   world: WorldState
   cardColors?: Record<string, string>
   onUpdateRecord: (recordId: string, updates: Partial<DrawRecord>) => void
+  onAddCustomRecord?: (record: DrawRecord) => void
+  onSelectTile?: (tileId: string) => void
+  onSelectEntity?: (entityId: string) => void
   onClearHistory: () => void
   onRewindToMove?: (moveId: number) => void
   onBranchFromMove?: (moveId: number) => void
@@ -32,6 +36,9 @@ export function TimelinePanel({
   world,
   cardColors = DEFAULT_CARD_COLORS,
   onUpdateRecord,
+  onAddCustomRecord,
+  onSelectTile,
+  onSelectEntity,
   onClearHistory,
   onRewindToMove,
   onBranchFromMove,
@@ -44,6 +51,12 @@ export function TimelinePanel({
   const [unlockedRecordIds, setUnlockedRecordIds] = useState<Record<string, boolean>>({})
   const [confirmRewindMoveId, setConfirmRewindMoveId] = useState<number | null>(null)
   const [confirmClearHistory, setConfirmClearHistory] = useState(false)
+
+  // Freeform Lore Event Adder state
+  const [showAddEventForm, setShowAddEventForm] = useState(false)
+  const [customTitle, setCustomTitle] = useState('')
+  const [customNote, setCustomNote] = useState('')
+  const [customTile, setCustomTile] = useState('')
 
   const filteredRecords = world.drawHistory
     .filter((rec) => {
@@ -148,6 +161,16 @@ export function TimelinePanel({
         </div>
 
         <div className="no-print flex flex-wrap items-center gap-2">
+          {onAddCustomRecord && !world.isLocked && (
+            <button
+              type="button"
+              onClick={() => setShowAddEventForm((v) => !v)}
+              className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>+ Log Custom Event</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setSortAsc(!sortAsc)}
@@ -221,6 +244,75 @@ export function TimelinePanel({
           )}
         </div>
       </div>
+
+      {/* Optional Freeform Custom Event Logger Drawer */}
+      {showAddEventForm && onAddCustomRecord && (
+        <div className="no-print p-4 rounded-xl border border-primary/30 bg-primary/[0.03] space-y-3 text-xs">
+          <div className="font-bold text-primary flex items-center justify-between">
+            <span>📜 Log Custom World Event / Activity</span>
+            <button
+              type="button"
+              onClick={() => setShowAddEventForm(false)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Close
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input
+              type="text"
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              placeholder="Event Title (e.g., Founding of Silverkeep)..."
+              className="input h-8 text-xs sm:col-span-2"
+            />
+            <input
+              type="text"
+              value={customTile}
+              onChange={(e) => setCustomTile(e.target.value)}
+              placeholder="Optional Tile (col,row)..."
+              className="input h-8 text-xs"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customNote}
+              onChange={(e) => setCustomNote(e.target.value)}
+              placeholder="Describe what happened in the world..."
+              className="input h-8 text-xs flex-1"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!customNote.trim() && !customTitle.trim()) return
+                const moveId = world.drawHistory.length + 1
+                const newRec: DrawRecord = {
+                  id: `custom_${Date.now()}`,
+                  moveId,
+                  card: { suit: '♦', value: '★', id: `custom-${moveId}` },
+                  timestamp: new Date().toISOString(),
+                  stage: world.currentStage,
+                  power: customTitle.trim() || 'Lore Chronicle',
+                  actionTitle: customTitle.trim() || undefined,
+                  note: customNote.trim(),
+                  linkedTileIds: customTile.trim() ? [customTile.trim()] : [],
+                  linkedEntityIds: [],
+                  epochYear: calculateEpochYear(world.currentStage, moveId),
+                }
+                onAddCustomRecord(newRec)
+                setCustomTitle('')
+                setCustomNote('')
+                setCustomTile('')
+                setShowAddEventForm(false)
+              }}
+              className="btn-primary px-4 h-8 text-xs font-bold shrink-0"
+            >
+              Save Event
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="no-print grid grid-cols-1 md:grid-cols-3 gap-3 bg-muted/40 p-3 rounded-lg">
@@ -470,9 +562,16 @@ export function TimelinePanel({
                     {(record.linkedTileIds || []).map((tId) => (
                       <span
                         key={tId}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border font-mono text-[11px]"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border hover:border-primary font-mono text-[11px]"
                       >
-                        ({tId})
+                        <button
+                          type="button"
+                          onClick={() => onSelectTile?.(tId)}
+                          className="hover:text-primary hover:underline"
+                          title={`Inspect Tile (${tId}) on Map`}
+                        >
+                          ({tId})
+                        </button>
                         {isUnlocked && (
                           <button
                             type="button"
@@ -524,16 +623,23 @@ export function TimelinePanel({
                           <button
                             key={ent.id}
                             type="button"
-                            disabled={!isUnlocked}
                             onClick={() => {
-                              if (!isUnlocked) return
-                              handleToggleEntityLink(record, ent.id)
+                              if (isUnlocked) {
+                                handleToggleEntityLink(record, ent.id)
+                              } else {
+                                onSelectEntity?.(ent.id)
+                              }
                             }}
                             className={`px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
                               isLinked
                                 ? 'bg-primary text-primary-foreground border-primary'
                                 : 'bg-background border-border text-muted-foreground hover:text-foreground'
                             }`}
+                            title={
+                              isUnlocked
+                                ? `Toggle link to ${ent.name}`
+                                : `Inspect ${ent.name} in Codex`
+                            }
                           >
                             {ent.icon} {ent.name}
                           </button>

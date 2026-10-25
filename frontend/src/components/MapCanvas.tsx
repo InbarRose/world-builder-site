@@ -58,6 +58,10 @@ interface MapCanvasProps {
   drawHistory?: DrawRecord[]
   entities?: WorldEntity[]
   initialViewOnly?: boolean
+  selectedTileId?: string
+  onSelectTile?: (tileId: string) => void
+  onSelectEntity?: (entityId: string) => void
+  onSelectEvent?: (moveId: number) => void
   onChange: (newMap: MapState) => void
 }
 
@@ -313,6 +317,10 @@ export function MapCanvas({
   drawHistory = [],
   entities = [],
   initialViewOnly = false,
+  selectedTileId: controlledSelectedTileId,
+  onSelectTile,
+  onSelectEntity,
+  onSelectEvent,
   onChange,
 }: MapCanvasProps) {
   const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
@@ -335,7 +343,12 @@ export function MapCanvas({
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('')
   const [geoPreset, setGeoPreset] = useState<GeographyPreset>('continent')
 
-  const [selectedTileId, setSelectedTileId] = useState<string>('10,6')
+  const [internalSelectedTileId, setInternalSelectedTileId] = useState<string>('10,6')
+  const selectedTileId = controlledSelectedTileId || internalSelectedTileId
+  const setSelectedTileId = (id: string) => {
+    setInternalSelectedTileId(id)
+    onSelectTile?.(id)
+  }
   const [isDragging, setIsDragging] = useState(false)
   const [tagInput, setTagInput] = useState('')
   const [customWidth, setCustomWidth] = useState<number>(map.width)
@@ -1694,28 +1707,67 @@ export function MapCanvas({
               {linkedEntities.length > 0 && (
                 <div className="space-y-1">
                   {linkedEntities.map((ent) => (
-                    <div
+                    <button
                       key={ent.id}
-                      className="text-xs p-1.5 rounded bg-muted/60 flex items-center justify-between border border-border/60"
+                      type="button"
+                      onClick={() => onSelectEntity?.(ent.id)}
+                      className="w-full text-left text-xs p-1.5 rounded bg-muted/60 hover:bg-accent hover:border-primary flex items-center justify-between border border-border/60 transition-colors"
+                      title={`Inspect ${ent.name} in the Codex`}
                     >
                       <span className="font-semibold flex items-center gap-1.5">
                         <span>{ent.icon}</span>
                         <span>{ent.name}</span>
                       </span>
-                      <span className="text-[10px] uppercase text-muted-foreground">
-                        {ent.category}
+                      <span className="text-[10px] uppercase text-primary font-semibold">
+                        {ent.category} →
                       </span>
-                    </div>
+                    </button>
                   ))}
+                </div>
+              )}
+
+              {/* Direct Entity Linker on Tile in Edit Mode */}
+              {!isViewOnly && entities.length > 0 && (
+                <div className="pt-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                    Connect Entities to Tile ({inspectedTile.col}, {inspectedTile.row}):
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {entities.map((ent) => {
+                      const isConnected = inspectedTile.linkedEntityIds.includes(ent.id)
+                      return (
+                        <button
+                          key={ent.id}
+                          type="button"
+                          onClick={() => {
+                            const nextIds = isConnected
+                              ? inspectedTile.linkedEntityIds.filter((id) => id !== ent.id)
+                              : [...inspectedTile.linkedEntityIds, ent.id]
+                            handleUpdateInspectedTile({ linkedEntityIds: nextIds })
+                          }}
+                          className={`px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
+                            isConnected
+                              ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                              : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          {ent.icon} {ent.name}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
 
               {linkedEvents.length > 0 ? (
                 <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                   {linkedEvents.map((ev) => (
-                    <div
+                    <button
                       key={ev.id}
-                      className="text-xs p-2 rounded bg-muted/50 border border-border/60 space-y-0.5"
+                      type="button"
+                      onClick={() => onSelectEvent?.(ev.moveId)}
+                      className="w-full text-left text-xs p-2 rounded bg-muted/50 hover:bg-accent border border-border/60 hover:border-primary space-y-0.5 transition-colors block"
+                      title={`Jump to Turn #${ev.moveId} in Chronicle`}
                     >
                       <div className="font-semibold flex justify-between text-[11px]">
                         <span className="text-primary">
@@ -1723,7 +1775,7 @@ export function MapCanvas({
                           {ev.card.suit}) · {ev.actionTitle || ev.power}
                         </span>
                         <span className="text-muted-foreground uppercase text-[10px]">
-                          {ev.stage}
+                          {ev.stage} →
                         </span>
                       </div>
                       {ev.note && (
@@ -1731,7 +1783,7 @@ export function MapCanvas({
                           {ev.note}
                         </p>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
