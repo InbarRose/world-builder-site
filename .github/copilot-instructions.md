@@ -55,10 +55,17 @@ npm --prefix frontend run preview
   - `frontend/src/test/` — Unit and component tests.
   - `frontend/public/` — Static assets, `CNAME`, and card deck data JSONs.
 
-### 4. Output & Commit Standards
+### 4. Output, PR & Merge Standards
 
 - Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`, `chore:`, `refactor:`.
-- Ensure tests pass (`npm run test:ci`) and static build succeeds (`npm run build`) before closing tasks.
+- Ensure tests pass (`npm run test:ci`) and static build succeeds (`npm run build`) locally.
+- **Task Conclusion Workflow**:
+  1. Commit atomic changes on a feature branch.
+  2. Push the branch to `origin`.
+  3. Open a Pull Request targeting `main`.
+  4. Ensure the GitHub Actions CI workflow runs and passes tests.
+  5. Merge the PR to `main` (squash or merge).
+  6. Switch back to `main` and pull latest.
 
 ## Tasks
 
