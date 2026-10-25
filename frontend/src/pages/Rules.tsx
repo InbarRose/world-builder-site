@@ -1,5 +1,17 @@
-import React, { useState, useEffect } from 'react'
-import { BookOpen, Menu, X, Printer, FileSpreadsheet, Book } from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+import {
+  BookOpen,
+  Menu,
+  X,
+  Printer,
+  FileSpreadsheet,
+  Book,
+  Search,
+  ChevronRight,
+  ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from 'lucide-react'
 
 interface NavItem {
   id: string
@@ -89,10 +101,188 @@ const NAVIGATION: NavItem[] = [
   { id: 'acknowledgements', title: 'Acknowledgements', level: 1 },
 ]
 
+interface SearchableEntry {
+  id: string
+  title: string
+  category: string
+  snippet: string
+}
+
+const SEARCH_INDEX: SearchableEntry[] = [
+  {
+    id: 'introduction',
+    title: 'Introduction',
+    category: 'Overview',
+    snippet: 'Collaborative fantasy world-building game using cards to shape terrain, civilizations, and history.',
+  },
+  {
+    id: 'setup',
+    title: 'Setup & Collaborative Roles',
+    category: 'System',
+    snippet: 'Assign Artist (map), Historian (timeline), and Keeper (codex) roles and draw a starting coastline.',
+  },
+  {
+    id: 'powers',
+    title: 'Powers & Fantastical Face Cards',
+    category: 'System',
+    snippet: 'Cards 2–10 trigger normal suit powers; Jack, Queen, King, and Jokers trigger Fantastical powers.',
+  },
+  {
+    id: 'natural-disasters',
+    title: 'Natural Disasters (Aces)',
+    category: 'System',
+    snippet: 'Triggered whenever an Ace is drawn: volcanic eruptions, earthquakes, tsunamis, meteors, plagues.',
+  },
+  {
+    id: '1.-genesis',
+    title: '1. Genesis Stage',
+    category: 'Stage 1',
+    snippet: 'Pre-history 10,000+ years ago. Earth (♠), Water (♥), Plant (♣), and Feature (♦) shape the landscape.',
+  },
+  {
+    id: '(♠)---earth',
+    title: '(♠) Earth — Genesis',
+    category: 'Stage 1 Power',
+    snippet: 'Mountains, hills, canyons, deserts, cliffs, caves, islands, and craters.',
+  },
+  {
+    id: '(♥)---water',
+    title: '(♥) Water — Genesis',
+    category: 'Stage 1 Power',
+    snippet: 'Rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, and glaciers.',
+  },
+  {
+    id: '(♣)---plant',
+    title: '(♣) Plant — Genesis',
+    category: 'Stage 1 Power',
+    snippet: 'Forests, jungles, grasslands, rainforests, marshes, and ancient groves.',
+  },
+  {
+    id: '(♦)---feature',
+    title: '(♦) Feature — Genesis',
+    category: 'Stage 1 Power',
+    snippet: 'Geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural wonders.',
+  },
+  {
+    id: '2.-primal',
+    title: '2. Primal Stage',
+    category: 'Stage 2',
+    snippet: 'Origin of sentient species. Settlement (♠), Tradition (♥), Resource (♣), and Skill (♦).',
+  },
+  {
+    id: '(♠)---settlement',
+    title: '(♠) Settlement — Primal',
+    category: 'Stage 2 Power',
+    snippet: 'Enhance a species with villages, camps, towns, small cities, and nomadic routes.',
+  },
+  {
+    id: '(♥)---tradition',
+    title: '(♥) Tradition — Primal',
+    category: 'Stage 2 Power',
+    snippet: 'Religious, cultural, militaristic, agricultural customs, festivals, and rites of passage.',
+  },
+  {
+    id: '(♣)---resource',
+    title: '(♣) Resource — Primal',
+    category: 'Stage 2 Power',
+    snippet: 'Domesticated crops, beasts, wood, stone, iron, quarries, and magical reagents.',
+  },
+  {
+    id: '(♦)---skill',
+    title: '(♦) Skill — Primal',
+    category: 'Stage 2 Power',
+    snippet: 'Mastery in hunting, sailing, smithing, magic, craftsmanship, or astronomy.',
+  },
+  {
+    id: '3.-civilization',
+    title: '3. Civilization Stage',
+    category: 'Stage 3',
+    snippet: 'Societies, kingdoms, and empires. Construction (♠), Enlightenment (♥), Expansion (♣), Diplomacy (♦).',
+  },
+  {
+    id: '(♠)---construction',
+    title: '(♠) Construction — Civilization',
+    category: 'Stage 3 Power',
+    snippet: 'Major cities, roads, bridges, castles, universities, temples, and terraforming.',
+  },
+  {
+    id: '(♥)---enlightenment',
+    title: '(♥) Enlightenment — Civilization',
+    category: 'Stage 3 Power',
+    snippet: 'Science, governments (republic, feudalism), philosophy, arts, monuments, and dogmas.',
+  },
+  {
+    id: '(♣)---expansion',
+    title: '(♣) Expansion — Civilization',
+    category: 'Stage 3 Power',
+    snippet: 'Expand borders through conquest, exploration, colonies, forming kingdoms and empires.',
+  },
+  {
+    id: '(♦)---diplomacy',
+    title: '(♦) Diplomacy — Civilization',
+    category: 'Stage 3 Power',
+    snippet: 'Alliances, trade routes, royal marriages, brokering peace, and negotiating borders.',
+  },
+  {
+    id: '4.-intrigue',
+    title: '4. Intrigue Stage',
+    category: 'Stage 4',
+    snippet: 'Recent decades & modern plots. Conflict (♠), Cooperation (♥), Scheme (♣), and Myth (♦).',
+  },
+  {
+    id: '(♠)---conflict',
+    title: '(♠) Conflict — Intrigue',
+    category: 'Stage 4 Power',
+    snippet: 'Wars, battles, rebellions, sieges, purges, and ruined cities.',
+  },
+  {
+    id: '(♥)---cooperation',
+    title: '(♥) Cooperation — Intrigue',
+    category: 'Stage 4 Power',
+    snippet: 'Coalitions, shared defense, guilds, peace summits, and joint quests.',
+  },
+  {
+    id: '(♣)---scheme',
+    title: '(♣) Scheme — Intrigue',
+    category: 'Stage 4 Power',
+    snippet: 'Espionage, spies, assassinations, black markets, secret cabals, and coups.',
+  },
+  {
+    id: '(♦)---myth',
+    title: '(♦) Myth — Intrigue',
+    category: 'Stage 4 Power',
+    snippet: 'Dragons, lost artifacts, lich lairs, prophecies, curses, and plot hooks.',
+  },
+  {
+    id: 'glossary-of-terms',
+    title: 'Glossary of Terms',
+    category: 'Reference',
+    snippet: 'Definitions for Draw Deck, Stage, Power, Fantastical Power, Natural Disaster, Joker, and Roles.',
+  },
+  {
+    id: 'reference-table',
+    title: '4×4 Stage & Suit Reference Table',
+    category: 'Reference',
+    snippet: 'Complete matrix comparing Spades, Hearts, Clubs, and Diamonds across all 4 stages.',
+  },
+]
+
+export type RulesCategoryFilter =
+  | 'all'
+  | 'system'
+  | 'genesis'
+  | 'primal'
+  | 'civilization'
+  | 'intrigue'
+  | 'glossary'
+
 export function Rules() {
   const [activeSection, setActiveSection] = useState('introduction')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [desktopTocCollapsed, setDesktopTocCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState<'full' | 'quick-card'>('full')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<RulesCategoryFilter>('all')
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -111,25 +301,39 @@ export function Rules() {
   const scrollToSection = (id: string) => {
     setActiveSection(id)
     setSidebarOpen(false)
+    setCategoryFilter('all')
     window.location.hash = id
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 30)
   }
+
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return []
+    return SEARCH_INDEX.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.snippet.toLowerCase().includes(q)
+    )
+  }, [searchQuery])
 
   const renderNavItem = (item: NavItem) => (
     <div key={item.id}>
       <button
         onClick={() => scrollToSection(item.id)}
-        className={`w-full text-left px-3 py-2 rounded-md transition-colors text-sm ${
+        className={`w-full text-left px-3 py-1.5 rounded-lg transition-colors text-xs sm:text-sm ${
           activeSection === item.id
-            ? 'bg-primary text-primary-foreground'
+            ? 'bg-primary text-primary-foreground font-semibold'
             : 'text-muted-foreground hover:text-foreground hover:bg-accent'
         }`}
-        style={{ paddingLeft: `${(item.level - 1) * 1 + 0.75}rem` }}
+        style={{ paddingLeft: `${(item.level - 1) * 0.85 + 0.75}rem` }}
       >
         {item.title}
       </button>
       {item.children && (
-        <div className="ml-2 mt-1 space-y-1">
+        <div className="ml-2 mt-0.5 space-y-0.5">
           {item.children.map(renderNavItem)}
         </div>
       )}
@@ -137,55 +341,185 @@ export function Rules() {
   )
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Top Action Bar (Hidden when printing) */}
-      <div className="no-print card p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2" role="tablist" aria-label="Rules View Mode">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'full'}
-            onClick={() => setViewMode('full')}
-            className={`px-4 py-2 rounded-md text-xs sm:text-sm font-semibold flex items-center gap-2 transition-colors ${
-              viewMode === 'full'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <Book className="h-4 w-4" />
-            <span>Full Rules Book</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'quick-card'}
-            onClick={() => setViewMode('quick-card')}
-            className={`px-4 py-2 rounded-md text-xs sm:text-sm font-semibold flex items-center gap-2 transition-colors ${
-              viewMode === 'quick-card'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-accent text-foreground'
-            }`}
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span>1-Page Quick Reference Card</span>
-          </button>
+    <div className="max-w-7xl mx-auto space-y-5">
+      {/* Top Control & Search Bar (Hidden when printing) */}
+      <div className="no-print card p-3.5 sm:p-4 space-y-3 border-border/80 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Left: View Mode Switcher */}
+          <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-xl border border-border" role="tablist" aria-label="Rules View Mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'full'}
+              onClick={() => setViewMode('full')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all ${
+                viewMode === 'full'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Book className="h-4 w-4" />
+              <span>Full Rules Book</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'quick-card'}
+              onClick={() => setViewMode('quick-card')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all ${
+                viewMode === 'quick-card'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>1-Page Quick Reference Card</span>
+            </button>
+          </div>
+
+          {/* Center: Instant Search Input */}
+          {viewMode === 'full' && (
+            <div className="relative flex-1 min-w-[220px] max-w-md">
+              <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-2.5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search rules, stages, suits (♠ ♥ ♣ ♦), or glossary..."
+                aria-label="Search Rules"
+                className="input h-9 pl-9 pr-8 text-xs w-full"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Right: TOC Toggle & Print Action */}
+          <div className="flex items-center gap-2">
+            {viewMode === 'full' && (
+              <button
+                type="button"
+                onClick={() => setDesktopTocCollapsed((c) => !c)}
+                className="hidden lg:inline-flex btn-outline px-2.5 py-1.5 text-xs items-center gap-1.5"
+                title={desktopTocCollapsed ? 'Show Table of Contents' : 'Collapse Table of Contents'}
+              >
+                {desktopTocCollapsed ? (
+                  <>
+                    <PanelLeftOpen className="h-3.5 w-3.5" />
+                    <span>Show Contents</span>
+                  </>
+                ) : (
+                  <>
+                    <PanelLeftClose className="h-3.5 w-3.5" />
+                    <span>Hide Contents</span>
+                  </>
+                )}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="btn-outline px-3.5 py-1.5 text-xs sm:text-sm flex items-center gap-2 font-medium"
+              title="Print or Save as PDF for offline tabletop play"
+            >
+              <Printer className="h-4 w-4 text-primary" />
+              <span>
+                {viewMode === 'quick-card'
+                  ? 'Print Quick Reference Card'
+                  : 'Print Full Rules'}
+              </span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="btn-outline px-4 py-2 text-xs sm:text-sm flex items-center gap-2 font-medium"
-            title="Print or Save as PDF for offline tabletop play"
-          >
-            <Printer className="h-4 w-4" />
-            <span>
-              {viewMode === 'quick-card'
-                ? 'Print Quick Reference Card'
-                : 'Print Full Rules'}
-            </span>
-          </button>
-        </div>
+        {/* Quick Filter Pills (Stage & Section Jumpers) */}
+        {viewMode === 'full' && (
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/60 overflow-x-auto">
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground font-semibold mr-1 shrink-0">
+                Focus Filter:
+              </span>
+              {(
+                [
+                  { id: 'all', label: 'All Sections' },
+                  { id: 'system', label: 'Core System & Roles' },
+                  { id: 'genesis', label: '1. Genesis' },
+                  { id: 'primal', label: '2. Primal' },
+                  { id: 'civilization', label: '3. Civilization' },
+                  { id: 'intrigue', label: '4. Intrigue' },
+                  { id: 'glossary', label: 'Glossary & Matrix' },
+                ] as const
+              ).map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setCategoryFilter(pill.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+                    categoryFilter === pill.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Instant Search Results Dropdown Panel */}
+        {viewMode === 'full' && searchQuery.trim() !== '' && (
+          <div className="p-3 rounded-xl border border-primary/30 bg-muted/30 space-y-2 max-h-72 overflow-y-auto">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-primary">
+                Search Results ({searchResults.length})
+              </span>
+              <span className="text-muted-foreground">
+                Click any result to jump directly to that rule
+              </span>
+            </div>
+            {searchResults.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">
+                No rules or powers matched "{searchQuery}".
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {searchResults.map((res) => (
+                  <button
+                    key={res.id}
+                    type="button"
+                    onClick={() => {
+                      scrollToSection(res.id)
+                      setSearchQuery('')
+                    }}
+                    className="p-2.5 rounded-lg border border-border bg-card hover:border-primary/50 text-left space-y-1 transition-all flex items-start justify-between gap-2"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                          {res.category}
+                        </span>
+                        <span className="text-xs font-bold">{res.title}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">
+                        {res.snippet}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {viewMode === 'quick-card' ? (
@@ -200,32 +534,34 @@ export function Rules() {
             />
           )}
 
-          {/* Sidebar Navigation */}
-          <aside
-            className={`no-print ${
-              sidebarOpen
-                ? 'fixed inset-y-0 left-0 z-50 w-72 shadow-2xl rounded-none'
-                : 'hidden'
-            } lg:block lg:sticky lg:top-16 h-fit lg:w-64 flex-shrink-0 bg-card border lg:rounded-lg p-4`}
-            style={{ maxHeight: sidebarOpen ? '100vh' : 'calc(100vh - 5rem)' }}
-          >
-            <div className="flex items-center justify-between mb-3 lg:hidden border-b border-border pb-2">
-              <h2 className="font-bold text-sm">Rules Table of Contents</h2>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1.5 hover:bg-accent rounded"
-                aria-label="Close Contents"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <nav
-              className="space-y-1 overflow-y-auto"
-              style={{ maxHeight: sidebarOpen ? 'calc(100vh - 5rem)' : 'calc(100vh - 8rem)' }}
+          {/* Sidebar Navigation (Collapsible on Desktop & Slide-Over on Mobile) */}
+          {!desktopTocCollapsed && (
+            <aside
+              className={`no-print ${
+                sidebarOpen
+                  ? 'fixed inset-y-0 left-0 z-50 w-72 shadow-2xl rounded-none'
+                  : 'hidden'
+              } lg:block lg:sticky lg:top-16 h-fit lg:w-64 flex-shrink-0 bg-card border lg:rounded-xl p-4`}
+              style={{ maxHeight: sidebarOpen ? '100vh' : 'calc(100vh - 5rem)' }}
             >
-              {NAVIGATION.map(renderNavItem)}
-            </nav>
-          </aside>
+              <div className="flex items-center justify-between mb-3 lg:hidden border-b border-border pb-2">
+                <h2 className="font-bold text-sm">Rules Table of Contents</h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-1.5 hover:bg-accent rounded"
+                  aria-label="Close Contents"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <nav
+                className="space-y-0.5 overflow-y-auto"
+                style={{ maxHeight: sidebarOpen ? 'calc(100vh - 5rem)' : 'calc(100vh - 8rem)' }}
+              >
+                {NAVIGATION.map(renderNavItem)}
+              </nav>
+            </aside>
+          )}
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
@@ -258,13 +594,15 @@ export function Rules() {
             </div>
 
             <div className="card p-4 sm:p-8 space-y-6 sm:space-y-8">
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-2 border-b border-border/60 pb-6">
                 <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto no-print" />
                 <h1 className="text-2xl sm:text-4xl font-bold">World Building</h1>
-                <p className="text-base sm:text-xl text-muted-foreground">Game Rules & Reference Wiki</p>
+                <p className="text-base sm:text-xl text-muted-foreground">
+                  Game Rules & Reference Wiki
+                </p>
               </div>
 
-              <RulesContent />
+              <RulesContent categoryFilter={categoryFilter} />
             </div>
           </div>
         </div>
@@ -273,7 +611,7 @@ export function Rules() {
   )
 }
 
-function QuickReferenceCard() {
+export function QuickReferenceCard() {
   const [mobileStageTab, setMobileStageTab] = useState<'all' | 1 | 2 | 3 | 4>('all')
 
   const mobileStageCards = [
@@ -553,378 +891,415 @@ function QuickReferenceCard() {
   )
 }
 
-function RulesContent() {
+function RulesContent({ categoryFilter }: { categoryFilter: RulesCategoryFilter }) {
+  const showOverview = categoryFilter === 'all'
+  const showSystem = categoryFilter === 'all' || categoryFilter === 'system'
+  const showGenesis = categoryFilter === 'all' || categoryFilter === 'genesis'
+  const showPrimal = categoryFilter === 'all' || categoryFilter === 'primal'
+  const showCivilization = categoryFilter === 'all' || categoryFilter === 'civilization'
+  const showIntrigue = categoryFilter === 'all' || categoryFilter === 'intrigue'
+  const showStagesParent = showGenesis || showPrimal || showCivilization || showIntrigue
+  const showGlossary = categoryFilter === 'all' || categoryFilter === 'glossary'
+
   return (
     <div className="prose prose-slate max-w-none">
-      <Section id="introduction" title="Introduction">
-        <p>
-          World building is a game where you and your friends will create a world. The theme of this
-          game is Fantasy, and the idea is that you could then later use this world in your other
-          role-playing-games, or for a fantasy story.
-        </p>
-        <p>
-          Throughout the game, different players will take turns using different powers to shape a
-          world. From its terrain, and up to its civilizations, their cultures, and the wars they
-          fight. While this is happening, you will want to write down and record the different
-          actions that are happening to use as the history for your world, and to track the
-          different races and cultures and their wars and technological developments so that you will
-          have a rich world to play in. You will of course, also need to be drawing this world as
-          you play, and you will end up with an awesome world map that you can use for your game.
-          The added benefit of course, that if you make the world with the same players that will
-          be playing in your game, they will be much more connected to the world and already know
-          it's history!
-        </p>
-      </Section>
+      {showOverview && (
+        <>
+          <Section id="introduction" title="Introduction">
+            <p>
+              World building is a game where you and your friends will create a world. The theme of this
+              game is Fantasy, and the idea is that you could then later use this world in your other
+              role-playing-games, or for a fantasy story.
+            </p>
+            <p>
+              Throughout the game, different players will take turns using different powers to shape a
+              world. From its terrain, and up to its civilizations, their cultures, and the wars they
+              fight. While this is happening, you will want to write down and record the different
+              actions that are happening to use as the history for your world, and to track the
+              different races and cultures and their wars and technological developments so that you will
+              have a rich world to play in. You will of course, also need to be drawing this world as
+              you play, and you will end up with an awesome world map that you can use for your game.
+              The added benefit of course, that if you make the world with the same players that will
+              be playing in your game, they will be much more connected to the world and already know
+              it's history!
+            </p>
+          </Section>
 
-      <Section id="guide-to-world-building" title="Guide to World Building">
-        <p>
-          A world is a complex concept with many elements, simplifying it into a system like the one
-          here takes certain simplifications. But we can also make certain assumption to make the
-          whole process easier and more fun! The system will let you create forests and rivers, but
-          that doesn't mean there aren't trees here and there, small groves, or little streams. The
-          elements you introduce with the powers in this game aren't the only thing in the game,
-          we assume that the world will have hills, rocks, trees, and vegetation, including the
-          occasional stream, brook, or pond. The features that his systems powers let you create
-          represent significant terrain features, fauna, flora, settlements, and events. In other
-          words, don't worry about the small stuff.
-        </p>
-      </Section>
+          <Section id="guide-to-world-building" title="Guide to World Building">
+            <p>
+              A world is a complex concept with many elements, simplifying it into a system like the one
+              here takes certain simplifications. But we can also make certain assumption to make the
+              whole process easier and more fun! The system will let you create forests and rivers, but
+              that doesn't mean there aren't trees here and there, small groves, or little streams. The
+              elements you introduce with the powers in this game aren't the only thing in the game,
+              we assume that the world will have hills, rocks, trees, and vegetation, including the
+              occasional stream, brook, or pond. The features that his systems powers let you create
+              represent significant terrain features, fauna, flora, settlements, and events. In other
+              words, don't worry about the small stuff.
+            </p>
+          </Section>
+        </>
+      )}
 
-      <Section id="preparation-and-requirements" title="Preparation and Requirements">
-        <SubSection id="what-you-will-need" title="What you will need">
+      {showSystem && (
+        <>
+          <Section id="preparation-and-requirements" title="Preparation and Requirements">
+            <SubSection id="what-you-will-need" title="What you will need">
+              <p>
+                For World Building, you will need a few players, pencils, plenty of paper, and
+                preferably a whiteboard with markers, or some other large and easy for all players to
+                see and interact with medium on which to draw. (perhaps even playable online with some
+                sort of collaborative whiteboard) It works well with a single player doing all the
+                drawing, or everyone doing their own thing, whatever you prefer as a group, but a single
+                player drawing will usually take slightly more time than otherwise. And lastly you will
+                need a normal deck of playing cards (with jokers) this is the Draw Deck.
+              </p>
+            </SubSection>
+
+            <SubSection id="how-long-it-will-take" title="How long it will take">
+              <p>
+                Each stage of the game should take between an hour and two hours, depending on how
+                detailed you are making the game, and any variant or house rules you may be using.
+              </p>
+            </SubSection>
+          </Section>
+
+          <Section id="system" title="System">
+            <p>
+              The process of building a world is split into three stages, with a fourth optional stage;
+              Genesis, Primal, Civilization, and Intrigue. Each stage is slightly different from the
+              others, with focus given to different aspects of building a world.
+            </p>
+            <p>
+              Unlike other "games" or systems, there is no winner or loser when World Building. The
+              players are simply creating a world together.
+            </p>
+            <p>
+              During the progression of the game, as the world goes through stages the players are free
+              to do anything that they want, they could create mountains in the first stage, only to
+              destroy them in the second stage. A player can put two of his creations against each
+              other, or even wipe them out completely. Something created by a player is owned by
+              everyone.
+            </p>
+
+            <SubSection id="setup" title="Setup">
+              <p>To set up the game, prepare your playing area. Each player should make sure that:</p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>They have easy access to the Draw Deck.</li>
+                <li>They can see and gesture at locations on the map.</li>
+                <li>They have pencil and paper to record actions and make notes.</li>
+              </ul>
+              <p>
+                There are three optional, but recommended, roles that should be assigned or shared by
+                players:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>Artist, dedicated to drawing the map.</li>
+                <li>Historian, dedicated to recording the timeline.</li>
+                <li>Keeper, dedicated to tracking various developments.</li>
+              </ul>
+              <p>
+                Now, before you start, you should draw a basic outline of a coastline, and maybe a few
+                features as a starting map. If you like you can design a whole seasonal system, with
+                tides, and moons, and weather, multiple continents, and etc. But for the purpose of the
+                game you will only be needing a single main landmass, a few features, and maybe some
+                islands.
+              </p>
+              <p>Once you've done all that you are ready to start the first stage!</p>
+            </SubSection>
+
+            <SubSection id="playing-a-stage" title="Playing a Stage">
+              <p>At the start of each stage, shuffle and prepare the Draw Deck.</p>
+              <p>Decide how many cards of each type you want to include….</p>
+              <p>A stage is played in rounds until all cards have been played.</p>
+              <p>
+                Each round, players will draw a card from the Draw Deck and play it for everyone to see.
+                Placing it faceup in the discard pile.
+              </p>
+              <p>
+                After all the effects are determined, the Artist should depict or draw any relevant
+                changes in the map. The Historian should record the actions in the timeline, and the
+                Keeper should track any relevant changes in the world.
+              </p>
+            </SubSection>
+
+            <SubSection id="powers" title="Powers">
+              <p>During each stage there are four powers.</p>
+              <p>
+                Powers can also be made Fantastical by using face cards of the same suit, or a Joker.
+              </p>
+              <p>
+                Fantastical versions of powers are essentially the same as normal powers only
+                fantastical, you should decide ahead of time with the rest of the players just how
+                fantastical you want to make it. Low and High fantasy can both be easily supported,
+                additionally you may decide to remove Fantastical powers from the game completely and
+                simply use them as <em>enhanced</em> or <em>better-than-normal</em> versions of the
+                powers.
+              </p>
+              <p>
+                Powers can affect any size area on the map, there is no size factor. But you should
+                consider carefully how big or small things should be, and to keep room for things and
+                not to overcrowd anything. Use your own judgement.
+              </p>
+            </SubSection>
+
+            <SubSection id="cards" title="Cards">
+              <p>During each stage, there are four powers. Each power corresponds to a different card suite.</p>
+              <p>The cards numbered 2 through 10 are used for powers of the current stage.</p>
+              <p>
+                The face cards (Jack, Queen, King) are used to perform Fantastical versions of the
+                powers of the current stage.
+              </p>
+              <p>Aces are Natural Disasters.</p>
+              <p>Jokers are Fantastical versions of any power.</p>
+            </SubSection>
+          </Section>
+        </>
+      )}
+
+      {showStagesParent && (
+        <Section id="stages-and-powers" title="Stages and Powers">
           <p>
-            For World Building, you will need a few players, pencils, plenty of paper, and
-            preferably a whiteboard with markers, or some other large and easy for all players to
-            see and interact with medium on which to draw. (perhaps even playable online with some
-            sort of collaborative whiteboard) It works well with a single player doing all the
-            drawing, or everyone doing their own thing, whatever you prefer as a group, but a single
-            player drawing will usually take slightly more time than otherwise. And lastly you will
-            need a normal deck of playing cards (with jokers) this is the Draw Deck.
+            Each stage has a focus on a different stage of world building. Here you will find those
+            stages, and explanations of how to use them to build the world as well as a list of the
+            powers for each age and descriptions of them.
           </p>
-        </SubSection>
 
-        <SubSection id="how-long-it-will-take" title="How long it will take">
-          <p>
-            Each stage of the game should take between an hour and two hours, depending on how
-            detailed you are making the game, and any variant or house rules you may be using.
-          </p>
-        </SubSection>
-      </Section>
+          {categoryFilter === 'all' && (
+            <>
+              <SubSection id="timeline-and-history" title="Timeline and History">
+                <p>
+                  The stages take place over the history and timeline of the world you are making. When
+                  deciding the scale of time for the different actions during different stages consider
+                  the following:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 ml-4">
+                  <li>
+                    Genesis is pre-history, the exact date of actions are not that important and it should
+                    be assumed that all events in this time happened before recorded history more than
+                    tens of thousands of years ago
+                  </li>
+                  <li>
+                    Primal is the earliest history, the actions and events in this stage don't need to
+                    have fixed dates, and have all taken place many thousands of years ago
+                  </li>
+                  <li>
+                    Civilization is history, these are all actions and events that took place over
+                    hundreds or a few thousands years ago, they act as a precursor to the Intrigue stage
+                    and don't need to be very nuanced or detailed.
+                  </li>
+                  <li>
+                    Intrigue is the most recent history, these are all actions and events that have taken
+                    place in the last few decades or years. These actions and events act as a lead into
+                    the story of the world and set up the major plots and stories.
+                  </li>
+                </ol>
+              </SubSection>
 
-      <Section id="system" title="System">
-        <p>
-          The process of building a world is split into three stages, with a fourth optional stage;
-          Genesis, Primal, Civilization, and Intrigue. Each stage is slightly different from the
-          others, with focus given to different aspects of building a world.
-        </p>
-        <p>
-          Unlike other "games" or systems, there is no winner or loser when World Building. The
-          players are simply creating a world together.
-        </p>
-        <p>
-          During the progression of the game, as the world goes through stages the players are free
-          to do anything that they want, they could create mountains in the first stage, only to
-          destroy them in the second stage. A player can put two of his creations against each
-          other, or even wipe them out completely. Something created by a player is owned by
-          everyone.
-        </p>
+              <SubSection id="natural-disasters" title="Natural Disasters">
+                <p>
+                  Natural Disasters happen during any age and are triggered whenever a player draws an Ace
+                  card. When this happens, the player who drew the card should decide what happens.
+                  Examples of natural disasters could be a volcanic eruption, an earthquake, a tsunami, a
+                  meteor, a plague, a tornado, etc.
+                </p>
+              </SubSection>
+            </>
+          )}
 
-        <SubSection id="setup" title="Setup">
-          <p>To set up the game, prepare your playing area. Each player should make sure that:</p>
-          <ul className="list-disc list-inside space-y-2 ml-4">
-            <li>They have easy access to the Draw Deck.</li>
-            <li>They can see and gesture at locations on the map.</li>
-            <li>They have pencil and paper to record actions and make notes.</li>
-          </ul>
-          <p>
-            There are three optional, but recommended, roles that should be assigned or shared by
-            players:
-          </p>
-          <ul className="list-disc list-inside space-y-2 ml-4">
-            <li>Artist, dedicated to drawing the map.</li>
-            <li>Historian, dedicated to recording the timeline.</li>
-            <li>Keeper, dedicated to tracking various developments.</li>
-          </ul>
-          <p>
-            Now, before you start, you should draw a basic outline of a coastline, and maybe a few
-            features as a starting map. If you like you can design a whole seasonal system, with
-            tides, and moons, and weather, multiple continents, and etc. But for the purpose of the
-            game you will only be needing a single main landmass, a few features, and maybe some
-            islands.
-          </p>
-          <p>Once you've done all that you are ready to start the first stage!</p>
-        </SubSection>
+          {showGenesis && (
+            <StageSection
+              id="1.-genesis"
+              title="1. Genesis"
+              description="The Genesis stage represents the early stage of a world, the main focus of this stage is to create a terrain/landscape for everything else to be in. Players should focus on using their powers during this stage to add features to the map."
+              preStage="Before starting this stage, make sure you already have some basic terrain features such as coastlines for your continent(s) and maybe a river, or a mountain or two."
+              powers={[
+                { id: '(♠)---earth', suit: '♠', name: 'Earth', description: 'This power represents earthly features: mountains, hills, canyons, deserts, cliffs, caves, etc.' },
+                { id: '(♥)---water', suit: '♥', name: 'Water', description: 'This power represents watery features: rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, glaciers, etc.' },
+                { id: '(♣)---plant', suit: '♣', name: 'Plant', description: 'This power represents the vegetation, flora, and plants: forests, jungles, grasslands, rainforests, marshes, etc.' },
+                { id: '(♦)---feature', suit: '♦', name: 'Feature', description: 'This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren\'t really represented with the other powers.' },
+              ]}
+            />
+          )}
 
-        <SubSection id="playing-a-stage" title="Playing a Stage">
-          <p>At the start of each stage, shuffle and prepare the Draw Deck.</p>
-          <p>Decide how many cards of each type you want to include….</p>
-          <p>A stage is played in rounds until all cards have been played.</p>
-          <p>
-            Each round, players will draw a card from the Draw Deck and play it for everyone to see.
-            Placing it faceup in the discard pile.
-          </p>
-          <p>
-            After all the effects are determined, the Artist should depict or draw any relevant
-            changes in the map. The Historian should record the actions in the timeline, and the
-            Keeper should track any relevant changes in the world.
-          </p>
-        </SubSection>
+          {showPrimal && (
+            <StageSection
+              id="2.-primal"
+              title="2. Primal"
+              description="The Primal stage represents the origin of intelligent species and races and what makes them special. The focus is on introducing new species to the world, and developing them. Players will each create a species, and then take turns enhancing those species in preparation for the next stage. Species here refers to a race of sentient beings that will be the basis for the nations and societies for the Civilization and Intrigue stages; Humans, Elves, Dwarves, Orcs, etc."
+              preStage="Before starting this stage, each player should create a species, describing them and naming them and deciding where on the map they originated from."
+              powers={[
+                { id: '(♠)---settlement', suit: '♠', name: 'Settlement', description: 'Enhance the species with a settlement; villages, towns, small cities, etc. (Major Cities, Kingdoms, Empires, and the like are more complex and are only available during the Civilization stage.)' },
+                { id: '(♥)---tradition', suit: '♥', name: 'Tradition', description: 'Enhance the species with a tradition; religious, cultural, militaristic, ritualistic, agricultural, rites of passage, etc.' },
+                { id: '(♣)---resource', suit: '♣', name: 'Resource', description: 'Enhance the species with a resource; domesticated crops or animals, raw materials (wood, stone, iron, etc), natural resource, etc.' },
+                { id: '(♦)---skill', suit: '♦', name: 'Skill', description: 'Enhance the species with a skill; something that they are the greatest at, hunting, sailing, climbing, building, crafting, farming, etc.' },
+              ]}
+            />
+          )}
 
-        <SubSection id="powers" title="Powers">
-          <p>During each stage there are four powers.</p>
-          <p>
-            Powers can also be made Fantastical by using face cards of the same suit, or a Joker.
-          </p>
-          <p>
-            Fantastical versions of powers are essentially the same as normal powers only
-            fantastical, you should decide ahead of time with the rest of the players just how
-            fantastical you want to make it. Low and High fantasy can both be easily supported,
-            additionally you may decide to remove Fantastical powers from the game completely and
-            simply use them as <em>enhanced</em> or <em>better-than-normal</em> versions of the
-            powers.
-          </p>
-          <p>
-            Powers can affect any size area on the map, there is no size factor. But you should
-            consider carefully how big or small things should be, and to keep room for things and
-            not to overcrowd anything. Use your own judgement.
-          </p>
-        </SubSection>
+          {showCivilization && (
+            <StageSection
+              id="3.-civilization"
+              title="3. Civilization"
+              description="The Civilization stage represents the development of species into varied societies and their impact on nature, the landscape, and each other. The focus is on making the different societies more unique, by playing the stage from their perspective. To let the species created during the Primal stage interact with each other and the world around them in interesting ways and diverge and grow as societies. The powers of this stage should be from the perspective of Societies, Civilizations, and Groups. Many of the powers in this stage can overlap in their effects, and that is okay, they are different approaches with different motivations which leads to a deeper world."
+              preStage="Before starting this stage, each player should create some societies within the different species which might grow and expand during this stage into kingdoms or empires."
+              powers={[
+                { id: '(♠)---construction', suit: '♠', name: 'Construction', description: 'The power of construction; the society will complete a significant construction project. Building a new City, Roads and Bridges, A Castle, A University, Terraform the landscape, etc.' },
+                { id: '(♥)---enlightenment', suit: '♥', name: 'Enlightenment', description: 'The power of enlightenment; the society will discover or develop technologically, scientifically, socially, culturally, or religiously. Becoming the best at something (mining, farming, boat-making, armor-crafting, architecture, medicine) or becoming paragons of new thinking; governments (feudalism, republic, aristocracy, etc), philosophy (pacifism, militarism, socialism, etc), arts (music, painting, sculptures) or becoming moved by their beliefs to build monuments, spread religion, or adhere to dogmas.' },
+                { id: '(♣)---expansion', suit: '♣', name: 'Expansion', description: 'The power of expansion; the society will expand their borders through war, conquest, exploration, population growth, or alliance with other societies. Taking control of land that is owned by others or not at all. Founding new settlements, integrating into old settlements or conquering them. Forming kingdoms and empires.' },
+                { id: '(♦)---diplomacy', suit: '♦', name: 'Diplomacy', description: 'The power of diplomacy; the society will work with other societies to trade, learn, grow, or cooperate together or against others. Exchanging goods and ideas for prosperity, making alliances, joining dynasties by marriage, forming kingdoms and empires. Brokering peace, ending wars, negotiating borders.' },
+              ]}
+            />
+          )}
 
-        <SubSection id="cards" title="Cards">
-          <p>During each stage, there are four powers. Each power corresponds to a different card suite.</p>
-          <p>The cards numbered 2 through 10 are used for powers of the current stage.</p>
-          <p>
-            The face cards (Jack, Queen, King) are used to perform Fantastical versions of the
-            powers of the current stage.
-          </p>
-          <p>Aces are Natural Disasters.</p>
-          <p>Jokers are Fantastical versions of any power.</p>
-        </SubSection>
-      </Section>
+          {showIntrigue && (
+            <StageSection
+              id="4.-intrigue"
+              title="4. Intrigue"
+              description="The Intrigue stage is where the players create the very recent history of the world. It represents the late stages of a world, where societies have already developed rich mythologies, where they interact with one another, and discover mysteries. The focus on this stage is enrich the world with connections, friendly or unfriendly and between the world, it's landscape, and its populace. The focus of this stage is to make the world an interesting place for telling stories, by discussing and creating plots, stories, and events that are all tied together, all close together, and all within a few decades of the start of the story."
+              preStage="Before this stage, you should make sure to give names to cities, nations, and societies. And deliberate on their aspects that you have developed over the last two stages. Noting the power, influence, armies, government, economy, etc of the different societies in the world."
+              powers={[
+                { id: '(♠)---conflict', suit: '♠', name: 'Conflict', description: 'The power of conflict; Groups work against each other, wars, battles, zealots purging heretics, cities are destroyed, etc. Conflicts can be specific or general, tactical or strategic, conquest or raid. Conflicts could be internal or between societies.' },
+                { id: '(♥)---cooperation', suit: '♥', name: 'Cooperation', description: 'The power of cooperation; Groups work together, trading goods and ideas, helping each other, protecting each other, etc. When cooperating societies can accomplish great things, or bring down great foes, they can be good or bad, fast or slow, ongoing or temporary.' },
+                { id: '(♣)---scheme', suit: '♣', name: 'Scheme', description: 'The power of scheming; Groups scheme and plot, spies and informants trade and share information and secrets, kings are assassinated, black markets are formed, secret alliances are made, etc. Anything that happens as part of a complex plot, or plans that are set in motion only to be triggered later, ongoing things in the world. Schemes can be internal to a society or involve multiple societies.' },
+                { id: '(♦)---myth', suit: '♦', name: 'Myth', description: 'The power of myth; this lets you add mythical things to your world and the story, they could have been there all along, or only recently arrived. It could be a dragon in a cave, a mysterious lost artifact somewhere in a desert, a lich who lives in a haunted palace near a specific mountain, etc. Myth is a general term which will let you add story elements that are part of the world and interesting for the game or story. These could be plot hooks, quests, or looming dangers in the world.' },
+              ]}
+            />
+          )}
+        </Section>
+      )}
 
-      <Section id="stages-and-powers" title="Stages and Powers">
-        <p>
-          Each stage has a focus on a different stage of world building. Here you will find those
-          stages, and explanations of how to use them to build the world as well as a list of the
-          powers for each age and descriptions of them.
-        </p>
+      {showGlossary && (
+        <>
+          <Section id="glossary-of-terms" title="Glossary of Terms">
+            <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Draw Deck</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  The customized playing card deck drawn from during each stage to determine which power a player invokes on their turn.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Stage</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  One of the four eras of creation (Genesis, Primal, Civilization, Intrigue), each focusing on a distinct layer of the world’s development.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Power (2–10 Cards)</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  A world-shaping action determined by the drawn card’s suit (♠, ♥, ♣, ♦) and the current active Stage.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Fantastical Power (J, Q, K)</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  Triggered by drawing a face card (Jack, Queen, or King), allowing an extraordinary, magical, or larger-than-life version of that suit’s power.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Natural Disaster (Ace)</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  Triggered by drawing an Ace; unleashes a cataclysmic upheaval or upheaval appropriate to the current Stage.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Joker (Wild Fantastical)</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  Allows the player to choose any Fantastical Power from the current stage (or combine effects creatively).
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Artist, Historian & Keeper</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  The three collaborative roles: the <strong>Artist</strong> illustrates the map, the <strong>Historian</strong> chronicles the timeline, and the <strong>Keeper</strong> tracks species, societies, and factions.
+                </dd>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/40 border border-border">
+                <dt className="font-bold text-primary">Species & Societies</dt>
+                <dd className="text-sm text-muted-foreground mt-1">
+                  Sentient races introduced before the Primal stage and the kingdoms, nations, or organizations they form prior to the Civilization stage.
+                </dd>
+              </div>
+            </dl>
+          </Section>
 
-        <SubSection id="timeline-and-history" title="Timeline and History">
-          <p>
-            The stages take place over the history and timeline of the world you are making. When
-            deciding the scale of time for the different actions during different stages consider
-            the following:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 ml-4">
-            <li>
-              Genesis is pre-history, the exact date of actions are not that important and it should
-              be assumed that all events in this time happened before recorded history more than
-              tens of thousands of years ago
-            </li>
-            <li>
-              Primal is the earliest history, the actions and events in this stage don't need to
-              have fixed dates, and have all taken place many thousands of years ago
-            </li>
-            <li>
-              Civilization is history, these are all actions and events that took place over
-              hundreds or a few thousands years ago, they act as a precursor to the Intrigue stage
-              and don't need to be very nuanced or detailed.
-            </li>
-            <li>
-              Intrigue is the most recent history, these are all actions and events that have taken
-              place in the last few decades or years. These actions and events act as a lead into
-              the story of the world and set up the major plots and stories.
-            </li>
-          </ol>
-        </SubSection>
+          <Section id="reference-table" title="Reference Table">
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse border border-border">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="border border-border p-3 text-left"></th>
+                    <th className="border border-border p-3 text-center">1 - Genesis</th>
+                    <th className="border border-border p-3 text-center">2 - Primal</th>
+                    <th className="border border-border p-3 text-center">3 - Civilization</th>
+                    <th className="border border-border p-3 text-center">4 - Intrigue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-border p-3 font-semibold">♠</td>
+                    <td className="border border-border p-3 text-center">Earth</td>
+                    <td className="border border-border p-3 text-center">Settlement</td>
+                    <td className="border border-border p-3 text-center">Construction</td>
+                    <td className="border border-border p-3 text-center">Conflict</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border p-3 font-semibold">♥</td>
+                    <td className="border border-border p-3 text-center">Water</td>
+                    <td className="border border-border p-3 text-center">Tradition</td>
+                    <td className="border border-border p-3 text-center">Enlightenment</td>
+                    <td className="border border-border p-3 text-center">Cooperation</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border p-3 font-semibold">♣</td>
+                    <td className="border border-border p-3 text-center">Plant</td>
+                    <td className="border border-border p-3 text-center">Resource</td>
+                    <td className="border border-border p-3 text-center">Expansion</td>
+                    <td className="border border-border p-3 text-center">Scheme</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border p-3 font-semibold">♦</td>
+                    <td className="border border-border p-3 text-center">Feature</td>
+                    <td className="border border-border p-3 text-center">Skill</td>
+                    <td className="border border-border p-3 text-center">Diplomacy</td>
+                    <td className="border border-border p-3 text-center">Myth</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              <strong>Aces:</strong> Natural Disaster, <strong>Face Cards:</strong> Fantastical Power,{' '}
+              <strong>Joker:</strong> Any Fantastical Power
+            </p>
+          </Section>
+        </>
+      )}
 
-        <SubSection id="natural-disasters" title="Natural Disasters">
-          <p>
-            Natural Disasters happen during any age and are triggered whenever a player draws an Ace
-            card. When this happens, the player who drew the card should decide what happens.
-            Examples of natural disasters could be a volcanic eruption, an earthquake, a tsunami, a
-            meteor, a plague, a tornado, etc.
-          </p>
-        </SubSection>
+      {showOverview && (
+        <Section id="acknowledgements" title="Acknowledgements">
+          <SubSection id="the-author" title="The Author">
+            <p>
+              I am Inbar Rose. <a href="mailto:inbarrose@gmail.com" className="text-primary hover:underline">inbarrose@gmail.com</a>. I love roleplaying games and World Building. And I made this so that I could have fun with my friends doing what I love.
+            </p>
+          </SubSection>
 
-        <StageSection
-          id="1.-genesis"
-          title="1. Genesis"
-          description="The Genesis stage represents the early stage of a world, the main focus of this stage is to create a terrain/landscape for everything else to be in. Players should focus on using their powers during this stage to add features to the map."
-          preStage="Before starting this stage, make sure you already have some basic terrain features such as coastlines for your continent(s) and maybe a river, or a mountain or two."
-          powers={[
-            { id: '(♠)---earth', suit: '♠', name: 'Earth', description: 'This power represents earthly features: mountains, hills, canyons, deserts, cliffs, caves, etc.' },
-            { id: '(♥)---water', suit: '♥', name: 'Water', description: 'This power represents watery features: rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, glaciers, etc.' },
-            { id: '(♣)---plant', suit: '♣', name: 'Plant', description: 'This power represents the vegetation, flora, and plants: forests, jungles, grasslands, rainforests, marshes, etc.' },
-            { id: '(♦)---feature', suit: '♦', name: 'Feature', description: 'This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren\'t really represented with the other powers.' },
-          ]}
-        />
+          <SubSection id="inspiration" title="Inspiration">
+            <p>
+              World Building was inspired by a wonderful system contained in a single document called
+              "Dawn of Worlds" (First Edition, July 2005, © N. Bob Pesall, Esq. Attorney At Law,
+              Dickinson, ND). This is a total re-thinking of that work, but the ideas came because I
+              wanted a better way to do what I did in that game.
+            </p>
+          </SubSection>
 
-        <StageSection
-          id="2.-primal"
-          title="2. Primal"
-          description="The Primal stage represents the origin of intelligent species and races and what makes them special. The focus is on introducing new species to the world, and developing them. Players will each create a species, and then take turns enhancing those species in preparation for the next stage. Species here refers to a race of sentient beings that will be the basis for the nations and societies for the Civilization and Intrigue stages; Humans, Elves, Dwarves, Orcs, etc."
-          preStage="Before starting this stage, each player should create a species, describing them and naming them and deciding where on the map they originated from."
-          powers={[
-            { id: '(♠)---settlement', suit: '♠', name: 'Settlement', description: 'Enhance the species with a settlement; villages, towns, small cities, etc. (Major Cities, Kingdoms, Empires, and the like are more complex and are only available during the Civilization stage.)' },
-            { id: '(♥)---tradition', suit: '♥', name: 'Tradition', description: 'Enhance the species with a tradition; religious, cultural, militaristic, ritualistic, agricultural, rites of passage, etc.' },
-            { id: '(♣)---resource', suit: '♣', name: 'Resource', description: 'Enhance the species with a resource; domesticated crops or animals, raw materials (wood, stone, iron, etc), natural resource, etc.' },
-            { id: '(♦)---skill', suit: '♦', name: 'Skill', description: 'Enhance the species with a skill; something that they are the greatest at, hunting, sailing, climbing, building, crafting, farming, etc.' },
-          ]}
-        />
-
-        <StageSection
-          id="3.-civilization"
-          title="3. Civilization"
-          description="The Civilization stage represents the development of species into varied societies and their impact on nature, the landscape, and each other. The focus is on making the different societies more unique, by playing the stage from their perspective. To let the species created during the Primal stage interact with each other and the world around them in interesting ways and diverge and grow as societies. The powers of this stage should be from the perspective of Societies, Civilizations, and Groups. Many of the powers in this stage can overlap in their effects, and that is okay, they are different approaches with different motivations which leads to a deeper world."
-          preStage="Before starting this stage, each player should create some societies within the different species which might grow and expand during this stage into kingdoms or empires."
-          powers={[
-            { id: '(♠)---construction', suit: '♠', name: 'Construction', description: 'The power of construction; the society will complete a significant construction project. Building a new City, Roads and Bridges, A Castle, A University, Terraform the landscape, etc.' },
-            { id: '(♥)---enlightenment', suit: '♥', name: 'Enlightenment', description: 'The power of enlightenment; the society will discover or develop technologically, scientifically, socially, culturally, or religiously. Becoming the best at something (mining, farming, boat-making, armor-crafting, architecture, medicine) or becoming paragons of new thinking; governments (feudalism, republic, aristocracy, etc), philosophy (pacifism, militarism, socialism, etc), arts (music, painting, sculptures) or becoming moved by their beliefs to build monuments, spread religion, or adhere to dogmas.' },
-            { id: '(♣)---expansion', suit: '♣', name: 'Expansion', description: 'The power of expansion; the society will expand their borders through war, conquest, exploration, population growth, or alliance with other societies. Taking control of land that is owned by others or not at all. Founding new settlements, integrating into old settlements or conquering them. Forming kingdoms and empires.' },
-            { id: '(♦)---diplomacy', suit: '♦', name: 'Diplomacy', description: 'The power of diplomacy; the society will work with other societies to trade, learn, grow, or cooperate together or against others. Exchanging goods and ideas for prosperity, making alliances, joining dynasties by marriage, forming kingdoms and empires. Brokering peace, ending wars, negotiating borders.' },
-          ]}
-        />
-
-        <StageSection
-          id="4.-intrigue"
-          title="4. Intrigue"
-          description="The Intrigue stage is where the players create the very recent history of the world. It represents the late stages of a world, where societies have already developed rich mythologies, where they interact with one another, and discover mysteries. The focus on this stage is enrich the world with connections, friendly or unfriendly and between the world, it's landscape, and its populace. The focus of this stage is to make the world an interesting place for telling stories, by discussing and creating plots, stories, and events that are all tied together, all close together, and all within a few decades of the start of the story."
-          preStage="Before this stage, you should make sure to give names to cities, nations, and societies. And deliberate on their aspects that you have developed over the last two stages. Noting the power, influence, armies, government, economy, etc of the different societies in the world."
-          powers={[
-            { id: '(♠)---conflict', suit: '♠', name: 'Conflict', description: 'The power of conflict; Groups work against each other, wars, battles, zealots purging heretics, cities are destroyed, etc. Conflicts can be specific or general, tactical or strategic, conquest or raid. Conflicts could be internal or between societies.' },
-            { id: '(♥)---cooperation', suit: '♥', name: 'Cooperation', description: 'The power of cooperation; Groups work together, trading goods and ideas, helping each other, protecting each other, etc. When cooperating societies can accomplish great things, or bring down great foes, they can be good or bad, fast or slow, ongoing or temporary.' },
-            { id: '(♣)---scheme', suit: '♣', name: 'Scheme', description: 'The power of scheming; Groups scheme and plot, spies and informants trade and share information and secrets, kings are assassinated, black markets are formed, secret alliances are made, etc. Anything that happens as part of a complex plot, or plans that are set in motion only to be triggered later, ongoing things in the world. Schemes can be internal to a society or involve multiple societies.' },
-            { id: '(♦)---myth', suit: '♦', name: 'Myth', description: 'The power of myth; this lets you add mythical things to your world and the story, they could have been there all along, or only recently arrived. It could be a dragon in a cave, a mysterious lost artifact somewhere in a desert, a lich who lives in a haunted palace near a specific mountain, etc. Myth is a general term which will let you add story elements that are part of the world and interesting for the game or story. These could be plot hooks, quests, or looming dangers in the world.' },
-          ]}
-        />
-      </Section>
-
-      <Section id="glossary-of-terms" title="Glossary of Terms">
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Draw Deck</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              The customized playing card deck drawn from during each stage to determine which power a player invokes on their turn.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Stage</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              One of the four eras of creation (Genesis, Primal, Civilization, Intrigue), each focusing on a distinct layer of the world’s development.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Power (2–10 Cards)</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              A world-shaping action determined by the drawn card’s suit (♠, ♥, ♣, ♦) and the current active Stage.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Fantastical Power (J, Q, K)</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              Triggered by drawing a face card (Jack, Queen, or King), allowing an extraordinary, magical, or larger-than-life version of that suit’s power.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Natural Disaster (Ace)</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              Triggered by drawing an Ace; unleashes a cataclysmic upheaval or upheaval appropriate to the current Stage.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Joker (Wild Fantastical)</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              Allows the player to choose any Fantastical Power from the current stage (or combine effects creatively).
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Artist, Historian & Keeper</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              The three collaborative roles: the <strong>Artist</strong> illustrates the map, the <strong>Historian</strong> chronicles the timeline, and the <strong>Keeper</strong> tracks species, societies, and factions.
-            </dd>
-          </div>
-          <div className="p-4 rounded-lg bg-muted/40 border border-border">
-            <dt className="font-bold text-primary">Species & Societies</dt>
-            <dd className="text-sm text-muted-foreground mt-1">
-              Sentient races introduced before the Primal stage and the kingdoms, nations, or organizations they form prior to the Civilization stage.
-            </dd>
-          </div>
-        </dl>
-      </Section>
-
-      <Section id="reference-table" title="Reference Table">
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-border">
-            <thead>
-              <tr className="bg-muted">
-                <th className="border border-border p-3 text-left"></th>
-                <th className="border border-border p-3 text-center">1 - Genesis</th>
-                <th className="border border-border p-3 text-center">2 - Primal</th>
-                <th className="border border-border p-3 text-center">3 - Civilization</th>
-                <th className="border border-border p-3 text-center">4 - Intrigue</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-border p-3 font-semibold">♠</td>
-                <td className="border border-border p-3 text-center">Earth</td>
-                <td className="border border-border p-3 text-center">Settlement</td>
-                <td className="border border-border p-3 text-center">Construction</td>
-                <td className="border border-border p-3 text-center">Conflict</td>
-              </tr>
-              <tr>
-                <td className="border border-border p-3 font-semibold">♥</td>
-                <td className="border border-border p-3 text-center">Water</td>
-                <td className="border border-border p-3 text-center">Tradition</td>
-                <td className="border border-border p-3 text-center">Enlightenment</td>
-                <td className="border border-border p-3 text-center">Cooperation</td>
-              </tr>
-              <tr>
-                <td className="border border-border p-3 font-semibold">♣</td>
-                <td className="border border-border p-3 text-center">Plant</td>
-                <td className="border border-border p-3 text-center">Resource</td>
-                <td className="border border-border p-3 text-center">Expansion</td>
-                <td className="border border-border p-3 text-center">Scheme</td>
-              </tr>
-              <tr>
-                <td className="border border-border p-3 font-semibold">♦</td>
-                <td className="border border-border p-3 text-center">Feature</td>
-                <td className="border border-border p-3 text-center">Skill</td>
-                <td className="border border-border p-3 text-center">Diplomacy</td>
-                <td className="border border-border p-3 text-center">Myth</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-4 text-sm text-muted-foreground">
-          <strong>Aces:</strong> Natural Disaster, <strong>Face Cards:</strong> Fantastical Power,{' '}
-          <strong>Joker:</strong> Any Fantastical Power
-        </p>
-      </Section>
-
-      <Section id="acknowledgements" title="Acknowledgements">
-        <SubSection id="the-author" title="The Author">
-          <p>
-            I am Inbar Rose. <a href="mailto:inbarrose@gmail.com" className="text-primary hover:underline">inbarrose@gmail.com</a>. I love roleplaying games and World Building. And I made this so that I could have fun with my friends doing what I love.
-          </p>
-        </SubSection>
-
-        <SubSection id="inspiration" title="Inspiration">
-          <p>
-            World Building was inspired by a wonderful system contained in a single document called
-            "Dawn of Worlds" (First Edition, July 2005, © N. Bob Pesall, Esq. Attorney At Law,
-            Dickinson, ND). This is a total re-thinking of that work, but the ideas came because I
-            wanted a better way to do what I did in that game.
-          </p>
-        </SubSection>
-
-        <SubSection id="thanks" title="Thanks">
-          <p>Thanks to Stav Geffen for inspiring me to use Cards for this game. And for helping me focus on what's important.</p>
-          <p>Thanks to Golan Gross for being an amazing artist during my first ever attempt at world building, and through his art making me realize how awesome this can be.</p>
-          <p>Thanks to Alon Tsang for dropping everything at the last minute to keep us playing, and keep us excited.</p>
-        </SubSection>
-      </Section>
+          <SubSection id="thanks" title="Thanks">
+            <p>Thanks to Stav Geffen for inspiring me to use Cards for this game. And for helping me focus on what's important.</p>
+            <p>Thanks to Golan Gross for being an amazing artist during my first ever attempt at world building, and through his art making me realize how awesome this can be.</p>
+            <p>Thanks to Alon Tsang for dropping everything at the last minute to keep us playing, and keep us excited.</p>
+          </SubSection>
+        </Section>
+      )}
     </div>
   )
 }
@@ -936,12 +1311,22 @@ interface SectionProps {
 }
 
 function Section({ id, title, children }: SectionProps) {
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
-    <section id={id} className="scroll-mt-8">
-      <h2 className="text-3xl font-bold mb-4 pt-8 border-t border-border first:border-t-0 first:pt-0">
-        {title}
-      </h2>
-      <div className="space-y-4">{children}</div>
+    <section id={id} className="scroll-mt-16">
+      <div className="flex items-center justify-between pt-8 border-t border-border first:border-t-0 first:pt-0 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold !my-0">{title}</h2>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="no-print p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent text-xs flex items-center gap-1"
+          title={collapsed ? `Expand ${title}` : `Collapse ${title}`}
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+      </div>
+      {!collapsed && <div className="space-y-4">{children}</div>}
     </section>
   )
 }
@@ -954,8 +1339,8 @@ interface SubSectionProps {
 
 function SubSection({ id, title, children }: SubSectionProps) {
   return (
-    <section id={id} className="scroll-mt-8">
-      <h3 className="text-2xl font-semibold mb-3 mt-6">{title}</h3>
+    <section id={id} className="scroll-mt-16">
+      <h3 className="text-xl sm:text-2xl font-semibold mb-3 mt-6">{title}</h3>
       <div className="space-y-4">{children}</div>
     </section>
   )
@@ -978,20 +1363,33 @@ interface StageSectionProps {
 
 function StageSection({ id, title, description, preStage, powers }: StageSectionProps) {
   return (
-    <section id={id} className="scroll-mt-8">
-      <h3 className="text-2xl font-semibold mb-3 mt-6">{title}</h3>
+    <section id={id} className="scroll-mt-16">
+      <h3 className="text-xl sm:text-2xl font-semibold mb-3 mt-6">{title}</h3>
       <p className="mb-4">{description}</p>
-      <div className="bg-muted/50 p-4 rounded-lg mb-4">
-        <p className="font-semibold mb-2">Pre-{title}:</p>
+      <div className="bg-muted/50 p-4 rounded-xl border border-border/60 mb-4">
+        <p className="font-semibold mb-1.5 text-primary">Pre-{title}:</p>
         <p className="text-sm">{preStage}</p>
       </div>
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 not-prose">
         {powers.map((power) => (
-          <div key={power.id} id={power.id} className="scroll-mt-8 border-l-4 border-primary pl-4">
-            <h4 className="text-xl font-semibold mb-2">
-              ({power.suit}) - {power.name}
+          <div
+            key={power.id}
+            id={power.id}
+            className="scroll-mt-16 p-4 rounded-xl border border-border bg-card border-l-4 border-l-primary space-y-1.5"
+          >
+            <h4 className="text-base font-bold flex items-center gap-1.5">
+              <span
+                className={
+                  power.suit === '♥' || power.suit === '♦' ? 'text-red-600' : 'text-foreground'
+                }
+              >
+                ({power.suit})
+              </span>
+              <span>- {power.name}</span>
             </h4>
-            <p>{power.description}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {power.description}
+            </p>
           </div>
         ))}
       </div>
