@@ -42,10 +42,17 @@ status: active
   - [x] Deterministic Seeded Auto-Play Engine (6 bot personalities, no AI/LLM) & Time-Travel Turn Rewind
   - [x] Visual Styles (`Fantasy Atlas`, `Dark Theme`, `Simplified / Print`) & Schema v2 backwards-compatible migration
 
+- [x] **Phase 6: v3.0 Best-in-Class UI/UX Architecture & Wiki Integration**
+  - [x] 5-Level UI Hierarchy (`L0`–`L4`) and Launchpad Homepage (`Home.tsx`) with Active Realm Resume Banner and direct mode launchers
+  - [x] Interactive Rules Reference Hub (`Rules.tsx`) with instant keyword search, focus category filters, collapsible sections, and 1-click print views
+  - [x] Three Distinct Play Modes in `Play.tsx`: `3.1 Companion Mode` (optional toggle panels + freeform linking), `3.2 Studio Mode` (live Turn Activity Basket + bot auto-play + turn pass/verify), and `3.3 Freeform Mode` (cardless world architect)
+  - [x] Bi-directional Wiki-Grade Codex (`EntityRegistry.tsx`), Map Inspector (`MapCanvas.tsx`), and Event Chronicle (`TimelinePanel.tsx`) with clear Read vs. Create/Edit separation
+  - [x] Documented scored UX/UI rubric & architectural decisions in `docs/DECISIONS.md` (ADR-008 & ADR-009)
+
 ---
 
 ## Tasks
 
-- [x] Complete Phase 0–5 implementation and test verification (27/27 tests passing).
+- [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
 
 

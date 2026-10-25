@@ -9,21 +9,21 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 5 — Vision Refinement & v2.1 Polish (Completed)
-- **Session Date**: 2026-10-17
-- **Status**: All Phases & Milestones Implemented, Verified (27/27 tests passing), and Ready for Production
+- **Current Phase**: Phase 6 — v3.0 UI/UX Architecture Redesign & Wiki Integration (Completed)
+- **Session Date**: 2026-10-24
+- **Status**: All Phases & Milestones Implemented, Verified (34/34 tests passing across 5 suites), and Ready for Production
 
 ## Completed in Current Session
-- **Milestone 1 & 2 (Schema v2, Presets, MapEngine & AutoPlayEngine)**: Upgraded `WorldState` to Schema v2 with `migrateWorldState`, added `presets.ts` (6 bot personalities, 15 species/society/myth presets), multi-layer `mapEngine.ts` (relief + flora + rivers + roads + territories + non-destructive grid resize), and deterministic seeded `autoPlayEngine.ts` with time-travel turn snapshots.
-- **Milestone 3 (Printable Rules, 1-Page Quick Reference Card & Visual Styles)**: Added 3 visual themes (`Atlas`, `Dark`, `Simplified / Print`), `@media print` rules, and a 1-Page Quick Reference Card in `Rules.tsx`.
-- **Milestone 4 (Enhanced Multi-Layer SVG Map Maker)**: Upgraded `MapCanvas.tsx` with custom grid dimensions, geography templates, composite relief/flora SVG artwork, river/road networks, and faction territory borders.
-- **Milestone 5 (World Codex, Timeline Rewind, Hotseat & Companion Modes)**: Upgraded `EntityRegistry.tsx` with preset templates and abilities, added `Rewind Here` time-travel and player badges to `TimelinePanel.tsx`, and integrated Companion Modes, 1–6 player Hotseat Manager, and Seeded Auto-Play controls into `Play.tsx`.
+- **Phase 1 (Global Shell, Launchpad Homepage & Rules Hub)**: Redesigned `Layout.tsx` (minimal L0 sticky bar), `Home.tsx` (Active Realm Resume Banner + 3 primary area cards + direct `3.1 Companion`, `3.2 Studio`, `3.3 Freeform` mode launchers), and `Rules.tsx` (instant keyword search index, stage/category focus filter pills, collapsible sections, and 1-click print views).
+- **Phase 2 (Wiki-Grade Codex, Map Inspector & Timeline Cross-Linking)**: Redesigned `EntityRegistry.tsx` with explicit **Browse Wiki Mode** vs. collapsible **Creator / Editor Drawer**, Entity Spotlight, clickable trait filters, clickable map coordinates, and relationship badges; upgraded `MapCanvas.tsx` and `TimelinePanel.tsx` with bi-directional entity/tile/event cross-linking and custom lore event creation.
+- **Phase 3 (Play Workspace Modes 3.1, 3.2, 3.3)**: Redesigned `Play.tsx` with focused view switching (eliminating vertical stacking clutter), **3.1 Companion Mode** (inline stage switcher + optional toggle panels for Rules, Event Log, Codex, Map, Players + freeform turn notes), **3.2 Studio Mode** (live Turn Activity Basket tracking map/codex changes per turn + human/bot turn controls), and **3.3 Freeform Mode** (cardless world-building sandbox).
+- **Phase 4 (Scored ADRs & Automated Tests)**: Added ADR-008 and ADR-009 in `docs/DECISIONS.md` with the 8-dimension UX/UI scoring rubric, and expanded the test suite to 34 passing unit and integration tests.
 
 ---
 
 ## Tasks
 
-- [x] Implement Phase 0–4 foundation and Milestone 1–5 v2.1 refinements.
-- [x] Run automated test suite (27/27 tests passing across 5 suites) and production build.
+- [x] Implement Phase 0–6 UI/UX redesign and Wiki integration.
+- [x] Run automated test suite (34/34 tests passing across 5 suites) and production build.
 
 
