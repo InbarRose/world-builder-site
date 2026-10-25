@@ -86,7 +86,42 @@ status: active
 
 ---
 
+## ADR-008: 5-Level UI Hierarchy & Mode-Adaptive Workspaces
+
+- **Status**: Accepted
+- **Context**: As the application evolved to support tabletop card-drawing companion play, turn-by-turn hotseat/bot studio games, and cardless freeform world-building, displaying all controls simultaneously in a single dashboard created visual clutter. We evaluated 4 options across an 8-dimension UX/UI Rubric (100 points total: Cognitive Load & Focus [20%], Information Hierarchy [15%], Tabletop Companion Fidelity [15%], Studio & Bot Automation Ergonomics [15%], Wiki & Map Cross-Linking [15%], Read vs. Edit Distinction [10%], Print & Reference Utility [5%], Visual Polish [5%]).
+- **Options Considered & Scored**:
+  1. **Option A — All-in-One Monolithic Dashboard (44.0 / 100)**: Everything visible on one scrollable page. Rejected due to severe visual clutter and lack of mode focus.
+  2. **Option B — Separate Hard-Isolated Routes per Mode (74.5 / 100)**: Separate `/play/companion`, `/play/studio`, `/play/freeform` routes. Rejected due to duplicate chrome and friction when switching mid-session.
+  3. **Option C — Adaptive Mode-Driven Workspace with Strict 5-Level Hierarchy & Slide-Over Inspector Drawers (96.0 / 100 — Selected)**: Single `/play` workspace governed by a 3-mode selector (`3.1 Companion`, `3.2 Studio`, `3.3 Freeform`) that dynamically adapts the L1–L4 UI chrome.
+  4. **Option D — Floating Multi-Window MDI Canvas (61.5 / 100)**: Draggable overlapping windows. Rejected due to window management overhead and poor mobile/tablet ergonomics.
+- **Decision**: Enforce a strict 5-Level UI Hierarchy (`L0` Global Header, `L1` Workspace Mode & Context Bar, `L2` Focused Primary Stage, `L3` Collapsible Side Drawers/Optional Panels, `L4` On-Demand Modals) across all routes, and tailor `/play` into three clean, purpose-built modes:
+  - **3.1 Play Companion**: Digital card deck + direct 1–4 stage switcher + active power reference, with optional toggle pills (`Stage Rules`, `Event Log`, `Codex`, `Map`, `Players`) off by default and 100% freeform manual linking.
+  - **3.2 Studio Mode**: Turn-by-turn human & bot simulation with a live **Turn Activity Basket** that automatically tracks map tile edits and Codex additions during the active turn, plus `Complete & Pass Turn`, `Auto-Step Turn`, and `Auto-Stage` controls.
+  - **3.3 Freeform Mode**: Cardless sandbox hiding all deck/turn chrome so creators can immediately sculpt the map, write Codex wiki articles, and log custom lore events.
+- **Consequences**:
+  - Eliminates stacked vertical scrolling panels and cognitive overload.
+  - Preserves shared `WorldState` seamlessly when switching between Companion, Studio, and Freeform modes.
+
+---
+
+## ADR-009: Bi-Directional Wiki Integration & Read/Edit Mode Separation
+
+- **Status**: Accepted
+- **Context**: Users need the World Codex, Cartography Map, and Event Chronicle to operate like an interconnected tabletop wiki where clicking any tile, entity, trait, relationship, or turn event navigates directly to its counterpart, while keeping reading existing lore distinct from creating/editing new content.
+- **Decision**:
+  1. Separate **Browse Wiki Mode** (clean lore cards, clickable entity spotlight, clickable trait filter pills, clickable origin/territory tile pills, clickable relationship pills, and historical event links) from the collapsible **Creator / Editor Drawer** (`+ New Codex Entry` / `Forge Relationship`), where users can pick editable presets or create custom entries with custom icons, colors, qualities, and multi-entity relationships.
+  2. Separate **Inspect Mode** vs. **Paint / Edit Mode** in `MapCanvas.tsx`, allowing clicking any tile in Inspect Mode to show linked Codex entities and timeline events with 1-click navigation, and allowing direct entity-to-tile placement in Edit Mode.
+  3. Upgrade `Rules.tsx` with an instant keyword search jumper, category/stage focus filter pills, collapsible sections, and 1-click print actions for both the Full Rulebook and 1-Page Quick Reference Card.
+- **Consequences**:
+  - Every entity, map coordinate `(col, row)`, relationship, and turn event is bi-directionally clickable across the entire studio.
+  - New and existing content have unmistakable visual boundaries while still allowing presets to be customized before or after creation.
+
+---
+
 ## Tasks
 
 - [x] Add ADR-006 and ADR-007 documenting Seeded Auto-Play, Time-Travel Snapshots, and Schema v2 Migration.
+- [x] Add ADR-008 and ADR-009 documenting the 5-Level UI Hierarchy, Mode-Adaptive Workspaces, and Bi-Directional Wiki Integration.
+
 

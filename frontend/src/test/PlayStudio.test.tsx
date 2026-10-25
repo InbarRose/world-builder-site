@@ -94,4 +94,50 @@ describe('Play Studio & Rules Integration', () => {
     ).toBeInTheDocument()
     expect(screen.getByText(/Stage & Suit Power Matrix/i)).toBeInTheDocument()
   })
+
+  it('supports Rules keyword search and category focus filter pills', () => {
+    render(
+      <BrowserRouter>
+        <Rules />
+      </BrowserRouter>
+    )
+
+    // Filter by 1. Genesis only
+    const genesisButtons = screen.getAllByRole('button', { name: /^1\. Genesis$/i })
+    fireEvent.click(genesisButtons[0])
+    expect(
+      screen.getByRole('heading', { name: /1\. Genesis/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Glossary of Terms' })
+    ).not.toBeInTheDocument()
+
+    // Search via instant keyword input
+    const searchInput = screen.getByLabelText(/Search Rules/i)
+    fireEvent.change(searchInput, { target: { value: 'Joker' } })
+    expect(screen.getByText(/Powers & Fantastical Face Cards/i)).toBeInTheDocument()
+  })
+
+  it('supports 3.1 Companion Mode optional toggles and 3.3 Freeform Mode', () => {
+    render(
+      <BrowserRouter>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Switch to 3.1 Companion Mode
+    fireEvent.click(screen.getByRole('button', { name: /Companion/i }))
+    expect(screen.getByText(/Optional Panels:/i)).toBeInTheDocument()
+
+    // Toggle Stage Rules optional panel in Companion mode
+    fireEvent.click(screen.getByRole('button', { name: /Stage Rules/i }))
+    expect(
+      screen.getByText(/Full 4-Ages Matrix/i)
+    ).toBeInTheDocument()
+
+    // Switch to 3.3 Freeform Mode
+    fireEvent.click(screen.getByRole('button', { name: /Free-Create/i }))
+    expect(screen.getByText(/Freeform World Sandbox/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Draw Card/i })).not.toBeInTheDocument()
+  })
 })
