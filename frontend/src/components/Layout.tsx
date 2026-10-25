@@ -14,8 +14,11 @@ import {
   MessageSquarePlus,
   ExternalLink,
   ChevronDown,
+  Globe,
 } from 'lucide-react'
-import { VisualStyleMode } from '../engine/types'
+import { VisualStyleMode, WorldState } from '../engine/types'
+import { getActiveWorld } from '../engine/storageService'
+import { STAGES } from '../engine/deckEngine'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -58,9 +61,18 @@ export function Layout({ children }: LayoutProps) {
     }
   })
 
+  const [activeWorld, setActiveWorld] = useState<WorldState | null>(null)
   const [starCount, setStarCount] = useState<number | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const feedbackRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    try {
+      setActiveWorld(getActiveWorld())
+    } catch {
+      setActiveWorld(null)
+    }
+  }, [location.pathname, location.search])
 
   useEffect(() => {
     const root = document.documentElement
@@ -142,57 +154,85 @@ export function Layout({ children }: LayoutProps) {
       : { label: 'Print', icon: FileText }
 
   const ModeIcon = modeBadge.icon
+  const stageMeta = activeWorld
+    ? STAGES.find((s) => s.id === activeWorld.currentStage)
+    : undefined
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="no-print border-b border-border bg-card/95 backdrop-blur sticky top-0 z-40">
-        <div className="container mx-auto px-2.5 sm:px-4 py-2">
+      {/* Level 0: Global App Shell Header */}
+      <header className="no-print border-b border-border/80 bg-card/95 backdrop-blur sticky top-0 z-40">
+        <div className="container mx-auto px-3 sm:px-4 py-2">
           <div className="flex items-center justify-between gap-2">
-            <Link to="/" className="flex items-center gap-2 hover:opacity-90 shrink-0">
-              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
-                <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              </div>
-              <div className="hidden xs:block sm:block">
-                <span className="text-sm sm:text-lg font-bold tracking-tight block leading-none">
-                  World Builder
-                </span>
-                <span className="hidden md:block text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
-                  Tabletop Cartography & Lore
-                </span>
-              </div>
-            </Link>
+            {/* Brand & Active World Context Pill */}
+            <div className="flex items-center gap-3 min-w-0">
+              <Link to="/" className="flex items-center gap-2 hover:opacity-90 shrink-0">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shadow-inner">
+                  <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                </div>
+                <div className="hidden xs:block sm:block">
+                  <span className="text-sm sm:text-base font-bold tracking-tight block leading-none">
+                    World Builder
+                  </span>
+                  <span className="hidden md:block text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
+                    Tabletop Cartography & Lore
+                  </span>
+                </div>
+              </Link>
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              <nav className="flex items-center gap-0.5 sm:gap-1" aria-label="Main Navigation">
-                {navItems.map(({ path, label, shortLabel, icon: Icon }) => (
+              {activeWorld && location.pathname !== '/play' && (
+                <Link
+                  to="/play"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/60 hover:bg-accent border border-border text-xs transition-colors truncate max-w-[240px]"
+                  title={`Resume ${activeWorld.name} (${stageMeta?.name || 'Genesis'})`}
+                >
+                  <Globe className="h-3 w-3 text-primary shrink-0" />
+                  <span className="font-semibold truncate">{activeWorld.name}</span>
+                  {stageMeta && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary/15 text-primary font-bold shrink-0">
+                      Age {stageMeta.number}
+                    </span>
+                  )}
+                </Link>
+              )}
+            </div>
+
+            {/* Center: Main Area Switcher */}
+            <nav
+              className="flex items-center gap-0.5 sm:gap-1 bg-muted/50 p-1 rounded-xl border border-border/70"
+              aria-label="Main Navigation"
+            >
+              {navItems.map(({ path, label, shortLabel, icon: Icon }) => {
+                const isActive = location.pathname === path
+                return (
                   <Link
                     key={path}
                     to={path}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                      location.pathname === path
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isActive
                         ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
                     }`}
                   >
-                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
                     <span className="sm:hidden">{shortLabel}</span>
                     <span className="hidden sm:inline">{label}</span>
                   </Link>
-                ))}
-              </nav>
+                )
+              })}
+            </nav>
 
-              <div className="h-4 w-px bg-border mx-0.5" />
-
+            {/* Right: Theme & Compact Community Menu */}
+            <div className="flex items-center gap-1.5 shrink-0">
               {/* Theme Switcher */}
               <button
                 type="button"
                 onClick={cycleStyleMode}
-                className="px-2 sm:px-2.5 py-1.5 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1 transition-colors"
+                className="px-2.5 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1.5 transition-colors"
                 aria-label="Toggle color theme"
                 title="Switch between Fantasy Atlas, Dark Slate, and Simplified Print-Friendly modes"
               >
-                <ModeIcon className="h-3.5 w-3.5" />
+                <ModeIcon className="h-3.5 w-3.5 text-primary" />
                 <span className="hidden md:inline">{modeBadge.label}</span>
               </button>
 
@@ -201,14 +241,14 @@ export function Layout({ children }: LayoutProps) {
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-md border border-border bg-background hover:bg-accent text-xs font-medium transition-colors overflow-hidden"
+                className="hidden sm:inline-flex items-center rounded-lg border border-border bg-background hover:bg-accent text-xs font-medium transition-colors overflow-hidden"
                 title="View repository and star on GitHub"
               >
                 <span className="flex items-center gap-1 px-2 py-1.5 text-foreground">
                   <GitHubMark className="h-3.5 w-3.5" />
-                  <span className="hidden lg:inline">GitHub</span>
+                  <span className="hidden xl:inline">GitHub</span>
                 </span>
-                <span className="hidden sm:flex items-center gap-1 px-1.5 py-1.5 bg-muted/70 border-l border-border text-muted-foreground">
+                <span className="flex items-center gap-1 px-1.5 py-1.5 bg-muted/70 border-l border-border text-muted-foreground">
                   <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
                   <span>{starCount !== null ? starCount : 'Star'}</span>
                 </span>
@@ -219,7 +259,7 @@ export function Layout({ children }: LayoutProps) {
                 <button
                   type="button"
                   onClick={() => setFeedbackOpen((o) => !o)}
-                  className="px-2 sm:px-2.5 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  className="px-2 py-1.5 rounded-lg border border-border bg-background hover:bg-accent text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                   title="Report a bug or suggest a feature on GitHub"
                 >
                   <MessageSquarePlus className="h-3.5 w-3.5 text-primary" />
@@ -228,7 +268,7 @@ export function Layout({ children }: LayoutProps) {
                 </button>
 
                 {feedbackOpen && (
-                  <div className="absolute right-0 mt-1.5 w-56 rounded-lg border border-border bg-card shadow-lg py-1.5 z-50 text-xs">
+                  <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-card shadow-lg py-1.5 z-50 text-xs">
                     <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border/60">
                       GitHub Issues & Ideas
                     </div>
@@ -280,21 +320,21 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-5 flex-1">{children}</main>
+      <main className="container mx-auto px-3 sm:px-4 py-5 flex-1">{children}</main>
 
-      {/* Footer */}
-      <footer className="no-print border-t border-border mt-auto bg-card/40">
-        <div className="container mx-auto px-4 py-4">
+      {/* Minimal Footer */}
+      <footer className="no-print border-t border-border/70 mt-auto bg-card/40">
+        <div className="container mx-auto px-4 py-3.5">
           <div className="flex flex-wrap items-center justify-between gap-3 text-muted-foreground text-xs">
             <p>
-              World Builder Studio — Created by Inbar Rose · Offline-Ready Static Edition
+              World Builder Studio — Created by Inbar Rose · 100% Client-Side & Offline-Ready
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <a
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border hover:bg-accent hover:text-foreground transition-colors"
               >
                 <GitHubMark className="h-3.5 w-3.5" />
                 <span>GitHub Repo</span>
@@ -303,7 +343,7 @@ export function Layout({ children }: LayoutProps) {
                 href={BUG_REPORT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border hover:bg-accent hover:text-foreground transition-colors"
               >
                 <Bug className="h-3.5 w-3.5 text-rose-500" />
                 <span>Report Bug</span>
@@ -312,7 +352,7 @@ export function Layout({ children }: LayoutProps) {
                 href={FEATURE_REQUEST_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-border hover:bg-accent hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border hover:bg-accent hover:text-foreground transition-colors"
               >
                 <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
                 <span>Suggest Idea</span>
