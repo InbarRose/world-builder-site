@@ -119,9 +119,43 @@ status: active
 
 ---
 
+## ADR-010: Revamped AAA-Calibrated Tabletop Benchmark Rubric & Quality Governance
+
+- **Status**: Accepted
+- **Context**: ADR-008 evaluated wireframe layouts on a lenient relative curve, assigning Option C 96.0 / 100. This score was overly optimistic and disconnected from industry reality. Benchmarking against premier commercial digital tabletop tools, world-building suites, and AAA games (*Foundry VTT, D&D Beyond, Inkarnate, Slay the Spire, Crusader Kings, Dwarf Fortress*) reveals that the application is currently an early functional web prototype sitting below 50%.
+- **Decision**:
+  1. Revamp the evaluation standard into an uncompromising **7-Dimension AAA-Calibrated Tabletop Benchmark Rubric (100 Points Total)**:
+     - **D1: Tactile Game Feel & Audiovisual Polish (20%)** — Physical card deal/flip animations, particle effects, spatial audio, micro-interactions (*Benchmark: Slay the Spire / Hearthstone*). Current: 5.0 / 20.
+     - **D2: Cartography & Spatial Storytelling (20%)** — 60fps pan/zoom, elevation shading, organic terrain blending, fog of war, brush history, multi-tile stamps (*Benchmark: Inkarnate / Wonderdraft / Civ VI*). Current: 9.0 / 20.
+     - **D3: Narrative Simulation & Causal Depth (15%)** — Dynamic causal events, entity lifecycles, emergent history (*Benchmark: Crusader Kings / Dwarf Fortress*). Current: 6.0 / 15.
+     - **D4: Tabletop Ergonomics & Multi-Device Play (15%)** — Frictionless peer sharing via QR/URL, offline PWA, touch gestures, sub-second lookups (*Benchmark: D&D Beyond / Roll20*). Current: 9.0 / 15.
+     - **D5: Information Hierarchy & Cognitive Flow (10%)** — Contextual sliding trays, zero clutter, keyboard hotkeys (`Ctrl+Z`, `Space+drag`, `1-4`, `D`) (*Benchmark: Linear / Figma*). Current: 7.0 / 10.
+     - **D6: State Integrity & Undo/Redo Resilience (10%)** — Unbreakable multi-level undo/redo across drawing, painting, typing; non-destructive branching (*Benchmark: Photoshop / Git*). Current: 5.5 / 10.
+     - **D7: Publication & Export Fidelity (10%)** — 1-click generation of beautifully typeset, illustrated campaign sourcebooks (HTML/PDF) (*Benchmark: The Homebrewery / WorldAnvil*). Current: 5.0 / 10.
+  2. Mandate **Score Snapshots & Aspiration Targets**: Every development phase must declare its target point delta on this rubric, run automated verification tests, and record a score snapshot upon completion.
+- **Consequences**:
+  - Eliminates self-congratulatory inflation and establishes objective product maturity gates.
+  - Development focus shifts directly toward real user value: tactile game feel, data safety (undo/redo), cartographic freedom, and publication-grade output.
+
+---
+
+## Benchmark Score Snapshots
+
+| Snapshot Date | Milestone / Version | D1 (20) | D2 (20) | D3 (15) | D4 (15) | D5 (10) | D6 (10) | D7 (10) | Total Score | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **2026-10-24** | v3.0 UI Redesign & Wiki Baseline | 5.0 | 9.0 | 6.0 | 9.0 | 7.0 | 5.5 | 5.0 | **46.5 / 100** | Current Baseline |
+| *Target Phase 7* | Canvas Resilience & Undo/Redo | 5.0 | 11.0 (+2) | 6.0 | 9.0 | 8.0 (+1) | 8.5 (+3) | 5.0 | **52.5 / 100** | Next Sprint |
+| *Target Phase 8* | Tactile Card Juice & Audio Polish | 12.0 (+7) | 11.0 | 6.0 | 9.0 | 8.0 | 8.5 | 5.0 | **59.5 / 100** | Planned |
+| *Target Phase 9* | Standalone Campaign Sourcebook Publisher | 12.0 | 11.0 | 7.0 (+1) | 10.0 (+1) | 8.0 | 8.5 | 10.0 (+5) | **66.5 / 100** | Planned |
+| *Target Phase 10* | Frictionless QR / URL Table Sharing | 12.0 | 11.0 | 7.0 | 14.0 (+4) | 9.0 (+1) | 9.5 (+1) | 10.0 | **72.5 / 100** | Planned |
+| *Target Phase 11* | 60fps Smooth Pan/Zoom Cartography Camera | 13.0 (+1) | 16.0 (+5) | 7.0 | 14.0 | 10.0 (+1) | 9.5 | 10.0 | **79.5 / 100** | Planned |
+
+---
+
 ## Tasks
 
 - [x] Add ADR-006 and ADR-007 documenting Seeded Auto-Play, Time-Travel Snapshots, and Schema v2 Migration.
 - [x] Add ADR-008 and ADR-009 documenting the 5-Level UI Hierarchy, Mode-Adaptive Workspaces, and Bi-Directional Wiki Integration.
+- [x] Add ADR-010 documenting the Revamped 7-Dimension AAA Benchmark Rubric, Baseline Score Snapshot (46.5/100), and Quality Governance.
 
 
