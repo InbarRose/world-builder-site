@@ -6,7 +6,7 @@ import { Home } from '../pages/Home'
 describe('Home Component', () => {
   beforeEach(() => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Home />
       </BrowserRouter>
     )

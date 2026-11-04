@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Play } from '../pages/Play'
 import { Rules } from '../pages/Rules'
+
+const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true }
 
 describe('Play Studio & Rules Integration', () => {
   beforeEach(() => {
@@ -25,14 +27,16 @@ describe('Play Studio & Rules Integration', () => {
 
   it('renders Play Studio with default world, draws a card, and logs turn with player attribution', async () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={routerFuture}>
         <Play />
       </BrowserRouter>
     )
 
     expect(screen.getByText('Emerald Vale')).toBeInTheDocument()
     const drawBtn = screen.getByRole('button', { name: /Draw Card \(54\)/i })
-    fireEvent.click(drawBtn)
+    await act(async () => {
+      fireEvent.click(drawBtn)
+    })
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
@@ -41,45 +45,59 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByText('Turn #1')).toBeInTheDocument()
   })
 
-  it('supports Companion Mode toggles, Hotseat Players, Auto-Play, and Codex tabs', () => {
+  it('supports Companion Mode toggles, Hotseat Players, Auto-Play, and Codex tabs', async () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={routerFuture}>
         <Play />
       </BrowserRouter>
     )
 
     // Toggle Players Panel & add a hotseat player
-    fireEvent.click(screen.getByRole('button', { name: /Players \(1\)/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Players \(1\)/i }))
+    })
     expect(
       screen.getByText(/Hotseat Players & Bot Personalities/i)
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /Add Player Seat/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Add Player Seat/i }))
+    })
     expect(screen.getByRole('button', { name: /Players \(2\)/i })).toBeInTheDocument()
 
     // Toggle Auto-Play Panel & run 1 auto turn
-    fireEvent.click(screen.getByRole('button', { name: /Auto-Play/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Auto-Play/i }))
+    })
     expect(
       screen.getByText(/Procedural Seeded Auto-Play & World Generator/i)
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /Auto-Play 1 Turn/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Auto-Play 1 Turn/i }))
+    })
     expect(screen.getByText('Turn #1')).toBeInTheDocument()
 
     // Switch to World Map tab
-    fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
+    })
     expect(screen.getByRole('grid', { name: /World Map Grid/i })).toBeInTheDocument()
 
     // Switch to Codex tab
-    fireEvent.click(screen.getByRole('tab', { name: /Codex/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Codex/i }))
+    })
     expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
 
     // Open World Manager Modal
-    fireEvent.click(screen.getByRole('button', { name: /Worlds \(1\)/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Worlds \(1\)/i }))
+    })
     expect(screen.getByRole('dialog', { name: /World Manager/i })).toBeInTheDocument()
   })
 
   it('renders Rules page with Glossary and switches to 1-Page Quick Reference Card', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={routerFuture}>
         <Rules />
       </BrowserRouter>
     )
@@ -97,7 +115,7 @@ describe('Play Studio & Rules Integration', () => {
 
   it('supports Rules keyword search and category focus filter pills', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={routerFuture}>
         <Rules />
       </BrowserRouter>
     )
@@ -118,25 +136,31 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByText(/Powers & Fantastical Face Cards/i)).toBeInTheDocument()
   })
 
-  it('supports 3.1 Companion Mode optional toggles and 3.3 Freeform Mode', () => {
+  it('supports 3.1 Companion Mode optional toggles and 3.3 Freeform Mode', async () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={routerFuture}>
         <Play />
       </BrowserRouter>
     )
 
     // Switch to 3.1 Companion Mode
-    fireEvent.click(screen.getByRole('button', { name: /Companion/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Companion/i }))
+    })
     expect(screen.getByText(/Optional Panels:/i)).toBeInTheDocument()
 
     // Toggle Stage Rules optional panel in Companion mode
-    fireEvent.click(screen.getByRole('button', { name: /Stage Rules/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Stage Rules/i }))
+    })
     expect(
       screen.getByText(/Full 4-Ages Matrix/i)
     ).toBeInTheDocument()
 
     // Switch to 3.3 Freeform Mode
-    fireEvent.click(screen.getByRole('button', { name: /Free-Create/i }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Free-Create/i }))
+    })
     expect(screen.getByText(/Freeform World Sandbox/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Draw Card/i })).not.toBeInTheDocument()
   })
