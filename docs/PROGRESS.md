@@ -119,6 +119,14 @@ status: active
   - [x] Visual Dynasty & Lineage succession trees (`buildEntityLineageTree`) displaying progenitor, offspring branches, and sister branches in `LoreFlyoutDrawer`
   - [x] Stage advance celebratory golden particle banner on era transitions
   - [x] Full test coverage in `narrativeEngine.test.ts`, `soundEngine.test.ts`, and `LoreFlyoutDrawer.test.tsx` (62/62 passing tests across 10 suites)
+- [x] **Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio** *(Score: 100.0 / 100)*
+  - [x] Dedicated Title Screen / Main Menu for Play Studio (`StudioLauncher.tsx`) with Resume Campaign, New Campaign genesis, Load Realm drawer, Quick Start 1-click generator, and Rules Codex reference
+  - [x] Distinct URL query synchronization (`/play?view=launcher` vs `/play?world=<id>&mode=<mode>`) and breadcrumb hierarchy (`Main Menu / Realm Name / Age Pill / Turn #`)
+  - [x] Deliberate `NewGameCeremonyModal` 5-step genesis ritual (realm title randomizer, mythic premise, table format selection, starting era, and player council roster)
+  - [x] Deliberate `EpochCeremonyModal` epoch advancement ritual (retrospective era metrics, deeds consecrated, incoming era herald, and epilogue inscription)
+  - [x] Minimalist focus-zone header with collapsed popover menus: `Atmosphere Menu`, `Share & Export Menu`, and `Settings Menu` (hiding administrative clutter away)
+  - [x] Map canvas mode separation with explicit `👁️ Safe Inspect Mode` default vs `🖌️ Drafting Workshop (Active)` gold ring indicator to prevent accidental tile edits
+  - [x] Full test coverage across 10 test suites (64/64 passing tests and clean production build)
 
 ---
 
@@ -135,5 +143,6 @@ status: active
 - [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
 - [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Score: 96.0 / 100).
 - [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (Score: 100.0 / 100).
+- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (Score: 100.0 / 100).
 
 

@@ -26,6 +26,10 @@ import {
   Check,
   QrCode,
   Volume2,
+  Home,
+  Settings,
+  Share2,
+  ChevronDown,
 } from 'lucide-react'
 import {
   Card,
@@ -91,6 +95,9 @@ import { PlayerRosterModal } from '../components/PlayerRosterModal'
 import { AutoPlayConsoleModal } from '../components/AutoPlayConsoleModal'
 import { GameSetupWizardModal } from '../components/GameSetupWizardModal'
 import { LoreFlyoutDrawer } from '../components/LoreFlyoutDrawer'
+import { StudioLauncher } from '../components/StudioLauncher'
+import { NewGameCeremonyModal } from '../components/NewGameCeremonyModal'
+import { EpochCeremonyModal } from '../components/EpochCeremonyModal'
 import {
   decodeWorldFromCompressedHash,
   parseSeedShareUrl,
@@ -173,6 +180,18 @@ export function Play() {
   const [showSetupWizardModal, setShowSetupWizardModal] = useState(false)
   const [showAgesModal, setShowAgesModal] = useState(false)
   const [showDeckEmptyDialog, setShowDeckEmptyDialog] = useState(false)
+  const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
+  const [showShareMenu, setShowShareMenu] = useState(false)
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false)
+  const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
+  const [showNewGameCeremonyModal, setShowNewGameCeremonyModal] = useState(false)
+  const [isInLauncher, setIsInLauncher] = useState<boolean>(() => {
+    const view = searchParams.get('view')
+    const menu = searchParams.get('menu')
+    if (view === 'launcher' || menu === 'true') return true
+    if (searchParams.get('world')) return false
+    return true
+  })
 
   const [generateIntoNewWorld, setGenerateIntoNewWorld] = useState(false)
   const [cardColors, setCardColors] = useState<Record<string, string>>(DEFAULT_CARD_COLORS)
@@ -236,6 +255,7 @@ export function Play() {
     }
   }, [])
 
+
   const handleAcceptSharedWorld = useCallback(() => {
     if (!incomingSharedWorld) return
     const saved = saveWorld(incomingSharedWorld)
@@ -243,6 +263,7 @@ export function Play() {
     setWorld(saved)
     setSavedWorlds(listSavedWorlds())
     setIncomingSharedWorld(null)
+    setIsInLauncher(false)
     playStageAdvanceSound()
     if (typeof window !== 'undefined') {
       window.history.replaceState({}, document.title, window.location.pathname)
@@ -255,6 +276,78 @@ export function Play() {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
+
+  // Hydrate world from URL if specified
+  useEffect(() => {
+    const worldParam = searchParams.get('world')
+    if (worldParam) {
+      const all = listSavedWorlds()
+      const found = all.find((w) => w.id === worldParam)
+      if (found && found.id !== world.id) {
+        setActiveWorldId(found.id)
+        setWorld(found)
+      }
+      setIsInLauncher(false)
+    } else if (searchParams.get('view') === 'launcher' || searchParams.get('menu') === 'true') {
+      setIsInLauncher(true)
+    }
+  }, [searchParams])
+
+  // Dismiss focus zone popovers on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.focus-popover-container')) {
+        setShowAtmosphereMenu(false)
+        setShowShareMenu(false)
+        setShowSettingsMenu(false)
+      }
+    }
+    document.addEventListener('click', handleOutsideClick)
+    return () => document.removeEventListener('click', handleOutsideClick)
+  }, [])
+
+  const handleReturnToLauncher = useCallback(() => {
+    setIsInLauncher(true)
+    setSearchParams({ view: 'launcher' })
+  }, [setSearchParams])
+
+  const handleLauncherSelectWorld = useCallback((selectedWorld: WorldState) => {
+    setActiveWorldId(selectedWorld.id)
+    setWorld(selectedWorld)
+    setSavedWorlds(listSavedWorlds())
+    setIsInLauncher(false)
+    setSearchParams({ world: selectedWorld.id, mode: selectedWorld.gameMode || 'studio' })
+  }, [setSearchParams])
+
+  const handleAdvanceStageCeremonially = (nextStage: StageId, epilogueNote?: string) => {
+    persistWorldUpdate((prev) => {
+      const updatedHistory = [...prev.drawHistory]
+      if (epilogueNote) {
+        updatedHistory.push({
+          id: `epilogue-${Date.now()}`,
+          moveId: updatedHistory.length + 1,
+          stage: prev.currentStage,
+          card: { id: 'epilogue', suit: '♠', value: 'A' },
+          power: 'Era Epilogue',
+          playerId: activePlayer?.id || 'p1',
+          playerName: activePlayer?.name || 'Table',
+          timestamp: new Date().toISOString(),
+          note: `[ERA CONCLUDED: ${prev.currentStage.toUpperCase()}] ${epilogueNote}`,
+        })
+      }
+      return {
+        ...prev,
+        currentStage: nextStage,
+        drawHistory: updatedHistory,
+      }
+    })
+    setStageCelebration({
+      active: true,
+      stageName: STAGES.find((s) => s.id === nextStage)?.name || nextStage,
+    })
+  }
+
 
   const rebuildDeck = useCallback(() => {
     return buildShuffledDeck({
@@ -920,246 +1013,425 @@ export function Play() {
   const latestTurnRecord =
     drawHistory.length > 0 ? drawHistory[drawHistory.length - 1] : undefined
 
+  if (isInLauncher) {
+    return (
+      <div className="max-w-7xl mx-auto py-4">
+        <StudioLauncher onSelectWorld={handleLauncherSelectWorld} />
+        {showNewGameCeremonyModal && (
+          <NewGameCeremonyModal
+            isOpen={showNewGameCeremonyModal}
+            onClose={() => setShowNewGameCeremonyModal(false)}
+            onLaunchWorld={(nw) => {
+              saveWorld(nw)
+              handleLauncherSelectWorld(nw)
+              setShowNewGameCeremonyModal(false)
+            }}
+          />
+        )}
+        {incomingSharedWorld && (
+          <IncomingSharedWorldModal
+            incomingWorld={incomingSharedWorld}
+            onAccept={handleAcceptSharedWorld}
+            onDecline={handleDeclineSharedWorld}
+          />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-4">
       {/* =========================================================================
-          1. LEVEL 1: UNIFIED PLAY WORKSPACE HEADER
+          1. LEVEL 1: UNIFIED PLAY WORKSPACE HEADER (AAA HIERARCHY & FOCUS ZONES)
           ========================================================================= */}
-      <header className="no-print card p-3.5 sm:p-4 space-y-3 border-border/80 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Left: World Identity & Stage Badge */}
-          <div className="flex items-center gap-2.5 min-w-0">
+      <header className="no-print card p-3 sm:p-3.5 space-y-2.5 border-border/80 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* ZONE 1 (Left): Navigation Hierarchy & Breadcrumbs */}
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            {/* Title Screen / Main Menu Button */}
             <button
               type="button"
-              onClick={() => setShowWorldManager(true)}
-              className="p-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary shrink-0 shadow-inner transition-colors"
-              title="Switch or Manage Saved Worlds"
+              onClick={handleReturnToLauncher}
+              className="px-2.5 py-1.5 rounded-lg border border-border bg-muted/40 hover:bg-muted text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+              title="Return to Play Studio Main Menu"
             >
-              <Globe className="h-5 w-5" />
+              <Home className="h-3.5 w-3.5 text-primary" />
+              <span>Main Menu</span>
             </button>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-lg sm:text-xl font-bold truncate tracking-tight">
-                  {world.name}
+
+            <span className="text-muted-foreground/60 select-none">/</span>
+
+            {/* Realm Identity Pill */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate max-w-[200px] sm:max-w-[280px]">
+                {world.name}
+              </span>
+              {world.isLocked && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-1 border border-amber-500/30">
+                  <Lock className="h-3 w-3" /> Read-Only
                 </span>
-                {currentStageData && gameMode !== 'free-create' && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAgesModal(true)}
-                    className="text-[11px] px-2.5 py-0.5 rounded-full bg-primary/15 hover:bg-primary/25 text-primary font-bold transition-colors"
-                    title="Click to switch Stage or inspect all 4 Ages"
-                  >
-                    Age {currentStageData.number}/4: {currentStageData.name}
-                  </button>
-                )}
-                {world.isLocked && (
-                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-1">
-                    <Lock className="h-3 w-3" /> Read-Only
-                  </span>
-                )}
-              </div>
-              <p className="text-[11px] text-muted-foreground hidden sm:block">
-                {drawHistory.length} turns · {world.entities.length} codex entries · {players.length} seat(s)
-              </p>
+              )}
             </div>
+
+            <span className="text-muted-foreground/60 select-none">/</span>
+
+            {/* Ceremonial Era / Stage Pill */}
+            {currentStageData && gameMode !== 'free-create' && (
+              <button
+                type="button"
+                onClick={() => setShowEpochCeremonyModal(true)}
+                className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1.5 transition-all shadow-2xs"
+                title="Era of the Realm: Tap to view Era Chronicle or enact Epoch Advancement Ceremony"
+              >
+                <Sparkles className="h-3 w-3 text-amber-500" />
+                <span>Age {currentStageData.number}: {currentStageData.name}</span>
+              </button>
+            )}
+
+            {/* Turn Counter Pill */}
+            <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-mono font-medium">
+              Turn #{drawHistory.length}
+            </span>
+
+            {/* Stability Index */}
+            <span
+              className={`hidden md:inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium border ${worldStability.badgeColor}`}
+              title={`World Stability Index: ${worldStability.score}/100 (${worldStability.status})`}
+            >
+              <span>{worldStability.icon}</span>
+              <span>Stability {worldStability.score}%</span>
+            </span>
           </div>
 
-          {/* Center: 3-Mode Switcher (3.1 Companion, 3.2 Studio, 3.3 Freeform) */}
+          {/* ZONE 2 (Center): Play Studio Mode Segment */}
           <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border text-xs font-semibold shadow-inner">
             <button
               type="button"
               onClick={() => handleModeChange('companion')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
                 gameMode === 'companion'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="3.1 Play Companion: Tactile card draw, stage tracker, and optional manual panels"
+              title="3.1 Companion Mode: Card draw & live table companion"
             >
               <span>🃏 Companion</span>
             </button>
             <button
               type="button"
               onClick={() => handleModeChange('studio')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
                 gameMode === 'studio'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="3.2 Studio Mode: Guided turn-by-turn campaign with automatic turn activity tracking and Bot Auto-Play"
+              title="3.2 Full Studio: Complete turn orchestration"
             >
               <span>🏆 Studio</span>
             </button>
             <button
               type="button"
               onClick={() => handleModeChange('free-create')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
                 gameMode === 'free-create'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="3.3 Freeform Sandbox: Create maps, codex wiki entries, and lore without cards"
+              title="3.3 Free-Create: Map drafting & codex without rules"
             >
               <span>🎨 Free-Create</span>
             </button>
           </div>
 
-          {/* Right: Contextual Utility Controls */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* ZONE 3 (Right): Focus Zone Trays & Administrative Settings */}
+          <div className="flex items-center gap-1.5 focus-popover-container">
+            {/* Active Seat Pill */}
             {activePlayer && gameMode !== 'free-create' && (
               <button
                 type="button"
                 onClick={() => setShowPlayersModal(true)}
-                className="text-[11px] px-2.5 py-1 rounded-full text-white font-medium flex items-center gap-1 shadow-sm hover:opacity-90"
+                className="text-[11px] px-2.5 py-1 rounded-full text-white font-medium flex items-center gap-1 shadow-2xs hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: activePlayer.color }}
-                title="Active Player Seat (Click to configure roster)"
+                title="Active Player Seat (Click to open Player Council)"
               >
-                <span>
-                  {activePlayer.name} ({activePlayer.role})
-                </span>
-                {activePlayer.isBot && (
-                  <span>· {BOT_PERSONALITIES[activePlayer.personality]?.icon}</span>
-                )}
+                <span>{activePlayer.name}</span>
+                {activePlayer.isBot && <span>· {BOT_PERSONALITIES[activePlayer.personality]?.icon}</span>}
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => setShowAutoPlayModal(true)}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              title="Procedural Seeded Auto-Play & World Generator"
-            >
-              <Bot className="h-3.5 w-3.5" />
-              <span>Auto-Play</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowPlayersModal(true)}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-border bg-background hover:bg-muted transition-colors"
-              title="Configure 1–6 Hotseat Players or Bot Seats"
-            >
-              <Users className="h-3.5 w-3.5" />
-              <span>Players ({players.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowWorldManager(true)}
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
-            >
-              <Globe className="h-3.5 w-3.5" />
-              <span>Worlds ({savedWorlds.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowExportModal(true)}
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
-              title="Export Markdown, YAML, JSON, or Sourcebook"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span>Export</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowShareModal(true)}
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-primary border-primary/40 bg-primary/5 hover:bg-primary/10"
-              title="Share Realm with Table via QR Code or Link"
-            >
-              <QrCode className="h-3.5 w-3.5" />
-              <span>Share Table</span>
-            </button>
-
-            {/* Ambient Atmosphere Soundscape Selector */}
-            <div
-              className="inline-flex rounded-lg border border-border p-0.5 bg-muted/40 text-xs"
-              role="group"
-              aria-label="Ambient Soundscape Atmosphere"
-            >
+            {/* Atmosphere Popover / Sound Tray */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => handleToggleAmbientMood('campfire')}
-                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-                  ambientMood === 'campfire'
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                onClick={() => {
+                  setShowAtmosphereMenu((prev) => !prev)
+                  setShowSettingsMenu(false)
+                  setShowShareMenu(false)
+                }}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  ambientMood !== 'none'
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-border bg-background hover:bg-muted text-muted-foreground'
                 }`}
-                title="Campfire Hearth Atmosphere"
+                title="Atmosphere & Ambient Soundscapes"
+                aria-label="Atmosphere Menu"
               >
-                <span>🔥</span>
-                <span className="hidden sm:inline">Hearth</span>
+                <Volume2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">
+                  {ambientMood === 'campfire' ? 'Hearth' : ambientMood === 'ocean' ? 'Ocean' : ambientMood === 'ether' ? 'Ether' : 'Atmosphere'}
+                </span>
+                <ChevronDown className="h-3 w-3 opacity-60" />
               </button>
-              <button
-                type="button"
-                onClick={() => handleToggleAmbientMood('ocean')}
-                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-                  ambientMood === 'ocean'
-                    ? 'bg-sky-600 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Coastal Waves Atmosphere"
-              >
-                <span>🌊</span>
-                <span className="hidden sm:inline">Ocean</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleToggleAmbientMood('ether')}
-                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-                  ambientMood === 'ether'
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Mystic Ether Atmosphere"
-              >
-                <span>✨</span>
-                <span className="hidden sm:inline">Ether</span>
-              </button>
-              {ambientMood !== 'none' && (
-                <div className="flex items-center gap-1 pl-1 border-l border-border/60">
-                  <Volume2 className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={ambientVolume}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value)
-                      setAmbientVolumeState(val)
-                      setAmbientVolume(val)
-                    }}
-                    className="w-14 h-1 accent-primary cursor-pointer"
-                    title={`Ambient Volume: ${Math.round(ambientVolume * 100)}%`}
-                    aria-label="Ambient Volume"
-                  />
+
+              {/* Atmosphere Popover Menu */}
+              {showAtmosphereMenu && (
+                <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-2.5 shadow-xl z-30 space-y-2 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                    Ambient Atmosphere
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAmbientMood('campfire')}
+                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
+                        ambientMood === 'campfire'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'bg-muted/50 hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <span className="text-sm">🔥</span>
+                      <span className="text-[10px]">Hearth</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAmbientMood('ocean')}
+                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
+                        ambientMood === 'ocean'
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : 'bg-muted/50 hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <span className="text-sm">🌊</span>
+                      <span className="text-[10px]">Ocean</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAmbientMood('ether')}
+                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
+                        ambientMood === 'ether'
+                          ? 'bg-purple-600 text-white shadow-xs'
+                          : 'bg-muted/50 hover:bg-muted text-foreground'
+                      }`}
+                    >
+                      <span className="text-sm">✨</span>
+                      <span className="text-[10px]">Ether</span>
+                    </button>
+                  </div>
+                  {ambientMood !== 'none' && (
+                    <div className="space-y-1 pt-1 border-t border-border/60">
+                      <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                        <span>Volume</span>
+                        <span>{Math.round(ambientVolume * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={ambientVolume}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value)
+                          setAmbientVolumeState(val)
+                          setAmbientVolume(val)
+                        }}
+                        className="w-full h-1.5 accent-primary cursor-pointer"
+                        aria-label="Ambient Volume Slider"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => handleToggleLockWorld(world.id)}
-              className={`p-1.5 rounded-lg border text-xs transition-colors ${
-                world.isLocked
-                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
-                  : 'border-border hover:bg-muted text-muted-foreground'
-              }`}
-              title={world.isLocked ? 'World Locked (Read-Only)' : 'Lock World'}
-            >
-              {world.isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-            </button>
+            {/* Share & Export Popover */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowShareMenu((prev) => !prev)
+                  setShowAtmosphereMenu(false)
+                  setShowSettingsMenu(false)
+                }}
+                className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
+                title="Share Realm & Export Suite"
+                aria-label="Share & Export Menu"
+              >
+                <Share2 className="h-3.5 w-3.5 text-primary" />
+                <span className="hidden sm:inline">Share</span>
+                <ChevronDown className="h-3 w-3 opacity-60" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setShowSetupWizardModal(true)}
-              className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground"
-              title="Game Setup Wizard"
-            >
-              <Wand2 className="h-4 w-4 text-primary" />
-            </button>
+              {showShareMenu && (
+                <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowShareModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <QrCode className="h-3.5 w-3.5 text-primary" />
+                    <span>Share Table QR</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowExportModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <Download className="h-3.5 w-3.5 text-primary" />
+                    <span>Export Suite</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* ⚙️ Administrative Settings Menu (Hiding Administrative Clutter Away) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSettingsMenu((prev) => !prev)
+                  setShowAtmosphereMenu(false)
+                  setShowShareMenu(false)
+                }}
+                className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                title="Studio Administration & Ceremony Settings"
+                aria-label="Settings Menu"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+
+              {showSettingsMenu && (
+                <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
+                    Game Ceremonies & Roster
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPlayersModal(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center justify-between font-medium"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Users className="h-3.5 w-3.5 text-primary" />
+                      <span>Player Council</span>
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                      {players.length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEpochCeremonyModal(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-700 dark:text-amber-300"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Epoch Ceremony</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAutoPlayModal(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <Bot className="h-3.5 w-3.5 text-primary" />
+                    <span>Auto-Play Console</span>
+                  </button>
+
+                  <div className="h-px bg-border my-1" />
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1">
+                    Realm Administration
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowWorldManager(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center justify-between font-medium"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-3.5 w-3.5 text-primary" />
+                      <span>World Archives</span>
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                      {savedWorlds.length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSetupWizardModal(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <Wand2 className="h-3.5 w-3.5 text-primary" />
+                    <span>Setup Wizard</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleToggleLockWorld(world.id)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    {world.isLocked ? (
+                      <>
+                        <Unlock className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>Unlock Realm</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-3.5 w-3.5 text-amber-500" />
+                        <span>Lock Realm (Read-Only)</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="h-px bg-border my-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSettingsMenu(false)
+                      handleReturnToLauncher()
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <Home className="h-3.5 w-3.5" />
+                    <span>Exit to Title Screen</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             <input
               ref={fileInputRef}
@@ -1710,7 +1982,7 @@ export function Play() {
                 onSelectEntity={handleNavigateToEntity}
                 onSelectEvent={handleNavigateToEvent}
                 onChange={handleWorkspaceMapChange}
-                initialViewOnly={false}
+                initialViewOnly={true}
               />
             </section>
           )}
@@ -2371,7 +2643,7 @@ export function Play() {
                       onSelectEntity={handleNavigateToEntity}
                       onSelectEvent={handleNavigateToEvent}
                       onChange={handleWorkspaceMapChange}
-                      initialViewOnly={false}
+                      initialViewOnly={true}
                     />
                   )}
                   {splitRightPanel === 'entities' && (
@@ -2440,7 +2712,7 @@ export function Play() {
                 onSelectEntity={handleNavigateToEntity}
                 onSelectEvent={handleNavigateToEvent}
                 onChange={handleWorkspaceMapChange}
-                initialViewOnly={false}
+                initialViewOnly={true}
               />
             </section>
           )}
@@ -2740,6 +3012,30 @@ export function Play() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Deliberate AAA Historical Epoch Advancement Ceremony Modal */}
+      {showEpochCeremonyModal && (
+        <EpochCeremonyModal
+          isOpen={showEpochCeremonyModal}
+          currentStage={currentStage}
+          world={world}
+          onClose={() => setShowEpochCeremonyModal(false)}
+          onAdvanceStage={handleAdvanceStageCeremonially}
+        />
+      )}
+
+      {/* Deliberate AAA Realm Creation Ceremony Modal */}
+      {showNewGameCeremonyModal && (
+        <NewGameCeremonyModal
+          isOpen={showNewGameCeremonyModal}
+          onClose={() => setShowNewGameCeremonyModal(false)}
+          onLaunchWorld={(nw) => {
+            saveWorld(nw)
+            handleLauncherSelectWorld(nw)
+            setShowNewGameCeremonyModal(false)
+          }}
+        />
       )}
 
       {/* Interconnected Lore & Dossier Flyout Drawer */}
