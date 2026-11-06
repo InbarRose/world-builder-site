@@ -49,10 +49,38 @@ export function toggleSound(): boolean {
 }
 
 /**
+ * Trigger subtle mobile haptic vibrations on tactile tabletop interactions.
+ */
+export type HapticPattern = 'light' | 'medium' | 'heavy' | 'celebration'
+
+export function triggerHapticFeedback(pattern: HapticPattern = 'light'): void {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator.vibrate) return
+  try {
+    switch (pattern) {
+      case 'light':
+        navigator.vibrate(15)
+        break
+      case 'medium':
+        navigator.vibrate(30)
+        break
+      case 'heavy':
+        navigator.vibrate([40, 30, 40])
+        break
+      case 'celebration':
+        navigator.vibrate([35, 45, 55, 45, 80])
+        break
+    }
+  } catch {
+    // Fail silently in headless or restricted environments
+  }
+}
+
+/**
  * Crisp paper card slide/flick sound.
  */
 export function playCardDrawSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('light')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -93,6 +121,7 @@ export function playCardDrawSound(): void {
  */
 export function playCardFlipSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('light')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -123,6 +152,7 @@ export function playCardFlipSound(): void {
  */
 export function playTurnPassSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('medium')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -153,6 +183,7 @@ export function playTurnPassSound(): void {
  */
 export function playStageAdvanceSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('celebration')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -188,6 +219,7 @@ export function playStageAdvanceSound(): void {
  */
 export function playUndoSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('light')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -219,6 +251,7 @@ export function playUndoSound(): void {
  */
 export function playTokenPlaceSound(): void {
   if (!isSoundEnabled()) return
+  triggerHapticFeedback('medium')
   const ctx = getAudioContext()
   if (!ctx) return
 
@@ -279,14 +312,30 @@ export function setAmbientVolume(vol: number): void {
   }
 }
 
-export function stopAmbientSoundscape(): void {
+export function stopAmbientSoundscape(fadeMs: number = 300): void {
   if (activeAmbient) {
-    try {
-      activeAmbient.stop()
-    } catch {
-      // ignore
-    }
+    const toStop = activeAmbient
     activeAmbient = null
+    try {
+      const ctx = getAudioContext()
+      if (ctx && toStop.gainNode) {
+        const now = ctx.currentTime
+        toStop.gainNode.gain.cancelScheduledValues(now)
+        toStop.gainNode.gain.setValueAtTime(toStop.gainNode.gain.value, now)
+        toStop.gainNode.gain.linearRampToValueAtTime(0.0001, now + fadeMs / 1000)
+        setTimeout(() => {
+          try {
+            toStop.stop()
+          } catch {
+            // ignore
+          }
+        }, fadeMs)
+      } else {
+        toStop.stop()
+      }
+    } catch {
+      toStop.stop()
+    }
   }
   if (typeof window !== 'undefined') {
     localStorage.setItem(AMBIENT_PREFERENCE_KEY, 'none')
@@ -295,7 +344,7 @@ export function stopAmbientSoundscape(): void {
 }
 
 export function startAmbientSoundscape(mood: AmbientSoundscapeMood): void {
-  stopAmbientSoundscape()
+  stopAmbientSoundscape(300)
   if (mood === 'none' || !isSoundEnabled()) return
 
   if (typeof window !== 'undefined') {
@@ -308,7 +357,10 @@ export function startAmbientSoundscape(mood: AmbientSoundscapeMood): void {
 
   try {
     const masterGain = ctx.createGain()
-    masterGain.gain.setValueAtTime(getAmbientVolume(), ctx.currentTime)
+    const targetVol = getAmbientVolume()
+    const now = ctx.currentTime
+    masterGain.gain.setValueAtTime(0.0001, now)
+    masterGain.gain.linearRampToValueAtTime(targetVol, now + 0.35)
     masterGain.connect(ctx.destination)
 
     const stopCallbacks: (() => void)[] = []

@@ -9,6 +9,7 @@ import {
   playStageAdvanceSound,
   playUndoSound,
   playTokenPlaceSound,
+  triggerHapticFeedback,
   getAmbientMood,
   startAmbientSoundscape,
   stopAmbientSoundscape,
@@ -60,6 +61,10 @@ describe('SoundEngine Module', () => {
     expect(() => playTurnPassSound()).not.toThrow()
     expect(() => playStageAdvanceSound()).not.toThrow()
     expect(() => playUndoSound()).not.toThrow()
+
+    // Haptics
+    expect(() => triggerHapticFeedback('light')).not.toThrow()
+    expect(() => triggerHapticFeedback('celebration')).not.toThrow()
   })
 
   it('manages ambient soundscape moods and volume safely', () => {

@@ -30,6 +30,7 @@ describe('LoreFlyoutDrawer Component', () => {
   const allyEntity: WorldEntity = {
     id: 'faction_sun_order',
     name: 'Solar Order',
+    parentEntityId: 'faction_iron_covenant',
     icon: '☀️',
     category: 'society',
     stageCreated: 'genesis',
@@ -114,6 +115,10 @@ describe('LoreFlyoutDrawer Component', () => {
     // Chronicle involvement
     expect(screen.getByText(/Iron Covenant march past the high passes/i)).toBeInTheDocument()
 
+    // Dynasty & Lineage Succession
+    expect(screen.getByText(/Dynasty & Lineage Succession/i)).toBeInTheDocument()
+    expect(screen.getByText(/Offspring \/ Successor Branches/i)).toBeInTheDocument()
+
     // Close button
     const closeBtns = screen.getAllByRole('button', { name: /Close Dossier/i })
     expect(closeBtns.length).toBeGreaterThan(0)
@@ -134,8 +139,8 @@ describe('LoreFlyoutDrawer Component', () => {
       />
     )
 
-    // Solar Order is in the relations web
-    const allyBtn = screen.getByRole('button', { name: /Solar Order/i })
+    // Solar Order is in the relations web and lineage branches
+    const [allyBtn] = screen.getAllByRole('button', { name: /Solar Order/i })
     expect(allyBtn).toBeInTheDocument()
     fireEvent.click(allyBtn)
     expect(handleNavEntity).toHaveBeenCalledWith('faction_sun_order')

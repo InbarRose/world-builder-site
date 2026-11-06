@@ -15,3 +15,12 @@ ReactDOM.createRoot(rootElement).render(
   </React.StrictMode>,
 )
 
+// Register offline PWA service worker in production environments
+if ('serviceWorker' in navigator && !import.meta.env.DEV) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Fail silently in unsupported or file:// test harness
+    })
+  })
+}
+

@@ -5,6 +5,8 @@ import {
   computeEntityAchievements,
   getEntityDiplomaticRelations,
   synthesizeRealmSaga,
+  computeWorldStabilityIndex,
+  buildEntityLineageTree,
 } from '../engine/narrativeEngine'
 
 describe('narrativeEngine', () => {
@@ -156,5 +158,54 @@ describe('narrativeEngine', () => {
     expect(saga.chapters[2].stageId).toBe('civilization')
     expect(saga.chapters[2].events).toHaveLength(1)
     expect(saga.overallSummary).toContain('2 recorded events')
+  })
+
+  it('computes world stability index and lineage trees', () => {
+    const world = createNewWorld('Chronicle of Eldoria')
+    world.entities = [
+      {
+        id: 'ent_empire',
+        name: 'First Empire',
+        category: 'society',
+        stageCreated: 'genesis',
+        description: 'The founding realm.',
+        traits: ['Ancient'],
+        status: 'active',
+        diplomaticLinks: [
+          {
+            id: 'l1',
+            targetEntityId: 'ent_colony',
+            targetEntityName: 'Southern Colony',
+            type: 'alliance',
+            label: 'Grand Alliance',
+            icon: '🤝',
+          },
+        ],
+      },
+      {
+        id: 'ent_colony',
+        name: 'Southern Colony',
+        parentEntityId: 'ent_empire',
+        category: 'society',
+        stageCreated: 'primal',
+        description: 'Breakaway colony.',
+        traits: ['Pioneers'],
+        status: 'active',
+      },
+    ]
+
+    // Lineage Tree
+    const tree = buildEntityLineageTree('ent_colony', world.entities)
+    expect(tree.parents.length).toBe(1)
+    expect(tree.parents[0].id).toBe('ent_empire')
+
+    const parentTree = buildEntityLineageTree('ent_empire', world.entities)
+    expect(parentTree.descendants.length).toBe(1)
+    expect(parentTree.descendants[0].id).toBe('ent_colony')
+
+    // Stability Index
+    const stability = computeWorldStabilityIndex(world)
+    expect(stability.score).toBeGreaterThan(50)
+    expect(['Golden Age', 'Pax & Stability']).toContain(stability.status)
   })
 })
