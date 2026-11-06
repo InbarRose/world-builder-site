@@ -87,5 +87,6 @@ status: active
 - [x] Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Score: 59.5 / 100)
 - [x] Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100)
 - [x] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100)
-- [ ] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100)
+- [x] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100)
+- [ ] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Target: 86.0 / 100)
 

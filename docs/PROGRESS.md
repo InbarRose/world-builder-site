@@ -77,7 +77,16 @@ status: active
   - [x] Safe URL hydration on page load with incoming shared realm confirmation dialog (`IncomingSharedWorldModal.tsx`)
   - [x] Direct "Share Table" toolbar action in `Play.tsx` and quick link from `ExportSuiteModal.tsx`
   - [x] Full automated test coverage (44/44 passing tests across 7 test suites)
-- [ ] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Target: 79.5 / 100)*
+- [x] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Score: 79.5 / 100)*
+  - [x] GPU hardware-accelerated `translate3d` + `scale` CSS matrix transformation stage for 60fps rendering
+  - [x] Dedicated Pan Map tool (`activeTool === 'pan'`) and global `Space + Drag` pan hotkey
+  - [x] Middle-click drag pan across both view-only and editing modes with cursor state management (`grab` / `grabbing`)
+  - [x] Smooth zoom controls (`0.4x` to `2.5x`) with mouse wheel listener, 1-click `100% Reset`, and `Fit Viewport`
+  - [x] Interactive floating Minimap Radar with real-time viewport bounding box and click-to-center coordinate navigation
+  - [x] Fantasy Compass Rose and dynamic Leagues/Miles cartographic scale bar (`~50 Leagues`)
+  - [x] Prevention of accidental tile painting or erasing during pan operations
+  - [x] Automated test coverage in `MapCanvas.test.tsx` (46/46 passing tests across 7 test suites)
+- [ ] **Phase 12: Emergent Narrative Simulation & Dynamic Chronicles** *(Target: 86.0 / 100)*
 
 ---
 
