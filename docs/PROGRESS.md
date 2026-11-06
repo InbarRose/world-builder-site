@@ -62,7 +62,14 @@ status: active
   - [x] Global SFX mute toggle button in L0 sticky header bar (`Layout.tsx`)
   - [x] 3D card deal easing & perspective flip animations in Companion and Studio modes
   - [x] Unit test coverage for sound engine (`soundEngine.test.ts`, 38/38 passing tests)
-- [ ] **Phase 9: Standalone "Campaign Sourcebook" Publisher** *(Target: 66.5 / 100)*
+- [x] **Phase 9: Standalone "Campaign Sourcebook" Publisher** *(Score: 66.5 / 100)*
+  - [x] Standalone, responsive fantasy RPG Campaign Sourcebook generator (`exportCampaignSourcebookHtml`)
+  - [x] Embedded high-resolution SVG cartography survey with cartographic notes
+  - [x] Two-column lore layout with drop caps, parchment theme, and thematic serif typography
+  - [x] Living Codex encyclopedic dossiers for Species, Realms (with diplomatic pacts), and Ancient Myths
+  - [x] Built-in `@media print` rules for clean 1-click PDF compilation via `window.print()`
+  - [x] Featured export launcher in `ExportSuiteModal.tsx` across Whole World and Selective tabs
+- [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
 - [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
 - [ ] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Target: 79.5 / 100)*
 

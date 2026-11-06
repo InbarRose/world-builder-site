@@ -46,6 +46,7 @@ import {
   exportWorldMarkdown,
   exportWorldYaml,
   exportMapLayeredJson,
+  exportCampaignSourcebookHtml,
 } from '../engine/exportService'
 import { CURRENT_SCHEMA_VERSION } from '../engine/types'
 
@@ -430,6 +431,22 @@ describe('AutoPlayEngine & Time-Travel Rewind', () => {
     expect(layered.terrainGrid.length).toBe(world.map.width * world.map.height)
     expect(Array.isArray(layered.reliefObjects)).toBe(true)
     expect(Array.isArray(layered.hydrologyObjects)).toBe(true)
+
+    // Standalone Campaign Sourcebook HTML Export
+    const htmlBook = exportCampaignSourcebookHtml(world)
+    expect(htmlBook).toContain('<!DOCTYPE html>')
+    expect(htmlBook).toContain('<title>Exportia Prime — Campaign Sourcebook</title>')
+    expect(htmlBook).toContain('Moonfolk')
+    expect(htmlBook).toContain('Moon Citadel')
+    expect(htmlBook).toContain('Eternal Compact')
+    expect(htmlBook).toContain('Towering quartz spires emerge.')
+    expect(htmlBook).toContain('<svg')
+    expect(htmlBook).toContain('@media print')
+    expect(htmlBook).toContain('window.print()')
+
+    // Selective filtering removes map when opted out
+    const noMapBook = exportCampaignSourcebookHtml(world, { includeMapState: false })
+    expect(noMapBook).not.toContain('<svg')
   })
 })
 
