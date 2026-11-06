@@ -201,6 +201,7 @@ export interface MapTile {
   overlay: TileOverlay
   hasRiver?: boolean
   hasRoad?: boolean
+  isUnexplored?: boolean
   territoryId?: string
   label?: string
   notes?: string

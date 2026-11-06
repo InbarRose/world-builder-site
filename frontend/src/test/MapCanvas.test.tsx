@@ -49,6 +49,23 @@ describe('MapCanvas Component', () => {
     expect(handleChange).toHaveBeenCalled()
   })
 
+  it('toggles Fog of War unexplored shroud with the fog tool', () => {
+    const map = createInitialMap(4, 4)
+    const handleChange = vi.fn()
+
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
+
+    const fogBtn = screen.getByRole('button', { name: /Fog of War Tool/i })
+    fireEvent.click(fogBtn)
+
+    const tileBtn = screen.getByTestId('map-tile-0-0')
+    fireEvent.mouseDown(tileBtn)
+
+    expect(handleChange).toHaveBeenCalledTimes(1)
+    const updatedMap = handleChange.mock.calls[0][0]
+    expect(updatedMap.tiles['0,0'].isUnexplored).toBe(true)
+  })
+
   it('supports clutter-free View Atlas mode (initialViewOnly) that inspects tiles without painting', () => {
     const map = createInitialMap(4, 4)
     const handleChange = vi.fn()
