@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 10 Completed; Phase 11 Planned
+- **Current Phase**: Phase 11 Completed; Phase 12 Planned
 - **Session Date**: 2026-11-06
-- **Status**: Phase 10 Verified (44/44 tests passing across 7 suites), AAA Benchmark Score Snapshot (72.5 / 100) Recorded
+- **Status**: Phase 11 Verified (46/46 tests passing across 7 suites), AAA Benchmark Score Snapshot (79.5 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -36,8 +36,16 @@ status: active
   - Built interactive `ShareTableModal.tsx` with live preview, copy link feedback, QR image download, and payload size metrics.
   - Implemented automatic URL hydration on page load with non-destructive incoming shared realm confirmation dialog (`IncomingSharedWorldModal.tsx`).
   - Added top toolbar "Share Table" button in `Play.tsx` and quick link from `ExportSuiteModal.tsx`.
-  - Added unit and integration tests (`shareService.test.ts`, `PlayStudio.test.tsx`, 44/44 tests passing).
-  - Recorded ADR-010 score snapshot: **72.5 / 100** (+6.0 pts: +4.0 on D4, +1.0 on D5, +1.0 on D6).
+  - Merged to `main` via PR #8 and deployed to GitHub Pages (Score: 72.5 / 100).
+- **Phase 11 (60fps Smooth Pan/Zoom Cartography Camera)**:
+  - Built GPU hardware-accelerated `translate3d` + `scale` CSS matrix transformation stage for 60fps rendering in `MapCanvas.tsx`.
+  - Added dedicated Pan Map tool (`activeTool === 'pan'`) and global `Space + Drag` pan hotkey with `grab` / `grabbing` cursor states.
+  - Added smooth mouse wheel zoom (`0.4x` to `2.5x`), 1-click `100% Reset`, and `Fit Viewport` buttons in the canvas toolbar.
+  - Built interactive floating Minimap Radar in the bottom-right corner with real-time viewport bounding box and click-to-center coordinate navigation.
+  - Added stylized Compass Rose and dynamic Leagues/Miles cartographic scale bar (`~50 Leagues`).
+  - Prevented accidental tile painting or erasing during pan operations.
+  - Added test coverage in `MapCanvas.test.tsx` (46/46 passing tests).
+  - Recorded ADR-010 score snapshot: **79.5 / 100** (+7.0 pts: +5.0 on D2, +1.0 on D1, +1.0 on D5).
 
 ---
 
@@ -46,8 +54,9 @@ status: active
 - [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (merged via PR #5).
 - [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (merged via PR #6).
 - [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (merged via PR #7).
-- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100).
-- [ ] Push Phase 10 branch, open PR #8, verify CI, and merge to `main`.
-- [ ] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100).
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (merged via PR #8).
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
+- [ ] Push Phase 11 branch, open PR #9, verify CI, and merge to `main`.
+- [ ] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Target: 86.0 / 100).
 
 

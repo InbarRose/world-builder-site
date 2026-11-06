@@ -17,6 +17,7 @@ import {
   Plus,
   Trash2,
   Sliders,
+  Hand,
 } from 'lucide-react'
 import {
   DrawRecord,
@@ -52,7 +53,7 @@ import {
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
-export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase'
+export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
 
 interface MapCanvasProps {
@@ -327,7 +328,7 @@ export function MapCanvas({
   onChange,
 }: MapCanvasProps) {
   const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
-  const [tileSizePx, setTileSizePx] = useState<number>(42)
+  const tileSizePx = 42
   const [activeTool, setActiveTool] = useState<MapTool>('brush')
   const [renderStyle, setRenderStyle] = useState<AtlasRenderStyle>('tilt-25d')
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
@@ -356,6 +357,143 @@ export function MapCanvas({
   const [tagInput, setTagInput] = useState('')
   const [customWidth, setCustomWidth] = useState<number>(map.width)
   const [customHeight, setCustomHeight] = useState<number>(map.height)
+
+  // 60fps Smooth Pan/Zoom Cartography Camera
+  const [camera, setCamera] = useState<{ x: number; y: number; zoom: number }>({
+    x: 0,
+    y: 0,
+    zoom: 1,
+  })
+  const [isSpacePressed, setIsSpacePressed] = useState(false)
+  const [isPanning, setIsPanning] = useState(false)
+  const [showMinimap, setShowMinimap] = useState(true)
+  const panStartRef = useRef<{ startX: number; startY: number; camX: number; camY: number } | null>(null)
+  const viewportContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleResetCamera = useCallback(() => {
+    setCamera({ x: 0, y: 0, zoom: 1 })
+  }, [])
+
+  const handleZoomIn = useCallback(() => {
+    setCamera((prev) => ({
+      ...prev,
+      zoom: Math.min(2.5, Number((prev.zoom * 1.25).toFixed(2))),
+    }))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setCamera((prev) => ({
+      ...prev,
+      zoom: Math.max(0.4, Number((prev.zoom / 1.25).toFixed(2))),
+    }))
+  }, [])
+
+  const handleFitCamera = useCallback(() => {
+    if (!viewportContainerRef.current) {
+      setCamera({ x: 0, y: 0, zoom: 1 })
+      return
+    }
+    const rect = viewportContainerRef.current.getBoundingClientRect()
+    const mapPxWidth = map.width * tileSizePx + 32
+    const mapPxHeight = map.height * tileSizePx + 32
+    const fitZoom = Math.min(
+      2.0,
+      Math.max(
+        0.4,
+        Number(Math.min((rect.width - 32) / mapPxWidth, (rect.height - 32) / mapPxHeight).toFixed(2))
+      )
+    )
+    setCamera({ x: 0, y: 0, zoom: fitZoom })
+  }, [map.width, map.height, tileSizePx])
+
+  const handleViewportMouseDown = (e: React.MouseEvent) => {
+    const isMiddleClick = e.button === 1
+    const isPan = activeTool === 'pan' || isSpacePressed || isMiddleClick
+
+    if (isPan) {
+      e.preventDefault()
+      setIsPanning(true)
+      panStartRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        camX: camera.x,
+        camY: camera.y,
+      }
+    }
+  }
+
+  const handleViewportMouseMove = (e: React.MouseEvent) => {
+    if (!isPanning || !panStartRef.current) return
+    const dx = e.clientX - panStartRef.current.startX
+    const dy = e.clientY - panStartRef.current.startY
+    setCamera((prev) => ({
+      ...prev,
+      x: panStartRef.current!.camX + dx,
+      y: panStartRef.current!.camY + dy,
+    }))
+  }
+
+  const handleViewportMouseUp = () => {
+    if (isPanning) {
+      setIsPanning(false)
+      panStartRef.current = null
+    }
+  }
+
+  // Mouse wheel zoom on viewport container with non-passive listener
+  useEffect(() => {
+    const container = viewportContainerRef.current
+    if (!container) return
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const factor = e.deltaY < 0 ? 1.15 : 0.87
+      setCamera((prev) => ({
+        ...prev,
+        zoom: Math.min(2.5, Math.max(0.4, Number((prev.zoom * factor).toFixed(2)))),
+      }))
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      container.removeEventListener('wheel', handleWheel)
+    }
+  }, [])
+
+  // Spacebar pan toggle listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.getAttribute('contenteditable') === 'true')
+      ) {
+        return
+      }
+
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault()
+        setIsSpacePressed(true)
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsSpacePressed(false)
+        setIsPanning(false)
+        panStartRef.current = null
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   // Canvas Undo & Redo History Buffers (bounded to 25 states)
   const [undoStack, setUndoStack] = useState<MapState[]>([])
@@ -811,6 +949,19 @@ export function MapCanvas({
                   <Eraser className="h-3.5 w-3.5" />
                   <span>Erase</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('pan')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'pan'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                  title="Pan Map Camera (or hold Spacebar + Drag)"
+                >
+                  <Hand className="h-3.5 w-3.5" />
+                  <span>Pan Map</span>
+                </button>
 
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
 
@@ -891,28 +1042,43 @@ export function MapCanvas({
 
           {/* Right: Zoom, Perspective Mode Switcher & Exports */}
           <div className="flex flex-wrap items-center gap-1.5">
-            {/* Touch/Mobile Friendly Zoom Controls */}
+            {/* 60fps Smooth Zoom & Camera Controls */}
             <div className="inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5 text-xs">
               <button
                 type="button"
-                onClick={() => setTileSizePx((s) => Math.max(28, s - 6))}
+                onClick={handleZoomOut}
                 className="px-2 py-0.5 hover:bg-accent rounded font-bold"
-                title="Zoom Out Map"
+                title="Zoom Out Map (or Mouse Wheel)"
                 aria-label="Zoom Out Map"
               >
                 −
               </button>
-              <span className="px-1.5 text-[10px] font-mono text-muted-foreground">
-                {Math.round((tileSizePx / 42) * 100)}%
-              </span>
               <button
                 type="button"
-                onClick={() => setTileSizePx((s) => Math.min(60, s + 6))}
+                onClick={handleResetCamera}
+                className="px-1.5 text-[10px] font-mono hover:text-primary transition-colors cursor-pointer"
+                title="Reset Camera to 100%"
+                aria-label="Reset Camera (100%)"
+              >
+                {Math.round(camera.zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomIn}
                 className="px-2 py-0.5 hover:bg-accent rounded font-bold"
-                title="Zoom In Map"
+                title="Zoom In Map (or Mouse Wheel)"
                 aria-label="Zoom In Map"
               >
                 +
+              </button>
+              <button
+                type="button"
+                onClick={handleFitCamera}
+                className="px-1.5 py-0.5 hover:bg-accent rounded text-[10px] font-medium border-l border-border/50 text-muted-foreground hover:text-foreground"
+                title="Fit Map to Viewport"
+                aria-label="Fit Map to Viewport"
+              >
+                <Maximize2 className="h-3 w-3" />
               </button>
             </div>
 
@@ -1291,20 +1457,43 @@ export function MapCanvas({
             </div>
           </div>
 
-          {/* 2.5D Perspective Stage Wrapper */}
-          <div className="atlas-perspective-stage py-2 flex justify-start sm:justify-center overflow-x-auto">
+          {/* 60fps Smooth Camera Viewport Container */}
+          <div
+            ref={viewportContainerRef}
+            className="relative overflow-hidden rounded-xl border border-border/80 bg-stone-900/5 dark:bg-black/30 select-none min-h-[460px] flex items-center justify-center p-4"
+            onMouseDown={handleViewportMouseDown}
+            onMouseMove={handleViewportMouseMove}
+            onMouseUp={handleViewportMouseUp}
+            onMouseLeave={handleViewportMouseUp}
+            style={{
+              cursor: isPanning
+                ? 'grabbing'
+                : isSpacePressed || activeTool === 'pan'
+                ? 'grab'
+                : 'default',
+            }}
+          >
+            {/* Smooth 60fps Transformed Camera Plane */}
             <div
-              className={`inline-grid border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden ${
-                renderStyle === 'tilt-25d'
-                  ? 'atlas-perspective-plane'
-                  : 'atlas-flat-plane'
-              }`}
+              className="atlas-camera-plane will-change-transform flex items-center justify-center py-4"
               style={{
-                gridTemplateColumns: `repeat(${map.width}, ${tileSizePx}px)`,
+                transform: `translate3d(${camera.x}px, ${camera.y}px, 0px) scale(${camera.zoom})`,
+                transformOrigin: 'center center',
+                transition: isPanning ? 'none' : 'transform 100ms ease-out',
               }}
-              role="grid"
-              aria-label="World Map Grid"
             >
+              <div
+                className={`inline-grid border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden shadow-2xl ${
+                  renderStyle === 'tilt-25d'
+                    ? 'atlas-perspective-plane'
+                    : 'atlas-flat-plane'
+                }`}
+                style={{
+                  gridTemplateColumns: `repeat(${map.width}, ${tileSizePx}px)`,
+                }}
+                role="grid"
+                aria-label="World Map Grid"
+              >
               {Array.from({ length: map.height }).map((_, row) =>
                 Array.from({ length: map.width }).map((__, col) => {
                   const id = getTileId(col, row)
@@ -1332,7 +1521,10 @@ export function MapCanvas({
                       key={id}
                       type="button"
                       data-testid={`map-tile-${col}-${row}`}
-                      onMouseDown={() => {
+                      onMouseDown={(e) => {
+                        if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
+                          return
+                        }
                         if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase')) {
                           setIsDragging(true)
                           dragStartMapRef.current = map
@@ -1340,7 +1532,12 @@ export function MapCanvas({
                         }
                         applyToolToTile(col, row)
                       }}
-                      onMouseEnter={() => handleTileMouseEnter(col, row)}
+                      onMouseEnter={() => {
+                        if (isSpacePressed || activeTool === 'pan' || isPanning) {
+                          return
+                        }
+                        handleTileMouseEnter(col, row)
+                      }}
                       style={{
                         ...getTileBackgroundStyle(tile),
                         width: `${tileSizePx}px`,
@@ -1434,9 +1631,127 @@ export function MapCanvas({
               )}
             </div>
           </div>
-        </div>
 
-        {/* Right: Tile Slot & Lineage Inspector (4 cols) */}
+          {/* Floating Cartographic Scale & Compass Rose */}
+          <div className="absolute bottom-3 left-3 z-30 flex items-center gap-2 pointer-events-none select-none">
+            <div className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-md border border-border/70 shadow-lg flex items-center justify-center text-[10px] font-serif font-bold text-primary">
+              <div className="relative w-7 h-7 flex items-center justify-center">
+                <span className="absolute top-0 text-[8px] font-bold">N</span>
+                <span className="absolute bottom-0 text-[8px]">S</span>
+                <span className="absolute left-0 text-[8px]">W</span>
+                <span className="absolute right-0 text-[8px]">E</span>
+                <Compass className="h-3.5 w-3.5 text-primary/70" />
+              </div>
+            </div>
+
+            <div className="px-2 py-1 rounded-md bg-card/90 backdrop-blur-md border border-border/70 shadow-lg text-[10px] font-mono text-muted-foreground flex items-center gap-1.5">
+              <div className="w-8 border-b-2 border-l-2 border-r-2 border-primary/80 h-1.5" />
+              <span>~{Math.round(50 / camera.zoom)} Leagues</span>
+            </div>
+          </div>
+
+          {/* Floating Navigation Hint */}
+          <div className="absolute top-3 right-3 z-30 flex items-center gap-1 pointer-events-none select-none">
+            <span className="text-[10px] px-2 py-1 rounded-md bg-card/85 backdrop-blur-md border border-border/60 text-muted-foreground hidden sm:inline-flex items-center gap-1">
+              <Hand className="h-2.5 w-2.5" />
+              <span>Space + Drag to Pan</span>
+            </span>
+          </div>
+
+          {/* Interactive Floating Minimap Radar */}
+          {showMinimap ? (
+            <div
+              className="absolute bottom-3 right-3 z-30 p-2 rounded-xl bg-card/90 backdrop-blur-md border border-border/80 shadow-2xl space-y-1.5 select-none"
+              style={{ maxWidth: '190px' }}
+            >
+              <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground px-0.5">
+                <div className="flex items-center gap-1">
+                  <Compass className="h-3 w-3 text-primary" />
+                  <span>Minimap Radar</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMinimap(false)}
+                  className="text-[10px] hover:text-foreground p-0.5 cursor-pointer"
+                  title="Hide Minimap"
+                  aria-label="Hide Minimap"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Minimap Grid */}
+              <div
+                className="relative rounded border border-border/60 overflow-hidden cursor-crosshair bg-slate-950"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${map.width}, 6px)`,
+                  width: `${map.width * 6}px`,
+                  height: `${map.height * 6}px`,
+                }}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const clickX = e.clientX - rect.left
+                  const clickY = e.clientY - rect.top
+                  const col = Math.floor(clickX / 6)
+                  const row = Math.floor(clickY / 6)
+                  const totalW = map.width * tileSizePx
+                  const totalH = map.height * tileSizePx
+                  const targetX = (col + 0.5) * tileSizePx - totalW / 2
+                  const targetY = (row + 0.5) * tileSizePx - totalH / 2
+                  setCamera((prev) => ({
+                    ...prev,
+                    x: -targetX * prev.zoom,
+                    y: -targetY * prev.zoom,
+                  }))
+                }}
+                title="Click on Minimap to center camera"
+              >
+                {Array.from({ length: map.height }).map((_, r) =>
+                  Array.from({ length: map.width }).map((__, c) => {
+                    const t = map.tiles[`${c},${r}`]
+                    const color = TERRAIN_PALETTE[t?.terrain || 'ocean']?.color || '#1e3a8a'
+                    return (
+                      <div
+                        key={`${c},${r}`}
+                        style={{
+                          backgroundColor: color,
+                          width: '6px',
+                          height: '6px',
+                        }}
+                      />
+                    )
+                  })
+                )}
+
+                {/* Viewport Box Indicator on Minimap */}
+                <div
+                  className="absolute border-2 border-amber-400 bg-amber-400/20 pointer-events-none rounded-sm transition-all duration-75"
+                  style={{
+                    width: `${Math.max(12, Math.min(map.width * 6, (map.width * 6) / camera.zoom * 0.55))}px`,
+                    height: `${Math.max(12, Math.min(map.height * 6, (map.height * 6) / camera.zoom * 0.55))}px`,
+                    left: `${Math.max(0, Math.min(map.width * 6 - 12, (map.width * 6) / 2 - (camera.x / (tileSizePx * map.width)) * (map.width * 6) - 12))}px`,
+                    top: `${Math.max(0, Math.min(map.height * 6 - 12, (map.height * 6) / 2 - (camera.y / (tileSizePx * map.height)) * (map.height * 6) - 12))}px`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowMinimap(true)}
+              className="absolute bottom-3 right-3 z-30 px-2 py-1 rounded-lg bg-card/90 backdrop-blur-md border border-border/80 shadow-md text-[10px] font-medium flex items-center gap-1 hover:bg-muted"
+              title="Show Minimap Radar"
+              aria-label="Show Minimap"
+            >
+              <Compass className="h-3 w-3 text-primary" />
+              <span>Show Minimap</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Right: Tile Slot & Lineage Inspector (4 cols) */}
         <div className="xl:col-span-4 card p-4 sm:p-5 space-y-4 h-fit">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>

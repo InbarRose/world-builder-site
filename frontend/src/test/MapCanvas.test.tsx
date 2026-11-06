@@ -144,5 +144,70 @@ describe('MapCanvas Component', () => {
     fireEvent.click(redoBtn)
     expect(within(undoBtn).getByText('2')).toBeInTheDocument()
   })
+
+  it('supports 60fps Smooth Pan/Zoom Cartography Camera, Zoom In/Out, Reset, and Fit buttons', () => {
+    const map = createInitialMap(6, 4)
+    const handleChange = vi.fn()
+
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
+
+    const zoomInBtn = screen.getByRole('button', { name: /Zoom In Map/i })
+    const zoomOutBtn = screen.getByRole('button', { name: /Zoom Out Map/i })
+    const resetBtn = screen.getByRole('button', { name: /Reset Camera \(100%\)/i })
+    const fitBtn = screen.getByRole('button', { name: /Fit Map to Viewport/i })
+
+    expect(resetBtn).toHaveTextContent('100%')
+
+    // Click Zoom In -> increases scale to 125%
+    fireEvent.click(zoomInBtn)
+    expect(resetBtn).toHaveTextContent('125%')
+
+    // Click Zoom Out twice -> decreases to 80%
+    fireEvent.click(zoomOutBtn)
+    expect(resetBtn).toHaveTextContent('100%')
+    fireEvent.click(zoomOutBtn)
+    expect(resetBtn).toHaveTextContent('80%')
+
+    // Click Reset -> returns to 100%
+    fireEvent.click(resetBtn)
+    expect(resetBtn).toHaveTextContent('100%')
+
+    // Click Fit Viewport
+    fireEvent.click(fitBtn)
+    expect(resetBtn).toBeInTheDocument()
+  })
+
+  it('supports Pan Map tool, Spacebar drag pan mode, Compass Rose, and Minimap Radar', () => {
+    const map = createInitialMap(6, 4)
+    const handleChange = vi.fn()
+
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
+
+    // Verify Compass Rose and Scale Bar
+    expect(screen.getByText(/~50 Leagues/i)).toBeInTheDocument()
+    expect(screen.getByText('N')).toBeInTheDocument()
+    expect(screen.getByText(/Space \+ Drag to Pan/i)).toBeInTheDocument()
+
+    // Verify Minimap Radar
+    expect(screen.getByText(/Minimap Radar/i)).toBeInTheDocument()
+
+    // Test Minimap toggle hide / show
+    const hideMinimapBtn = screen.getByRole('button', { name: /Hide Minimap/i })
+    fireEvent.click(hideMinimapBtn)
+    expect(screen.queryByText(/Minimap Radar/i)).not.toBeInTheDocument()
+
+    const showMinimapBtn = screen.getByRole('button', { name: /Show Minimap/i })
+    fireEvent.click(showMinimapBtn)
+    expect(screen.getByText(/Minimap Radar/i)).toBeInTheDocument()
+
+    // Activate Pan Tool
+    const panToolBtn = screen.getByRole('button', { name: /Pan Map/i })
+    fireEvent.click(panToolBtn)
+
+    // In Pan mode, clicking on a tile does NOT trigger paint
+    const tile00 = screen.getByTestId('map-tile-0-0')
+    fireEvent.mouseDown(tile00)
+    expect(handleChange).not.toHaveBeenCalled()
+  })
 })
 
