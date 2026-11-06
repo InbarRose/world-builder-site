@@ -51,8 +51,13 @@ status: active
   │      - Multi-octave elevation relief shading, organic biome border blending
   │      - Coastline shallows, NW sunlit crest highlights, water shimmer waves
   │
-  └──► [Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes] (Next — Target: 96.0 / 100)
-         - Physical board mat skeuomorphism, dynamic audio soundscape generator
+  ├──► [Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes] (Done — Score: 96.0 / 100)
+  │      - Physical board mat skeuomorphism, dynamic audio soundscape generator
+  │      - Fog of War wilderness shroud, interconnected Lore Flyout Drawer
+  │
+  └──► [Phase 15: Polished AAA Orchestration & PWA Offline Mastery] (Next — Target: 99.0 / 100)
+         - Native PWA service worker caching, instant offline installation
+         - Micro-interactions, haptic feedback hooks, and polished orchestration
 ```
 
 ## Milestone Deliverables
@@ -101,5 +106,6 @@ status: active
 - [x] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100)
 - [x] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100)
 - [x] Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100)
-- [ ] Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100)
+- [x] Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Score: 96.0 / 100)
+- [ ] Phase 15: Polished AAA Orchestration & PWA Offline Mastery (Target: 99.0 / 100)
 

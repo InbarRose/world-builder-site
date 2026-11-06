@@ -699,6 +699,11 @@ export function exportMapToSvgString(
           .replace(/>/g, '&gt;')
         rects += `<text x="${x + tileSize / 2}" y="${y + tileSize - 4}" font-size="8.5" font-family="Georgia, serif" font-weight="bold" fill="#ffffff" stroke="#1c1917" stroke-width="0.45" text-anchor="middle">${escapedLabel}</text>`
       }
+
+      if (tile.isUnexplored) {
+        rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="#1c1917" opacity="0.9" />`
+        rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 5}" font-size="14" fill="#a8a29e" text-anchor="middle">🌫️</text>`
+      }
     }
   }
 

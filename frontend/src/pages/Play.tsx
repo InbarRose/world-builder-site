@@ -23,6 +23,7 @@ import {
   Sparkles,
   FastForward,
   Compass,
+  Check,
   QrCode,
 } from 'lucide-react'
 import {
@@ -76,7 +77,7 @@ import {
   StageActionPreset,
   getActionPresetsForDraw,
 } from '../engine/presets'
-import { addSlotToTile, getTileId } from '../engine/mapEngine'
+import { addSlotToTile, createDefaultTile, getTileId } from '../engine/mapEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
@@ -88,6 +89,7 @@ import { AgesReferenceModal } from '../components/AgesReferenceModal'
 import { PlayerRosterModal } from '../components/PlayerRosterModal'
 import { AutoPlayConsoleModal } from '../components/AutoPlayConsoleModal'
 import { GameSetupWizardModal } from '../components/GameSetupWizardModal'
+import { LoreFlyoutDrawer } from '../components/LoreFlyoutDrawer'
 import {
   decodeWorldFromCompressedHash,
   parseSeedShareUrl,
@@ -98,6 +100,11 @@ import {
   playTurnPassSound,
   playStageAdvanceSound,
   playUndoSound,
+  playTokenPlaceSound,
+  startAmbientSoundscape,
+  stopAmbientSoundscape,
+  getAmbientMood,
+  AmbientSoundscapeMood,
 } from '../engine/soundEngine'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
@@ -124,6 +131,8 @@ export function Play() {
   // Shared Wiki Selection State (Map Tile <-> Codex Entity <-> Timeline Event)
   const [selectedTileId, setSelectedTileId] = useState<string>('10,6')
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null)
+  const [flyoutEntityId, setFlyoutEntityId] = useState<string | null>(null)
+  const [ambientMood, setAmbientMood] = useState<AmbientSoundscapeMood>(() => getAmbientMood())
 
   // 3.1 Companion Mode Optional Toggleable Panels (All Collapsible & Independent)
   const [companionShowEventLog, setCompanionShowEventLog] = useState(false)
@@ -291,12 +300,23 @@ export function Play() {
 
   const handleNavigateToEntity = (entityId: string) => {
     setSelectedEntityId(entityId)
+    setFlyoutEntityId(entityId)
     if (gameMode === 'companion') {
       setCompanionShowCodex(true)
     } else if (activeTab === 'split') {
       setSplitRightPanel('entities')
     } else {
       setActiveTab('entities')
+    }
+  }
+
+  const handleToggleAmbientMood = (newMood: AmbientSoundscapeMood) => {
+    if (newMood === ambientMood) {
+      stopAmbientSoundscape()
+      setAmbientMood('none')
+    } else {
+      startAmbientSoundscape(newMood)
+      setAmbientMood(newMood)
     }
   }
 
@@ -378,6 +398,65 @@ export function Play() {
         drawHistory: nextHistory,
       }
     })
+  }
+
+  // Target Coordinates Quick Actions: direct 1-click slot injection on selectedTileId
+  const handleQuickInjectSlot = (actionType: 'settlement' | 'mountain' | 'forest' | 'anomaly') => {
+    const [colStr, rowStr] = selectedTileId.split(',')
+    const col = parseInt(colStr, 10) || 0
+    const row = parseInt(rowStr, 10) || 0
+    const tile = world.map.tiles[selectedTileId] || createDefaultTile(col, row)
+
+    let category: 'settlement' | 'elevation' | 'vegetation' | 'structure' = 'settlement'
+    let icon = '🏡'
+    let name = 'New Settlement'
+    let priority = 90
+
+    if (actionType === 'mountain') {
+      category = 'elevation'
+      icon = '🏔️'
+      name = 'Mountain Peak'
+      priority = 60
+    } else if (actionType === 'forest') {
+      category = 'vegetation'
+      icon = '🌲'
+      name = 'Ancient Forest'
+      priority = 50
+    } else if (actionType === 'anomaly') {
+      category = 'structure'
+      icon = '✨'
+      name = 'Arcane Anomaly'
+      priority = 95
+    }
+
+    const updatedTile = addSlotToTile(tile, {
+      category,
+      type: actionType,
+      name,
+      icon,
+      priority,
+    })
+
+    const newMap: MapState = {
+      ...world.map,
+      tiles: {
+        ...world.map.tiles,
+        [selectedTileId]: updatedTile,
+      },
+    }
+
+    playTokenPlaceSound()
+    handleWorkspaceMapChange(newMap)
+  }
+
+  // Quick link/unlink entity to current active turn
+  const handleToggleLinkEntityToTurn = (entityId: string) => {
+    if (turnModifiedEntities.includes(entityId)) {
+      setTurnModifiedEntities((prev) => prev.filter((id) => id !== entityId))
+    } else {
+      setTurnModifiedEntities((prev) => [...prev, entityId])
+      playTokenPlaceSound()
+    }
   }
 
   // Draw Card action
@@ -956,6 +1035,53 @@ export function Play() {
               <QrCode className="h-3.5 w-3.5" />
               <span>Share Table</span>
             </button>
+
+            {/* Ambient Atmosphere Soundscape Selector */}
+            <div
+              className="inline-flex rounded-lg border border-border p-0.5 bg-muted/40 text-xs"
+              role="group"
+              aria-label="Ambient Soundscape Atmosphere"
+            >
+              <button
+                type="button"
+                onClick={() => handleToggleAmbientMood('campfire')}
+                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                  ambientMood === 'campfire'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Campfire Hearth Atmosphere"
+              >
+                <span>🔥</span>
+                <span className="hidden sm:inline">Hearth</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleAmbientMood('ocean')}
+                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                  ambientMood === 'ocean'
+                    ? 'bg-sky-600 text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Coastal Waves Atmosphere"
+              >
+                <span>🌊</span>
+                <span className="hidden sm:inline">Ocean</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleAmbientMood('ether')}
+                className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                  ambientMood === 'ether'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Mystic Ether Atmosphere"
+              >
+                <span>✨</span>
+                <span className="hidden sm:inline">Ether</span>
+              </button>
+            </div>
 
             <button
               type="button"
@@ -1876,62 +2002,150 @@ export function Play() {
                         )}
 
                         {/* Live Turn Activity Basket (Shows Map Tiles & Codex Entries touched this turn) */}
-                        <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-bold text-primary flex items-center gap-1">
-                              <Sparkles className="h-3.5 w-3.5" />
-                              <span>Turn #{drawHistory.length} Activity Recorded:</span>
-                            </span>
-                            {selectedPreset && (
-                              <span className="px-2 py-0.5 rounded bg-primary/15 text-primary font-semibold">
-                                {selectedPreset.icon} {selectedPreset.name} @ ({selectedTileId})
+                        <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 space-y-2.5 text-xs">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-bold text-primary flex items-center gap-1">
+                                <Sparkles className="h-3.5 w-3.5" />
+                                <span>Turn #{drawHistory.length} Activity Recorded:</span>
                               </span>
-                            )}
-                            {turnModifiedTiles.map((tid) => (
-                              <span
-                                key={tid}
-                                className="px-2 py-0.5 rounded bg-background border border-border font-mono"
-                              >
-                                🗺️ ({tid})
-                              </span>
-                            ))}
-                            {turnModifiedEntities.map((eid) => {
-                              const ent = world.entities.find((e) => e.id === eid)
-                              return ent ? (
-                                <span
-                                  key={eid}
-                                  className="px-2 py-0.5 rounded bg-background border border-border font-semibold"
-                                >
-                                  {ent.icon} {ent.name}
-                                </span>
-                              ) : null
-                            })}
-                            {!selectedPreset &&
-                              turnModifiedTiles.length === 0 &&
-                              turnModifiedEntities.length === 0 && (
-                                <span className="text-muted-foreground italic">
-                                  Pick a preset above, or open Map / Codex to make changes for this turn.
+                              {selectedPreset && (
+                                <span className="px-2 py-0.5 rounded bg-primary/15 text-primary font-semibold">
+                                  {selectedPreset.icon} {selectedPreset.name} @ ({selectedTileId})
                                 </span>
                               )}
-                          </div>
-                          {activeTab !== 'split' && (
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveTab('map')}
-                                className="btn-outline px-2.5 py-1 text-[11px]"
-                              >
-                                🗺️ Edit Map
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveTab('entities')}
-                                className="btn-outline px-2.5 py-1 text-[11px]"
-                              >
-                                📚 Add Codex
-                              </button>
+                              {turnModifiedTiles.map((tid) => (
+                                <button
+                                  key={tid}
+                                  type="button"
+                                  onClick={() => handleNavigateToTile(tid)}
+                                  className="px-2 py-0.5 rounded bg-background border border-border font-mono hover:border-primary transition-all cursor-pointer"
+                                  title="Jump to tile"
+                                >
+                                  🗺️ ({tid})
+                                </button>
+                              ))}
+                              {turnModifiedEntities.map((eid) => {
+                                const ent = world.entities.find((e) => e.id === eid)
+                                return ent ? (
+                                  <button
+                                    key={eid}
+                                    type="button"
+                                    onClick={() => setFlyoutEntityId(eid)}
+                                    className="px-2 py-0.5 rounded bg-background border border-border font-semibold hover:border-primary transition-all cursor-pointer flex items-center gap-1"
+                                    title="Open interconnected dossier drawer"
+                                  >
+                                    <span>{ent.icon}</span>
+                                    <span>{ent.name}</span>
+                                  </button>
+                                ) : null
+                              })}
+                              {!selectedPreset &&
+                                turnModifiedTiles.length === 0 &&
+                                turnModifiedEntities.length === 0 && (
+                                  <span className="text-muted-foreground italic">
+                                    Pick a preset above, use quick actions, or open Map / Codex.
+                                  </span>
+                                )}
                             </div>
-                          )}
+                            {activeTab !== 'split' && (
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('map')}
+                                  className="btn-outline px-2.5 py-1 text-[11px]"
+                                >
+                                  🗺️ Edit Map
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('entities')}
+                                  className="btn-outline px-2.5 py-1 text-[11px]"
+                                >
+                                  📚 Add Codex
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* 1-Click Tabletop Quick Actions on selected coordinate */}
+                          <div className="pt-2 border-t border-border/40 flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground font-semibold flex items-center gap-1">
+                                <Compass className="h-3.5 w-3.5 text-primary" />
+                                <span>Quick Place on ({selectedTileId}):</span>
+                              </span>
+                              <div className="flex flex-wrap items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickInjectSlot('settlement')}
+                                  className="px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-[11px] font-medium transition-all shadow-2xs hover:scale-105 active:scale-95 flex items-center gap-1"
+                                  title="Add a Settlement token to this coordinate"
+                                >
+                                  <span>🏡</span>
+                                  <span>Settle</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickInjectSlot('mountain')}
+                                  className="px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-[11px] font-medium transition-all shadow-2xs hover:scale-105 active:scale-95 flex items-center gap-1"
+                                  title="Erect a Mountain Peak slot on this coordinate"
+                                >
+                                  <span>🏔️</span>
+                                  <span>Mountain</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickInjectSlot('forest')}
+                                  className="px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-[11px] font-medium transition-all shadow-2xs hover:scale-105 active:scale-95 flex items-center gap-1"
+                                  title="Sprout Ancient Forest woods on this coordinate"
+                                >
+                                  <span>🌲</span>
+                                  <span>Forest</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickInjectSlot('anomaly')}
+                                  className="px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-[11px] font-medium transition-all shadow-2xs hover:scale-105 active:scale-95 flex items-center gap-1"
+                                  title="Place an Arcane Anomaly landmark on this coordinate"
+                                >
+                                  <span>✨</span>
+                                  <span>Anomaly</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Entity Link Chips */}
+                            {world.entities.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1">
+                                <span className="text-[11px] text-muted-foreground mr-1">Link Faction/Actor:</span>
+                                {world.entities.slice(0, 5).map((ent) => {
+                                  const isLinked = turnModifiedEntities.includes(ent.id)
+                                  return (
+                                    <button
+                                      key={ent.id}
+                                      type="button"
+                                      onClick={() => handleToggleLinkEntityToTurn(ent.id)}
+                                      onContextMenu={(e) => {
+                                        e.preventDefault()
+                                        setFlyoutEntityId(ent.id)
+                                      }}
+                                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium border transition-all flex items-center gap-1 ${
+                                        isLinked
+                                          ? 'bg-primary/20 border-primary text-primary font-bold shadow-2xs'
+                                          : 'bg-background/80 border-border text-muted-foreground hover:text-foreground hover:border-primary/50'
+                                      }`}
+                                      title="Click to link to turn record; right-click for dossier"
+                                    >
+                                      <span>{ent.icon}</span>
+                                      <span>{ent.name}</span>
+                                      {isLinked && <Check className="h-2.5 w-2.5 ml-0.5" />}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Turn Note & Chronicle Action */}
@@ -2433,6 +2647,15 @@ export function Play() {
           </div>
         </div>
       )}
+
+      {/* Interconnected Lore & Dossier Flyout Drawer */}
+      <LoreFlyoutDrawer
+        entityId={flyoutEntityId}
+        world={world}
+        onClose={() => setFlyoutEntityId(null)}
+        onNavigateToTile={handleNavigateToTile}
+        onNavigateToEntity={handleNavigateToEntity}
+      />
     </div>
   )
 }

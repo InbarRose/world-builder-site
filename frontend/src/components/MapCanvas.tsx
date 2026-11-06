@@ -18,6 +18,7 @@ import {
   Trash2,
   Sliders,
   Hand,
+  CloudFog,
 } from 'lucide-react'
 import {
   DrawRecord,
@@ -57,7 +58,7 @@ import {
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
-export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan'
+export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
 
 interface MapCanvasProps {
@@ -703,6 +704,23 @@ export function MapCanvas({
       return
     }
 
+    if (activeTool === 'fog') {
+      hasStrokeMutatedRef.current = true
+      const existing = map.tiles[id] || createDefaultTile(col, row)
+      const nextUnexplored = !existing.isUnexplored
+      onChange({
+        ...map,
+        tiles: {
+          ...map.tiles,
+          [id]: {
+            ...existing,
+            isUnexplored: nextUnexplored,
+          },
+        },
+      })
+      return
+    }
+
     if (activeTool === 'fill') {
       pushToUndo(map)
       onChange(
@@ -740,7 +758,7 @@ export function MapCanvas({
   }
 
   const handleTileMouseEnter = (col: number, row: number) => {
-    if (isDragging && (activeTool === 'brush' || activeTool === 'erase')) {
+    if (isDragging && (activeTool === 'brush' || activeTool === 'erase' || activeTool === 'fog')) {
       applyToolToTile(col, row)
     }
   }
@@ -1028,6 +1046,20 @@ export function MapCanvas({
                 >
                   <Hand className="h-3.5 w-3.5" />
                   <span>Pan Map</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('fog')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'fog'
+                      ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                  title="Fog of War: Shroud or Reveal Unexplored Wilderness"
+                  aria-label="Fog of War Tool"
+                >
+                  <CloudFog className="h-3.5 w-3.5" />
+                  <span>Fog / Reveal</span>
                 </button>
 
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
@@ -1726,6 +1758,16 @@ export function MapCanvas({
                         <span className="relative z-10 text-[8px] font-serif font-bold text-amber-50 bg-stone-950/75 px-1 rounded truncate max-w-[94%] mt-0.5 shadow-sm">
                           {tile.label}
                         </span>
+                      )}
+
+                      {/* Fog of War / Unexplored Wilderness Shroud */}
+                      {tile.isUnexplored && (
+                        <div
+                          className="absolute inset-0 bg-stone-900/90 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center pointer-events-none select-none"
+                          aria-label="Unexplored Fog of War"
+                        >
+                          <CloudFog className="h-4 w-4 text-stone-400 opacity-60 animate-pulse" />
+                        </div>
                       )}
                     </button>
                   )

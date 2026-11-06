@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 13 Completed; Phase 14 Planned
+- **Current Phase**: Phase 14 Completed; Phase 15 Planned
 - **Session Date**: 2026-11-06
-- **Status**: Phase 13 Verified (56/56 tests passing across 9 suites), AAA Benchmark Score Snapshot (91.0 / 100) Recorded
+- **Status**: Phase 14 Verified (61/61 tests passing across 10 suites), AAA Benchmark Score Snapshot (96.0 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -65,6 +65,14 @@ status: active
   - Integrated organic shading into standalone SVG map exporter (`exportMapToSvgString`).
   - Full automated test coverage in `cartographyShadingEngine.test.ts` and `MapCanvas.test.tsx` (56/56 passing tests across 9 suites).
   - Recorded ADR-010 score snapshot: **91.0 / 100** (+5.0 pts: +3.0 on D2, +2.0 on D1).
+- **Phase 14 (Full Physical Play Mat Mode & Ambient Soundscapes)**:
+  - Built procedural Web Audio ambient soundscapes: Hearth campfire crackle, Ocean wave surf LFO, and Ether harmonic choral drone with master volume control and sound toggle integration.
+  - Added tactile wooden/stone token placement audio effect (`playTokenPlaceSound`) for instant physical board mat feel.
+  - Added Fog of War / Unexplored Wilderness shroud on map tiles with dedicated toolbar tool (`activeTool === 'fog'`), continuous drag shroud/reveal, and standalone SVG export representation.
+  - Created interconnected `LoreFlyoutDrawer.tsx`: slide-out dossier panel showing lore, traits, historical feats, diplomatic pacts/relations with 1-click cross-entity navigation, claimed province coordinate pills with 1-click map camera centering, and turn chronicle history.
+  - Built Live Turn Activity Basket: 1-click Tabletop Quick Actions on active coordinates (`🏡 Settle`, `🏔️ Mountain`, `🌲 Forest`, `✨ Anomaly`) and interactive codex entity linking chips directly into turn records.
+  - Full automated test coverage in `LoreFlyoutDrawer.test.tsx`, `soundEngine.test.ts`, and `MapCanvas.test.tsx` (61/61 passing tests across 10 suites).
+  - Recorded ADR-010 score snapshot: **96.0 / 100** (+5.0 pts: +3.0 on D1, +1.0 on D2, +1.0 on D3).
 
 ---
 
@@ -76,8 +84,9 @@ status: active
 - [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (merged via PR #8).
 - [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (merged via PR #9).
 - [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (merged via PR #10).
-- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
-- [ ] Push Phase 13 branch, open PR #11, verify CI, and merge to `main`.
-- [ ] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100).
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (merged via PR #11).
+- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Score: 96.0 / 100).
+- [ ] Push Phase 14 branch, open PR #12, verify CI, and merge to `main`.
+- [ ] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (Target: 99.0 / 100).
 
 

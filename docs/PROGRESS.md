@@ -104,7 +104,14 @@ status: active
   - [x] Toolbar toggle for `Organic Shading 🌄` vs `Crisp Grid 📐` modes
   - [x] Standalone SVG export integration in `exportMapToSvgString`
   - [x] Full test coverage in `cartographyShadingEngine.test.ts` and `MapCanvas.test.tsx` (56/56 passing tests across 9 suites)
-- [ ] **Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes** *(Target: 96.0 / 100)*
+- [x] **Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes** *(Score: 96.0 / 100)*
+  - [x] Procedural Web Audio ambient soundscapes: Hearth campfire crackle, Ocean wave surf LFO, and Ether harmonic choral drone with master volume control and sound toggle integration
+  - [x] Tactile wooden/stone token placement audio effect (`playTokenPlaceSound`)
+  - [x] Fog of War / Unexplored Wilderness shroud on map tiles with dedicated toolbar tool (`activeTool === 'fog'`), continuous drag shroud/reveal, and standalone SVG export representation
+  - [x] Interconnected `LoreFlyoutDrawer`: slide-out dossier panel showing lore, traits, historical feats, diplomatic pacts/relations with 1-click cross-entity navigation, claimed province coordinate pills with 1-click map camera centering, and turn chronicle history
+  - [x] Live Turn Activity Basket: 1-click Tabletop Quick Actions on active coordinates (`🏡 Settle`, `🏔️ Mountain`, `🌲 Forest`, `✨ Anomaly`) and interactive codex entity linking chips directly into turn records
+  - [x] Full test coverage in `LoreFlyoutDrawer.test.tsx`, `soundEngine.test.ts`, and `MapCanvas.test.tsx` (61/61 passing tests across 10 suites)
+- [ ] **Phase 15: Polished AAA Orchestration & PWA Offline Mastery** *(Target: 99.0 / 100)*
 
 ---
 
@@ -119,6 +126,7 @@ status: active
 - [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
 - [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
 - [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
-- [ ] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100).
+- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Score: 96.0 / 100).
+- [ ] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (Target: 99.0 / 100).
 
 

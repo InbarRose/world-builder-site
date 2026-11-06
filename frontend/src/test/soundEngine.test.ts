@@ -8,6 +8,12 @@ import {
   playTurnPassSound,
   playStageAdvanceSound,
   playUndoSound,
+  playTokenPlaceSound,
+  getAmbientMood,
+  startAmbientSoundscape,
+  stopAmbientSoundscape,
+  getAmbientVolume,
+  setAmbientVolume,
 } from '../engine/soundEngine'
 
 describe('SoundEngine Module', () => {
@@ -44,13 +50,35 @@ describe('SoundEngine Module', () => {
     expect(() => playTurnPassSound()).not.toThrow()
     expect(() => playStageAdvanceSound()).not.toThrow()
     expect(() => playUndoSound()).not.toThrow()
+    expect(() => playTokenPlaceSound()).not.toThrow()
 
     // Disabled
     setSoundEnabled(false)
     expect(() => playCardDrawSound()).not.toThrow()
+    expect(() => playTokenPlaceSound()).not.toThrow()
     expect(() => playCardFlipSound()).not.toThrow()
     expect(() => playTurnPassSound()).not.toThrow()
     expect(() => playStageAdvanceSound()).not.toThrow()
     expect(() => playUndoSound()).not.toThrow()
+  })
+
+  it('manages ambient soundscape moods and volume safely', () => {
+    expect(getAmbientMood()).toBe('none')
+    expect(getAmbientVolume()).toBe(0.25)
+
+    setAmbientVolume(0.5)
+    expect(getAmbientVolume()).toBe(0.5)
+
+    expect(() => startAmbientSoundscape('ocean')).not.toThrow()
+    expect(getAmbientMood()).toBe('ocean')
+
+    expect(() => startAmbientSoundscape('campfire')).not.toThrow()
+    expect(getAmbientMood()).toBe('campfire')
+
+    expect(() => startAmbientSoundscape('ether')).not.toThrow()
+    expect(getAmbientMood()).toBe('ether')
+
+    expect(() => stopAmbientSoundscape()).not.toThrow()
+    expect(getAmbientMood()).toBe('none')
   })
 })
