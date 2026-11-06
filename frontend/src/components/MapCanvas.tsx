@@ -50,6 +50,7 @@ import {
   removeSlotFromTile,
 } from '../engine/mapEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
+import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
 export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
@@ -372,6 +373,7 @@ export function MapCanvas({
     const previousMap = undoStack[undoStack.length - 1]
     setUndoStack((prev) => prev.slice(0, -1))
     setRedoStack((prev) => [...prev, map].slice(-25))
+    playUndoSound()
     onChange(previousMap)
   }, [undoStack, map, onChange])
 
@@ -380,6 +382,7 @@ export function MapCanvas({
     const nextMap = redoStack[redoStack.length - 1]
     setRedoStack((prev) => prev.slice(0, -1))
     setUndoStack((prev) => [...prev, map].slice(-25))
+    playCardFlipSound()
     onChange(nextMap)
   }, [redoStack, map, onChange])
 

@@ -15,10 +15,13 @@ import {
   ExternalLink,
   ChevronDown,
   Globe,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
 import { VisualStyleMode, WorldState } from '../engine/types'
 import { getActiveWorld } from '../engine/storageService'
 import { STAGES } from '../engine/deckEngine'
+import { isSoundEnabled, toggleSound } from '../engine/soundEngine'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -65,6 +68,18 @@ export function Layout({ children }: LayoutProps) {
   const [starCount, setStarCount] = useState<number | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const feedbackRef = useRef<HTMLDivElement>(null)
+  const [soundOn, setSoundOn] = useState<boolean>(() => isSoundEnabled())
+
+  useEffect(() => {
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<{ enabled: boolean }>
+      if (customEvent.detail !== undefined) {
+        setSoundOn(customEvent.detail.enabled)
+      }
+    }
+    window.addEventListener('wb:sound-toggle', handleSync)
+    return () => window.removeEventListener('wb:sound-toggle', handleSync)
+  }, [])
 
   useEffect(() => {
     try {
@@ -234,6 +249,29 @@ export function Layout({ children }: LayoutProps) {
               >
                 <ModeIcon className="h-3.5 w-3.5 text-primary" />
                 <span className="hidden md:inline">{modeBadge.label}</span>
+              </button>
+
+              {/* Tactile Sound SFX Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = toggleSound()
+                  setSoundOn(next)
+                }}
+                className="px-2 sm:px-2.5 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent flex items-center gap-1.5 transition-colors"
+                aria-label={soundOn ? 'Mute sound effects' : 'Unmute sound effects'}
+                title={
+                  soundOn
+                    ? 'Tactile Web Audio SFX: Enabled (Click to Mute)'
+                    : 'Tactile Web Audio SFX: Muted (Click to Unmute)'
+                }
+              >
+                {soundOn ? (
+                  <Volume2 className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <VolumeX className="h-3.5 w-3.5 text-muted-foreground opacity-60" />
+                )}
+                <span className="hidden lg:inline">{soundOn ? 'SFX' : 'Mute'}</span>
               </button>
 
               {/* GitHub Star Pill */}

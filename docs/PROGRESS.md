@@ -56,7 +56,12 @@ status: active
   - [x] Visual Toolbar Undo/Redo controls with disabled states and step counters
   - [x] Keyboard shortcuts (`Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z`) with input protection
   - [x] Automated regression tests in `MapCanvas.test.tsx` (35/35 passing tests)
-- [ ] **Phase 8: Tactile Game Feel, Card Juice & Audio Polish** *(Target: 59.5 / 100)*
+- [x] **Phase 8: Tactile Game Feel, Card Juice & Audio Polish** *(Score: 59.5 / 100)*
+  - [x] Zero-asset, offline Web Audio API synthesizer (`soundEngine.ts`) with custom event bus
+  - [x] Tactile SFX for card draw, card flip snap, turn chronicle pass, stage fanfare, and undo swoosh
+  - [x] Global SFX mute toggle button in L0 sticky header bar (`Layout.tsx`)
+  - [x] 3D card deal easing & perspective flip animations in Companion and Studio modes
+  - [x] Unit test coverage for sound engine (`soundEngine.test.ts`, 38/38 passing tests)
 - [ ] **Phase 9: Standalone "Campaign Sourcebook" Publisher** *(Target: 66.5 / 100)*
 - [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
 - [ ] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Target: 79.5 / 100)*
