@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 12 Completed; Phase 13 Planned
+- **Current Phase**: Phase 13 Completed; Phase 14 Planned
 - **Session Date**: 2026-11-06
-- **Status**: Phase 12 Verified (51/51 tests passing across 8 suites), AAA Benchmark Score Snapshot (86.0 / 100) Recorded
+- **Status**: Phase 13 Verified (56/56 tests passing across 9 suites), AAA Benchmark Score Snapshot (91.0 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -54,7 +54,17 @@ status: active
   - Built interactive Epoch Scrubber and Significance Filter Pills in `TimelinePanel.tsx`.
   - Added historical feats badge display in `EntityRegistry.tsx`.
   - Full automated test coverage in `narrativeEngine.test.ts` and `TimelineAndEntities.test.tsx` (51/51 passing tests across 8 suites).
-  - Recorded ADR-010 score snapshot: **86.0 / 100** (+6.5 pts: +5.0 on D3, +1.0 on D4, +0.5 on D6).
+  - Merged to `main` via PR #10 and deployed to GitHub Pages (Score: 86.0 / 100).
+- **Phase 13 (Organic Cartography Shading & Dynamic Biome Blending)**:
+  - Built spatial neighbor analysis engine (`cartographyShadingEngine.ts`) with 8-neighbor inspection, elevation tier ranking, and directional lighting.
+  - Implemented multi-octave hillshading (315° NW sunlit crest highlights and SE terrain drop-shadows) on mountains, volcanoes, and hills.
+  - Implemented dynamic coastal biome blending: subtle warm beach sand rims on land adjacent to water, and shallow turquoise shelves on water adjacent to land.
+  - Implemented animated water shimmer wave dynamics (`.animate-water-shimmer`) with reduced-motion accessibility support.
+  - Added vintage cartographic vignette overlay framing the map canvas.
+  - Added toolbar toggle for `Organic Shading 🌄` vs `Crisp Grid 📐` modes.
+  - Integrated organic shading into standalone SVG map exporter (`exportMapToSvgString`).
+  - Full automated test coverage in `cartographyShadingEngine.test.ts` and `MapCanvas.test.tsx` (56/56 passing tests across 9 suites).
+  - Recorded ADR-010 score snapshot: **91.0 / 100** (+5.0 pts: +3.0 on D2, +2.0 on D1).
 
 ---
 
@@ -65,8 +75,9 @@ status: active
 - [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (merged via PR #7).
 - [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (merged via PR #8).
 - [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (merged via PR #9).
-- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
-- [ ] Push Phase 12 branch, open PR #10, verify CI, and merge to `main`.
-- [ ] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100).
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (merged via PR #10).
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
+- [ ] Push Phase 13 branch, open PR #11, verify CI, and merge to `main`.
+- [ ] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100).
 
 

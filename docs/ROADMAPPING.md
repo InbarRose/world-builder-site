@@ -47,8 +47,12 @@ status: active
   │      - Deterministic 4-chapter prose saga synthesizer (`RealmSagaModal.tsx`)
   │      - Turn significance classifier, historical deeds & diplomatic harmony engine
   │
-  └──► [Phase 13: Organic Cartography Shading & Dynamic Biome Blending] (Next — Target: 91.0 / 100)
-         - Multi-octave elevation relief shading, organic biome border blending
+  ├──► [Phase 13: Organic Cartography Shading & Dynamic Biome Blending] (Done — Score: 91.0 / 100)
+  │      - Multi-octave elevation relief shading, organic biome border blending
+  │      - Coastline shallows, NW sunlit crest highlights, water shimmer waves
+  │
+  └──► [Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes] (Next — Target: 96.0 / 100)
+         - Physical board mat skeuomorphism, dynamic audio soundscape generator
 ```
 
 ## Milestone Deliverables
@@ -96,6 +100,6 @@ status: active
 - [x] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100)
 - [x] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100)
 - [x] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100)
-- [ ] Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100)
-- [ ] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Target: 86.0 / 100)
+- [x] Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100)
+- [ ] Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100)
 

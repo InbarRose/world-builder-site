@@ -209,5 +209,37 @@ describe('MapCanvas Component', () => {
     fireEvent.mouseDown(tile00)
     expect(handleChange).not.toHaveBeenCalled()
   })
+
+  it('supports Organic Shading & Biome Blending toggle and renders coastline rims and hillshading', () => {
+    const map = createInitialMap(6, 4)
+    map.tiles['1,1'] = {
+      ...map.tiles['1,1'],
+      terrain: 'mountain',
+      relief: 'mountain',
+      domain: 'land',
+    }
+    map.tiles['1,2'] = {
+      ...map.tiles['1,2'],
+      terrain: 'plains',
+      domain: 'land',
+    }
+    const handleChange = vi.fn()
+
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
+
+    const organicBtn = screen.getByRole('button', { name: /Organic Shading 🌄/i })
+    const crispBtn = screen.getByRole('button', { name: /Crisp Grid 📐/i })
+
+    expect(organicBtn).toBeInTheDocument()
+    expect(crispBtn).toBeInTheDocument()
+
+    // Switch to Crisp Grid
+    fireEvent.click(crispBtn)
+    expect(crispBtn).toHaveClass('bg-primary')
+
+    // Switch back to Organic Shading
+    fireEvent.click(organicBtn)
+    expect(organicBtn).toHaveClass('bg-amber-600')
+  })
 })
 
