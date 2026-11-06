@@ -83,9 +83,9 @@ status: active
 - [x] Phase 4: Integrated World Studio & Polish
 - [x] Phase 5: Vision Refinement & v2.1 Studio Polish
 - [x] Phase 6: v3.0 UI Hierarchy & Wiki Codex Baseline (Score: 46.5 / 100)
-- [ ] Phase 7: Map Canvas Resilience & Undo/Redo Engine (Target: 52.5 / 100)
-- [ ] Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Target: 59.5 / 100)
-- [ ] Phase 9: Standalone "Campaign Sourcebook" Publisher (Target: 66.5 / 100)
-- [ ] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Target: 72.5 / 100)
+- [x] Phase 7: Map Canvas Resilience & Undo/Redo Engine (Score: 52.5 / 100)
+- [x] Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Score: 59.5 / 100)
+- [x] Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100)
+- [x] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100)
 - [ ] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100)
 

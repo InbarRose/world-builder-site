@@ -12,7 +12,7 @@ import {
 const STORAGE_WORLDS_KEY = 'wb_saved_worlds_v1'
 const STORAGE_ACTIVE_ID_KEY = 'wb_active_world_id_v1'
 
-export function createNewWorld(name: string = 'Untitled Realm', seed?: string): WorldState {
+export function createNewWorld(name = 'Untitled Realm', seed?: string): WorldState {
   const now = new Date().toISOString()
   const resolvedSeed =
     seed || `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'realm'}-${Math.floor(100 + Math.random() * 900)}`

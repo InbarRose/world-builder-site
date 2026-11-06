@@ -23,6 +23,7 @@ import {
   Sparkles,
   FastForward,
   Compass,
+  QrCode,
 } from 'lucide-react'
 import {
   Card,
@@ -81,10 +82,16 @@ import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
 import { CreateWorldOptions, WorldManagerModal } from '../components/WorldManagerModal'
 import { ExportSuiteModal } from '../components/ExportSuiteModal'
+import { ShareTableModal } from '../components/ShareTableModal'
+import { IncomingSharedWorldModal } from '../components/IncomingSharedWorldModal'
 import { AgesReferenceModal } from '../components/AgesReferenceModal'
 import { PlayerRosterModal } from '../components/PlayerRosterModal'
 import { AutoPlayConsoleModal } from '../components/AutoPlayConsoleModal'
 import { GameSetupWizardModal } from '../components/GameSetupWizardModal'
+import {
+  decodeWorldFromCompressedHash,
+  parseSeedShareUrl,
+} from '../engine/shareService'
 import {
   playCardDrawSound,
   playCardFlipSound,
@@ -142,6 +149,8 @@ export function Play() {
 
   // Dedicated Modals
   const [showExportModal, setShowExportModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [incomingSharedWorld, setIncomingSharedWorld] = useState<WorldState | null>(null)
   const [showWorldManager, setShowWorldManager] = useState(false)
   const [showPlayersModal, setShowPlayersModal] = useState(false)
   const [showAutoPlayModal, setShowAutoPlayModal] = useState(false)
@@ -191,6 +200,44 @@ export function Play() {
 
   useEffect(() => {
     loadCardColors().then(setCardColors)
+  }, [])
+
+  // Tabletop Frictionless Sharing: Check for incoming shared realm from URL hash (#state=...) or query (?seed=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash
+    const search = window.location.search
+
+    let foundWorld: WorldState | null = null
+    if (hash && hash.includes('state=')) {
+      foundWorld = decodeWorldFromCompressedHash(hash)
+    } else if (search && (search.includes('seed=') || search.includes('shareType=seed'))) {
+      foundWorld = parseSeedShareUrl(search)
+    }
+
+    if (foundWorld) {
+      setIncomingSharedWorld(foundWorld)
+    }
+  }, [])
+
+  const handleAcceptSharedWorld = useCallback(() => {
+    if (!incomingSharedWorld) return
+    const saved = saveWorld(incomingSharedWorld)
+    setActiveWorldId(saved.id)
+    setWorld(saved)
+    setSavedWorlds(listSavedWorlds())
+    setIncomingSharedWorld(null)
+    playStageAdvanceSound()
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [incomingSharedWorld])
+
+  const handleDeclineSharedWorld = useCallback(() => {
+    setIncomingSharedWorld(null)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
   }, [])
 
   const rebuildDeck = useCallback(() => {
@@ -894,10 +941,20 @@ export function Play() {
               type="button"
               onClick={() => setShowExportModal(true)}
               className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
-              title="Export Markdown, YAML, JSON, or Map assets"
+              title="Export Markdown, YAML, JSON, or Sourcebook"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Export</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowShareModal(true)}
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-primary border-primary/40 bg-primary/5 hover:bg-primary/10"
+              title="Share Realm with Table via QR Code or Link"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              <span>Share Table</span>
             </button>
 
             <button
@@ -2194,7 +2251,24 @@ export function Play() {
         isOpen={showExportModal}
         world={world}
         onClose={() => setShowExportModal(false)}
+        onOpenShare={() => setShowShareModal(true)}
       />
+
+      {/* Share with Table QR & Compact URL Modal */}
+      <ShareTableModal
+        isOpen={showShareModal}
+        world={world}
+        onClose={() => setShowShareModal(false)}
+      />
+
+      {/* Incoming Shared Realm Hydration Prompt */}
+      {incomingSharedWorld && (
+        <IncomingSharedWorldModal
+          incomingWorld={incomingSharedWorld}
+          onAccept={handleAcceptSharedWorld}
+          onDecline={handleDeclineSharedWorld}
+        />
+      )}
 
       {/* All 4 Ages Reference Matrix Modal */}
       <AgesReferenceModal
