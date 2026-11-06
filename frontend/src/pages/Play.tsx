@@ -85,6 +85,13 @@ import { AgesReferenceModal } from '../components/AgesReferenceModal'
 import { PlayerRosterModal } from '../components/PlayerRosterModal'
 import { AutoPlayConsoleModal } from '../components/AutoPlayConsoleModal'
 import { GameSetupWizardModal } from '../components/GameSetupWizardModal'
+import {
+  playCardDrawSound,
+  playCardFlipSound,
+  playTurnPassSound,
+  playStageAdvanceSound,
+  playUndoSound,
+} from '../engine/soundEngine'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
 
@@ -334,6 +341,11 @@ export function Play() {
       return
     }
 
+    playCardDrawSound()
+    setTimeout(() => {
+      playCardFlipSound()
+    }, 110)
+
     const newDeck = [...deck]
     const card = newDeck.pop()!
     setDeck(newDeck)
@@ -418,6 +430,7 @@ export function Play() {
   // Save Optional Note / Connections to Current Companion Turn
   const handleSaveCompanionTurnNote = () => {
     if (drawHistory.length === 0) return
+    playTurnPassSound()
     persistWorldUpdate((prev) => {
       const lastIdx = prev.drawHistory.length - 1
       if (lastIdx < 0) return prev
@@ -450,6 +463,7 @@ export function Play() {
   // Confirm and Chronicle Turn in Studio Mode
   const handleConfirmTurnChronicle = () => {
     if (!drawnCard || world.isLocked) return
+    playTurnPassSound()
 
     persistWorldUpdate((prev) => {
       const lastIndex = prev.drawHistory.length - 1
@@ -558,6 +572,7 @@ export function Play() {
   // Undo Last Turn
   const handleUndoLastTurn = () => {
     if (drawHistory.length === 0 || world.isLocked) return
+    playUndoSound()
     const targetMove = drawHistory.length - 1
     if (targetMove === 0) {
       persistWorldUpdate((prev) => ({
@@ -637,6 +652,7 @@ export function Play() {
 
   const handleStageChange = (newStage: StageId) => {
     if (world.isLocked) return
+    playStageAdvanceSound()
     persistWorldUpdate((prev) => ({
       ...prev,
       currentStage: newStage,
@@ -1237,11 +1253,12 @@ export function Play() {
 
           {/* Core Companion Centerpiece: Card Deck & Active Stage Power */}
           <div className="card p-6 flex flex-col md:flex-row items-center justify-between gap-6 border-primary/20 bg-card">
-            {/* Left: Tactile Card Display */}
-            <div className="w-full md:w-5/12 flex flex-col items-center justify-center">
+            {/* Left: Tactile Card Display with 3D Physics */}
+            <div className="w-full md:w-5/12 flex flex-col items-center justify-center perspective-1000">
               {drawnCard ? (
                 <div
-                  className={`w-full max-w-[220px] aspect-[5/7] ${bgColor} rounded-2xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative select-none transition-transform hover:scale-[1.02]`}
+                  key={`${drawnCard.id}_${drawHistory.length}`}
+                  className={`w-full max-w-[220px] aspect-[5/7] ${bgColor} rounded-2xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-6 relative select-none transition-transform hover:scale-[1.03] animate-card-deal animate-card-flip`}
                 >
                   {drawnCard.value !== JOKER && (
                     <>
@@ -1668,15 +1685,16 @@ export function Play() {
                       : 'grid grid-cols-1 lg:grid-cols-12 gap-4'
                   }
                 >
-                  {/* Card Visual */}
+                  {/* Card Visual with 3D Flip Physics */}
                   <div
                     className={`${
                       activeTab === 'split' ? '' : 'lg:col-span-4'
-                    } card p-6 flex flex-col items-center justify-center min-h-[240px]`}
+                    } card p-6 flex flex-col items-center justify-center min-h-[240px] perspective-1000`}
                   >
                     {drawnCard ? (
                       <div
-                        className={`w-full max-w-[180px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-xl flex flex-col items-center justify-center p-5 relative select-none`}
+                        key={`${drawnCard.id}_${drawHistory.length}`}
+                        className={`w-full max-w-[180px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-xl flex flex-col items-center justify-center p-5 relative select-none animate-card-deal animate-card-flip`}
                       >
                         {drawnCard.value !== JOKER && (
                           <>
