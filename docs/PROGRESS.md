@@ -96,7 +96,15 @@ status: active
   - [x] Interactive Epoch Scrubber and Significance Filter Pills in `TimelinePanel.tsx`
   - [x] Historical Feats and Diplomatic links display in `EntityRegistry.tsx`
   - [x] Comprehensive test coverage in `narrativeEngine.test.ts` and `TimelineAndEntities.test.tsx` (51/51 passing tests across 8 suites)
-- [ ] **Phase 13: Organic Cartography Shading & Dynamic Biome Blending** *(Target: 91.0 / 100)*
+- [x] **Phase 13: Organic Cartography Shading & Dynamic Biome Blending** *(Score: 91.0 / 100)*
+  - [x] Directional multi-octave hillshading engine (`cartographyShadingEngine.ts`) with 315° NW sunlit crest highlights and SE drop shadows
+  - [x] Dynamic coastal biome blending: subtle warm beach sand rims and shallow turquoise continental shelves along water/land edges
+  - [x] Animated water shimmer wave dynamics (`.animate-water-shimmer`) with reduced-motion accessibility support
+  - [x] Vintage cartographic vignette filter framing the map canvas
+  - [x] Toolbar toggle for `Organic Shading 🌄` vs `Crisp Grid 📐` modes
+  - [x] Standalone SVG export integration in `exportMapToSvgString`
+  - [x] Full test coverage in `cartographyShadingEngine.test.ts` and `MapCanvas.test.tsx` (56/56 passing tests across 9 suites)
+- [ ] **Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes** *(Target: 96.0 / 100)*
 
 ---
 
@@ -110,6 +118,7 @@ status: active
 - [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100).
 - [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
 - [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
-- [ ] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100).
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
+- [ ] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Target: 96.0 / 100).
 
 

@@ -11,6 +11,10 @@ import {
   TileSlot,
   WorldEntity,
 } from './types'
+import {
+  computeTileNeighborContext,
+  generateOrganicShadingSvgString,
+} from './cartographyShadingEngine'
 
 export const DEFAULT_MAP_WIDTH = 20
 export const DEFAULT_MAP_HEIGHT = 12
@@ -648,6 +652,10 @@ export function exportMapToSvgString(
       } else {
         rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${primaryColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
       }
+
+      // Dynamic Biome Blending & Multi-Octave Hillshading
+      const neighborContext = computeTileNeighborContext(map, col, row)
+      rects += generateOrganicShadingSvgString(neighborContext, x, y, tileSize)
 
       if (
         (tile.coloringMode === 'patterned' || (tile.pattern && tile.pattern !== 'solid')) &&

@@ -50,6 +50,10 @@ import {
   addSlotToTile,
   removeSlotFromTile,
 } from '../engine/mapEngine'
+import {
+  computeTileNeighborContext,
+  TileNeighborContext,
+} from '../engine/cartographyShadingEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
@@ -105,6 +109,8 @@ function TileCartographySvg({
   hasRoad,
   isCoastalLand,
   simpleMode,
+  neighborContext,
+  enableOrganicShading = true,
 }: {
   col: number
   row: number
@@ -115,6 +121,8 @@ function TileCartographySvg({
   hasRoad?: boolean
   isCoastalLand: boolean
   simpleMode: boolean
+  neighborContext?: TileNeighborContext
+  enableOrganicShading?: boolean
 }) {
   const v = getTileVariantSeed(col, row)
   const effectiveRelief =
@@ -139,14 +147,66 @@ function TileCartographySvg({
       ? 'marsh'
       : 'none'
 
+  const showOrganic = !simpleMode && enableOrganicShading
+
   return (
     <svg
       viewBox="0 0 48 48"
       className="absolute inset-0 w-full h-full pointer-events-none"
       aria-hidden="true"
     >
-      {/* Subtle Coastal Double-Hatching when Land borders Water */}
-      {!simpleMode && isCoastalLand && (
+      {/* Dynamic Coastlines & Shallows Blend */}
+      {showOrganic && neighborContext && neighborContext.isLand && (
+        <g opacity="0.6">
+          {neighborContext.waterBorders.north && (
+            <rect x="0" y="0" width="48" height="3.5" fill="#fef08a" />
+          )}
+          {neighborContext.waterBorders.south && (
+            <rect x="0" y="44.5" width="48" height="3.5" fill="#fef08a" />
+          )}
+          {neighborContext.waterBorders.west && (
+            <rect x="0" y="0" width="3.5" height="48" fill="#fef08a" />
+          )}
+          {neighborContext.waterBorders.east && (
+            <rect x="44.5" y="0" width="3.5" height="48" fill="#fef08a" />
+          )}
+        </g>
+      )}
+
+      {showOrganic && neighborContext && neighborContext.isWater && (
+        <g opacity="0.45">
+          {neighborContext.landBorders.north && (
+            <rect x="0" y="0" width="48" height="4.5" fill="#38bdf8" />
+          )}
+          {neighborContext.landBorders.south && (
+            <rect x="0" y="43.5" width="48" height="4.5" fill="#38bdf8" />
+          )}
+          {neighborContext.landBorders.west && (
+            <rect x="0" y="0" width="4.5" height="48" fill="#38bdf8" />
+          )}
+          {neighborContext.landBorders.east && (
+            <rect x="43.5" y="0" width="4.5" height="48" fill="#38bdf8" />
+          )}
+        </g>
+      )}
+
+      {/* Multi-Octave Hillshading (NW Sunlit Crest, SE Slope Shading) */}
+      {showOrganic && (effectiveRelief === 'mountain' || effectiveRelief === 'volcano' || effectiveRelief === 'hills') && (
+        <g>
+          {/* North-West Sunlit Crest Highlight */}
+          <polygon points="0,0 48,0 0,48" fill="#ffffff" opacity="0.18" />
+          {/* South-East Shaded Slope */}
+          <polygon points="48,0 48,48 0,48" fill="#0f172a" opacity="0.22" />
+        </g>
+      )}
+
+      {/* Cast Shadow onto Adjacent Lowlands from NW High Relief */}
+      {showOrganic && neighborContext && neighborContext.hasNorthWestSunlightShadow && effectiveRelief === 'none' && (
+        <polygon points="0,0 24,0 0,24" fill="#0f172a" opacity="0.16" />
+      )}
+
+      {/* Subtle Coastal Double-Hatching when Land borders Water (Classic fallback) */}
+      {!simpleMode && isCoastalLand && !showOrganic && (
         <rect
           x="1.5"
           y="1.5"
@@ -160,9 +220,15 @@ function TileCartographySvg({
         />
       )}
 
-      {/* Subtle Ocean / Water Wave Variance (Background only, non-noisy) */}
+      {/* Animated Ocean / Water Wave Shimmer */}
       {!simpleMode && (terrain === 'ocean' || terrain === 'water') && (
-        <g stroke="#bae6fd" strokeWidth="1" fill="none" opacity="0.28">
+        <g
+          stroke="#bae6fd"
+          strokeWidth="1"
+          fill="none"
+          opacity="0.32"
+          className={showOrganic ? 'animate-water-shimmer' : ''}
+        >
           {v === 0 && <path d="M 8 16 Q 14 13, 20 16 T 32 16" />}
           {v === 1 && <path d="M 14 30 Q 20 27, 26 30 T 38 30" />}
           {v === 2 && (
@@ -331,6 +397,7 @@ export function MapCanvas({
   const tileSizePx = 42
   const [activeTool, setActiveTool] = useState<MapTool>('brush')
   const [renderStyle, setRenderStyle] = useState<AtlasRenderStyle>('tilt-25d')
+  const [shadingMode, setShadingMode] = useState<'organic' | 'crisp'>('organic')
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
 
@@ -1125,6 +1192,38 @@ export function MapCanvas({
               </button>
             </div>
 
+            {/* Organic Shading & Biome Blending Mode Toggle */}
+            <div
+              className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
+              role="group"
+              aria-label="Cartographic Shading Mode"
+            >
+              <button
+                type="button"
+                onClick={() => setShadingMode('organic')}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                  shadingMode === 'organic'
+                    ? 'bg-amber-600 text-white dark:bg-amber-700'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Organic Biome Blending, Coastal Shallows & Multi-Octave Hillshading"
+              >
+                Organic Shading 🌄
+              </button>
+              <button
+                type="button"
+                onClick={() => setShadingMode('crisp')}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                  shadingMode === 'crisp'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Crisp Grid & Direct Tile Borders"
+              >
+                Crisp Grid 📐
+              </button>
+            </div>
+
             {/* Quick Dimension Presets (Visible in Edit Mode) */}
             {!isViewOnly && (
               <div className="flex items-center gap-1">
@@ -1483,7 +1582,7 @@ export function MapCanvas({
               }}
             >
               <div
-                className={`inline-grid border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden shadow-2xl ${
+                className={`inline-grid relative border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden shadow-2xl ${
                   renderStyle === 'tilt-25d'
                     ? 'atlas-perspective-plane'
                     : 'atlas-flat-plane'
@@ -1515,6 +1614,7 @@ export function MapCanvas({
                     (s) => s.category === 'hydrology'
                   )
                   const isCoastal = isCoastalLandTile(col, row, tile)
+                  const neighborContext = computeTileNeighborContext(map, col, row)
 
                   return (
                     <button
@@ -1567,6 +1667,8 @@ export function MapCanvas({
                         hasRoad={tile.hasRoad}
                         isCoastalLand={isCoastal}
                         simpleMode={renderStyle === 'simple-schematic'}
+                        neighborContext={neighborContext}
+                        enableOrganicShading={shadingMode === 'organic'}
                       />
 
                       {/* Corner Micro-Indicators (Top-Left: Extra Slots or Lake/Island indicator) */}
@@ -1628,6 +1730,12 @@ export function MapCanvas({
                     </button>
                   )
                 })
+              )}
+              {shadingMode === 'organic' && (
+                <div
+                  className="absolute inset-0 pointer-events-none cartography-vignette z-30"
+                  aria-hidden="true"
+                />
               )}
             </div>
           </div>
