@@ -7,10 +7,12 @@ import {
   Image as ImageIcon,
   X,
   Compass,
+  BookOpen,
 } from 'lucide-react'
 import { SelectiveExportOptions, WorldState } from '../engine/types'
 import {
   downloadExportFile,
+  exportCampaignSourcebookHtml,
   exportMapLayeredJson,
   exportWorldMarkdown,
   exportWorldYaml,
@@ -44,6 +46,11 @@ export function ExportSuiteModal({ isOpen, world, onClose }: ExportSuiteModalPro
   })
 
   if (!isOpen) return null
+
+  const handleDownloadHtmlSourcebook = () => {
+    const html = exportCampaignSourcebookHtml(world, selectiveOptions)
+    downloadExportFile(`${baseFileName}-sourcebook.html`, html, 'text/html')
+  }
 
   const handleDownloadMarkdown = () => {
     const md = exportWorldMarkdown(world, selectiveOptions)
@@ -154,65 +161,91 @@ export function ExportSuiteModal({ isOpen, world, onClose }: ExportSuiteModalPro
 
         {/* Tab 1: Whole World Archive */}
         {activeTab === 'whole-world' && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
-              <div className="space-y-1.5">
+          <div className="space-y-3">
+            {/* Featured Hero Card: Campaign Sourcebook */}
+            <div className="p-4 rounded-xl border-2 border-primary/40 bg-primary/5 space-y-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <FileText className="h-4 w-4" />
-                  <span>Markdown (.md)</span>
+                  <BookOpen className="h-4 w-4" />
+                  <span>Official Campaign Sourcebook (.html / Print PDF)</span>
+                  <span className="text-[10px] uppercase font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                    Publication Ready
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Book-ready world chronicle, complete codex wiki with species/kingdoms/myths, and turn chronology.
+                <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+                  Standalone illustrated fantasy RPG sourcebook with embedded SVG cartography, two-column lore chapters, drop caps, Codex stat blocks, and 1-click print-to-PDF formatting.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={handleDownloadMarkdown}
-                className="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                onClick={handleDownloadHtmlSourcebook}
+                className="btn-primary shrink-0 px-4 py-2 text-xs font-bold flex items-center gap-2 shadow-sm"
               >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export Markdown</span>
+                <Download className="h-4 w-4" />
+                <span>Export Campaign Book</span>
               </button>
             </div>
 
-            <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
-                  <Layers className="h-4 w-4" />
-                  <span>YAML (.yaml)</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <FileText className="h-4 w-4" />
+                    <span>Markdown (.md)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Book-ready world chronicle, complete codex wiki with species/kingdoms/myths, and turn chronology.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Clean, human-readable structured YAML document formatted for tabletop wikis and game masters.
-                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadMarkdown}
+                  className="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export Markdown</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadYaml}
-                className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export YAML</span>
-              </button>
-            </div>
 
-            <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
-                  <FileJson className="h-4 w-4" />
-                  <span>JSON (Schema v2)</span>
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
+                    <Layers className="h-4 w-4" />
+                    <span>YAML (.yaml)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Clean, human-readable structured YAML document formatted for tabletop wikis and game masters.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Full programmatic backup with snapshots, turn history, map tiles, and configuration for re-importing.
-                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadYaml}
+                  className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export YAML</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadJson}
-                className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export JSON</span>
-              </button>
+
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                    <FileJson className="h-4 w-4" />
+                    <span>JSON (Schema v2)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Full programmatic backup with snapshots, turn history, map tiles, and configuration for re-importing.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadJson}
+                  className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export JSON</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -252,11 +285,19 @@ export function ExportSuiteModal({ isOpen, world, onClose }: ExportSuiteModalPro
               ))}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={handleDownloadHtmlSourcebook}
+                className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Download Custom Sourcebook (.html)</span>
+              </button>
               <button
                 type="button"
                 onClick={handleDownloadMarkdown}
-                className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
+                className="btn-outline text-xs px-4 py-2 flex items-center gap-1.5"
               >
                 <FileText className="h-3.5 w-3.5" />
                 <span>Download Custom Markdown</span>
