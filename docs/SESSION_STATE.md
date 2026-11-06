@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 7 Completed; Phase 8 Planned
+- **Current Phase**: Phase 8 Completed; Phase 9 Planned
 - **Session Date**: 2026-11-05
-- **Status**: Phase 7 Verified (35/35 tests passing), AAA Benchmark Score Snapshot (52.5 / 100) Recorded
+- **Status**: Phase 8 Verified (38/38 tests passing), AAA Benchmark Score Snapshot (59.5 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -19,16 +19,22 @@ status: active
   - Implemented toolbar Undo and Redo buttons with disabled styling and real-time step counters.
   - Added global `Ctrl+Z` (Undo) and `Ctrl+Y` / `Ctrl+Shift+Z` (Redo) hotkeys with input/textarea form focus protection.
   - Added automated test cases in `MapCanvas.test.tsx` verifying single clicks, continuous strokes, and keyboard shortcuts (35/35 passing tests).
-  - Updated ADR-010 score snapshot table with the new **52.5 / 100** rating (+6.0 pts).
+  - Merged to `main` via PR #5 and deployed to GitHub Pages.
+- **Phase 8 (Tactile Game Feel, Card Juice & Audio Polish)**:
+  - Created offline Web Audio API sound synthesizer engine (`soundEngine.ts`) with zero external assets.
+  - Integrated tactile sounds: paper card draw, resonant flip snap, turn pass confirmation, stage advance arpeggio, and undo swoosh.
+  - Added global Sound SFX toggle button (🔊 / 🔇) to the L0 header bar in `Layout.tsx` with persistent localStorage preferences.
+  - Added 3D CSS perspective card flip and deal slide animations in `Play.tsx` (Companion and Studio modes).
+  - Added unit test suite in `soundEngine.test.ts` (38/38 passing tests).
+  - Updated ADR-010 score snapshot table with the new **59.5 / 100** rating (+7.0 pts on D1).
 
 ---
 
 ## Tasks
 
-- [x] Implement Phase 0–6 UI/UX redesign and Wiki integration (merged via PR #4).
-- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot (46.5 / 100).
-- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (Score: 52.5 / 100).
-- [ ] Push Phase 7 branch and merge to `main`.
-- [ ] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Target: 59.5 / 100).
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (merged via PR #5).
+- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Score: 59.5 / 100).
+- [ ] Push Phase 8 branch and merge to `main`.
+- [ ] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (Target: 66.5 / 100).
 
 
