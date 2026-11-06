@@ -42,6 +42,7 @@ import {
   SOCIETY_PRESETS,
   SPECIES_PRESETS,
 } from '../engine/presets'
+import { computeEntityAchievements } from '../engine/narrativeEngine'
 
 interface EntityRegistryProps {
   entities: WorldEntity[]
@@ -148,6 +149,28 @@ export function EntityRegistry({
   // Defaults to true when empty so new worlds can immediately pick a preset or create, or toggleable anytime
   const [isCreatorOpen, setIsCreatorOpen] = useState<boolean>(() => entities.length === 0)
   const [showRelationshipDrawer, setShowRelationshipDrawer] = useState<boolean>(false)
+
+  const featsMap = useMemo(() => {
+    return computeEntityAchievements({
+      schemaVersion: 2,
+      id: 'temp',
+      name: 'temp',
+      createdAt: '',
+      updatedAt: '',
+      isLocked: false,
+      deckConfig: {} as any,
+      currentStage,
+      stageNotes: {},
+      drawHistory,
+      map: map || { width: 20, height: 12, tiles: {} },
+      entities,
+      players: [],
+      currentPlayerIndex: 0,
+      companionMode: 'full-studio',
+      generationSettings: { seed: 'temp', geographyPreset: 'continent', fantasyLevel: 'medium', disasterIntensity: 'standard' },
+      snapshots: [],
+    })
+  }, [entities, drawHistory, map, currentStage])
 
   // Form State (Create New or Edit Existing)
   const [editingFormEntityId, setEditingFormEntityId] = useState<string | null>(null)
@@ -1617,6 +1640,27 @@ export function EntityRegistry({
                               >
                                 ⚡ {ab}
                               </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Historical Feats & Emergent Deeds */}
+                      {featsMap[ent.id] && featsMap[ent.id].length > 0 && (
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider font-semibold text-primary block mb-1">
+                            Historical Feats & Epoch Deeds ({featsMap[ent.id].length})
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {featsMap[ent.id].map((feat) => (
+                              <span
+                                key={feat.id}
+                                className={`text-[11px] px-2 py-0.5 rounded-lg border font-semibold flex items-center gap-1 ${feat.badgeColor}`}
+                                title={feat.description}
+                              >
+                                <span>{feat.icon}</span>
+                                <span>{feat.title}</span>
+                              </span>
                             ))}
                           </div>
                         </div>

@@ -15,10 +15,14 @@ import {
   Unlock,
   GitBranch,
   Plus,
+  BookOpen,
+  Compass,
 } from 'lucide-react'
 import { DrawRecord, StageId, WorldEntity, WorldState } from '../engine/types'
 import { DEFAULT_CARD_COLORS, STAGES, calculateEpochYear, getCardDisplay } from '../engine/deckEngine'
 import { exportWorldChronicleMarkdown } from '../engine/storageService'
+import { RealmSagaModal } from './RealmSagaModal'
+import { classifyEventSignificance, EventSignificance } from '../engine/narrativeEngine'
 
 interface TimelinePanelProps {
   world: WorldState
@@ -45,6 +49,8 @@ export function TimelinePanel({
 }: TimelinePanelProps) {
   const [stageFilter, setStageFilter] = useState<StageId | 'all'>('all')
   const [entityFilter, setEntityFilter] = useState<string>('all')
+  const [significanceFilter, setSignificanceFilter] = useState<EventSignificance | 'all'>('all')
+  const [showSagaModal, setShowSagaModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortAsc, setSortAsc] = useState(false)
   const [coordInputs, setCoordInputs] = useState<Record<string, string>>({})
@@ -66,6 +72,10 @@ export function TimelinePanel({
         (!rec.linkedEntityIds || !rec.linkedEntityIds.includes(entityFilter))
       ) {
         return false
+      }
+      if (significanceFilter !== 'all') {
+        const sig = classifyEventSignificance(rec)
+        if (sig !== significanceFilter) return false
       }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
@@ -188,6 +198,16 @@ export function TimelinePanel({
           >
             <Copy className="h-3.5 w-3.5" />
             <span>Copy Text</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowSagaModal(true)}
+            disabled={world.drawHistory.length === 0}
+            className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+            title="Synthesize and view rich narrative Realm Saga"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Realm Saga</span>
           </button>
           <button
             type="button"
@@ -360,6 +380,70 @@ export function TimelinePanel({
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Interactive Epoch Scrubber */}
+      <div className="no-print p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold">
+          <span className="flex items-center gap-1.5 text-primary">
+            <Compass className="h-3.5 w-3.5" />
+            <span>Interactive Epoch Scrubber</span>
+          </span>
+          <span className="text-[11px] font-mono text-muted-foreground">
+            {stageFilter === 'all' ? 'All Eras Visible' : `${stageFilter.toUpperCase()} Focus`}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          {STAGES.map((s) => {
+            const count = world.drawHistory.filter((r) => r.stage === s.id).length
+            const isSelected = stageFilter === s.id
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setStageFilter(isSelected ? 'all' : s.id)}
+                className={`p-2 rounded-lg text-left border transition-all text-xs ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-background/80 hover:bg-muted text-muted-foreground border-border/60'
+                }`}
+              >
+                <div className="font-bold truncate">{s.number}. {s.name}</div>
+                <div className="text-[10px] opacity-80">{count} {count === 1 ? 'Turn' : 'Turns'}</div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Event Significance Filter Pills */}
+      <div className="no-print flex flex-wrap items-center gap-1.5 text-xs">
+        <span className="text-muted-foreground font-medium text-[11px] mr-1">Event Type:</span>
+        {(['all', 'creation', 'expansion', 'conflict', 'diplomacy', 'cataclysm'] as const).map((sig) => {
+          const isSelected = significanceFilter === sig
+          const labels = {
+            all: 'All Events',
+            creation: 'Creation 🌍',
+            expansion: 'Expansion 🏛️',
+            conflict: 'Conflicts ⚔️',
+            diplomacy: 'Diplomacy 📜',
+            cataclysm: 'Cataclysms 🔥',
+          }
+          return (
+            <button
+              key={sig}
+              type="button"
+              onClick={() => setSignificanceFilter(sig)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                isSelected
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-background hover:bg-muted text-muted-foreground border-border'
+              }`}
+            >
+              {labels[sig]}
+            </button>
+          )
+        })}
       </div>
 
       {/* Timeline Entries */}
@@ -653,6 +737,12 @@ export function TimelinePanel({
           })}
         </div>
       )}
+      {/* Realm Saga Synthesizer Modal */}
+      <RealmSagaModal
+        isOpen={showSagaModal}
+        world={world}
+        onClose={() => setShowSagaModal(false)}
+      />
     </div>
   )
 }
