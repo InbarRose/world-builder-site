@@ -277,7 +277,7 @@ describe('AutoPlayEngine & Time-Travel Rewind', () => {
   })
 
   it('auto-plays a full 4-stage world and supports rewinding to any historical turn', () => {
-    let world = createNewWorld('Chronos Realm', 'seed-chronos-99')
+    const world = createNewWorld('Chronos Realm', 'seed-chronos-99')
     world.players = [
       {
         id: 'p1',
@@ -363,7 +363,7 @@ describe('AutoPlayEngine & Time-Travel Rewind', () => {
   })
 
   it('exports comprehensive world markdown, structured YAML, and layered map JSON', () => {
-    let world = createNewWorld('Exportia Prime')
+    const world = createNewWorld('Exportia Prime')
     world.gameMode = 'studio'
     world.entities = [
       {

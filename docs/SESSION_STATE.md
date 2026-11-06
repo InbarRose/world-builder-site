@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 9 Completed; Phase 10 Planned
-- **Session Date**: 2026-11-05
-- **Status**: Phase 9 Verified (38/38 tests passing), AAA Benchmark Score Snapshot (66.5 / 100) Recorded
+- **Current Phase**: Phase 10 Completed; Phase 11 Planned
+- **Session Date**: 2026-11-06
+- **Status**: Phase 10 Verified (44/44 tests passing across 7 suites), AAA Benchmark Score Snapshot (72.5 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -29,8 +29,15 @@ status: active
   - Built `exportCampaignSourcebookHtml` in `exportService.ts`: produces a self-contained, publication-ready fantasy RPG Campaign Sourcebook (.html) with embedded SVG cartography, two-column lore chapters, drop caps, Codex dossiers (with traits, abilities, and diplomatic compacts), and chronological event chronicles.
   - Formatted built-in `@media print` rules for clean, paginated PDF output with page break controls and responsive print theme.
   - Integrated featured hero card and custom section buttons into `ExportSuiteModal.tsx`.
-  - Added test coverage in `engine.test.ts` (38/38 tests passing).
-  - Updated ADR-010 score snapshot table with the new **66.5 / 100** rating (+7.0 pts: +5.0 on D7, +1.0 on D3, +1.0 on D4).
+  - Merged to `main` via PR #7 and deployed to GitHub Pages (Score: 66.5 / 100).
+- **Phase 10 (Frictionless Table Sharing via Compact URL / QR Code)**:
+  - Created `shareService.ts` with lightweight seed URL sharing (<120 chars) and full session snapshot encoding via LZ-String URL hash fragments.
+  - Built pure client-side SVG and PNG QR code generation with automatic single-code capacity protection.
+  - Built interactive `ShareTableModal.tsx` with live preview, copy link feedback, QR image download, and payload size metrics.
+  - Implemented automatic URL hydration on page load with non-destructive incoming shared realm confirmation dialog (`IncomingSharedWorldModal.tsx`).
+  - Added top toolbar "Share Table" button in `Play.tsx` and quick link from `ExportSuiteModal.tsx`.
+  - Added unit and integration tests (`shareService.test.ts`, `PlayStudio.test.tsx`, 44/44 tests passing).
+  - Recorded ADR-010 score snapshot: **72.5 / 100** (+6.0 pts: +4.0 on D4, +1.0 on D5, +1.0 on D6).
 
 ---
 
@@ -38,8 +45,9 @@ status: active
 
 - [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (merged via PR #5).
 - [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (merged via PR #6).
-- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100).
-- [ ] Push Phase 9 branch and merge to `main`.
-- [ ] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Target: 72.5 / 100).
+- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (merged via PR #7).
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100).
+- [ ] Push Phase 10 branch, open PR #8, verify CI, and merge to `main`.
+- [ ] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100).
 
 

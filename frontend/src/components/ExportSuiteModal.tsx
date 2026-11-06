@@ -8,6 +8,7 @@ import {
   X,
   Compass,
   BookOpen,
+  QrCode,
 } from 'lucide-react'
 import { SelectiveExportOptions, WorldState } from '../engine/types'
 import {
@@ -24,11 +25,12 @@ interface ExportSuiteModalProps {
   isOpen: boolean
   world: WorldState
   onClose: () => void
+  onOpenShare?: () => void
 }
 
 type ExportTab = 'whole-world' | 'selective' | 'map-assets'
 
-export function ExportSuiteModal({ isOpen, world, onClose }: ExportSuiteModalProps) {
+export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: ExportSuiteModalProps) {
   const [activeTab, setActiveTab] = useState<ExportTab>('whole-world')
   const [baseFileName, setBaseFileName] = useState(
     () => `${world.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().split('T')[0]}`
@@ -157,6 +159,21 @@ export function ExportSuiteModal({ isOpen, world, onClose }: ExportSuiteModalPro
           >
             Map Graphics & Layer Objects
           </button>
+
+          {onOpenShare && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                onOpenShare()
+              }}
+              className="ml-auto px-2.5 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1.5 font-semibold text-xs transition-colors"
+              title="Open QR Code & Table Share Modal"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              <span>Share Table (QR)</span>
+            </button>
+          )}
         </div>
 
         {/* Tab 1: Whole World Archive */}

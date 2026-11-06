@@ -610,7 +610,7 @@ export function bucketFillTerrain(
 
 export function exportMapToSvgString(
   map: MapState,
-  worldName: string = 'World Map',
+  worldName = 'World Map',
   entities: WorldEntity[] = []
 ): string {
   const tileSize = 48

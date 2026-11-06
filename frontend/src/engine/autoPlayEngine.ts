@@ -89,7 +89,7 @@ function findBestLandTile(
   world: WorldState,
   personality: BotPersonalityId,
   rng: () => number,
-  preferUnlabeled: boolean = true
+  preferUnlabeled = true
 ): MapTile {
   const allTiles = Object.values(world.map.tiles)
   const landTiles = allTiles.filter((t) => t.terrain !== 'ocean')
@@ -969,7 +969,7 @@ export function autoPlayStage(
     `${world.generationSettings.seed}-${world.currentStage}-${world.drawHistory.length}`
   )
   let currentWorld = { ...world }
-  let currentDeck =
+  const currentDeck =
     deck.length > 0 ? [...deck] : buildShuffledDeck(world.deckConfig, rng)
 
   const turnsToRun = Math.min(resolvedTurns, currentDeck.length)

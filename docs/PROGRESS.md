@@ -69,8 +69,14 @@ status: active
   - [x] Living Codex encyclopedic dossiers for Species, Realms (with diplomatic pacts), and Ancient Myths
   - [x] Built-in `@media print` rules for clean 1-click PDF compilation via `window.print()`
   - [x] Featured export launcher in `ExportSuiteModal.tsx` across Whole World and Selective tabs
-- [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
-- [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
+- [x] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Score: 72.5 / 100)*
+  - [x] Lightweight URL Seed sharing (`generateSeedShareUrl`, `parseSeedShareUrl`) for instant table onboarding (<120 chars)
+  - [x] Full session state snapshot serialization & compression via LZ-String (`generateFullStateShareUrl`, `decodeWorldFromCompressedHash`) in URL hash
+  - [x] Client-side SVG & PNG QR code generation (`shareService.ts`) with zero third-party network queries
+  - [x] Interactive `ShareTableModal.tsx` with Seed vs Full Session tabs, live QR preview, copy link feedback, and QR download
+  - [x] Safe URL hydration on page load with incoming shared realm confirmation dialog (`IncomingSharedWorldModal.tsx`)
+  - [x] Direct "Share Table" toolbar action in `Play.tsx` and quick link from `ExportSuiteModal.tsx`
+  - [x] Full automated test coverage (44/44 passing tests across 7 test suites)
 - [ ] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Target: 79.5 / 100)*
 
 ---

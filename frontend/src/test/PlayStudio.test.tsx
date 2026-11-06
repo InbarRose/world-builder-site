@@ -164,4 +164,70 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByText(/Freeform World Sandbox/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Draw Card/i })).not.toBeInTheDocument()
   })
+
+  it('supports Share Table QR modal and Export Suite share button', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Open Share Table modal from toolbar
+    const shareBtn = screen.getByRole('button', { name: /Share Table/i })
+    await act(async () => {
+      fireEvent.click(shareBtn)
+    })
+
+    expect(screen.getByRole('heading', { name: /Share with Table/i })).toBeInTheDocument()
+    expect(screen.getByText(/Seed Link & QR \(Fast\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Full Session State/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Copy Link/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Download QR Image/i })).toBeInTheDocument()
+
+    // Switch to Full Session State tab
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Full Session State/i }))
+    })
+    expect(screen.getByText(/Complete State Snapshot:/i)).toBeInTheDocument()
+
+    // Close modal
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close Share Modal/i }))
+    })
+  })
+
+  it('detects and hydrates incoming shared realm from URL query or hash', async () => {
+    // Simulate window.location.search having a shared seed
+    const originalLocation = window.location
+    delete (window as unknown as Record<string, unknown>).location
+    window.location = {
+      ...originalLocation,
+      pathname: '/play',
+      search: '?shareType=seed&seed=solstice-99&name=Solstice%20Reach&preset=archipelago',
+      hash: '',
+    } as unknown as Location
+
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/Shared Realm Received/i)).toBeInTheDocument()
+      expect(screen.getByText('Solstice Reach')).toBeInTheDocument()
+    })
+
+    // Click Load Shared Realm
+    const loadBtn = screen.getByRole('button', { name: /Load Shared Realm/i })
+    await act(async () => {
+      fireEvent.click(loadBtn)
+    })
+
+    // The active world name in the header should now be Solstice Reach
+    expect(screen.getByText('Solstice Reach')).toBeInTheDocument()
+
+    // Restore location
+    window.location = originalLocation
+  })
 })
