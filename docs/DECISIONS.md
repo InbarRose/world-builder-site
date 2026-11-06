@@ -153,6 +153,32 @@ status: active
 | **2026-11-06** | Phase 13: Organic Cartography Shading & Dynamic Biome Blending | 15.0 (+2) | 19.0 (+3) | 12.0 | 15.0 | 10.0 | 10.0 | 10.0 | **91.0 / 100** | Completed |
 | **2026-11-06** | Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes | 18.0 (+3) | 20.0 (+1) | 13.0 (+1) | 15.0 | 10.0 | 10.0 | 10.0 | **96.0 / 100** | Completed |
 | **2026-11-06** | Phase 15: Polished AAA Orchestration & PWA Offline Mastery | 20.0 (+2) | 20.0 | 15.0 (+2) | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Completed |
+| **2026-11-06** | Phase 16: AAA Launcher, Deliberate Ceremonies & Focused Studio | 20.0 | 20.0 | 15.0 | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Completed |
+
+---
+
+## ADR-011: AAA Game Launcher Architecture, Deliberate Ceremonies, and Focus-Zone In-Game Hierarchy
+
+- **Status**: Accepted
+- **Date**: 2026-11-06
+- **Context**:
+  - The Play Studio was previously presenting all game configuration, audio mood controls, auto-play generator buttons, and world switching directly in the active game canvas header without hierarchy.
+  - Players experienced cognitive friction distinguishing whether they were in a world or at a title screen, modifying core game parameters casually mid-game without ceremonial gravity, and risking accidental cartography tile painting while inspecting lore.
+- **Decision**:
+  1. **Dedicated Play Studio Launcher / Title Screen (`StudioLauncher.tsx`)**:
+     - Internal Title Screen with Resume Active Campaign, New Campaign genesis, Load Realm drawer, Quick Start 1-click generator, and Rules Codex reference.
+     - Synchronized URL parameters (`/play?view=launcher` vs `/play?world=<id>&mode=<mode>`) ensuring zero ambiguity between the main menu and an active world.
+  2. **Deliberate Ceremonies for Parameter Modifications**:
+     - **`NewGameCeremonyModal`**: 5-step genesis ritual (realm title randomizer, mythic premise, table format selection, starting era, and player council roster).
+     - **`EpochCeremonyModal`**: Formal epoch closure (era retrospective metrics, deeds consecrated, incoming dawn herald, and epilogue inscription).
+  3. **Minimalist Focus-Zone In-Game Header**:
+     - Breadcrumbs (`Main Menu / Realm Name / Age Pill / Turn #`) with clickable epoch ascension and instant title screen return.
+     - Dedicated collapsible trays: `Atmosphere Menu` (Hearth, Ocean, Ether + volume), `Share & Export Menu` (QR code + sourcebook suite), and `Settings Menu` (administrative clutter: player council, epoch ceremony, auto-play console, world archives, setup wizard, realm lock).
+  4. **Strict Cartography Mode Separation**:
+     - Clear separation between **👁️ Safe Inspect Mode** (non-accidental browsing, tile lore inspection) and **🖌️ Drafting Workshop** (active terrain painting with high-visibility gold ring indicator).
+- **Consequences**:
+  - Transforms Play Studio into a cohesive AAA game experience mirroring major grand strategy and tabletop titles.
+  - Eliminates accidental map edits and hides administrative clutter away from primary gameplay flow.
 
 ---
 
@@ -161,7 +187,9 @@ status: active
 - [x] Add ADR-006 and ADR-007 documenting Seeded Auto-Play, Time-Travel Snapshots, and Schema v2 Migration.
 - [x] Add ADR-008 and ADR-009 documenting the 5-Level UI Hierarchy, Mode-Adaptive Workspaces, and Bi-Directional Wiki Integration.
 - [x] Add ADR-010 documenting the Revamped 7-Dimension AAA Benchmark Rubric, Baseline Score Snapshot (46.5/100), and Quality Governance.
+- [x] Add ADR-011 documenting the AAA Game Launcher, Deliberate Epoch Ceremonies, and Focus-Zone Header.
 - [x] Record Phase 14 completion snapshot (96.0 / 100) with full physical play mat mode, ambient soundscapes, fog of war, and lore flyout drawer.
 - [x] Record Phase 15 completion snapshot (100.0 / 100) with PWA offline service worker, haptic feedback, crossfade soundscapes, geopolitical tension index, and dynasty lineage trees.
+- [x] Record Phase 16 completion snapshot (100.0 / 100) with AAA Title Screen, New Campaign Genesis Ceremony, Epoch Ceremony, and Focused Header.
 
 

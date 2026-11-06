@@ -19,6 +19,8 @@ import {
   Sliders,
   Hand,
   CloudFog,
+  ShieldCheck,
+  Unlock,
 } from 'lucide-react'
 import {
   DrawRecord,
@@ -983,6 +985,19 @@ export function MapCanvas({
               </button>
             </div>
 
+            {/* Clear Mode Separation Badge */}
+            {isViewOnly ? (
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3" />
+                <span className="hidden sm:inline">Safe Inspect Mode</span>
+              </span>
+            ) : (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1 animate-pulse">
+                <Unlock className="h-3 w-3" />
+                <span className="hidden sm:inline">Drafting Workshop (Active)</span>
+              </span>
+            )}
+
             {!isViewOnly && (
               <>
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
@@ -1614,7 +1629,11 @@ export function MapCanvas({
               }}
             >
               <div
-                className={`inline-grid relative border-4 border-amber-950/60 dark:border-slate-700 rounded-lg overflow-hidden shadow-2xl ${
+                className={`inline-grid relative border-4 ${
+                  !isViewOnly
+                    ? 'border-amber-500/80 ring-4 ring-amber-500/20'
+                    : 'border-amber-950/60 dark:border-slate-700'
+                } rounded-lg overflow-hidden shadow-2xl ${
                   renderStyle === 'tilt-25d'
                     ? 'atlas-perspective-plane'
                     : 'atlas-flat-plane'

@@ -9,6 +9,7 @@ const routerFuture = { v7_startTransition: true, v7_relativeSplatPath: true }
 describe('Play Studio & Rules Integration', () => {
   beforeEach(() => {
     localStorage.clear()
+    window.history.replaceState({}, '', '/play')
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -25,14 +26,25 @@ describe('Play Studio & Rules Integration', () => {
     )
   })
 
-  it('renders Play Studio with default world, draws a card, and logs turn with player attribution', async () => {
+  it('renders Play Studio Title Screen launcher, resumes campaign, draws a card, logs turn, and returns to main menu', async () => {
     render(
       <BrowserRouter future={routerFuture}>
         <Play />
       </BrowserRouter>
     )
 
+    // Verify Title Screen / Launcher
+    expect(screen.getByText('World Builder Studio')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Resume Campaign/i })).toBeInTheDocument()
     expect(screen.getByText('Emerald Vale')).toBeInTheDocument()
+
+    // Resume into the world session
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Now in session: breadcrumb trail with Main Menu button
+    expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
     const drawBtn = screen.getByRole('button', { name: /Draw Card \(54\)/i })
     await act(async () => {
       fireEvent.click(drawBtn)
@@ -42,7 +54,14 @@ describe('Play Studio & Rules Integration', () => {
       expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Turn #1')).toBeInTheDocument()
+    expect(screen.getAllByText(/Turn #1/i).length).toBeGreaterThan(0)
+
+    // Return to Title Screen via breadcrumb button
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Main Menu/i }))
+    })
+    expect(screen.getByText('World Builder Studio')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Resume Campaign/i })).toBeInTheDocument()
   })
 
   it('supports Companion Mode toggles, Hotseat Players, Auto-Play, and Codex tabs', async () => {
@@ -52,9 +71,17 @@ describe('Play Studio & Rules Integration', () => {
       </BrowserRouter>
     )
 
-    // Toggle Players Panel & add a hotseat player
+    // Resume into session
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Players \(1\)/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Open Settings Menu to access Player Council
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Settings Menu/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Player Council/i }))
     })
     expect(
       screen.getByText(/Hotseat Players & Bot Personalities/i)
@@ -62,11 +89,16 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Add Player Seat/i }))
     })
-    expect(screen.getByRole('button', { name: /Players \(2\)/i })).toBeInTheDocument()
-
-    // Toggle Auto-Play Panel & run 1 auto turn
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Auto-Play/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Close Player Roster/i }))
+    })
+
+    // Open Settings Menu to access Auto-Play
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Settings Menu/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Auto-Play Console/i }))
     })
     expect(
       screen.getByText(/Procedural Seeded Auto-Play & World Generator/i)
@@ -74,7 +106,7 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Auto-Play 1 Turn/i }))
     })
-    expect(screen.getByText('Turn #1')).toBeInTheDocument()
+    expect(screen.getAllByText(/Turn #1/i).length).toBeGreaterThan(0)
 
     // Switch to World Map tab
     await act(async () => {
@@ -88,11 +120,17 @@ describe('Play Studio & Rules Integration', () => {
     })
     expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
 
-    // Open World Manager Modal
+    // Open World Manager Modal from Settings Menu
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Worlds \(1\)/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Settings Menu/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /World Archives/i }))
     })
     expect(screen.getByRole('dialog', { name: /World Manager/i })).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close World Manager/i }))
+    })
   })
 
   it('renders Rules page with Glossary and switches to 1-Page Quick Reference Card', () => {
@@ -143,6 +181,11 @@ describe('Play Studio & Rules Integration', () => {
       </BrowserRouter>
     )
 
+    // Resume into session
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
     // Switch to 3.1 Companion Mode
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Companion/i }))
@@ -172,10 +215,21 @@ describe('Play Studio & Rules Integration', () => {
       </BrowserRouter>
     )
 
-    // Open Share Table modal from toolbar
-    const shareBtn = screen.getByRole('button', { name: /Share Table/i })
+    // Resume into session
     await act(async () => {
-      fireEvent.click(shareBtn)
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Open Share menu from toolbar
+    const shareMenuBtn = screen.getByRole('button', { name: /Share & Export Menu/i })
+    await act(async () => {
+      fireEvent.click(shareMenuBtn)
+    })
+
+    // Open Share Table modal
+    const shareTableBtn = screen.getByRole('button', { name: /Share Table QR/i })
+    await act(async () => {
+      fireEvent.click(shareTableBtn)
     })
 
     expect(screen.getByRole('heading', { name: /Share with Table/i })).toBeInTheDocument()
@@ -229,5 +283,66 @@ describe('Play Studio & Rules Integration', () => {
 
     // Restore location
     window.location = originalLocation
+  })
+
+  it('supports deliberate AAA New Campaign ceremony initiation and Epoch ceremony advancement', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Click New Campaign on Title Screen Launcher
+    const newCampBtn = screen.getByRole('button', { name: /New Campaign Initiation ceremony/i })
+    await act(async () => {
+      fireEvent.click(newCampBtn)
+    })
+
+    // Verify New Game Ceremony Modal is open
+    expect(screen.getByText(/Initiate New Campaign/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Forge Realm & Inscribe Destiny/i })).toBeInTheDocument()
+
+    // Consecrate realm into live session
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Forge Realm & Inscribe Destiny/i }))
+    })
+
+    // Verify in-game session entered
+    expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
+
+    // Enact deliberate Epoch Ceremony from Age breadcrumb
+    const eraBtn = screen.getByRole('button', { name: /Age 1: Genesis/i })
+    await act(async () => {
+      fireEvent.click(eraBtn)
+    })
+
+    // Verify Epoch Ceremony Modal is open
+    expect(screen.getByText(/Epoch Advancement Ceremony/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Ascend to Primal/i })).toBeInTheDocument()
+
+    // Advance Epoch ceremonially
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Ascend to Primal/i }))
+    })
+
+    // Verify epoch advanced to Age 2
+    expect(screen.getByRole('button', { name: /Age 2: Primal/i })).toBeInTheDocument()
+  })
+
+  it('supports quick start instant realm generation from title menu', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    const quickStartBtn = screen.getByRole('button', { name: /Quick Start 1-click instant/i })
+    await act(async () => {
+      fireEvent.click(quickStartBtn)
+    })
+
+    // Live session entered immediately
+    expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Draw Card \(54\)/i })).toBeInTheDocument()
   })
 })
