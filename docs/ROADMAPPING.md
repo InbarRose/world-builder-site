@@ -40,8 +40,15 @@ status: active
   ├──► [Phase 10: Frictionless Table Sharing via Compact URL / QR Code] (Target: 72.5 / 100)
   │      - URL fragment state compression via lz-string & QR code generator modal
   │
-  └──► [Phase 11: 60fps Smooth Pan/Zoom Cartography Camera] (Target: 79.5 / 100)
-         - Canvas viewport zoom/pan with mouse wheel, space+drag, and pinch gestures
+  ├──► [Phase 11: 60fps Smooth Pan/Zoom Cartography Camera] (Done — Score: 79.5 / 100)
+  │      - Canvas viewport zoom/pan with mouse wheel, space+drag, floating radar minimap
+  │
+  ├──► [Phase 12: Emergent Narrative Simulation & Dynamic Chronicles] (Done — Score: 86.0 / 100)
+  │      - Deterministic 4-chapter prose saga synthesizer (`RealmSagaModal.tsx`)
+  │      - Turn significance classifier, historical deeds & diplomatic harmony engine
+  │
+  └──► [Phase 13: Organic Cartography Shading & Dynamic Biome Blending] (Next — Target: 91.0 / 100)
+         - Multi-octave elevation relief shading, organic biome border blending
 ```
 
 ## Milestone Deliverables
@@ -88,5 +95,7 @@ status: active
 - [x] Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100)
 - [x] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100)
 - [x] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100)
+- [x] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100)
+- [ ] Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100)
 - [ ] Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Target: 86.0 / 100)
 

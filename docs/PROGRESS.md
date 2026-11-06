@@ -86,7 +86,17 @@ status: active
   - [x] Fantasy Compass Rose and dynamic Leagues/Miles cartographic scale bar (`~50 Leagues`)
   - [x] Prevention of accidental tile painting or erasing during pan operations
   - [x] Automated test coverage in `MapCanvas.test.tsx` (46/46 passing tests across 7 test suites)
-- [ ] **Phase 12: Emergent Narrative Simulation & Dynamic Chronicles** *(Target: 86.0 / 100)*
+- [x] **Phase 12: Emergent Narrative Simulation & Dynamic Chronicles** *(Score: 86.0 / 100)*
+  - [x] Deterministic narrative synthesizer engine (`narrativeEngine.ts`) mapping card draws, powers, terrain slots, and entities to rich prose
+  - [x] Event significance classifier (`classifyEventSignificance`) tagging turns as `creation`, `expansion`, `conflict`, `diplomacy`, or `cataclysm`
+  - [x] Synthesis of 4-chapter prose chronicles (`synthesizeRealmSaga`) with evocative era titles, epoch summaries, and dominant hegemon detection
+  - [x] Automated historical feat detection (`computeEntityAchievements`) recognizing `Treaty Forger`, `Cataclysm Survivor`, `Sovereign Realm`, and `Historic Pillar`
+  - [x] Pairwise diplomatic harmony calculator (`getEntityDiplomaticRelations`) computing -100 to +100 relational standing and pact statuses
+  - [x] Interactive `RealmSagaModal.tsx` with chapter tabs, full chronicle prose reader, 1-click Markdown copy, and print styling
+  - [x] Interactive Epoch Scrubber and Significance Filter Pills in `TimelinePanel.tsx`
+  - [x] Historical Feats and Diplomatic links display in `EntityRegistry.tsx`
+  - [x] Comprehensive test coverage in `narrativeEngine.test.ts` and `TimelineAndEntities.test.tsx` (51/51 passing tests across 8 suites)
+- [ ] **Phase 13: Organic Cartography Shading & Dynamic Biome Blending** *(Target: 91.0 / 100)*
 
 ---
 
@@ -94,7 +104,12 @@ status: active
 
 - [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
 - [x] Record ADR-010, revamped AAA rubric, and baseline snapshot (46.5 / 100).
-- [ ] Merge `feat/v3-ui-redesign-and-wiki-integration` to `main`.
-- [ ] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine.
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (Score: 52.5 / 100).
+- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Score: 59.5 / 100).
+- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100).
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100).
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
+- [ ] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100).
 
 

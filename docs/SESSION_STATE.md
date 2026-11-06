@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 11 Completed; Phase 12 Planned
+- **Current Phase**: Phase 12 Completed; Phase 13 Planned
 - **Session Date**: 2026-11-06
-- **Status**: Phase 11 Verified (46/46 tests passing across 7 suites), AAA Benchmark Score Snapshot (79.5 / 100) Recorded
+- **Status**: Phase 12 Verified (51/51 tests passing across 8 suites), AAA Benchmark Score Snapshot (86.0 / 100) Recorded
 
 ## Completed in Current Session
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
@@ -44,8 +44,17 @@ status: active
   - Built interactive floating Minimap Radar in the bottom-right corner with real-time viewport bounding box and click-to-center coordinate navigation.
   - Added stylized Compass Rose and dynamic Leagues/Miles cartographic scale bar (`~50 Leagues`).
   - Prevented accidental tile painting or erasing during pan operations.
-  - Added test coverage in `MapCanvas.test.tsx` (46/46 passing tests).
-  - Recorded ADR-010 score snapshot: **79.5 / 100** (+7.0 pts: +5.0 on D2, +1.0 on D1, +1.0 on D5).
+  - Merged to `main` via PR #9 and deployed to GitHub Pages (Score: 79.5 / 100).
+- **Phase 12 (Emergent Narrative Simulation & Dynamic Chronicles)**:
+  - Built deterministic procedural chronicle synthesizer engine (`narrativeEngine.ts`) mapping actual deck draws, powers, territory counts, and tile slots into evocative 4-chapter prose sagas.
+  - Built significance classifier tagging turns into Creation, Expansion, Conflict, Diplomacy, and Cataclysm.
+  - Implemented automatic historical deed detection (`computeEntityAchievements`) recognizing Treaty Forgers, Cataclysm Survivors, Sovereign Realms, and Historic Pillars.
+  - Built pairwise diplomatic harmony calculator (`getEntityDiplomaticRelations`) computing -100 to +100 relational standing and pact statuses.
+  - Built interactive `RealmSagaModal.tsx` with chapter tabs, full chronicle prose reader, 1-click Markdown copy, and print styling.
+  - Built interactive Epoch Scrubber and Significance Filter Pills in `TimelinePanel.tsx`.
+  - Added historical feats badge display in `EntityRegistry.tsx`.
+  - Full automated test coverage in `narrativeEngine.test.ts` and `TimelineAndEntities.test.tsx` (51/51 passing tests across 8 suites).
+  - Recorded ADR-010 score snapshot: **86.0 / 100** (+6.5 pts: +5.0 on D3, +1.0 on D4, +0.5 on D6).
 
 ---
 
@@ -55,8 +64,9 @@ status: active
 - [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (merged via PR #6).
 - [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (merged via PR #7).
 - [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (merged via PR #8).
-- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
-- [ ] Push Phase 11 branch, open PR #9, verify CI, and merge to `main`.
-- [ ] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Target: 86.0 / 100).
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (merged via PR #9).
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
+- [ ] Push Phase 12 branch, open PR #10, verify CI, and merge to `main`.
+- [ ] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Target: 91.0 / 100).
 
 
