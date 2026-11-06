@@ -48,11 +48,24 @@ status: active
   - [x] Three Distinct Play Modes in `Play.tsx`: `3.1 Companion Mode` (optional toggle panels + freeform linking), `3.2 Studio Mode` (live Turn Activity Basket + bot auto-play + turn pass/verify), and `3.3 Freeform Mode` (cardless world architect)
   - [x] Bi-directional Wiki-Grade Codex (`EntityRegistry.tsx`), Map Inspector (`MapCanvas.tsx`), and Event Chronicle (`TimelinePanel.tsx`) with clear Read vs. Create/Edit separation
   - [x] Documented scored UX/UI rubric & architectural decisions in `docs/DECISIONS.md` (ADR-008 & ADR-009)
+  - [x] Revamped 7-Dimension AAA Tabletop Benchmark Rubric & recorded Baseline Snapshot (46.5 / 100) in ADR-010
+
+- [ ] **Phase 7: Map Canvas Resilience & Undo/Redo Engine** *(Target: 52.5 / 100)*
+  - [ ] 20-step tile state undo/redo buffer (`Ctrl+Z` / `Ctrl+Y`)
+  - [ ] Visual Toolbar Undo/Redo controls & dirty state indicators
+  - [ ] Automated regression tests in `MapCanvas.test.tsx`
+- [ ] **Phase 8: Tactile Game Feel, Card Juice & Audio Polish** *(Target: 59.5 / 100)*
+- [ ] **Phase 9: Standalone "Campaign Sourcebook" Publisher** *(Target: 66.5 / 100)*
+- [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*
+- [ ] **Phase 11: 60fps Smooth Pan/Zoom Cartography Camera** *(Target: 79.5 / 100)*
 
 ---
 
 ## Tasks
 
 - [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
+- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot (46.5 / 100).
+- [ ] Merge `feat/v3-ui-redesign-and-wiki-integration` to `main`.
+- [ ] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine.
 
 

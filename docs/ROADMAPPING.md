@@ -10,52 +10,67 @@ status: active
 ```
 [Phase 0: Governance & Static Foundations] (Done)
   │
-  ├──► [Phase 1: Core Engine & Multi-World Local Persistence] (Current)
-  │      - TypeScript DeckEngine & CardData types
-  │      - WorldStorageService (localStorage named slots, autosave, JSON export/import)
-  │      - Unit test coverage (Vitest)
+  ├──► [Phase 1: Core Engine & Multi-World Local Persistence] (Done)
   │
-  ├──► [Phase 2: Interactive Grid Map Canvas]
-  │      - Configurable 20x12 grid canvas
-  │      - Terrain palette & paint/fill tools
-  │      - Tile inspector modal/drawer with event linkages
-  │      - Map snapshot export (PNG/SVG)
+  ├──► [Phase 2: Interactive Grid Map Canvas] (Done)
   │
-  ├──► [Phase 3: Timeline & Entity Registry]
-  │      - Chronological event timeline with epoch/year calculation
-  │      - Species, Civilization, and Myth trackers
-  │      - Spatial & entity cross-linking with map and cards
+  ├──► [Phase 3: Timeline & Entity Registry] (Done)
   │
-  └──► [Phase 4: Integrated World Building Studio]
-         - Unified responsive layout with panel toggles
-         - Theme polish & accessibility
-         - End-to-end verification and documentation
+  ├──► [Phase 4: Integrated World Studio & Final Polish] (Done)
+  │
+  ├──► [Phase 5: Vision Refinement & v2.1 Studio Polish] (Done)
+  │      - Hotseat multiplayer (1–6 seats), Seeded Auto-Play, Time-travel rewind
+  │
+  ├──► [Phase 6: v3.0 UI Hierarchy & Wiki Codex] (Done — Baseline: 46.5 / 100)
+  │      - 5-Level UI Hierarchy, Mode-Adaptive Workspaces (Companion, Studio, Freeform),
+  │        Bi-directional Wiki cross-linking, Instant search rules hub
+  │
+  ├──► [Phase 7: Map Canvas Resilience & Undo/Redo Engine] (Next — Target: 52.5 / 100)
+  │      - 20-step tile state undo/redo buffer (`Ctrl+Z` / `Ctrl+Y`)
+  │      - Toolbar Undo/Redo controls & dirty state indicators
+  │
+  ├──► [Phase 8: Tactile Game Feel, Card Juice & Audio Polish] (Target: 59.5 / 100)
+  │      - 3D CSS card flip & deal physics with micro-interactions
+  │      - Optional synthesized web-audio clicks/chimes with mute toggle
+  │
+  ├──► [Phase 9: Standalone "Campaign Sourcebook" Publisher] (Target: 66.5 / 100)
+  │      - 1-click self-contained printable HTML/PDF campaign book
+  │      - Embedded 2.5D SVG map, timeline chapters by Age, Codex stat blocks
+  │
+  ├──► [Phase 10: Frictionless Table Sharing via Compact URL / QR Code] (Target: 72.5 / 100)
+  │      - URL fragment state compression via lz-string & QR code generator modal
+  │
+  └──► [Phase 11: 60fps Smooth Pan/Zoom Cartography Camera] (Target: 79.5 / 100)
+         - Canvas viewport zoom/pan with mouse wheel, space+drag, and pinch gestures
 ```
 
 ## Milestone Deliverables
 
-### Phase 0: Foundations & Governance (Completed)
-- Clean up server-side/Vercel artifacts.
-- Set up GitHub Pages automated CI/CD with custom domain `world-building.inbarrose.com`.
-- Overhaul Agent Instructions, ADRs, and Architecture documentation.
+### Phase 0–6 (Completed Baseline — Score: 46.5 / 100)
+- Verified static SPA architecture on GitHub Pages.
+- 5-Level UI hierarchy, 3 mode workspaces, and bi-directional Wiki Codex (34/34 passing tests).
 
-### Phase 1: Modular Engine & Multi-World Persistence
-- Refactor card logic into standalone `DeckEngine.ts`.
-- Implement `WorldStorageService.ts` for multiple named saved worlds in `localStorage`.
-- Comprehensive Vitest test suite for deck logic and serialization.
+### Phase 7: Map Canvas Resilience & Undo/Redo Engine (Target: 52.5 / 100)
+- Immutable 20-action history stack (`undoStack` and `redoStack`) for brush and bucket fill operations.
+- `Ctrl+Z` / `Ctrl+Y` keyboard bindings and visual toolbar triggers.
+- Unit tests verifying multi-step fill/brush reversals.
 
-### Phase 2: Interactive Grid Map Canvas
-- Build HTML5/SVG interactive tile canvas with 12+ terrain types.
-- Tile inspection drawer showing terrain details, notes, and associated historical events.
-- PNG/SVG map image export.
+### Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Target: 59.5 / 100)
+- 3D card dealing and flipping animation transitions.
+- Subtle sound design using Web Audio API (card draw, turn pass, stage advance) with instant mute control.
+- Micro-interactions on buttons, tiles, and timeline scrubbers.
 
-### Phase 3: Timeline & Entity Registry
-- Dedicated timeline viewer with search and stage filters.
-- Entity registry tracking Primal species, Civilization societies, and Intrigue myths.
+### Phase 9: Standalone "Campaign Sourcebook" Publisher (Target: 66.5 / 100)
+- Publication-grade HTML/CSS export bundle styled like an official fantasy RPG sourcebook.
+- Two-column responsive layout with embedded SVG world map, chapter-by-stage chronicle, and entity dossiers.
 
-### Phase 4: Integrated World Studio & Final Polish
-- Unified Studio interface integrating Deck, Map, Timeline, and Entities.
-- Export entire world chronicle as a markdown/HTML bundle.
+### Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Target: 72.5 / 100)
+- Client-side compression of world states/seeds into URL fragments.
+- QR code display modal for instant mobile/tablet loading across the physical table without files.
+
+### Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100)
+- Infinite canvas viewport pan and zoom controls (`Space + Drag`, mouse wheel, touch pinch).
+- Coordinate ruler, minimap viewport indicator, and grid scale markers.
 
 ---
 
@@ -66,4 +81,11 @@ status: active
 - [x] Phase 2: Interactive Grid Map Canvas
 - [x] Phase 3: Timeline & Entity Registry
 - [x] Phase 4: Integrated World Studio & Polish
+- [x] Phase 5: Vision Refinement & v2.1 Studio Polish
+- [x] Phase 6: v3.0 UI Hierarchy & Wiki Codex Baseline (Score: 46.5 / 100)
+- [ ] Phase 7: Map Canvas Resilience & Undo/Redo Engine (Target: 52.5 / 100)
+- [ ] Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Target: 59.5 / 100)
+- [ ] Phase 9: Standalone "Campaign Sourcebook" Publisher (Target: 66.5 / 100)
+- [ ] Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Target: 72.5 / 100)
+- [ ] Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Target: 79.5 / 100)
 

@@ -46,6 +46,9 @@ npm --prefix frontend run preview
 ### 3. Project-Specific Conventions
 
 - **Atomic Commits**: The repository owner prefers small, atomic changes so they can review and commit frequently.
+- **Decision Records & Backlog Tracking**: Always record architectural decisions in `docs/DECISIONS.md` (ADRs) and track active/future backlog items in `docs/ROADMAPPING.md` and `docs/PROGRESS.md`.
+- **AAA Quality Scoring & Snapshots**: Benchmark all improvements against the 7-dimension AAA Tabletop Benchmark Rubric (ADR-010). Every proposal must state its aspirational score delta, and record verifiable score snapshots in `docs/DECISIONS.md`. Never use lenient self-referential curves.
+- **Validation**: Run `npm run test:ci` and `npm run build` after every meaningful change.
 - **Data & Rules**: Game rules in `rules_v2025-01-27.json` and `frontend/public/data/*.json` are canonical. Never alter rule mechanics without explicit user direction.
 - **Doc Integrity**: Keep `/docs/` and ADRs updated with any architectural decisions.
 - **File Structure**:

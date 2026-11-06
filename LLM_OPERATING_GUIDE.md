@@ -23,19 +23,26 @@ Create, maintain, and extend the `world-builder-site` application — a pure cli
    - The user requires atomic changes so they can review and commit frequently.
    - Keep pull requests and changes focused on single logical components with accompanying unit tests.
 
-2. **Phase Discipline**
-   - Work strictly within the current milestone defined in `docs/SESSION_STATE.md` and `docs/PROGRESS.md`.
+2. **Phase Discipline & Backlog Management**
+   - Work strictly within the active phase defined in `docs/SESSION_STATE.md` and `docs/PROGRESS.md`.
+   - Always maintain and update the phase roadmap in `docs/ROADMAPPING.md` with backlog items and dependencies.
    - Never implement unverified future-phase features before validating the current phase.
 
-3. **Determinism & Test-Driven Development (TDD)**
-   - All pure business logic (deck engine, probability calculations, timeline sequences, storage serializers) must be covered with unit tests in Vitest.
-   - Maintain minimum **80% test coverage** for core engine and state services.
+3. **Rubric Scoring & Quality Snapshots (AAA Standard)**
+   - All improvements must be measured against the **7-Dimension AAA Tabletop Benchmark Rubric** (ADR-010).
+   - Never use lenient or self-referential curves; benchmark against commercial platforms (*Foundry VTT, D&D Beyond, Inkarnate, Slay the Spire*).
+   - Every proposal or milestone must state its aspirational target score delta and record a verifiable score snapshot in `docs/DECISIONS.md` upon completion.
 
-4. **Safety & Documentation Integrity**
+4. **Continuous Test & Build Validation**
+   - All engine logic, deck mutations, serializations, and user interaction states must have Vitest unit/integration coverage.
+   - Run tests and static production build on every atomic step (`npm run test:ci` and `npm run build`). No commits with broken tests or compile errors.
+
+5. **Decision Records (ADRs) & Documentation Integrity**
+   - Every architectural shift, model redesign, rubric revamp, or subsystem addition must be immediately recorded as a formal ADR in `docs/DECISIONS.md`.
    - Game rules in `rules_v2025-01-27.json` and `frontend/public/data/*.json` are canonical and immutable unless explicitly requested by the user.
-   - Always update `docs/PROGRESS.md`, `docs/SESSION_STATE.md`, and `docs/DECISIONS.md` (ADRs) when architectural changes or new modules are introduced.
+   - Keep `docs/PROGRESS.md`, `docs/SESSION_STATE.md`, `docs/DECISIONS.md`, and `docs/ROADMAPPING.md` synchronized after every phase.
 
-5. **Human Override**
+6. **Human Override**
    - The repository owner (Inbar Rose) has authoritative control. On ambiguity or design conflicts, document questions and request feedback before modifying core behavior.
 
 ---
@@ -104,13 +111,13 @@ npm --prefix frontend run preview
 Perceive → Plan → Verify Plan → Implement → Test & Validate → Commit
 ```
 
-1. **Perceive**: Read `PROJECT_CONTEXT.md`, `docs/SESSION_STATE.md`, and relevant specs in `docs/`.
-2. **Plan**: Formulate atomic steps and present in `implementation_plan.md`.
-3. **Implement**: Write modular TypeScript code following standard React hook patterns and functional components.
+1. **Perceive**: Read `PROJECT_CONTEXT.md`, `docs/SESSION_STATE.md`, active backlog in `docs/ROADMAPPING.md`, and current score snapshot in `docs/DECISIONS.md`.
+2. **Plan**: Formulate atomic steps with explicit target score deltas on the AAA benchmark rubric and present in `implementation_plan.md`.
+3. **Implement**: Write modular TypeScript code following standard React hook patterns and functional components. Keep changes atomic.
 4. **Test & Validate**:
-   - Run `npm --prefix frontend run test:ci` (all tests must pass).
+   - Run `npm --prefix frontend run test:ci` (all tests must pass with zero regressions).
    - Run `npm --prefix frontend run build` (TypeScript compilation must pass with 0 errors).
-5. **Reflect & Document**: Update `docs/PROGRESS.md` and log ADRs in `docs/DECISIONS.md`.
+5. **Reflect & Document**: Update `docs/PROGRESS.md`, record score snapshot in `docs/DECISIONS.md`, update backlog items, and log formal ADRs.
 
 ---
 
