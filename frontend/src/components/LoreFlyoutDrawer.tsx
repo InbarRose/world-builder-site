@@ -1,6 +1,10 @@
-import { X, MapPin, Award, Users, FileText, Compass, ExternalLink } from 'lucide-react'
+import { X, MapPin, Award, Users, FileText, Compass, ExternalLink, Network } from 'lucide-react'
 import { WorldState } from '../engine/types'
-import { computeEntityAchievements, getEntityDiplomaticRelations } from '../engine/narrativeEngine'
+import {
+  computeEntityAchievements,
+  getEntityDiplomaticRelations,
+  buildEntityLineageTree,
+} from '../engine/narrativeEngine'
 
 interface LoreFlyoutDrawerProps {
   entityId: string | null
@@ -25,6 +29,7 @@ export function LoreFlyoutDrawer({
   const featsByEntity = computeEntityAchievements(world)
   const feats = featsByEntity[entity.id] || []
   const relations = getEntityDiplomaticRelations(entity, world.entities)
+  const lineage = buildEntityLineageTree(entity.id, world.entities)
 
   // Find all tiles claimed or linked to this entity
   const claimedTiles = Object.values(world.map.tiles).filter(
@@ -164,6 +169,85 @@ export function LoreFlyoutDrawer({
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dynasty & Lineage Succession */}
+        {(lineage.parents.length > 0 ||
+          lineage.descendants.length > 0 ||
+          lineage.peers.length > 0) && (
+          <div className="space-y-2">
+            <span className="font-bold uppercase tracking-wider text-muted-foreground text-[10px] flex items-center gap-1">
+              <Network className="h-3 w-3 text-primary" />
+              <span>Dynasty & Lineage Succession</span>
+            </span>
+            <div className="p-2.5 rounded-lg bg-background border border-border space-y-2.5">
+              {lineage.parents.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground font-semibold block">
+                    Progenitor / Parent Faction:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {lineage.parents.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => onNavigateToEntity(p.id)}
+                        className="px-2 py-0.5 rounded bg-muted/60 border border-border text-[11px] font-semibold hover:border-primary flex items-center gap-1 transition-colors"
+                      >
+                        <span>{p.icon || '📜'}</span>
+                        <span>{p.name}</span>
+                        <ExternalLink className="h-2 w-2 opacity-50" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {lineage.descendants.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground font-semibold block">
+                    Offspring / Successor Branches ({lineage.descendants.length}):
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {lineage.descendants.map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => onNavigateToEntity(d.id)}
+                        className="px-2 py-0.5 rounded bg-muted/60 border border-border text-[11px] font-semibold hover:border-primary flex items-center gap-1 transition-colors"
+                      >
+                        <span>{d.icon || '📜'}</span>
+                        <span>{d.name}</span>
+                        <ExternalLink className="h-2 w-2 opacity-50" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {lineage.peers.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground font-semibold block">
+                    Sister Branches:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {lineage.peers.map((peer) => (
+                      <button
+                        key={peer.id}
+                        type="button"
+                        onClick={() => onNavigateToEntity(peer.id)}
+                        className="px-2 py-0.5 rounded bg-muted/60 border border-border text-[11px] font-semibold hover:border-primary flex items-center gap-1 transition-colors"
+                      >
+                        <span>{peer.icon || '📜'}</span>
+                        <span>{peer.name}</span>
+                        <ExternalLink className="h-2 w-2 opacity-50" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

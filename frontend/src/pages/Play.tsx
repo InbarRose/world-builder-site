@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Play as PlayIcon,
@@ -25,6 +25,7 @@ import {
   Compass,
   Check,
   QrCode,
+  Volume2,
 } from 'lucide-react'
 import {
   Card,
@@ -104,8 +105,11 @@ import {
   startAmbientSoundscape,
   stopAmbientSoundscape,
   getAmbientMood,
+  getAmbientVolume,
+  setAmbientVolume,
   AmbientSoundscapeMood,
 } from '../engine/soundEngine'
+import { computeWorldStabilityIndex } from '../engine/narrativeEngine'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
 
@@ -133,6 +137,8 @@ export function Play() {
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null)
   const [flyoutEntityId, setFlyoutEntityId] = useState<string | null>(null)
   const [ambientMood, setAmbientMood] = useState<AmbientSoundscapeMood>(() => getAmbientMood())
+  const [ambientVolume, setAmbientVolumeState] = useState<number>(() => getAmbientVolume())
+  const worldStability = useMemo(() => computeWorldStabilityIndex(world), [world])
 
   // 3.1 Companion Mode Optional Toggleable Panels (All Collapsible & Independent)
   const [companionShowEventLog, setCompanionShowEventLog] = useState(false)
@@ -155,6 +161,7 @@ export function Play() {
   const [showTurnVerifyDialog, setShowTurnVerifyDialog] = useState(false)
   const [turnModifiedTiles, setTurnModifiedTiles] = useState<string[]>([])
   const [turnModifiedEntities, setTurnModifiedEntities] = useState<string[]>([])
+  const [stageCelebration, setStageCelebration] = useState<{ active: boolean; stageName: string } | null>(null)
 
   // Dedicated Modals
   const [showExportModal, setShowExportModal] = useState(false)
@@ -319,6 +326,32 @@ export function Play() {
       setAmbientMood(newMood)
     }
   }
+
+  // Global Keyboard Hotkey: Press 'M' to toggle ambient soundscape atmosphere
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement
+      const isInput =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          (activeEl as HTMLElement).isContentEditable)
+      if (isInput) return
+
+      if (e.key === 'm' || e.key === 'M') {
+        if (ambientMood !== 'none') {
+          stopAmbientSoundscape()
+          setAmbientMood('none')
+        } else {
+          startAmbientSoundscape('campfire')
+          setAmbientMood('campfire')
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [ambientMood])
 
   const handleNavigateToEvent = () => {
     if (gameMode === 'companion') {
@@ -779,6 +812,9 @@ export function Play() {
   const handleStageChange = (newStage: StageId) => {
     if (world.isLocked) return
     playStageAdvanceSound()
+    const stData = STAGES.find((s) => s.id === newStage)
+    setStageCelebration({ active: true, stageName: stData?.name || newStage })
+    setTimeout(() => setStageCelebration(null), 3000)
     persistWorldUpdate((prev) => ({
       ...prev,
       currentStage: newStage,
@@ -1081,6 +1117,26 @@ export function Play() {
                 <span>✨</span>
                 <span className="hidden sm:inline">Ether</span>
               </button>
+              {ambientMood !== 'none' && (
+                <div className="flex items-center gap-1 pl-1 border-l border-border/60">
+                  <Volume2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={ambientVolume}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value)
+                      setAmbientVolumeState(val)
+                      setAmbientVolume(val)
+                    }}
+                    className="w-14 h-1 accent-primary cursor-pointer"
+                    title={`Ambient Volume: ${Math.round(ambientVolume * 100)}%`}
+                    aria-label="Ambient Volume"
+                  />
+                </div>
+              )}
             </div>
 
             <button
@@ -1214,6 +1270,17 @@ export function Play() {
             )}
 
             <div className="ml-auto flex items-center gap-2 shrink-0">
+              {/* Geopolitical Stability / World Tension Index */}
+              <div
+                className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all ${worldStability.badgeColor}`}
+                title={`${worldStability.summary} (Score: ${worldStability.score}/100 • Alliances: ${worldStability.breakdown.alliancesCount}, Conflicts: ${worldStability.breakdown.conflictsCount}, Cataclysms: ${worldStability.breakdown.cataclysmsCount}, Settlements: ${worldStability.breakdown.settlementCount})`}
+                aria-label={`World Stability Index: ${worldStability.status}`}
+              >
+                <span>{worldStability.icon}</span>
+                <span className="font-bold hidden md:inline">{worldStability.status}</span>
+                <span className="text-[10px] font-mono opacity-85">({worldStability.score}%)</span>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setShowAgesModal(true)}
@@ -1226,6 +1293,23 @@ export function Play() {
           </nav>
         )}
       </header>
+
+      {/* Celebratory Stage Advance Banner */}
+      {stageCelebration && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-x-0 top-16 z-50 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-95 duration-300"
+        >
+          <div className="px-6 py-2.5 rounded-2xl bg-amber-500 text-stone-950 font-black shadow-2xl backdrop-blur-md border border-amber-300 flex items-center gap-3">
+            <Sparkles className="h-5 w-5 animate-spin text-amber-950" />
+            <span className="text-sm tracking-wide">
+              Dawn of a New Era: {stageCelebration.stageName}
+            </span>
+            <span className="text-lg">🌟</span>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================================
           2. AREA 3.1: PLAY COMPANION MODE (Digital Tabletop & Optional Panels)
@@ -1249,13 +1333,23 @@ export function Play() {
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       isAct
                         ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-accent'
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground'
                     }`}
                   >
-                    {st.number}. {st.name}
+                    {st.name}
                   </button>
                 )
               })}
+            </div>
+
+            {/* Geopolitical Stability Index in Companion Mode */}
+            <div
+              className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1 shrink-0 ${worldStability.badgeColor}`}
+              title={worldStability.summary}
+            >
+              <span>{worldStability.icon}</span>
+              <span className="font-bold">{worldStability.status}</span>
+              <span className="text-[10px] font-mono opacity-85">({worldStability.score}%)</span>
             </div>
 
             {/* Optional Toggleable Panels (Off by default, available whenever the user wants) */}

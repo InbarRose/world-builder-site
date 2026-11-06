@@ -1,0 +1,17 @@
+{
+  "name": "World Builder Studio",
+  "short_name": "WorldBuilder",
+  "description": "Tactile Physical Tabletop World-Building Studio, Hex Cartography, & Chronicle Generator",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#18181b",
+  "icons": [
+    {
+      "src": "./vite.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -330,3 +330,141 @@ export function synthesizeRealmSaga(world: WorldState): RealmSaga {
     historicFeats: computeEntityAchievements(world),
   }
 }
+
+/**
+ * Lineage and Dynasty relationships for an entity.
+ */
+export interface EntityLineage {
+  parents: WorldEntity[]
+  descendants: WorldEntity[]
+  peers: WorldEntity[]
+}
+
+export function buildEntityLineageTree(
+  entityId: string,
+  allEntities: WorldEntity[]
+): EntityLineage {
+  const current = allEntities.find((e) => e.id === entityId)
+  if (!current) {
+    return { parents: [], descendants: [], peers: [] }
+  }
+
+  const parents = current.parentEntityId
+    ? allEntities.filter((e) => e.id === current.parentEntityId)
+    : []
+
+  const descendants = allEntities.filter((e) => e.parentEntityId === entityId)
+
+  const peers = current.parentEntityId
+    ? allEntities.filter((e) => e.parentEntityId === current.parentEntityId && e.id !== entityId)
+    : []
+
+  return { parents, descendants, peers }
+}
+
+/**
+ * Real-time World Stability and Geopolitical Tension index.
+ */
+export interface WorldStabilityMetrics {
+  score: number // 0 to 100
+  status: 'Golden Age' | 'Pax & Stability' | 'Tense Borderlands' | 'Realm at War' | 'Age of Chaos'
+  icon: string
+  badgeColor: string
+  breakdown: {
+    alliancesCount: number
+    conflictsCount: number
+    cataclysmsCount: number
+    settlementCount: number
+  }
+  summary: string
+}
+
+export function computeWorldStabilityIndex(world: WorldState): WorldStabilityMetrics {
+  let alliancesCount = 0
+  let conflictsCount = 0
+
+  for (const ent of world.entities) {
+    for (const rel of ent.diplomaticLinks || []) {
+      if (
+        rel.type === 'alliance' ||
+        rel.type === 'trade_pact' ||
+        rel.type === 'royal_marriage' ||
+        rel.type === 'shared_faith'
+      ) {
+        alliancesCount++
+      } else if (rel.type === 'war' || rel.type === 'rivalry') {
+        conflictsCount++
+      }
+    }
+  }
+
+  // Count cataclysm turns in draw history
+  let cataclysmsCount = 0
+  for (const rec of world.drawHistory) {
+    if (
+      rec.card?.suit === '♠' ||
+      (rec.stage === 'genesis' && rec.note.toLowerCase().includes('cataclysm'))
+    ) {
+      cataclysmsCount++
+    }
+  }
+
+  // Count settlements on map
+  let settlementCount = 0
+  for (const tile of Object.values(world.map.tiles)) {
+    if (tile.slots?.some((s) => s.category === 'settlement') || tile.territoryId) {
+      settlementCount++
+    }
+  }
+
+  // Calculate score: base 60 + alliances * 10 - conflicts * 15 - cataclysms * 6 + settlements * 3
+  const rawScore =
+    60 + alliancesCount * 10 - conflictsCount * 15 - cataclysmsCount * 6 + settlementCount * 3
+  const score = Math.max(5, Math.min(100, rawScore))
+
+  let status: WorldStabilityMetrics['status'] = 'Pax & Stability'
+  let icon = '🛡️'
+  let badgeColor = 'text-teal-700 bg-teal-500/15 border-teal-500/30 dark:text-teal-300'
+  let summary = 'Order and civil progress prevail across the established realms.'
+
+  if (score >= 82) {
+    status = 'Golden Age'
+    icon = '🕊️'
+    badgeColor = 'text-emerald-700 bg-emerald-500/15 border-emerald-500/30 dark:text-emerald-300'
+    summary = 'Flourishing treaties, peace pacts, and thriving settlements unite the lands.'
+  } else if (score >= 60) {
+    status = 'Pax & Stability'
+    icon = '🛡️'
+    badgeColor = 'text-teal-700 bg-teal-500/15 border-teal-500/30 dark:text-teal-300'
+    summary = 'Order and civil progress prevail across the established realms.'
+  } else if (score >= 40) {
+    status = 'Tense Borderlands'
+    icon = '⚡'
+    badgeColor = 'text-amber-700 bg-amber-500/15 border-amber-500/30 dark:text-amber-300'
+    summary = 'Rivalries and border disputes strain alliances; tension simmers.'
+  } else if (score >= 20) {
+    status = 'Realm at War'
+    icon = '⚔️'
+    badgeColor = 'text-orange-700 bg-orange-500/15 border-orange-500/30 dark:text-orange-300'
+    summary = 'Active skirmishes and hostile rivalries tear through provinces.'
+  } else {
+    status = 'Age of Chaos'
+    icon = '🌋'
+    badgeColor = 'text-rose-700 bg-rose-500/15 border-rose-500/30 dark:text-rose-300'
+    summary = 'Cataclysms and widespread strife have unraveled the established order.'
+  }
+
+  return {
+    score,
+    status,
+    icon,
+    badgeColor,
+    breakdown: {
+      alliancesCount,
+      conflictsCount,
+      cataclysmsCount,
+      settlementCount,
+    },
+    summary,
+  }
+}
