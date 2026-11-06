@@ -9,24 +9,26 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 6 Completed; ADR-010 & Phase 7 Planned
-- **Session Date**: 2026-11-03
-- **Status**: Baseline v3.0 Verified (34/34 tests passing), ADR-010 AAA Benchmark Rubric Recorded (Baseline: 46.5 / 100), Ready to merge PR & launch Phase 7
+- **Current Phase**: Phase 7 Completed; Phase 8 Planned
+- **Session Date**: 2026-11-05
+- **Status**: Phase 7 Verified (35/35 tests passing), AAA Benchmark Score Snapshot (52.5 / 100) Recorded
 
 ## Completed in Current Session
-- **Phase 1 (Global Shell, Launchpad Homepage & Rules Hub)**: Redesigned `Layout.tsx` (minimal L0 sticky bar), `Home.tsx` (Active Realm Resume Banner + 3 primary area cards + direct `3.1 Companion`, `3.2 Studio`, `3.3 Freeform` mode launchers), and `Rules.tsx` (instant keyword search index, stage/category focus filter pills, collapsible sections, and 1-click print views).
-- **Phase 2 (Wiki-Grade Codex, Map Inspector & Timeline Cross-Linking)**: Redesigned `EntityRegistry.tsx` with explicit **Browse Wiki Mode** vs. collapsible **Creator / Editor Drawer**, Entity Spotlight, clickable trait filters, clickable map coordinates, and relationship badges; upgraded `MapCanvas.tsx` and `TimelinePanel.tsx` with bi-directional entity/tile/event cross-linking and custom lore event creation.
-- **Phase 3 (Play Workspace Modes 3.1, 3.2, 3.3)**: Redesigned `Play.tsx` with focused view switching (eliminating vertical stacking clutter), **3.1 Companion Mode** (inline stage switcher + optional toggle panels for Rules, Event Log, Codex, Map, Players + freeform turn notes), **3.2 Studio Mode** (live Turn Activity Basket tracking map/codex changes per turn + human/bot turn controls), and **3.3 Freeform Mode** (cardless world-building sandbox).
-- **Phase 4 (Scored ADRs & Automated Tests)**: Added ADR-008 and ADR-009 in `docs/DECISIONS.md`, and expanded the test suite to 34 passing unit and integration tests.
-- **Phase 5 (Revamped AAA Rubric & Backlog Governance)**: Added ADR-010 in `docs/DECISIONS.md` establishing the 7-dimension AAA Tabletop Quality Rubric and recorded baseline snapshot (46.5 / 100); updated `docs/ROADMAPPING.md`, `LLM_OPERATING_GUIDE.md`, and `.github/copilot-instructions.md` with continuous decision/scoring/testing rules.
+- **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
+  - Added bounded 25-step `undoStack` and `redoStack` in `MapCanvas.tsx` with continuous drag-stroke grouping.
+  - Implemented toolbar Undo and Redo buttons with disabled styling and real-time step counters.
+  - Added global `Ctrl+Z` (Undo) and `Ctrl+Y` / `Ctrl+Shift+Z` (Redo) hotkeys with input/textarea form focus protection.
+  - Added automated test cases in `MapCanvas.test.tsx` verifying single clicks, continuous strokes, and keyboard shortcuts (35/35 passing tests).
+  - Updated ADR-010 score snapshot table with the new **52.5 / 100** rating (+6.0 pts).
 
 ---
 
 ## Tasks
 
-- [x] Implement Phase 0–6 UI/UX redesign and Wiki integration.
+- [x] Implement Phase 0–6 UI/UX redesign and Wiki integration (merged via PR #4).
 - [x] Record ADR-010, revamped AAA rubric, and baseline snapshot (46.5 / 100).
-- [ ] Conclude v3.0 PR merge protocol into `main`.
-- [ ] Kick off Phase 7: Map Canvas Resilience & Undo/Redo Engine (Target: 52.5 / 100).
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (Score: 52.5 / 100).
+- [ ] Push Phase 7 branch and merge to `main`.
+- [ ] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Target: 59.5 / 100).
 
 

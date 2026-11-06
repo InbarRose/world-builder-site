@@ -143,9 +143,9 @@ status: active
 
 | Snapshot Date | Milestone / Version | D1 (20) | D2 (20) | D3 (15) | D4 (15) | D5 (10) | D6 (10) | D7 (10) | Total Score | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **2026-10-24** | v3.0 UI Redesign & Wiki Baseline | 5.0 | 9.0 | 6.0 | 9.0 | 7.0 | 5.5 | 5.0 | **46.5 / 100** | Current Baseline |
-| *Target Phase 7* | Canvas Resilience & Undo/Redo | 5.0 | 11.0 (+2) | 6.0 | 9.0 | 8.0 (+1) | 8.5 (+3) | 5.0 | **52.5 / 100** | Next Sprint |
-| *Target Phase 8* | Tactile Card Juice & Audio Polish | 12.0 (+7) | 11.0 | 6.0 | 9.0 | 8.0 | 8.5 | 5.0 | **59.5 / 100** | Planned |
+| **2026-10-24** | v3.0 UI Redesign & Wiki Baseline | 5.0 | 9.0 | 6.0 | 9.0 | 7.0 | 5.5 | 5.0 | **46.5 / 100** | Baseline |
+| **2026-11-05** | Phase 7: Canvas Resilience & Undo/Redo | 5.0 | 11.0 (+2) | 6.0 | 9.0 | 8.0 (+1) | 8.5 (+3) | 5.0 | **52.5 / 100** | Completed |
+| *Target Phase 8* | Tactile Card Juice & Audio Polish | 12.0 (+7) | 11.0 | 6.0 | 9.0 | 8.0 | 8.5 | 5.0 | **59.5 / 100** | Next Sprint |
 | *Target Phase 9* | Standalone Campaign Sourcebook Publisher | 12.0 | 11.0 | 7.0 (+1) | 10.0 (+1) | 8.0 | 8.5 | 10.0 (+5) | **66.5 / 100** | Planned |
 | *Target Phase 10* | Frictionless QR / URL Table Sharing | 12.0 | 11.0 | 7.0 | 14.0 (+4) | 9.0 (+1) | 9.5 (+1) | 10.0 | **72.5 / 100** | Planned |
 | *Target Phase 11* | 60fps Smooth Pan/Zoom Cartography Camera | 13.0 (+1) | 16.0 (+5) | 7.0 | 14.0 | 10.0 (+1) | 9.5 | 10.0 | **79.5 / 100** | Planned |
