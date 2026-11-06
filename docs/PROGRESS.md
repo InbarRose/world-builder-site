@@ -50,10 +50,12 @@ status: active
   - [x] Documented scored UX/UI rubric & architectural decisions in `docs/DECISIONS.md` (ADR-008 & ADR-009)
   - [x] Revamped 7-Dimension AAA Tabletop Benchmark Rubric & recorded Baseline Snapshot (46.5 / 100) in ADR-010
 
-- [ ] **Phase 7: Map Canvas Resilience & Undo/Redo Engine** *(Target: 52.5 / 100)*
-  - [ ] 20-step tile state undo/redo buffer (`Ctrl+Z` / `Ctrl+Y`)
-  - [ ] Visual Toolbar Undo/Redo controls & dirty state indicators
-  - [ ] Automated regression tests in `MapCanvas.test.tsx`
+- [x] **Phase 7: Map Canvas Resilience & Undo/Redo Engine** *(Score: 52.5 / 100)*
+  - [x] 25-step tile state undo/redo buffer with bounded memory management
+  - [x] Continuous drag-stroke grouping into atomic undo steps
+  - [x] Visual Toolbar Undo/Redo controls with disabled states and step counters
+  - [x] Keyboard shortcuts (`Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z`) with input protection
+  - [x] Automated regression tests in `MapCanvas.test.tsx` (35/35 passing tests)
 - [ ] **Phase 8: Tactile Game Feel, Card Juice & Audio Polish** *(Target: 59.5 / 100)*
 - [ ] **Phase 9: Standalone "Campaign Sourcebook" Publisher** *(Target: 66.5 / 100)*
 - [ ] **Phase 10: Frictionless Table Sharing via Compact URL / QR Code** *(Target: 72.5 / 100)*

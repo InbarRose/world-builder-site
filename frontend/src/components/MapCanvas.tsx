@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Paintbrush,
   PaintBucket,
   MousePointer,
   Eraser,
+  Undo2,
+  Redo2,
   Download,
   RotateCcw,
   Tag,
@@ -354,6 +356,90 @@ export function MapCanvas({
   const [customWidth, setCustomWidth] = useState<number>(map.width)
   const [customHeight, setCustomHeight] = useState<number>(map.height)
 
+  // Canvas Undo & Redo History Buffers (bounded to 25 states)
+  const [undoStack, setUndoStack] = useState<MapState[]>([])
+  const [redoStack, setRedoStack] = useState<MapState[]>([])
+  const dragStartMapRef = useRef<MapState | null>(null)
+  const hasStrokeMutatedRef = useRef<boolean>(false)
+
+  const pushToUndo = useCallback((snapshot: MapState) => {
+    setUndoStack((prev) => [...prev, snapshot].slice(-25))
+    setRedoStack([])
+  }, [])
+
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return
+    const previousMap = undoStack[undoStack.length - 1]
+    setUndoStack((prev) => prev.slice(0, -1))
+    setRedoStack((prev) => [...prev, map].slice(-25))
+    onChange(previousMap)
+  }, [undoStack, map, onChange])
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return
+    const nextMap = redoStack[redoStack.length - 1]
+    setRedoStack((prev) => prev.slice(0, -1))
+    setUndoStack((prev) => [...prev, map].slice(-25))
+    onChange(nextMap)
+  }, [redoStack, map, onChange])
+
+  // End continuous stroke and push drag-start snapshot to undo stack
+  const handleMouseUpGlobal = useCallback(() => {
+    if (isDragging) {
+      if (hasStrokeMutatedRef.current && dragStartMapRef.current) {
+        const snapshot = dragStartMapRef.current
+        setUndoStack((prev) => [...prev, snapshot].slice(-25))
+        setRedoStack([])
+        dragStartMapRef.current = null
+        hasStrokeMutatedRef.current = false
+      }
+      setIsDragging(false)
+    }
+  }, [isDragging])
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUpGlobal)
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUpGlobal)
+    }
+  }, [handleMouseUpGlobal])
+
+  // Keyboard Shortcuts: Ctrl+Z (Undo) and Ctrl+Y / Ctrl+Shift+Z (Redo)
+  useEffect(() => {
+    if (isViewOnly) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.getAttribute('contenteditable') === 'true')
+      ) {
+        return
+      }
+
+      const isCtrlOrMeta = e.ctrlKey || e.metaKey
+      if (!isCtrlOrMeta) return
+
+      if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+      } else if (
+        e.key.toLowerCase() === 'y' ||
+        (e.key.toLowerCase() === 'z' && e.shiftKey)
+      ) {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isViewOnly, handleUndo, handleRedo])
+
   // Custom Slot Builder inside Tile Inspector
   const [newSlotCategory, setNewSlotCategory] = useState<TileSlotCategory>('settlement')
   const [newSlotName, setNewSlotName] = useState('')
@@ -387,6 +473,7 @@ export function MapCanvas({
     }
 
     if (activeTool === 'erase') {
+      hasStrokeMutatedRef.current = true
       onChange(
         paintTile(map, col, row, {
           domain: 'water',
@@ -409,6 +496,7 @@ export function MapCanvas({
     }
 
     if (activeTool === 'fill') {
+      pushToUndo(map)
       onChange(
         bucketFillTerrain(
           map,
@@ -425,6 +513,7 @@ export function MapCanvas({
 
     if (activeTool === 'brush') {
       const existing = map.tiles[id] || createDefaultTile(col, row)
+      hasStrokeMutatedRef.current = true
       onChange(
         paintTile(map, col, row, {
           terrain: selectedTerrain,
@@ -451,6 +540,7 @@ export function MapCanvas({
   const handleUpdateInspectedTile = (
     updates: Partial<Omit<typeof inspectedTile, 'id' | 'col' | 'row'>>
   ) => {
+    pushToUndo(map)
     onChange(paintTile(map, inspectedTile.col, inspectedTile.row, updates))
   }
 
@@ -495,6 +585,7 @@ export function MapCanvas({
   const handleResizeGrid = (w: number, h: number) => {
     setCustomWidth(w)
     setCustomHeight(h)
+    pushToUndo(map)
     onChange(resizeMap(map, w, h))
   }
 
@@ -626,8 +717,8 @@ export function MapCanvas({
   return (
     <div
       className="space-y-4 select-none"
-      onMouseUp={() => setIsDragging(false)}
-      onMouseLeave={() => setIsDragging(false)}
+      onMouseUp={handleMouseUpGlobal}
+      onMouseLeave={handleMouseUpGlobal}
     >
       {/* Sleek Top Cartography Bar */}
       <div className="no-print card p-3 space-y-3">
@@ -717,6 +808,52 @@ export function MapCanvas({
                   <Eraser className="h-3.5 w-3.5" />
                   <span>Erase</span>
                 </button>
+
+                <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
+
+                {/* Undo / Redo History Controls */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={undoStack.length === 0}
+                    className="px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    title={
+                      undoStack.length > 0
+                        ? `Undo (${undoStack.length} step${undoStack.length > 1 ? 's' : ''}) — Ctrl+Z`
+                        : 'Undo (Ctrl+Z)'
+                    }
+                    aria-label="Undo Map Action"
+                  >
+                    <Undo2 className="h-3.5 w-3.5" />
+                    <span className="hidden md:inline">Undo</span>
+                    {undoStack.length > 0 && (
+                      <span className="text-[10px] px-1 py-0.2 rounded bg-muted-foreground/15 text-muted-foreground font-mono">
+                        {undoStack.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRedo}
+                    disabled={redoStack.length === 0}
+                    className="px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    title={
+                      redoStack.length > 0
+                        ? `Redo (${redoStack.length} step${redoStack.length > 1 ? 's' : ''}) — Ctrl+Y`
+                        : 'Redo (Ctrl+Y)'
+                    }
+                    aria-label="Redo Map Action"
+                  >
+                    <Redo2 className="h-3.5 w-3.5" />
+                    <span className="hidden md:inline">Redo</span>
+                    {redoStack.length > 0 && (
+                      <span className="text-[10px] px-1 py-0.2 rounded bg-muted-foreground/15 text-muted-foreground font-mono">
+                        {redoStack.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
 
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
 
@@ -911,9 +1048,10 @@ export function MapCanvas({
               </select>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  pushToUndo(map)
                   onChange(createInitialMap(map.width, map.height, geoPreset))
-                }
+                }}
                 className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1 text-destructive"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -1192,7 +1330,11 @@ export function MapCanvas({
                       type="button"
                       data-testid={`map-tile-${col}-${row}`}
                       onMouseDown={() => {
-                        setIsDragging(true)
+                        if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase')) {
+                          setIsDragging(true)
+                          dragStartMapRef.current = map
+                          hasStrokeMutatedRef.current = false
+                        }
                         applyToolToTile(col, row)
                       }}
                       onMouseEnter={() => handleTileMouseEnter(col, row)}

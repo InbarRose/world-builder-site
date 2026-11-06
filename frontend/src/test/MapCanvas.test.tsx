@@ -1,5 +1,6 @@
+import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MapCanvas } from '../components/MapCanvas'
 import { createInitialMap } from '../engine/mapEngine'
 
@@ -72,6 +73,76 @@ describe('MapCanvas Component', () => {
     // Switching to Edit Map reveals painting tools
     fireEvent.click(screen.getByRole('button', { name: /Edit Map/i }))
     expect(screen.getByRole('button', { name: /Paint Brush/i })).toBeInTheDocument()
+  })
+
+  it('supports 20-step undo and redo history for tile painting, continuous strokes, and Ctrl+Z / Ctrl+Y hotkeys', () => {
+    function InteractiveMap() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(4, 4))
+      return <MapCanvas map={currentMap} worldName="Eldoria" onChange={setCurrentMap} />
+    }
+
+    render(<InteractiveMap />)
+
+    const undoBtn = screen.getByRole('button', { name: /Undo Map Action/i })
+    const redoBtn = screen.getByRole('button', { name: /Redo Map Action/i })
+
+    // Initially, both Undo and Redo are disabled
+    expect(undoBtn).toBeDisabled()
+    expect(redoBtn).toBeDisabled()
+
+    // 1. Single click brush paint on (0, 0)
+    const tile00 = screen.getByTestId('map-tile-0-0')
+    fireEvent.mouseDown(tile00)
+    fireEvent.mouseUp(window)
+
+    expect(undoBtn).not.toBeDisabled()
+    expect(redoBtn).toBeDisabled()
+    expect(within(undoBtn).getByText('1')).toBeInTheDocument()
+
+    // 2. Click Undo button -> reverts tile
+    fireEvent.click(undoBtn)
+    expect(undoBtn).toBeDisabled()
+    expect(redoBtn).not.toBeDisabled()
+    expect(within(redoBtn).getByText('1')).toBeInTheDocument()
+
+    // 3. Click Redo button -> restores painted tile
+    fireEvent.click(redoBtn)
+    expect(undoBtn).not.toBeDisabled()
+    expect(redoBtn).toBeDisabled()
+    expect(within(undoBtn).getByText('1')).toBeInTheDocument()
+
+    // 4. Test Ctrl+Z and Ctrl+Y keyboard shortcuts
+    fireEvent.keyDown(window, { key: 'z', ctrlKey: true })
+    expect(undoBtn).toBeDisabled()
+    expect(redoBtn).not.toBeDisabled()
+    expect(within(redoBtn).getByText('1')).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { key: 'y', ctrlKey: true })
+    expect(undoBtn).not.toBeDisabled()
+    expect(redoBtn).toBeDisabled()
+    expect(within(undoBtn).getByText('1')).toBeInTheDocument()
+
+    // 5. Test continuous drag stroke grouping (3 tiles in 1 stroke)
+    const tile01 = screen.getByTestId('map-tile-0-1')
+    const tile02 = screen.getByTestId('map-tile-0-2')
+    const tile03 = screen.getByTestId('map-tile-0-3')
+
+    fireEvent.mouseDown(tile01)
+    fireEvent.mouseEnter(tile02)
+    fireEvent.mouseEnter(tile03)
+    fireEvent.mouseUp(window)
+
+    // Undo stack now has 2 steps: [Step 1: (0,0), Step 2: stroke (0,1 -> 0,3)]
+    expect(within(undoBtn).getByText('2')).toBeInTheDocument()
+
+    // Undo once reverts the entire 3-tile stroke
+    fireEvent.click(undoBtn)
+    expect(within(undoBtn).getByText('1')).toBeInTheDocument()
+    expect(within(redoBtn).getByText('1')).toBeInTheDocument()
+
+    // Redo restores all 3 tiles at once
+    fireEvent.click(redoBtn)
+    expect(within(undoBtn).getByText('2')).toBeInTheDocument()
   })
 })
 
