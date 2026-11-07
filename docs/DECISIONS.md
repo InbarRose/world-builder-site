@@ -222,6 +222,39 @@ status: active
 - [x] Add ADR-010 documenting the Revamped 7-Dimension AAA Benchmark Rubric, Baseline Score Snapshot (46.5/100), and Quality Governance.
 - [x] Add ADR-011 documenting the AAA Game Launcher, Deliberate Epoch Ceremonies, and Focus-Zone Header.
 - [x] Add ADR-012 documenting the Uncompromising AAA-Grade Multi-Domain Rubric, Adversarial Re-Evaluation (47.0/100 baseline), and Phase 17–24 Master Roadmap.
+- [x] Add ADR-013 documenting the Institutionalization of the Human Experience (HX)-Led Engineering Framework.
 - [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
+
+---
+
+## ADR-013: Institutionalizing the Human Experience (HX)-Led Engineering Framework
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - Technical roadmaps and adversarial rubrics, while necessary for rigor, risk degenerating into detached metric-chasing if not anchored directly in the lived human reality of players, game masters, and worldbuilders.
+  - Engineering decisions must be guided by human personas, emotional arcs, and user journeys so that features solve real creative and tabletop friction (e.g., accidental canvas overwrites, broken immersion during turn passing, loss of uncommitted chronicle lore, slow device sharing at the physical table).
+- **Decision**:
+  1. **Adopt the Human Experience (HX) Traceability Standard**:
+     - Establish the unbroken progression: `Human Need -> Persona -> User Journey -> PRD Requirement -> HLD Architecture -> Component Spec -> Work Items -> Automated Tests -> Rubric Score Delta`.
+     - Documented in [`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`](./HUMAN_EXPERIENCE_FRAMEWORK.md), [`docs/USER_JOURNEYS.md`](./USER_JOURNEYS.md), and [`docs/PRD_HLD_SPECS.md`](./PRD_HLD_SPECS.md).
+  2. **Institutionalize Four Core Human Personas**:
+     - *Evelyn (The Solo Myth-Weaver)*: Atmospheric immersion, safe cartography, high-DPI export.
+     - *Marcus & The Tabletop Circle (Live GM & Players)*: Fast turn handoffs, physical parity, zero-login peer sync.
+     - *Soren (The Tactical Cartographer)*: Axial hex verisimilitude, procedural plate tectonics, coordinate precision.
+     - *Lyra (The Lore Archivist)*: Relational causal saga graph, entity lifecycles, campaign sourcebooks.
+  3. **Institutionalize Six End-to-End User Journeys**:
+     - J1: Awakening & Realm Genesis (Studio Launcher & Stepper Ceremony).
+     - J2: The Core Loop — The Turn Ritual (Kinetic Card Draw, Drafting Workshop, Turn Basket Commit).
+     - J3: The Turning of an Age (Epoch Ascension Ceremony & Map Retrospective).
+     - J4: The Shared Hearth (Zero-Login Tabletop Sync & Hotseat Safety).
+     - J5: The Master Scribe (High-DPI Cartographic Campaign Tome Publication).
+     - J6: The Freeform Dreamer (Cardless Infinite World Sandbox & POI Lore).
+  4. **Iterative Refinement Governance**:
+     - When playtesting or user feedback reveals ergonomic friction, the User Journey and PRD specification must be updated before engineering refactors commence.
+- **Consequences**:
+  - Code changes and PRs must explicitly justify how they improve the human tabletop experience.
+  - Guarantees that our journey from the 47.0 baseline to 90+ remains grounded in actual human delight, ergonomic safety, and tabletop verisimilitude.
+
 
 

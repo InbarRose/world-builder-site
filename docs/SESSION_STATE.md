@@ -103,6 +103,7 @@ status: active
 - [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (merged via PR #13).
 - [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (merged via PR #14).
 - [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
+- [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
 - [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
 
 
