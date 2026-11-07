@@ -21,6 +21,7 @@ import {
   CloudFog,
   ShieldCheck,
   Unlock,
+  Ruler,
 } from 'lucide-react'
 import {
   DrawRecord,
@@ -57,10 +58,19 @@ import {
   computeTileNeighborContext,
   TileNeighborContext,
 } from '../engine/cartographyShadingEngine'
+import {
+  hexToPixel,
+  getHexPolygonPoints,
+  getHexRange,
+  measureTabletopDistance,
+  getGridPixelDimensions,
+  MeasurementResult,
+  OffsetCoord,
+} from '../engine/hexTopologyEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
-export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog'
+export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog' | 'ruler'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
 
 interface MapCanvasProps {
@@ -474,6 +484,14 @@ export function MapCanvas({
   const [paintRoad, setPaintRoad] = useState(false)
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('')
   const [geoPreset, setGeoPreset] = useState<GeographyPreset>('continent')
+  const [rulerStart, setRulerStart] = useState<OffsetCoord | null>(null)
+  const [rulerHover, setRulerHover] = useState<OffsetCoord | null>(null)
+  const [brushRadius, setBrushRadius] = useState<number>(0) // 0: 1x1, 1: 3x3, 2: 5x5
+
+  const rulerMeasurement: MeasurementResult | null =
+    activeTool === 'ruler' && rulerStart && rulerHover
+      ? measureTabletopDistance(rulerStart, rulerHover, map.gridTopology || 'square')
+      : null
 
   const [internalSelectedTileId, setInternalSelectedTileId] = useState<string>('10,6')
   const selectedTileId = controlledSelectedTileId || internalSelectedTileId
@@ -737,14 +755,38 @@ export function MapCanvas({
     const id = getTileId(col, row)
     setSelectedTileId(id)
 
+    if (activeTool === 'ruler') {
+      if (!rulerStart) {
+        setRulerStart({ col, row })
+        setRulerHover({ col, row })
+      } else if (rulerStart.col === col && rulerStart.row === row) {
+        setRulerStart(null)
+        setRulerHover(null)
+      } else {
+        setRulerHover({ col, row })
+      }
+      return
+    }
+
     if (isViewOnly || activeTool === 'inspect') {
       return
     }
 
+    const affectedCoords =
+      brushRadius > 0
+        ? getHexRange({ col, row }, brushRadius, map.gridTopology || 'square', {
+            width: map.width,
+            height: map.height,
+          })
+        : [{ col, row }]
+
     if (activeTool === 'erase') {
       hasStrokeMutatedRef.current = true
-      onChange(
-        paintTile(map, col, row, {
+      const nextTiles = { ...map.tiles }
+      for (const coord of affectedCoords) {
+        const tid = getTileId(coord.col, coord.row)
+        nextTiles[tid] = {
+          ...createDefaultTile(coord.col, coord.row),
           domain: 'water',
           terrain: 'ocean',
           relief: 'none',
@@ -759,8 +801,9 @@ export function MapCanvas({
           hasRoad: false,
           territoryId: undefined,
           label: undefined,
-        })
-      )
+        }
+      }
+      onChange({ ...map, tiles: nextTiles })
       return
     }
 
@@ -768,16 +811,13 @@ export function MapCanvas({
       hasStrokeMutatedRef.current = true
       const existing = map.tiles[id] || createDefaultTile(col, row)
       const nextUnexplored = !existing.isUnexplored
-      onChange({
-        ...map,
-        tiles: {
-          ...map.tiles,
-          [id]: {
-            ...existing,
-            isUnexplored: nextUnexplored,
-          },
-        },
-      })
+      const nextTiles = { ...map.tiles }
+      for (const coord of affectedCoords) {
+        const tid = getTileId(coord.col, coord.row)
+        const t = nextTiles[tid] || createDefaultTile(coord.col, coord.row)
+        nextTiles[tid] = { ...t, isUnexplored: nextUnexplored }
+      }
+      onChange({ ...map, tiles: nextTiles })
       return
     }
 
@@ -798,10 +838,13 @@ export function MapCanvas({
     }
 
     if (activeTool === 'brush') {
-      const existing = map.tiles[id] || createDefaultTile(col, row)
       hasStrokeMutatedRef.current = true
-      onChange(
-        paintTile(map, col, row, {
+      const nextTiles = { ...map.tiles }
+      for (const coord of affectedCoords) {
+        const tid = getTileId(coord.col, coord.row)
+        const existing = nextTiles[tid] || createDefaultTile(coord.col, coord.row)
+        nextTiles[tid] = {
+          ...existing,
           terrain: selectedTerrain,
           relief: selectedRelief !== 'none' ? selectedRelief : existing.relief,
           flora: selectedFlora !== 'none' ? selectedFlora : existing.flora,
@@ -812,12 +855,16 @@ export function MapCanvas({
           hasRiver: paintRiver ? true : existing.hasRiver,
           hasRoad: paintRoad ? true : existing.hasRoad,
           territoryId: selectedTerritoryId || existing.territoryId,
-        })
-      )
+        }
+      }
+      onChange({ ...map, tiles: nextTiles })
     }
   }
 
   const handleTileMouseEnter = (col: number, row: number) => {
+    if (activeTool === 'ruler' && rulerStart) {
+      setRulerHover({ col, row })
+    }
     if (isDragging && (activeTool === 'brush' || activeTool === 'erase' || activeTool === 'fog')) {
       applyToolToTile(col, row)
     }
@@ -1134,6 +1181,24 @@ export function MapCanvas({
                   <CloudFog className="h-3.5 w-3.5" />
                   <span>Fog / Reveal</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTool('ruler')
+                    setRulerStart(null)
+                    setRulerHover(null)
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'ruler'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                  title="Distance Ruler: Measure distances in leagues, miles, and march days"
+                  aria-label="Distance Ruler Tool"
+                >
+                  <Ruler className="h-3.5 w-3.5" />
+                  <span>Ruler</span>
+                </button>
 
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
 
@@ -1297,6 +1362,53 @@ export function MapCanvas({
               </button>
             </div>
 
+            {/* Grid Topology Switcher: Square vs Pointy Hex vs Flat Hex */}
+            <div
+              className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
+              role="group"
+              aria-label="Grid Topology Mode"
+            >
+              <button
+                type="button"
+                onClick={() => onChange({ ...map, gridTopology: 'square' })}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                  !map.gridTopology || map.gridTopology === 'square'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Orthogonal Square Grid (Classic)"
+                aria-label="Square Grid Mode"
+              >
+                Square
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ ...map, gridTopology: 'hex-pointy' })}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                  map.gridTopology === 'hex-pointy'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Pointy-Topped Hexagonal Grid (Tactical VTT)"
+                aria-label="Pointy Hex Mode"
+              >
+                ⬡ Pointy Hex
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ ...map, gridTopology: 'hex-flat' })}
+                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                  map.gridTopology === 'hex-flat'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Flat-Topped Hexagonal Grid (Atlas Wargame)"
+                aria-label="Flat Hex Mode"
+              >
+                ⬢ Flat Hex
+              </button>
+            </div>
+
             {/* Organic Shading & Biome Blending Mode Toggle */}
             <div
               className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
@@ -1444,6 +1556,45 @@ export function MapCanvas({
                   1. Base Biome & Domain (Empty grass/ocean tiles stay clean without icon noise)
                 </label>
                 <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded border border-border">
+                    <span className="text-[10px] text-muted-foreground px-1 font-medium">Brush:</span>
+                    <button
+                      type="button"
+                      onClick={() => setBrushRadius(0)}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        brushRadius === 0
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title="Single Tile (1x1)"
+                    >
+                      1×1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBrushRadius(1)}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        brushRadius === 1
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title="Radius 1 (3x3 or 7 hexes)"
+                    >
+                      3×3
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBrushRadius(2)}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        brushRadius === 2
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title="Radius 2 (5x5 or 19 hexes)"
+                    >
+                      5×5
+                    </button>
+                  </div>
                   <span className="text-muted-foreground">Tile Style:</span>
                   <select
                     value={selectedColoringMode}
@@ -1686,99 +1837,180 @@ export function MapCanvas({
                 transition: isPanning ? 'none' : 'transform 100ms ease-out',
               }}
             >
-              <div
-                className={`inline-grid relative border-4 ${
-                  !isViewOnly
-                    ? 'border-amber-500/80 ring-4 ring-amber-500/20'
-                    : 'border-amber-950/60 dark:border-slate-700'
-                } rounded-lg overflow-hidden shadow-2xl ${
-                  renderStyle === 'tilt-25d'
-                    ? 'atlas-perspective-plane'
-                    : 'atlas-flat-plane'
-                }`}
-                style={{
-                  gridTemplateColumns: `repeat(${map.width}, ${tileSizePx}px)`,
-                }}
-                role="grid"
-                aria-label="World Map Grid"
-              >
-              {Array.from({ length: map.height }).map((_, row) =>
-                Array.from({ length: map.width }).map((__, col) => {
-                  const id = getTileId(col, row)
-                  const tile = map.tiles[id] || createDefaultTile(col, row)
-                  const terrainMeta =
-                    TERRAIN_PALETTE[tile.terrain] || TERRAIN_PALETTE.ocean
-                  const isSelected = selectedTileId === id
-                  const effectiveSlots = getEffectiveTileSlots(tile, entities)
-                  const primarySlot = effectiveSlots[0]
-                  const secondarySlot = effectiveSlots[1]
-                  const extraSlotCount = Math.max(0, effectiveSlots.length - 2)
+              {(() => {
+                const isHex = map.gridTopology === 'hex-pointy' || map.gridTopology === 'hex-flat'
+                const hexTopology = map.gridTopology === 'hex-flat' ? 'hex-flat' : 'hex-pointy'
+                const hexRadius = 24
+                const gridDim = isHex
+                  ? getGridPixelDimensions(map.width, map.height, hexRadius, hexTopology)
+                  : { totalWidth: map.width * tileSizePx, totalHeight: map.height * tileSizePx }
 
-                  const hasEvents =
-                    tile.linkedEventIds.length > 0 ||
-                    Boolean(tile.notes) ||
-                    tile.tags.length > 0
+                return (
+                  <div
+                    className={`${isHex ? 'relative' : 'inline-grid relative'} border-4 ${
+                      !isViewOnly
+                        ? 'border-amber-500/80 ring-4 ring-amber-500/20'
+                        : 'border-amber-950/60 dark:border-slate-700'
+                    } rounded-lg overflow-hidden shadow-2xl ${
+                      renderStyle === 'tilt-25d'
+                        ? 'atlas-perspective-plane'
+                        : 'atlas-flat-plane'
+                    }`}
+                    style={
+                      isHex
+                        ? {
+                            width: `${gridDim.totalWidth}px`,
+                            height: `${gridDim.totalHeight}px`,
+                            minWidth: `${gridDim.totalWidth}px`,
+                            minHeight: `${gridDim.totalHeight}px`,
+                          }
+                        : {
+                            gridTemplateColumns: `repeat(${map.width}, ${tileSizePx}px)`,
+                          }
+                    }
+                    role="grid"
+                    aria-label="World Map Grid"
+                  >
+                  {Array.from({ length: map.height }).map((_, row) =>
+                    Array.from({ length: map.width }).map((__, col) => {
+                      const id = getTileId(col, row)
+                      const tile = map.tiles[id] || createDefaultTile(col, row)
+                      const terrainMeta =
+                        TERRAIN_PALETTE[tile.terrain] || TERRAIN_PALETTE.ocean
+                      const isSelected = selectedTileId === id
+                      const effectiveSlots = getEffectiveTileSlots(tile, entities)
+                      const primarySlot = effectiveSlots[0]
+                      const secondarySlot = effectiveSlots[1]
+                      const extraSlotCount = Math.max(0, effectiveSlots.length - 2)
 
-                  const hasLakeOrSpringSlot = (tile.slots || []).some(
-                    (s) => s.category === 'hydrology'
-                  )
-                  const isCoastal = isCoastalLandTile(col, row, tile)
-                  const neighborContext = computeTileNeighborContext(map, col, row)
+                      const hasEvents =
+                        tile.linkedEventIds.length > 0 ||
+                        Boolean(tile.notes) ||
+                        tile.tags.length > 0
 
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      data-testid={`map-tile-${col}-${row}`}
-                      onMouseDown={(e) => {
-                        if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
-                          return
-                        }
-                        if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase')) {
-                          setIsDragging(true)
-                          dragStartMapRef.current = map
-                          hasStrokeMutatedRef.current = false
-                        }
-                        applyToolToTile(col, row)
-                      }}
-                      onMouseEnter={() => {
-                        if (isSpacePressed || activeTool === 'pan' || isPanning) {
-                          return
-                        }
-                        handleTileMouseEnter(col, row)
-                      }}
-                      style={{
-                        ...getTileBackgroundStyle(tile),
-                        width: `${tileSizePx}px`,
-                        height: `${tileSizePx}px`,
-                      }}
-                      title={`(${col}, ${row}) [${getTileDomain(tile).toUpperCase()}] ${
-                        terrainMeta.label
-                      }${
-                        effectiveSlots.length > 0
-                          ? ` · Slots: ${effectiveSlots.map((s) => s.name).join(', ')}`
-                          : ''
-                      }${tile.label ? ` — ${tile.label}` : ''}`}
-                      className={`relative border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
-                        isSelected
-                          ? 'ring-2 ring-white z-20 scale-110 shadow-xl'
-                          : 'hover:brightness-105'
-                      }`}
-                    >
-                      {/* Procedural Illustrated SVG Cartography Underlay */}
-                      <TileCartographySvg
-                        col={col}
-                        row={row}
-                        terrain={tile.terrain}
-                        relief={tile.relief}
-                        flora={tile.flora}
-                        hasRiver={tile.hasRiver}
-                        hasRoad={tile.hasRoad}
-                        isCoastalLand={isCoastal}
-                        simpleMode={renderStyle === 'simple-schematic'}
-                        neighborContext={neighborContext}
-                        enableOrganicShading={shadingMode === 'organic'}
-                      />
+                      const hasLakeOrSpringSlot = (tile.slots || []).some(
+                        (s) => s.category === 'hydrology'
+                      )
+                      const isCoastal = isCoastalLandTile(col, row, tile)
+                      const neighborContext = computeTileNeighborContext(map, col, row)
+
+                      // Hex vs Square calculations
+                      const center = isHex
+                        ? hexToPixel({ col, row }, hexRadius, hexTopology)
+                        : { x: col * tileSizePx + tileSizePx / 2, y: row * tileSizePx + tileSizePx / 2 }
+                      const hexWidth = hexTopology === 'hex-pointy' ? Math.sqrt(3) * hexRadius : 2 * hexRadius
+                      const hexHeight = hexTopology === 'hex-pointy' ? 2 * hexRadius : Math.sqrt(3) * hexRadius
+                      const clipPath = isHex
+                        ? hexTopology === 'hex-pointy'
+                          ? 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                          : 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'
+                        : undefined
+
+                      const isInRulerPath = Boolean(
+                        rulerMeasurement?.path.some((p) => p.col === col && p.row === row)
+                      )
+                      const isRulerOrigin = Boolean(
+                        rulerStart && rulerStart.col === col && rulerStart.row === row
+                      )
+
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          data-testid={`map-tile-${col}-${row}`}
+                          onMouseDown={(e) => {
+                            if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
+                              return
+                            }
+                            if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase')) {
+                              setIsDragging(true)
+                              dragStartMapRef.current = map
+                              hasStrokeMutatedRef.current = false
+                            }
+                            applyToolToTile(col, row)
+                          }}
+                          onMouseEnter={() => {
+                            if (isSpacePressed || activeTool === 'pan' || isPanning) {
+                              return
+                            }
+                            handleTileMouseEnter(col, row)
+                          }}
+                          style={
+                            isHex
+                              ? {
+                                  ...getTileBackgroundStyle(tile),
+                                  position: 'absolute',
+                                  left: `${center.x - hexWidth / 2}px`,
+                                  top: `${center.y - hexHeight / 2}px`,
+                                  width: `${hexWidth}px`,
+                                  height: `${hexHeight}px`,
+                                  clipPath,
+                                }
+                              : {
+                                  ...getTileBackgroundStyle(tile),
+                                  width: `${tileSizePx}px`,
+                                  height: `${tileSizePx}px`,
+                                }
+                          }
+                          title={`(${col}, ${row}) [${getTileDomain(tile).toUpperCase()}] ${
+                            terrainMeta.label
+                          }${
+                            effectiveSlots.length > 0
+                              ? ` · Slots: ${effectiveSlots.map((s) => s.name).join(', ')}`
+                              : ''
+                          }${tile.label ? ` — ${tile.label}` : ''}`}
+                          className={`relative border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
+                            isSelected || isRulerOrigin
+                              ? 'ring-2 ring-white z-20 scale-110 shadow-xl'
+                              : isInRulerPath
+                              ? 'ring-2 ring-amber-400 z-20 brightness-110 shadow-md'
+                              : 'hover:brightness-105'
+                          }`}
+                        >
+                          {/* Procedural Illustrated SVG Cartography Underlay */}
+                          <TileCartographySvg
+                            col={col}
+                            row={row}
+                            terrain={tile.terrain}
+                            relief={tile.relief}
+                            flora={tile.flora}
+                            hasRiver={tile.hasRiver}
+                            hasRoad={tile.hasRoad}
+                            isCoastalLand={isCoastal}
+                            simpleMode={renderStyle === 'simple-schematic'}
+                            neighborContext={neighborContext}
+                            enableOrganicShading={shadingMode === 'organic'}
+                          />
+
+                          {/* Crisp Hexagonal Polygon Stroke Outline */}
+                          {isHex && (
+                            <svg
+                              viewBox={`0 0 ${hexWidth} ${hexHeight}`}
+                              className="absolute inset-0 w-full h-full pointer-events-none"
+                            >
+                              <polygon
+                                points={getHexPolygonPoints(
+                                  { x: hexWidth / 2, y: hexHeight / 2 },
+                                  hexRadius,
+                                  hexTopology
+                                )}
+                                fill="none"
+                                stroke={
+                                  isSelected || isRulerOrigin
+                                    ? '#f59e0b'
+                                    : isInRulerPath
+                                    ? '#fbbf24'
+                                    : 'rgba(0,0,0,0.22)'
+                                }
+                                strokeWidth={isSelected || isRulerOrigin ? '2.5' : isInRulerPath ? '2' : '1'}
+                              />
+                            </svg>
+                          )}
+
+                          {/* Ruler Path Golden Highlight Overlay */}
+                          {isInRulerPath && (
+                            <div className="absolute inset-0 bg-amber-400/25 pointer-events-none z-10 animate-pulse" />
+                          )}
 
                       {/* Corner Micro-Indicators (Top-Left: Extra Slots or Lake/Island indicator) */}
                       {extraSlotCount > 0 ? (
@@ -1857,7 +2089,40 @@ export function MapCanvas({
                 />
               )}
             </div>
-          </div>
+          )
+        })()}
+      </div>
+
+          {/* Floating Distance Ruler Measurement Banner */}
+          {rulerMeasurement && (
+            <div
+              data-testid="hex-ruler-overlay"
+              className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900/95 text-stone-100 border border-amber-500/50 rounded-xl px-4 py-2.5 shadow-2xl flex items-center gap-4 text-xs z-40 pointer-events-auto backdrop-blur-md"
+            >
+              <div className="flex items-center gap-2 font-mono">
+                <Ruler className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span className="font-bold text-amber-300">
+                  {rulerMeasurement.tiles} {map.gridTopology?.startsWith('hex') ? 'hexes' : 'tiles'}
+                </span>
+                <span className="text-stone-400">·</span>
+                <span>{rulerMeasurement.leagues} leagues ({rulerMeasurement.miles} miles)</span>
+                <span className="text-stone-400">·</span>
+                <span className="text-emerald-400 font-semibold">
+                  ~{rulerMeasurement.daysWalk} days march
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRulerStart(null)
+                  setRulerHover(null)
+                }}
+                className="text-stone-400 hover:text-stone-100 px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700 transition-colors"
+              >
+                Clear Ruler
+              </button>
+            </div>
+          )}
 
           {/* Floating Cartographic Scale & Compass Rose */}
           <div className="absolute bottom-3 left-3 z-30 flex items-center gap-2 pointer-events-none select-none">
