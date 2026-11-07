@@ -104,6 +104,8 @@ status: active
 - [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (merged via PR #14).
 - [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
 - [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
+- [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export (merged via PR #17).
+- [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (merged via PR #18).
 - [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
 
 
