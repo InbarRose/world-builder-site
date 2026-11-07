@@ -30,6 +30,8 @@ import {
   Settings,
   Share2,
   ChevronDown,
+  Search,
+  Keyboard,
 } from 'lucide-react'
 import {
   Card,
@@ -98,6 +100,9 @@ import { LoreFlyoutDrawer } from '../components/LoreFlyoutDrawer'
 import { StudioLauncher } from '../components/StudioLauncher'
 import { NewGameCeremonyModal } from '../components/NewGameCeremonyModal'
 import { EpochCeremonyModal } from '../components/EpochCeremonyModal'
+import { CommandPalette } from '../components/CommandPalette'
+import { KeyboardShortcutsModal } from '../components/KeyboardShortcutsModal'
+import { saveWorldAsync } from '../engine/storageIndexedDb'
 import {
   decodeWorldFromCompressedHash,
   parseSeedShareUrl,
@@ -185,6 +190,26 @@ export function Play() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
   const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
   const [showNewGameCeremonyModal, setShowNewGameCeremonyModal] = useState(false)
+  const [showCommandPalette, setShowCommandPalette] = useState(false)
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false)
+  const [isDraftingWorkshop, setIsDraftingWorkshop] = useState(false)
+
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      const activeTag = document.activeElement?.tagName.toLowerCase()
+      const isInput = activeTag === 'input' || activeTag === 'textarea'
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setShowCommandPalette((prev) => !prev)
+      } else if (e.key === '?' && !isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        setShowShortcutsModal(true)
+      }
+    }
+    window.addEventListener('keydown', handleGlobalShortcuts)
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts)
+  }, [])
   const [isInLauncher, setIsInLauncher] = useState<boolean>(() => {
     const view = searchParams.get('view')
     const menu = searchParams.get('menu')
@@ -214,6 +239,7 @@ export function Play() {
   const persistWorldUpdate = useCallback((updater: (prev: WorldState) => WorldState) => {
     setWorld((prev) => {
       const next = saveWorld(updater(prev))
+      saveWorldAsync(next).catch(() => {})
       setSavedWorlds(listSavedWorlds())
       return next
     })
@@ -417,6 +443,17 @@ export function Play() {
     } else {
       startAmbientSoundscape(newMood)
       setAmbientMood(newMood)
+    }
+  }
+
+  const isSoundMuted = ambientMood === 'none'
+  const handleToggleSound = () => {
+    if (ambientMood !== 'none') {
+      stopAmbientSoundscape()
+      setAmbientMood('none')
+    } else {
+      startAmbientSoundscape('campfire')
+      setAmbientMood('campfire')
     }
   }
 
@@ -1253,6 +1290,20 @@ export function Play() {
               )}
             </div>
 
+            {/* Spotlight Command Palette (Ctrl+K) */}
+            <button
+              type="button"
+              onClick={() => setShowCommandPalette(true)}
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 hover:border-primary/60"
+              title="Open Spotlight Command Palette (Ctrl+K)"
+              aria-label="Command Palette"
+            >
+              <Search className="h-3.5 w-3.5 text-primary" />
+              <span className="hidden md:inline font-mono text-[10px] bg-muted px-1 py-0.5 rounded border border-border text-muted-foreground">
+                Ctrl+K
+              </span>
+            </button>
+
             {/* Share & Export Popover */}
             <div className="relative">
               <button
@@ -1414,6 +1465,18 @@ export function Play() {
                         <span>Lock Realm (Read-Only)</span>
                       </>
                     )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowShortcutsModal(true)
+                      setShowSettingsMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <Keyboard className="h-3.5 w-3.5 text-primary" />
+                    <span>Keyboard Shortcuts (?)</span>
                   </button>
 
                   <div className="h-px bg-border my-1" />
@@ -3083,6 +3146,34 @@ export function Play() {
         onClose={() => setFlyoutEntityId(null)}
         onNavigateToTile={handleNavigateToTile}
         onNavigateToEntity={handleNavigateToEntity}
+      />
+
+      {/* Global Spotlight Command Palette (Ctrl+K) */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        world={world}
+        currentMode={gameMode}
+        onSelectMode={handleModeChange}
+        onToggleSafeMode={() => setIsDraftingWorkshop((prev) => !prev)}
+        isDraftingWorkshop={isDraftingWorkshop}
+        onUndo={() => {}}
+        onRedo={() => {}}
+        canUndo={false}
+        canRedo={false}
+        onToggleSound={handleToggleSound}
+        isSoundMuted={isSoundMuted}
+        onOpenExportModal={() => setShowExportModal(true)}
+        onOpenShareModal={() => setShowShareModal(true)}
+        onOpenCodexEntity={(eid) => setFlyoutEntityId(eid)}
+        onReturnToLauncher={handleReturnToLauncher}
+        onOpenShortcutsModal={() => setShowShortcutsModal(true)}
+      />
+
+      {/* Keyboard Shortcuts Cheat Sheet (?) */}
+      <KeyboardShortcutsModal
+        isOpen={showShortcutsModal}
+        onClose={() => setShowShortcutsModal(false)}
       />
     </div>
   )
