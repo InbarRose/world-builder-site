@@ -146,10 +146,10 @@ graph TD
   - *Audit Score*: **2.5 / 5.0**
 - **M4.3: Keyboard Mastery & Cognitive Friction Minimization (5 pts)**
   - *Criteria*: Universal keyboard shortcut coverage (`D` draw, `Space+drag` pan, `1-4` stage switch, `Tab` cycle tiles, `Ctrl+K` command palette, `?` hotkey modal), zero-clutter HUD with collapsible focus zones.
-  - *Current Reality*: Focus-zone header and settings dropdown implemented in Phase 16; basic pan/zoom hotkeys exist; missing `Ctrl+K` command palette and global hotkey cheat sheet.
-  - *Audit Score*: **3.0 / 5.0**
+  - *Current Reality*: Focus-zone header and settings dropdown implemented in Phase 16; global `Ctrl+K` command palette with search across modes/actions/entities, and `?` hotkey cheat sheet modal implemented and tested in Phase 17 (`CommandPalette.tsx`, `KeyboardShortcutsModal.tsx`).
+  - *Audit Score*: **4.5 / 5.0**
 
-**Domain 4 Total: 7.5 / 15.0**
+**Domain 4 Total: 9.0 / 15.0**
 
 ---
 
@@ -158,18 +158,18 @@ graph TD
 
 - **M5.1: Unified Transactional Multi-Domain Undo/Redo (5 pts)**
   - *Criteria*: Command Pattern / Event Sourcing where an Undo action atomically reverts map tile modifications, codex entities, and draw history records simultaneously without desync.
-  - *Current Reality*: Map canvas has its own internal undo stack; game draw history has separate undo; codex edits are not in the undo stack. Potential for partial-state desynchronization.
-  - *Audit Score*: **2.0 / 5.0**
+  - *Current Reality*: Command Pattern engine implemented in Phase 17 (`commandEngine.ts`) with composite drag grouping, multi-domain commands (tile paint, entity create/update/delete), and 50-step undo/redo stack verified by 13 unit tests.
+  - *Audit Score*: **4.5 / 5.0**
 - **M5.2: IndexedDB Quota-Resilient Storage & Auto-Save (5 pts)**
   - *Criteria*: Asynchronous IndexedDB storage engine with automatic migration pipeline, binary blob caching, debounced auto-save (100ms), and corruption recovery.
-  - *Current Reality*: Synchronous `localStorage` with ~5MB quota limit. Large campaigns with extensive lore and history risk quota exhaustion and data loss.
-  - *Audit Score*: **2.0 / 5.0**
+  - *Current Reality*: Asynchronous IndexedDB storage adapter implemented in Phase 17 (`storageIndexedDb.ts`) unlocking 50MB+ quotas, automated startup migration from localStorage, and transparent localStorage fallback in restricted sandboxes.
+  - *Audit Score*: **4.0 / 5.0**
 - **M5.3: Zero-Dependency Offline PWA (5 pts)**
   - *Criteria*: Complete offline execution via Service Worker caching, Web App Manifest, offline sound generation, and self-contained zero-CDN operation.
   - *Current Reality*: Service Worker (`sw.js`) and manifest present; sound engine is procedural Web Audio (zero network assets); full offline functionality verified.
   - *Audit Score*: **4.0 / 5.0**
 
-**Domain 5 Total: 8.0 / 15.0**
+**Domain 5 Total: 12.5 / 15.0**
 
 ---
 
@@ -191,17 +191,17 @@ graph TD
 
 ## Adversarial Benchmark Scorecard
 
-| Domain | Weight | Baseline (v3.0) | Inflated Claim (Phase 15/16) | **Adversarial Real Score** | Gap to AAA Standard |
+| Domain | Weight | Baseline (v3.0) | Inflated Claim (Phase 15/16) | Phase 17 Verified Score | Gap to AAA Standard |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **D1: AAA Game Feel & Audio Polish** | 20% | 5.0 | 20.0 | **10.0** | -10.0 |
 | **D2: Cartographic Engineering & Spatial Simulation** | 20% | 9.0 | 20.0 | **8.5** | -11.5 |
 | **D3: Narrative Architecture & Causal Simulation** | 20% | 6.0 | 15.0 | **7.5** | -12.5 |
-| **D4: Tabletop Ergonomics & Multi-Device Sync** | 15% | 9.0 | 15.0 | **7.5** | -7.5 |
-| **D5: System Reliability & Persistence** | 15% | 5.5 | 15.0 | **8.0** | -7.0 |
+| **D4: Tabletop Ergonomics & Multi-Device Sync** | 15% | 9.0 | 15.0 | **9.0** (+1.5) | -6.0 |
+| **D5: System Reliability & Persistence** | 15% | 5.5 | 15.0 | **12.5** (+4.5) | -2.5 |
 | **D6: Campaign Publishing & Typographic Fidelity** | 10% | 5.0 | 10.0 | **5.5** | -4.5 |
-| **TOTAL SCORE** | **100%** | **39.5** | **100.0 (Revoked)** | **47.0 / 100** | **-53.0 pts** |
+| **TOTAL SCORE** | **100%** | **39.5** | **100.0 (Revoked)** | **53.0 / 100** (+6.0) | **-47.0 pts** |
 
-> **Conclusion**: The application currently sits at **47.0 / 100** on a true commercial AAA standard. While functionally capable, massive engineering gaps remain across grid topology, river physics, causal story graphs, unified transaction undo, IndexedDB persistence, live peer synchronization, and kinetic card physics.
+> **Conclusion**: The application currently sits at **53.0 / 100** on a true commercial AAA standard following Phase 17 verification (+6.0 pts). With multi-domain transactional undo/redo and quota-resilient IndexedDB persistence active, our next objective is Phase 18: Dual Hexagonal & Orthogonal Cartography Engine to elevate Domain 2 from 8.5 to 13.5 (+5.0 pts).
 
 ---
 

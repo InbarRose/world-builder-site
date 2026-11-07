@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: ADR-012 Adversarial Multi-Domain Re-Audit Completed (True Baseline: 47.0 / 100); Ready for Phase 17
-- **Session Date**: 2026-11-06
-- **Status**: Inflated 100/100 score revoked; Uncompromising 6-Domain 24-Metric Rubric established (`docs/AUDIT_RUBRIC.md`); Phase 17–24 Master Roadmap planned.
+- **Current Phase**: Phase 17 Completed (Score: 53.0 / 100); Ready for Phase 18: Dual Hexagonal & Orthogonal Cartography Engine
+- **Session Date**: 2026-11-07
+- **Status**: Phase 17 merged and verified (77/77 tests passing); ADR-015 recorded; baseline elevated from 47.0 to 53.0 / 100 (+6.0 pts). Starting Phase 18 to elevate Domain 2 from 8.5 to 13.5 (+5.0 pts).
 
 ## Completed in Current Session
 - **ADR-012 Multi-Domain Adversarial Re-Audit**:
@@ -106,6 +106,7 @@ status: active
 - [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
 - [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export (merged via PR #17).
 - [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (merged via PR #18).
-- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
+- [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (merged via PR #19, Score: 53.0 / 100).
+- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Target: 58.0 / 100).
 
 

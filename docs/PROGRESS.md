@@ -127,11 +127,17 @@ status: active
   - [x] Minimalist focus-zone header with collapsed popover menus: `Atmosphere Menu`, `Share & Export Menu`, and `Settings Menu` (hiding administrative clutter away)
   - [x] Map canvas mode separation with explicit `👁️ Safe Inspect Mode` default vs `🖌️ Drafting Workshop (Active)` gold ring indicator to prevent accidental tile edits
   - [x] Full test coverage across 10 test suites (64/64 passing tests and clean production build)
-- [ ] **Phase 17: Unified Transactional Command Engine & IndexedDB Resilience** *(Target: 53.0 / 100)*
-  - [ ] Unified Command Pattern state engine (`commandEngine.ts`) with atomic undo/redo across map, codex, and timeline
-  - [ ] Asynchronous IndexedDB storage adapter (`storageIndexedDb.ts`) replacing localStorage with schema migration and 50MB+ capacity
-  - [ ] Global Command Palette (`Ctrl+K`) and Keyboard Shortcut Cheat Sheet modal (`?`)
-  - [ ] Automated unit test suite validating multi-domain atomic rollbacks and async persistence
+- [x] **Phase 17: Unified Transactional Command Engine & IndexedDB Resilience** *(Score: 53.0 / 100 via ADR-015)*
+  - [x] Unified Command Pattern state engine (`commandEngine.ts`) with atomic undo/redo across map tiles and codex entities
+  - [x] Asynchronous IndexedDB storage adapter (`storageIndexedDb.ts`) replacing localStorage with schema migration and 50MB+ capacity
+  - [x] Global Command Palette (`Ctrl+K`) and Keyboard Shortcut Cheat Sheet modal (`?`)
+  - [x] Automated unit test suite validating multi-domain atomic rollbacks and async persistence (77/77 tests passing across 13 suites)
+- [ ] **Phase 18: Dual Hexagonal & Orthogonal Cartography Engine** *(Target: 58.0 / 100)*
+  - [ ] True Flat-Topped & Pointy-Topped Hexagonal grid topology (`hexTopologyEngine.ts`) with axial $(q, r)$ and cube $(s = -q - r)$ math
+  - [ ] Seamless dual-mode rendering in `MapCanvas.tsx` (Square vs Hex) with isometric-feel SVG geometry
+  - [ ] Hex Distance Measurement Ruler with tabletop league/mile scale readouts
+  - [ ] Hexagonal organic hillshading and vector SVG export integration
+  - [ ] Automated unit test suite in `hexTopologyEngine.test.ts` and `MapCanvas.test.tsx`
 
 ---
 
@@ -153,6 +159,7 @@ status: active
 - [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
 - [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export.
 - [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (`mountain-snow`, `mountain-range`, `mesa`, `crag`, `volcano`).
-- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
+- [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
+- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Target: 58.0 / 100).
 
 

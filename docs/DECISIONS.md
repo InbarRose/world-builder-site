@@ -224,7 +224,8 @@ status: active
 - [x] Add ADR-012 documenting the Uncompromising AAA-Grade Multi-Domain Rubric, Adversarial Re-Evaluation (47.0/100 baseline), and Phase 17–24 Master Roadmap.
 - [x] Add ADR-013 documenting the Institutionalization of the Human Experience (HX)-Led Engineering Framework.
 - [x] Add ADR-014 documenting Deprecation of QR Codes in favor of Portable JSON World Files and Export/Import.
-- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
+- [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
+- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine.
 
 ---
 
@@ -284,3 +285,30 @@ status: active
 
 
 
+
+---
+
+## ADR-015: Command Pattern State Engine and IndexedDB Local Persistence
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - Prior to Phase 17, map undo was limited to a single canvas brush stroke cache, completely disconnected from entity creation, card plays, and turn state. If a player placed an entity or painted a tile and then hit undo, only visual pixels would be affected, causing state desynchronization.
+  - Furthermore, world state was saved synchronously into `localStorage`, which is capped at 5MB in modern browsers and vulnerable to silent `QuotaExceededError` data truncation during deep tabletop campaigns with extensive lore and tile arrays.
+  - Tenet 2 (*Unbroken Creative Flow & Psychological Safety*) requires that players never fear making creative mistakes and that data persistence can scale to 50MB+ without browser quota exhaustion.
+- **Decision**:
+  1. **Unified Transactional Command Engine (`commandEngine.ts`)**:
+     - Implement the Command pattern with an explicit reversible interface (`execute()` and `undo()`) and action-labeled transaction history (`undoStack` and `redoStack`, max 50 items).
+     - Support composite command transactions so continuous drag strokes or multi-tile biome splats group into a single atomic undoable action.
+     - Support multi-domain commands covering tile terrain/relief painting and codex entity creation, modification, and deletion.
+  2. **Asynchronous IndexedDB Persistence with Transparent Fallback (`storageIndexedDb.ts`)**:
+     - Implement an asynchronous IndexedDB adapter (`WorldBuilderDB`, store: `worlds`) unlocking 50MB+ storage quotas.
+     - Provide automatic migration on startup from legacy `localStorage` keys into IndexedDB.
+     - Gracefully fallback to `localStorage` in restricted sandboxes, private browsing, or test environments without throwing unhandled exceptions.
+  3. **Global Spotlight Command Palette & Keyboard Shortcuts Modal**:
+     - Wire `Ctrl+K` / `Cmd+K` global spotlight command palette to allow rapid keyboard-driven navigation across modes, tools, actions, and codex entities.
+     - Wire `?` cheat sheet modal to expose all keyboard shortcuts to players.
+- **Consequences**:
+  - Eliminates creative hesitation by guaranteeing full state rollback across both map and entity domains.
+  - Solves the 5MB browser quota ceiling, ensuring multi-year campaign preservation.
+  - Enables fluid keyboard-first power navigation for tabletop storytellers.
