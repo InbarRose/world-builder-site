@@ -225,7 +225,8 @@ status: active
 - [x] Add ADR-013 documenting the Institutionalization of the Human Experience (HX)-Led Engineering Framework.
 - [x] Add ADR-014 documenting Deprecation of QR Codes in favor of Portable JSON World Files and Export/Import.
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
-- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine.
+- [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine.
+- [ ] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding.
 
 ---
 
@@ -312,3 +313,34 @@ status: active
   - Eliminates creative hesitation by guaranteeing full state rollback across both map and entity domains.
   - Solves the 5MB browser quota ceiling, ensuring multi-year campaign preservation.
   - Enables fluid keyboard-first power navigation for tabletop storytellers.
+
+---
+
+## ADR-016: Dual Hexagonal & Orthogonal Cartography Engine with Distance Ruler
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - Fantasy worldbuilders, tabletop roleplayers, and tactical cartographers (e.g. persona Soren) frequently require hexagonal grids for overland exploration, hex-crawl campaigns, and isometric-feel map presentation. Square grids introduce diagonal movement distortions (Chebyshev/Euclidean mismatches where diagonal steps are $\sqrt{2} \approx 1.414\times$ longer).
+  - Hexagonal grids provide uniform distance in all 6 directions, making overland march calculations mathematically consistent.
+  - Furthermore, tabletop game masters and players need a distance measurement tool to calculate journey times in fantasy leagues, statute miles, and daily marches directly on the map.
+- **Decision**:
+  1. **Axial & Cube Mathematical Engine (`hexTopologyEngine.ts`)**:
+     - Implement axial $(q, r)$ and cube $(q, r, s$ where $q + r + s = 0)$ coordinate mathematics.
+     - Support both Pointy-Topped (odd-r horizontal layout) and Flat-Topped (odd-q vertical layout) hexagon orientations with bijective offset coordinate conversions.
+     - Implement cube rounding to resolve floating-point click coordinates to exact hex boundaries.
+     - Implement 6-directional neighbor adjacency and Bresenham cube linear interpolation (`getHexLine`) for straight-line sight paths.
+  2. **Seamless Dual-Mode Cartography Rendering in `MapCanvas.tsx`**:
+     - Add `gridTopology?: 'square' | 'hex-pointy' | 'hex-flat'` to `MapState`.
+     - Support instant 3-way toggle in the cartography toolbar without losing terrain, relief, slots, or lore attachments.
+     - Render hexagonal polygons with CSS `clip-path` and vector SVG polygon stroke outlines.
+     - Support multi-radius area brushes (1x1, 3x3, 5x5) using `getHexRange` to stamp terrain, relief, or fog across 1, 7, or 19 tiles simultaneously.
+  3. **Interactive Distance Measurement Ruler Tool**:
+     - Add `'ruler'` tool to the canvas toolbar (`activeTool === 'ruler'`).
+     - Clicking tile A pins the origin; hovering/clicking tile B draws the line of hexes and renders a floating measurement HUD displaying exact hex count, leagues, statute miles, and estimated march days ($1\text{ hex} = 5\text{ leagues} = 15\text{ miles} \approx 0.6\text{ march days}$).
+  4. **Vector Hexagonal SVG Map Export**:
+     - Update `exportMapToSvgString` in `mapEngine.ts` to export vector SVG `<polygon>` elements matching the exact hexagonal geometry when hex topology is active.
+- **Consequences**:
+  - Elevates cartographic fidelity to commercial VTT and atlas benchmarks (*Wonderdraft, Inkarnate, Foundry VTT*).
+  - Enables tactical hex-crawl campaigns while preserving classic square grid mode.
+  - Gives GMs instant travel time calculations without needing external rulebooks or calculators.

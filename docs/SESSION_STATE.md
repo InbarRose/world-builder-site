@@ -9,9 +9,9 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 17 Completed (Score: 53.0 / 100); Ready for Phase 18: Dual Hexagonal & Orthogonal Cartography Engine
+- **Current Phase**: Phase 18 Completed (Score: 58.0 / 100); Ready for Phase 19: Vector Watershed Physics & Connected Road Pathfinding
 - **Session Date**: 2026-11-07
-- **Status**: Phase 17 merged and verified (77/77 tests passing); ADR-015 recorded; baseline elevated from 47.0 to 53.0 / 100 (+6.0 pts). Starting Phase 18 to elevate Domain 2 from 8.5 to 13.5 (+5.0 pts).
+- **Status**: Milestone 1 (Phases 17 & 18) 100% Complete & Verified (103/103 tests passing); ADR-016 recorded; score elevated from 53.0 to 58.0 / 100 (+5.0 pts). Ready for Phase 19 to elevate Domain 2 from 13.5 to 18.0 (+4.5 pts).
 
 ## Completed in Current Session
 - **ADR-012 Multi-Domain Adversarial Re-Audit**:
@@ -107,6 +107,7 @@ status: active
 - [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export (merged via PR #17).
 - [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (merged via PR #18).
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (merged via PR #19, Score: 53.0 / 100).
-- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Target: 58.0 / 100).
+- [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
+- [ ] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Target: 62.5 / 100).
 
 

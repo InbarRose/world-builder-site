@@ -15,6 +15,11 @@ import {
   computeTileNeighborContext,
   generateOrganicShadingSvgString,
 } from './cartographyShadingEngine'
+import {
+  hexToPixel,
+  getHexPolygonPoints,
+  getGridPixelDimensions,
+} from './hexTopologyEngine'
 
 export const DEFAULT_MAP_WIDTH = 20
 export const DEFAULT_MAP_HEIGHT = 12
@@ -621,9 +626,19 @@ export function exportMapToSvgString(
   worldName = 'World Map',
   entities: WorldEntity[] = []
 ): string {
+  const isHex = map.gridTopology === 'hex-pointy' || map.gridTopology === 'hex-flat'
+  const hexTopology = map.gridTopology === 'hex-flat' ? 'hex-flat' : 'hex-pointy'
+  const hexRadius = 26
   const tileSize = 48
-  const svgWidth = map.width * tileSize
-  const svgHeight = map.height * tileSize
+
+  let svgWidth = map.width * tileSize
+  let svgHeight = map.height * tileSize
+
+  if (isHex) {
+    const dim = getGridPixelDimensions(map.width, map.height, hexRadius, hexTopology)
+    svgWidth = dim.totalWidth
+    svgHeight = dim.totalHeight
+  }
 
   const entityColorMap: Record<string, string> = {}
   for (const ent of entities) {
@@ -638,8 +653,6 @@ export function exportMapToSvgString(
       const id = getTileId(col, row)
       const tile = map.tiles[id] || createDefaultTile(col, row)
       const meta = TERRAIN_PALETTE[tile.terrain] || TERRAIN_PALETTE.ocean
-      const x = col * tileSize
-      const y = row * tileSize
 
       const primaryColor = tile.customColors?.primary || meta.color
       const secondaryColor =
@@ -651,62 +664,98 @@ export function exportMapToSvgString(
       const strokeColor = territoryColor || meta.borderColor
       const strokeWidth = territoryColor ? '2.5' : '0.8'
 
-      if (tile.coloringMode === 'outline') {
-        rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="#f5eedc" stroke="${primaryColor}" stroke-width="3" />`
+      if (isHex) {
+        const center = hexToPixel({ col, row }, hexRadius, hexTopology)
+        const polyPoints = getHexPolygonPoints(center, hexRadius, hexTopology)
+
+        if (tile.coloringMode === 'outline') {
+          rects += `<polygon points="${polyPoints}" fill="#f5eedc" stroke="${primaryColor}" stroke-width="3" />`
+        } else {
+          rects += `<polygon points="${polyPoints}" fill="${primaryColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
+        }
+
+        // Render slots centered on hex
+        const slots = getEffectiveTileSlots(tile, entities)
+        if (slots.length === 1) {
+          rects += `<text x="${center.x}" y="${center.y + 6}" font-size="18" text-anchor="middle">${slots[0].icon}</text>`
+        } else if (slots.length >= 2) {
+          rects += `<text x="${center.x - 7}" y="${center.y + 5}" font-size="15" text-anchor="middle">${slots[0].icon}</text>`
+          rects += `<text x="${center.x + 9}" y="${center.y + 8}" font-size="12" text-anchor="middle">${slots[1].icon}</text>`
+        }
+
+        if (tile.label) {
+          const escapedLabel = tile.label
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+          rects += `<text x="${center.x}" y="${center.y + hexRadius - 4}" font-size="8.5" font-family="Georgia, serif" font-weight="bold" fill="#ffffff" stroke="#1c1917" stroke-width="0.45" text-anchor="middle">${escapedLabel}</text>`
+        }
+
+        if (tile.isUnexplored) {
+          rects += `<polygon points="${polyPoints}" fill="#1c1917" opacity="0.9" />`
+          rects += `<text x="${center.x}" y="${center.y + 5}" font-size="14" fill="#a8a29e" text-anchor="middle">🌫️</text>`
+        }
       } else {
-        rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${primaryColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
-      }
+        const x = col * tileSize
+        const y = row * tileSize
 
-      // Dynamic Biome Blending & Multi-Octave Hillshading
-      const neighborContext = computeTileNeighborContext(map, col, row)
-      rects += generateOrganicShadingSvgString(neighborContext, x, y, tileSize)
-
-      if (
-        (tile.coloringMode === 'patterned' || (tile.pattern && tile.pattern !== 'solid')) &&
-        secondaryColor
-      ) {
-        const pat = tile.pattern || 'diagonal'
-        if (pat === 'diagonal') {
-          rects += `<polygon points="${x},${y + tileSize} ${x + tileSize},${y} ${x + tileSize},${y + tileSize}" fill="${secondaryColor}" opacity="0.55" />`
-        } else if (pat === 'horizontal') {
-          rects += `<rect x="${x}" y="${y + tileSize / 2}" width="${tileSize}" height="${tileSize / 2}" fill="${secondaryColor}" opacity="0.55" />`
-        } else if (pat === 'vertical') {
-          rects += `<rect x="${x + tileSize / 2}" y="${y}" width="${tileSize / 2}" height="${tileSize}" fill="${secondaryColor}" opacity="0.55" />`
+        if (tile.coloringMode === 'outline') {
+          rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="#f5eedc" stroke="${primaryColor}" stroke-width="3" />`
+        } else {
+          rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="${primaryColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
         }
-      }
 
-      if (tile.hasRiver) {
-        rects += `<path d="M ${x} ${y + tileSize * 0.3} Q ${x + tileSize * 0.5} ${y + tileSize * 0.72}, ${x + tileSize} ${y + tileSize * 0.38}" stroke="#2563eb" stroke-width="3.5" fill="none" stroke-linecap="round" />`
-      }
+        // Dynamic Biome Blending & Multi-Octave Hillshading
+        const neighborContext = computeTileNeighborContext(map, col, row)
+        rects += generateOrganicShadingSvgString(neighborContext, x, y, tileSize)
 
-      if (tile.hasRoad) {
-        rects += `<line x1="${x}" y1="${y + tileSize * 0.5}" x2="${x + tileSize}" y2="${y + tileSize * 0.5}" stroke="#78350f" stroke-width="2" stroke-dasharray="4 2" />`
-      }
-
-      // Render only high-priority slots (Zero noise on empty background tiles!)
-      const slots = getEffectiveTileSlots(tile, entities)
-      if (slots.length === 1) {
-        rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 6}" font-size="18" text-anchor="middle">${slots[0].icon}</text>`
-      } else if (slots.length >= 2) {
-        rects += `<text x="${x + 17}" y="${y + 27}" font-size="16" text-anchor="middle">${slots[0].icon}</text>`
-        rects += `<text x="${x + 33}" y="${y + 31}" font-size="13" text-anchor="middle">${slots[1].icon}</text>`
-        if (slots.length > 2) {
-          rects += `<circle cx="${x + tileSize - 8}" cy="${y + 8}" r="6" fill="#1e293b" opacity="0.85" />`
-          rects += `<text x="${x + tileSize - 8}" y="${y + 11}" font-size="7" fill="#ffffff" text-anchor="middle">+${slots.length - 2}</text>`
+        if (
+          (tile.coloringMode === 'patterned' || (tile.pattern && tile.pattern !== 'solid')) &&
+          secondaryColor
+        ) {
+          const pat = tile.pattern || 'diagonal'
+          if (pat === 'diagonal') {
+            rects += `<polygon points="${x},${y + tileSize} ${x + tileSize},${y} ${x + tileSize},${y + tileSize}" fill="${secondaryColor}" opacity="0.55" />`
+          } else if (pat === 'horizontal') {
+            rects += `<rect x="${x}" y="${y + tileSize / 2}" width="${tileSize}" height="${tileSize / 2}" fill="${secondaryColor}" opacity="0.55" />`
+          } else if (pat === 'vertical') {
+            rects += `<rect x="${x + tileSize / 2}" y="${y}" width="${tileSize / 2}" height="${tileSize}" fill="${secondaryColor}" opacity="0.55" />`
+          }
         }
-      }
 
-      if (tile.label) {
-        const escapedLabel = tile.label
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-        rects += `<text x="${x + tileSize / 2}" y="${y + tileSize - 4}" font-size="8.5" font-family="Georgia, serif" font-weight="bold" fill="#ffffff" stroke="#1c1917" stroke-width="0.45" text-anchor="middle">${escapedLabel}</text>`
-      }
+        if (tile.hasRiver) {
+          rects += `<path d="M ${x} ${y + tileSize * 0.3} Q ${x + tileSize * 0.5} ${y + tileSize * 0.72}, ${x + tileSize} ${y + tileSize * 0.38}" stroke="#2563eb" stroke-width="3.5" fill="none" stroke-linecap="round" />`
+        }
 
-      if (tile.isUnexplored) {
-        rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="#1c1917" opacity="0.9" />`
-        rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 5}" font-size="14" fill="#a8a29e" text-anchor="middle">🌫️</text>`
+        if (tile.hasRoad) {
+          rects += `<line x1="${x}" y1="${y + tileSize * 0.5}" x2="${x + tileSize}" y2="${y + tileSize * 0.5}" stroke="#78350f" stroke-width="2" stroke-dasharray="4 2" />`
+        }
+
+        // Render only high-priority slots (Zero noise on empty background tiles!)
+        const slots = getEffectiveTileSlots(tile, entities)
+        if (slots.length === 1) {
+          rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 6}" font-size="18" text-anchor="middle">${slots[0].icon}</text>`
+        } else if (slots.length >= 2) {
+          rects += `<text x="${x + 17}" y="${y + 27}" font-size="16" text-anchor="middle">${slots[0].icon}</text>`
+          rects += `<text x="${x + 33}" y="${y + 31}" font-size="13" text-anchor="middle">${slots[1].icon}</text>`
+          if (slots.length > 2) {
+            rects += `<circle cx="${x + tileSize - 8}" cy="${y + 8}" r="6" fill="#1e293b" opacity="0.85" />`
+            rects += `<text x="${x + tileSize - 8}" y="${y + 11}" font-size="7" fill="#ffffff" text-anchor="middle">+${slots.length - 2}</text>`
+          }
+        }
+
+        if (tile.label) {
+          const escapedLabel = tile.label
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+          rects += `<text x="${x + tileSize / 2}" y="${y + tileSize - 4}" font-size="8.5" font-family="Georgia, serif" font-weight="bold" fill="#ffffff" stroke="#1c1917" stroke-width="0.45" text-anchor="middle">${escapedLabel}</text>`
+        }
+
+        if (tile.isUnexplored) {
+          rects += `<rect x="${x}" y="${y}" width="${tileSize}" height="${tileSize}" fill="#1c1917" opacity="0.9" />`
+          rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 5}" font-size="14" fill="#a8a29e" text-anchor="middle">🌫️</text>`
+        }
       }
     }
   }

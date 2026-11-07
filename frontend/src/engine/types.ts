@@ -221,9 +221,12 @@ export interface MapTile {
   linkedEntityIds: string[]
 }
 
+export type GridTopology = 'square' | 'hex-pointy' | 'hex-flat'
+
 export interface MapState {
   width: number
   height: number
+  gridTopology?: GridTopology
   tiles: Record<string, MapTile>
 }
 

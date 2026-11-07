@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MapCanvas } from '../components/MapCanvas'
 import { createInitialMap } from '../engine/mapEngine'
+import { MapState } from '../engine/types'
 
 describe('MapCanvas Component', () => {
   it('renders map grid, tools, dimension presets, and tile inspector', () => {
@@ -257,6 +258,101 @@ describe('MapCanvas Component', () => {
     // Switch back to Organic Shading
     fireEvent.click(organicBtn)
     expect(organicBtn).toHaveClass('bg-amber-600')
+  })
+
+  it('supports seamless switching between Square, Pointy Hex, and Flat Hex topologies', () => {
+    const map = createInitialMap(6, 4)
+    const handleChange = vi.fn()
+
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
+
+    const pointyBtn = screen.getByRole('button', { name: /Pointy Hex Mode/i })
+    const flatBtn = screen.getByRole('button', { name: /Flat Hex Mode/i })
+    const squareBtn = screen.getByRole('button', { name: /Square Grid Mode/i })
+
+    expect(pointyBtn).toBeInTheDocument()
+    expect(flatBtn).toBeInTheDocument()
+    expect(squareBtn).toBeInTheDocument()
+
+    // Switch to Pointy Hex
+    fireEvent.click(pointyBtn)
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({ gridTopology: 'hex-pointy' })
+    )
+
+    // Switch to Flat Hex
+    fireEvent.click(flatBtn)
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({ gridTopology: 'hex-flat' })
+    )
+
+    // Switch back to Square
+    fireEvent.click(squareBtn)
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({ gridTopology: 'square' })
+    )
+  })
+
+  it('supports the Distance Ruler tool to measure hex distance, leagues, miles, and march days', () => {
+    function RulerMap() {
+      const [currentMap, setCurrentMap] = React.useState<MapState>(() => ({
+        ...createInitialMap(8, 8),
+        gridTopology: 'hex-pointy',
+      }))
+      return <MapCanvas map={currentMap} worldName="Eldoria" onChange={setCurrentMap} />
+    }
+
+    render(<RulerMap />)
+
+    const rulerBtn = screen.getByRole('button', { name: /Distance Ruler Tool/i })
+    fireEvent.click(rulerBtn)
+
+    // Click tile (1, 1) as ruler origin
+    const tile11 = screen.getByTestId('map-tile-1-1')
+    fireEvent.mouseDown(tile11)
+
+    // Hover over tile (4, 1)
+    const tile41 = screen.getByTestId('map-tile-4-1')
+    fireEvent.mouseEnter(tile41)
+
+    // Measurement HUD overlay should appear with distance readouts
+    const overlay = screen.getByTestId('hex-ruler-overlay')
+    expect(overlay).toBeInTheDocument()
+    expect(overlay).toHaveTextContent(/3 hexes/i)
+    expect(overlay).toHaveTextContent(/15 leagues/i)
+    expect(overlay).toHaveTextContent(/45 miles/i)
+    expect(overlay).toHaveTextContent(/march/i)
+
+    // Click Clear Ruler to dismiss
+    const clearBtn = within(overlay).getByRole('button', { name: /Clear Ruler/i })
+    fireEvent.click(clearBtn)
+    expect(screen.queryByTestId('hex-ruler-overlay')).not.toBeInTheDocument()
+  })
+
+  it('supports multi-radius brush painting across adjacent tiles', () => {
+    function MultiRadiusMap() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(8, 8))
+      return <MapCanvas map={currentMap} worldName="Eldoria" onChange={setCurrentMap} />
+    }
+
+    render(<MultiRadiusMap />)
+
+    // Open palette drawer
+    const paletteBtn = screen.getByRole('button', { name: /Palette & Overlays/i })
+    fireEvent.click(paletteBtn)
+
+    // Select 3x3 radius
+    const radius3x3Btn = screen.getByRole('button', { name: /3×3/i })
+    fireEvent.click(radius3x3Btn)
+
+    // Paint center tile (3, 3)
+    const tile33 = screen.getByTestId('map-tile-3-3')
+    fireEvent.mouseDown(tile33)
+
+    // Tile (3, 3) and adjacent neighbor (3, 4) should both have been mutated
+    expect(tile33).toHaveAttribute('title', expect.stringContaining('Forest'))
+    const tile34 = screen.getByTestId('map-tile-3-4')
+    expect(tile34).toHaveAttribute('title', expect.stringContaining('Forest'))
   })
 })
 
