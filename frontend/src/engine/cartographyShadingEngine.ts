@@ -62,9 +62,16 @@ export interface TileNeighborContext {
 export function getTileElevationRank(tile?: MapTile): number {
   if (!tile) return 0
   const relief = tile.relief
-  if (relief === 'mountain' || tile.terrain === 'mountain') return 6
+  if (
+    relief === 'mountain' ||
+    relief === 'mountain-snow' ||
+    relief === 'mountain-range' ||
+    relief === 'crag' ||
+    tile.terrain === 'mountain'
+  )
+    return 6
   if (relief === 'volcano' || tile.terrain === 'volcano') return 6
-  if (relief === 'hills') return 5
+  if (relief === 'mesa' || relief === 'hills') return 5
   if (relief === 'canyon' || tile.terrain === 'canyon') return 4
   if (tile.terrain === 'forest' || tile.terrain === 'jungle' || tile.terrain === 'earth') return 3
   if (tile.terrain === 'ocean') return 0

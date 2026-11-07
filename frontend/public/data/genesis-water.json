@@ -2,8 +2,17 @@
   "stage": "genesis",
   "suit": "♥",
   "power": "Water",
-  "description": "This power represents watery features: rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, glaciers, etc.",
-  "fantasticalDescription": "This power represents fantastical watery features: magical springs, underwater cities, living rivers, etc.",
-  "examples": "This power represents watery features: rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, glaciers, etc."
+  "description": "This power represents hydrological features: meandering river deltas, deep glacial fjords, inland freshwater lakes, mist-shrouded fenlands, barrier coral reefs, and thundering waterfalls.",
+  "fantasticalDescription": "This power represents fantastical watery phenomena: luminous celestial rivers flowing through the sky, eternal whirlpool maelstroms leading to the hollow core, living tidal pools, and reverse cataracts falling into the clouds.",
+  "examples": "Glacial Fjords, Braided River Estuaries, Crater Lakes, Turquoise Barrier Reefs, Tidal Mangroves, and Abyssal Ocean Trenches.",
+  "creativePrompts": [
+    "Where do the headwaters spring from, and how do they sustain future civilizations?",
+    "What creatures or spirits inhabit the deepest, sunless trenches of this body of water?",
+    "Does this waterway unite distinct regions via easy travel, or does its treacherous current isolate them?"
+  ],
+  "exampleNarratives": [
+    "A life-giving river carved a winding silver ribbon across the plains, emptying through a fertile braided delta.",
+    "Sheer granite sea-cliffs dropped thousands of feet into a freezing indigo fjord, sheltered from the howling outer ocean.",
+    "A radiant barrier of living coral formed a turquoise lagoon where warm waters nursed nascent marine life."
+  ]
 }
-

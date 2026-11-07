@@ -207,9 +207,19 @@ describe('MapEngine', () => {
     expect(orderedSlots[1].name).toBe('Frost Peak')
     expect(orderedSlots[2].name).toBe('Mirror Lake')
 
-    // Stage action presets return appropriate options for normal, fantastical, and disaster draws
+    // Stage action presets return rich options for normal, fantastical, and disaster draws
     const genSpades = getActionPresetsForDraw('genesis', '♠', false, false)
-    expect(genSpades.length).toBeGreaterThanOrEqual(2)
+    expect(genSpades.length).toBeGreaterThanOrEqual(5)
+    // Mountain variants exist
+    const reliefTypes = genSpades.map((p) => p.reliefChange).filter(Boolean)
+    expect(reliefTypes).toContain('mountain-snow')
+    expect(reliefTypes).toContain('mountain-range')
+    expect(reliefTypes).toContain('mesa')
+    expect(reliefTypes).toContain('crag')
+    // Creative prompts and example narratives are populated
+    expect(genSpades[0].creativePrompt).toBeTruthy()
+    expect(genSpades[0].exampleNarrative).toBeTruthy()
+
     const genFantastical = getActionPresetsForDraw('genesis', '♠', true, false)
     expect(genFantastical[0].isFantastical).toBe(true)
     const disasterPresets = getActionPresetsForDraw('civilization', '♥', false, true)

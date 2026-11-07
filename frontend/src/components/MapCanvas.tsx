@@ -194,7 +194,14 @@ function TileCartographySvg({
       )}
 
       {/* Multi-Octave Hillshading (NW Sunlit Crest, SE Slope Shading) */}
-      {showOrganic && (effectiveRelief === 'mountain' || effectiveRelief === 'volcano' || effectiveRelief === 'hills') && (
+      {showOrganic &&
+        (effectiveRelief === 'mountain' ||
+          effectiveRelief === 'mountain-snow' ||
+          effectiveRelief === 'mountain-range' ||
+          effectiveRelief === 'mesa' ||
+          effectiveRelief === 'crag' ||
+          effectiveRelief === 'volcano' ||
+          effectiveRelief === 'hills') && (
         <g>
           {/* North-West Sunlit Crest Highlight */}
           <polygon points="0,0 48,0 0,48" fill="#ffffff" opacity="0.18" />
@@ -316,6 +323,57 @@ function TileCartographySvg({
         <g opacity="0.58">
           <polygon points="8,39 20,14 28,14 40,39" fill="#451a03" />
           <polygon points="20,14 28,14 25,22 22,20" fill="#ef4444" />
+        </g>
+      )}
+
+      {/* Glacial Horns & Ice Massif Relief Silhouette */}
+      {!simpleMode && effectiveRelief === 'mountain-snow' && (
+        <g opacity="0.55">
+          <polygon points="8,39 24,9 40,39" fill="#0f172a" />
+          <polygon points="24,9 24,39 8,39" fill="#334155" />
+          <polygon points="24,9 18,22 30,22" fill="#f8fafc" />
+          <polygon points="24,9 21,25 24,22" fill="#7dd3fc" />
+          <line x1="24" y1="9" x2="24" y2="39" stroke="#94a3b8" strokeWidth="0.8" />
+        </g>
+      )}
+
+      {/* Continuous Triple-Peak Mountain Range Spine */}
+      {!simpleMode && effectiveRelief === 'mountain-range' && (
+        <g opacity="0.52">
+          <polygon points="2,39 14,14 26,39" fill="#44403c" />
+          <polygon points="18,39 30,10 42,39" fill="#292524" />
+          <polygon points="32,39 40,18 48,39" fill="#57534e" />
+          <polygon points="14,14 11,21 17,21" fill="#f5f5f4" />
+          <polygon points="30,10 26,17 34,17" fill="#f5f5f4" />
+          <polygon points="40,18 37,24 43,24" fill="#f5f5f4" />
+        </g>
+      )}
+
+      {/* Stepped Flat-Topped Mesa & Tableland */}
+      {!simpleMode && effectiveRelief === 'mesa' && (
+        <g opacity="0.6">
+          <polygon points="6,39 12,18 36,18 42,39" fill="#78350f" />
+          <polygon points="12,18 36,18 34,22 14,22" fill="#d97706" />
+          <line x1="8" y1="28" x2="40" y2="28" stroke="#fef3c7" strokeWidth="1" opacity="0.4" />
+          <line x1="7" y1="34" x2="41" y2="34" stroke="#451a03" strokeWidth="1" opacity="0.6" />
+        </g>
+      )}
+
+      {/* Obsidian Crags & Needle Spires */}
+      {!simpleMode && effectiveRelief === 'crag' && (
+        <g opacity="0.55">
+          <polygon points="6,39 12,12 16,39" fill="#1c1917" />
+          <polygon points="18,39 25,8 29,39" fill="#292524" />
+          <polygon points="32,39 38,15 42,39" fill="#1c1917" />
+          <polygon points="25,8 22,18 25,39" fill="#78716c" opacity="0.6" />
+        </g>
+      )}
+
+      {/* Deep Canyon Rift Silhouette */}
+      {!simpleMode && effectiveRelief === 'canyon' && (
+        <g opacity="0.55">
+          <path d="M 14 0 Q 22 18, 18 30 T 28 48 L 34 48 Q 24 30, 28 18 T 20 0 Z" fill="#451a03" />
+          <path d="M 16 0 Q 24 18, 20 30 T 30 48" stroke="#f59e0b" strokeWidth="0.8" fill="none" opacity="0.6" />
         </g>
       )}
 
@@ -2122,7 +2180,7 @@ export function MapCanvas({
             {!isViewOnly && (
               <>
                 {/* Base Terrain, Coloring Style & Custom Colors */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground block mb-1">
                       Base Biome
@@ -2139,6 +2197,26 @@ export function MapCanvas({
                       {Object.values(TERRAIN_PALETTE).map((t) => (
                         <option key={t.id} value={t.id}>
                           {t.symbol} {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Elevation Relief
+                    </label>
+                    <select
+                      value={inspectedTile.relief || 'none'}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          relief: e.target.value as ReliefType,
+                        })
+                      }
+                      className="input w-full text-xs py-1 h-8"
+                    >
+                      {Object.values(RELIEF_PALETTE).map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.symbol ? `${r.symbol} ${r.label}` : 'Flat / None'}
                         </option>
                       ))}
                     </select>

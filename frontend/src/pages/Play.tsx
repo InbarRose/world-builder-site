@@ -2367,6 +2367,38 @@ export function Play() {
                           </div>
                         )}
 
+                        {/* Selected Preset Creative Prompt & Narrative Example Box */}
+                        {selectedPreset &&
+                          (selectedPreset.creativePrompt || selectedPreset.exampleNarrative) && (
+                            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-2 animate-in fade-in duration-150">
+                              {selectedPreset.creativePrompt && (
+                                <div className="text-amber-900 dark:text-amber-200 leading-relaxed">
+                                  <strong className="font-bold text-amber-700 dark:text-amber-400">
+                                    💡 Creative Prompt:{' '}
+                                  </strong>
+                                  <span>{selectedPreset.creativePrompt}</span>
+                                </div>
+                              )}
+                              {selectedPreset.exampleNarrative && (
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1.5 border-t border-amber-500/20">
+                                  <div className="text-muted-foreground italic text-[11px] leading-relaxed border-l-2 border-amber-500/50 pl-2">
+                                    &ldquo;{selectedPreset.exampleNarrative}&rdquo;
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPendingNote(selectedPreset.exampleNarrative || '')
+                                    }
+                                    className="shrink-0 px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-semibold transition-colors flex items-center gap-1"
+                                    title="Copy this example prose directly into your turn chronicle note"
+                                  >
+                                    <span>✍️ Use Example Prose</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                         {/* Live Turn Activity Basket (Shows Map Tiles & Codex Entries touched this turn) */}
                         <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 space-y-2.5 text-xs">
                           <div className="flex flex-wrap items-center justify-between gap-2">

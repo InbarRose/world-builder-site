@@ -89,6 +89,8 @@ export interface PowerData {
   description: string
   fantasticalDescription?: string
   examples: string
+  creativePrompts?: string[]
+  exampleNarratives?: string[]
 }
 
 export type TileSlotCategory =
@@ -159,7 +161,16 @@ export type TerrainType =
   | 'tundra'
   | 'volcano'
 
-export type ReliefType = 'none' | 'hills' | 'mountain' | 'canyon' | 'volcano'
+export type ReliefType =
+  | 'none'
+  | 'hills'
+  | 'mountain'
+  | 'mountain-snow'
+  | 'mountain-range'
+  | 'mesa'
+  | 'crag'
+  | 'canyon'
+  | 'volcano'
 
 export type FloraType = 'none' | 'forest' | 'jungle' | 'marsh' | 'oasis'
 
