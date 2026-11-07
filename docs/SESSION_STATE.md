@@ -9,11 +9,15 @@ status: active
 
 ## Current Status
 
-- **Current Phase**: Phase 16 Completed (AAA Game Launcher & Deliberate Tabletop Ceremonies)
+- **Current Phase**: ADR-012 Adversarial Multi-Domain Re-Audit Completed (True Baseline: 47.0 / 100); Ready for Phase 17
 - **Session Date**: 2026-11-06
-- **Status**: Phase 16 Verified (64/64 tests passing across 10 suites), Clean Production Build, Ready for PR #14
+- **Status**: Inflated 100/100 score revoked; Uncompromising 6-Domain 24-Metric Rubric established (`docs/AUDIT_RUBRIC.md`); Phase 17–24 Master Roadmap planned.
 
 ## Completed in Current Session
+- **ADR-012 Multi-Domain Adversarial Re-Audit**:
+  - Comprehensive expert audit across 6 domains: AAA Game Feel, Cartographic Engineering, Narrative Architecture, Tabletop Ergonomics, System Reliability, and Campaign Publishing.
+  - Revoked inflated self-scored 100/100; re-anchored baseline at **47.0 / 100**.
+  - Established formal roadmap across Phases 17–24 to address every identified gap with automated testing gates.
 - **Phase 7 (Map Canvas Resilience & Undo/Redo Engine)**:
   - Added bounded 25-step `undoStack` and `redoStack` in `MapCanvas.tsx` with continuous drag-stroke grouping.
   - Implemented toolbar Undo and Redo buttons with disabled styling and real-time step counters.
@@ -97,7 +101,9 @@ status: active
 - [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (merged via PR #11).
 - [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (merged via PR #12).
 - [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (merged via PR #13).
-- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (Score: 100.0 / 100).
-- [ ] Push Phase 16 branch, open PR #14, verify CI, and merge to `main`.
+- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (merged via PR #14).
+- [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
+- [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
+- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
 
 
