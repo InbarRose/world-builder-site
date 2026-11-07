@@ -152,8 +152,9 @@ status: active
 | **2026-11-06** | Phase 12: Emergent Narrative Simulation & Dynamic Chronicles | 13.0 | 16.0 | 12.0 (+5) | 15.0 (+1) | 10.0 | 10.0 (+0.5) | 10.0 | **86.0 / 100** | Completed |
 | **2026-11-06** | Phase 13: Organic Cartography Shading & Dynamic Biome Blending | 15.0 (+2) | 19.0 (+3) | 12.0 | 15.0 | 10.0 | 10.0 | 10.0 | **91.0 / 100** | Completed |
 | **2026-11-06** | Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes | 18.0 (+3) | 20.0 (+1) | 13.0 (+1) | 15.0 | 10.0 | 10.0 | 10.0 | **96.0 / 100** | Completed |
-| **2026-11-06** | Phase 15: Polished AAA Orchestration & PWA Offline Mastery | 20.0 (+2) | 20.0 | 15.0 (+2) | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Completed |
-| **2026-11-06** | Phase 16: AAA Launcher, Deliberate Ceremonies & Focused Studio | 20.0 | 20.0 | 15.0 | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Completed |
+| **2026-11-06** | Phase 15: Polished AAA Orchestration & PWA Offline Mastery | 20.0 (+2) | 20.0 | 15.0 (+2) | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Retracted (Uncritical Curve) |
+| **2026-11-06** | Phase 16: AAA Launcher, Deliberate Ceremonies & Focused Studio | 20.0 | 20.0 | 15.0 | 15.0 | 10.0 | 10.0 | 10.0 | **100.0 / 100** | Retracted (Uncritical Curve) |
+| **2026-11-06** | **ADR-012 Adversarial Multi-Domain Re-Audit** | **10.0** | **8.5** | **7.5** | **7.5** | **8.0** | **5.5** | — | **47.0 / 100** | **Active True Baseline** |
 
 ---
 
@@ -182,14 +183,45 @@ status: active
 
 ---
 
+## ADR-012: The Uncompromising AAA-Grade Multi-Domain Rubric & Adversarial Baseline Audit
+
+- **Status**: Accepted
+- **Date**: 2026-11-06
+- **Context**:
+  - The prior declaration of reaching "100.0 / 100 AAA Target Achieved" in Phase 15 and 16 was flawed and represented score inflation disconnected from commercial reality.
+  - When examined critically against the actual benchmarks (*Foundry VTT, Inkarnate, Wonderdraft, Crusader Kings III, Slay the Spire, Baldur's Gate 3, Linear, Figma*), substantial engineering gaps exist: square-only grid topology, lack of connected vector river/road pathfinding, string-template chronicles lacking a recursive causal dependency graph, synchronous localStorage with 5MB quota vulnerability, single-canvas undo instead of unified multi-domain command transactions, and static URL hash sharing instead of real-time peer-to-peer table synchronization.
+- **Decision**:
+  1. **Formally Revoke the Inflated 100/100 Score**: Establish the true adversarial baseline at **47.0 / 100**.
+  2. **Enact the 6-Domain, 24-Submetric Expert Rubric** (documented in full in [`docs/AUDIT_RUBRIC.md`](./AUDIT_RUBRIC.md)):
+     - **D1: AAA Game Feel, Systems Design & Audio Polish (20%)** — Real: 10.0 / 20.
+     - **D2: Cartographic Engineering, Spatial Simulation & Biome Ecology (20%)** — Real: 8.5 / 20.
+     - **D3: Narrative Architecture, Worldbuilding Codex & Causal Simulation (20%)** — Real: 7.5 / 20.
+     - **D4: Tabletop Ergonomics, Human Factors & Multi-Device Sync (15%)** — Real: 7.5 / 15.
+     - **D5: System Reliability, State Machine Rigor & Persistence (15%)** — Real: 8.0 / 15.
+     - **D6: Campaign Publishing, Export Fidelity & Typographic Production (10%)** — Real: 5.5 / 10.
+  3. **Mandate Phase 17–24 Engineering Master Roadmap**:
+     - **Phase 17**: Unified Transactional Command Engine & IndexedDB Resilience (+6.0 pts).
+     - **Phase 18**: Dual Hexagonal & Orthogonal Cartography Engine (+5.0 pts).
+     - **Phase 19**: Vector Watershed Physics & Connected Road Pathfinding (+4.5 pts).
+     - **Phase 20**: Recursive Causal Saga Graph & Emergent Lore Engine (+5.5 pts).
+     - **Phase 21**: Dynamic Geopolitical Faction AI & Utility-AI Bot Personalities (+5.0 pts).
+     - **Phase 22**: Kinetic Card Physics, Dynamic Particle FX & Acoustic Stems (+6.5 pts).
+     - **Phase 23**: Real-Time Tabletop Peer Synchronization (WebRTC / BroadcastChannel) (+4.5 pts).
+     - **Phase 24**: High-DPI Cartography Cartouche & Multi-Theme Sourcebook Studio (+4.5 pts).
+  4. **Strict Evidence & Testing Rules**: Every phase PR must include dedicated automated unit tests, clean production builds, and an adversarial limitation section before scores can increment.
+- **Consequences**:
+  - Grounds project roadmap in objective, unyielding engineering excellence.
+  - Prevents premature victory claims and directly prioritizes high-value features.
+
+---
+
 ## Tasks
 
 - [x] Add ADR-006 and ADR-007 documenting Seeded Auto-Play, Time-Travel Snapshots, and Schema v2 Migration.
 - [x] Add ADR-008 and ADR-009 documenting the 5-Level UI Hierarchy, Mode-Adaptive Workspaces, and Bi-Directional Wiki Integration.
 - [x] Add ADR-010 documenting the Revamped 7-Dimension AAA Benchmark Rubric, Baseline Score Snapshot (46.5/100), and Quality Governance.
 - [x] Add ADR-011 documenting the AAA Game Launcher, Deliberate Epoch Ceremonies, and Focus-Zone Header.
-- [x] Record Phase 14 completion snapshot (96.0 / 100) with full physical play mat mode, ambient soundscapes, fog of war, and lore flyout drawer.
-- [x] Record Phase 15 completion snapshot (100.0 / 100) with PWA offline service worker, haptic feedback, crossfade soundscapes, geopolitical tension index, and dynasty lineage trees.
-- [x] Record Phase 16 completion snapshot (100.0 / 100) with AAA Title Screen, New Campaign Genesis Ceremony, Epoch Ceremony, and Focused Header.
+- [x] Add ADR-012 documenting the Uncompromising AAA-Grade Multi-Domain Rubric, Adversarial Re-Evaluation (47.0/100 baseline), and Phase 17–24 Master Roadmap.
+- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
 
 

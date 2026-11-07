@@ -119,7 +119,7 @@ status: active
   - [x] Visual Dynasty & Lineage succession trees (`buildEntityLineageTree`) displaying progenitor, offspring branches, and sister branches in `LoreFlyoutDrawer`
   - [x] Stage advance celebratory golden particle banner on era transitions
   - [x] Full test coverage in `narrativeEngine.test.ts`, `soundEngine.test.ts`, and `LoreFlyoutDrawer.test.tsx` (62/62 passing tests across 10 suites)
-- [x] **Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio** *(Score: 100.0 / 100)*
+- [x] **Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio** *(Score: 47.0 / 100 via ADR-012 Adversarial Audit)*
   - [x] Dedicated Title Screen / Main Menu for Play Studio (`StudioLauncher.tsx`) with Resume Campaign, New Campaign genesis, Load Realm drawer, Quick Start 1-click generator, and Rules Codex reference
   - [x] Distinct URL query synchronization (`/play?view=launcher` vs `/play?world=<id>&mode=<mode>`) and breadcrumb hierarchy (`Main Menu / Realm Name / Age Pill / Turn #`)
   - [x] Deliberate `NewGameCeremonyModal` 5-step genesis ritual (realm title randomizer, mythic premise, table format selection, starting era, and player council roster)
@@ -127,22 +127,29 @@ status: active
   - [x] Minimalist focus-zone header with collapsed popover menus: `Atmosphere Menu`, `Share & Export Menu`, and `Settings Menu` (hiding administrative clutter away)
   - [x] Map canvas mode separation with explicit `👁️ Safe Inspect Mode` default vs `🖌️ Drafting Workshop (Active)` gold ring indicator to prevent accidental tile edits
   - [x] Full test coverage across 10 test suites (64/64 passing tests and clean production build)
+- [ ] **Phase 17: Unified Transactional Command Engine & IndexedDB Resilience** *(Target: 53.0 / 100)*
+  - [ ] Unified Command Pattern state engine (`commandEngine.ts`) with atomic undo/redo across map, codex, and timeline
+  - [ ] Asynchronous IndexedDB storage adapter (`storageIndexedDb.ts`) replacing localStorage with schema migration and 50MB+ capacity
+  - [ ] Global Command Palette (`Ctrl+K`) and Keyboard Shortcut Cheat Sheet modal (`?`)
+  - [ ] Automated unit test suite validating multi-domain atomic rollbacks and async persistence
 
 ---
 
 ## Tasks
 
 - [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
-- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot (46.5 / 100).
-- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine (Score: 52.5 / 100).
-- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish (Score: 59.5 / 100).
-- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher (Score: 66.5 / 100).
-- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code (Score: 72.5 / 100).
-- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera (Score: 79.5 / 100).
-- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles (Score: 86.0 / 100).
-- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending (Score: 91.0 / 100).
-- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes (Score: 96.0 / 100).
-- [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery (Score: 100.0 / 100).
-- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio (Score: 100.0 / 100).
+- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot.
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine.
+- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish.
+- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher.
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code.
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera.
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles.
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending.
+- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes.
+- [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery.
+- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio.
+- [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
+- [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Target: 53.0 / 100).
 
 
