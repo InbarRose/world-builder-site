@@ -132,12 +132,18 @@ status: active
   - [x] Asynchronous IndexedDB storage adapter (`storageIndexedDb.ts`) replacing localStorage with schema migration and 50MB+ capacity
   - [x] Global Command Palette (`Ctrl+K`) and Keyboard Shortcut Cheat Sheet modal (`?`)
   - [x] Automated unit test suite validating multi-domain atomic rollbacks and async persistence (77/77 tests passing across 13 suites)
-- [ ] **Phase 18: Dual Hexagonal & Orthogonal Cartography Engine** *(Target: 58.0 / 100)*
-  - [ ] True Flat-Topped & Pointy-Topped Hexagonal grid topology (`hexTopologyEngine.ts`) with axial $(q, r)$ and cube $(s = -q - r)$ math
-  - [ ] Seamless dual-mode rendering in `MapCanvas.tsx` (Square vs Hex) with isometric-feel SVG geometry
-  - [ ] Hex Distance Measurement Ruler with tabletop league/mile scale readouts
-  - [ ] Hexagonal organic hillshading and vector SVG export integration
-  - [ ] Automated unit test suite in `hexTopologyEngine.test.ts` and `MapCanvas.test.tsx`
+- [x] **Phase 18: Dual Hexagonal & Orthogonal Cartography Engine** *(Score: 58.0 / 100 via ADR-016)*
+  - [x] True Flat-Topped & Pointy-Topped Hexagonal grid topology (`hexTopologyEngine.ts`) with axial $(q, r)$ and cube $(s = -q - r)$ math
+  - [x] Seamless dual-mode rendering in `MapCanvas.tsx` (Square vs Pointy Hex vs Flat Hex) with isometric-feel SVG geometry
+  - [x] Hex Distance Measurement Ruler with tabletop league/mile scale and daily march readouts
+  - [x] Multi-radius area brushes (1x1, 3x3, 5x5) stamping terrain, relief, and fog across 1, 7, or 19 tiles
+  - [x] Hexagonal vector SVG export integration in `mapEngine.ts`
+  - [x] Automated unit test suite in `hexTopologyEngine.test.ts` and `MapCanvas.test.tsx` (103/103 tests passing across 14 suites)
+- [ ] **Phase 19: Vector Watershed Physics & Connected Road Pathfinding** *(Target: 62.5 / 100)*
+  - [ ] Procedural downhill water flow simulation generating connected river branches and estuaries based on elevation
+  - [ ] A* road network pathfinding connecting settlements along optimal terrain contours
+  - [ ] Layer Stacking panel with toggles for Terrain, Political, Exploration, Roads/Rivers, and Annotations
+  - [ ] Automated test suite in `riverRoadEngine.test.ts`
 
 ---
 
@@ -160,6 +166,7 @@ status: active
 - [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export.
 - [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (`mountain-snow`, `mountain-range`, `mesa`, `crag`, `volcano`).
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
-- [ ] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Target: 58.0 / 100).
+- [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
+- [ ] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Target: 62.5 / 100).
 
 
