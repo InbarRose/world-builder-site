@@ -208,7 +208,7 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.queryByRole('button', { name: /Draw Card/i })).not.toBeInTheDocument()
   })
 
-  it('supports Share Table QR modal and Export Suite share button', async () => {
+  it('supports Share & Backup JSON modal and Export Suite share button', async () => {
     render(
       <BrowserRouter future={routerFuture}>
         <Play />
@@ -226,23 +226,30 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(shareMenuBtn)
     })
 
-    // Open Share Table modal
-    const shareTableBtn = screen.getByRole('button', { name: /Share Table QR/i })
+    // Open Share & Backup modal
+    const shareTableBtn = screen.getByRole('button', { name: /Share & Backup JSON/i })
     await act(async () => {
       fireEvent.click(shareTableBtn)
     })
 
-    expect(screen.getByRole('heading', { name: /Share with Table/i })).toBeInTheDocument()
-    expect(screen.getByText(/Seed Link & QR \(Fast\)/i)).toBeInTheDocument()
-    expect(screen.getByText(/Full Session State/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Copy Link/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Download QR Image/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Export, Import & Share Realm/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Export \(\.json\)/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Import \(\.json\)/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Seed Link/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Download World File \(\.json\)/i })).toBeInTheDocument()
 
-    // Switch to Full Session State tab
+    // Switch to Import tab
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Full Session State/i }))
+      fireEvent.click(screen.getByRole('button', { name: /Import \(\.json\)/i }))
     })
-    expect(screen.getByText(/Complete State Snapshot:/i)).toBeInTheDocument()
+    expect(screen.getByText(/Click to Select \.world\.json File/i)).toBeInTheDocument()
+
+    // Switch to Seed Link tab
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Seed Link/i }))
+    })
+    expect(screen.getByText(/Lightweight Seed Link/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Copy Link/i })).toBeInTheDocument()
 
     // Close modal
     await act(async () => {

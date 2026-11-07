@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { createNewWorld } from '../engine/storageService'
+import { createNewWorld, serializeWorld, parseImportedWorld } from '../engine/storageService'
 import {
   compressStringToBase64Url,
   decodeWorldFromCompressedHash,
   decompressBase64UrlToString,
   encodeWorldToCompressedHash,
   generateFullStateShareUrl,
-  generateQrCodeDataUrl,
-  generateQrCodeSvg,
   generateSeedShareUrl,
   parseSeedShareUrl,
 } from '../engine/shareService'
@@ -104,13 +102,29 @@ describe('shareService', () => {
     expect(decoded?.entities[0].traits).toContain('Luminous')
   })
 
-  it('generates valid QR Code SVG and Data URL', async () => {
-    const testUrl = 'https://world-building.inbarrose.com/play?seed=test-123'
-    const svg = await generateQrCodeSvg(testUrl, true)
-    expect(svg).toContain('<svg')
-    expect(svg).toContain('</svg>')
+  it('serializes and parses portable JSON world files with schema migration integrity', () => {
+    const world = createNewWorld('Aethelgard High Kingdom', 'aethel-99')
+    world.drawHistory.push({
+      id: 'move_1',
+      moveId: 1,
+      card: { suit: '♥', value: 'K', id: '♥-K' },
+      timestamp: new Date().toISOString(),
+      stage: 'genesis',
+      power: 'Crown of Peaks',
+      note: 'The high peaks were forged.',
+      linkedTileIds: ['1,2'],
+      linkedEntityIds: [],
+    })
 
-    const dataUrl = await generateQrCodeDataUrl(testUrl, 200, true)
-    expect(dataUrl.startsWith('data:image/png;base64,')).toBe(true)
+    const json = serializeWorld(world)
+    expect(typeof json).toBe('string')
+    expect(json).toContain('Aethelgard High Kingdom')
+    expect(json).toContain('Crown of Peaks')
+
+    const imported = parseImportedWorld(json)
+    expect(imported.name).toBe('Aethelgard High Kingdom')
+    expect(imported.drawHistory.length).toBe(1)
+    expect(imported.drawHistory[0].power).toBe('Crown of Peaks')
+    expect(imported.schemaVersion).toBeGreaterThanOrEqual(1)
   })
 })

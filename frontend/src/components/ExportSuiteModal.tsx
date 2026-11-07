@@ -8,7 +8,6 @@ import {
   X,
   Compass,
   BookOpen,
-  QrCode,
 } from 'lucide-react'
 import { SelectiveExportOptions, WorldState } from '../engine/types'
 import {
@@ -168,10 +167,10 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
                 onOpenShare()
               }}
               className="ml-auto px-2.5 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1.5 font-semibold text-xs transition-colors"
-              title="Open QR Code & Table Share Modal"
+              title="Open World Backup & Share Modal"
             >
-              <QrCode className="h-3.5 w-3.5" />
-              <span>Share Table (QR)</span>
+              <FileJson className="h-3.5 w-3.5" />
+              <span>Share & Backup (.json)</span>
             </button>
           )}
         </div>
