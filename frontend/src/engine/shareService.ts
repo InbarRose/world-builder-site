@@ -1,4 +1,3 @@
-import QRCode from 'qrcode'
 import LZString from 'lz-string'
 import { CURRENT_SCHEMA_VERSION, GeographyPreset, WorldState } from './types'
 import { createNewWorld, migrateWorldState } from './storageService'
@@ -131,36 +130,4 @@ export function decodeWorldFromCompressedHash(hashOrParam: string): WorldState |
     console.error('Failed to decode world from compressed hash', err)
     return null
   }
-}
-
-/**
- * Generates an SVG string representation of a QR Code.
- */
-export async function generateQrCodeSvg(text: string, isDark = true): Promise<string> {
-  return QRCode.toString(text, {
-    type: 'svg',
-    margin: 1,
-    color: {
-      dark: isDark ? '#e2e8f0' : '#0f172a',
-      light: '#00000000', // transparent background
-    },
-  })
-}
-
-/**
- * Generates a PNG Data URL of a QR Code for direct rendering in an <img> tag or download.
- */
-export async function generateQrCodeDataUrl(
-  text: string,
-  width = 280,
-  isDark = true
-): Promise<string> {
-  return QRCode.toDataURL(text, {
-    width,
-    margin: 1,
-    color: {
-      dark: isDark ? '#e2e8f0' : '#0f172a',
-      light: '#00000000',
-    },
-  })
 }

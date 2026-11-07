@@ -223,7 +223,33 @@ status: active
 - [x] Add ADR-011 documenting the AAA Game Launcher, Deliberate Epoch Ceremonies, and Focus-Zone Header.
 - [x] Add ADR-012 documenting the Uncompromising AAA-Grade Multi-Domain Rubric, Adversarial Re-Evaluation (47.0/100 baseline), and Phase 17–24 Master Roadmap.
 - [x] Add ADR-013 documenting the Institutionalization of the Human Experience (HX)-Led Engineering Framework.
+- [x] Add ADR-014 documenting Deprecation of QR Codes in favor of Portable JSON World Files and Export/Import.
 - [ ] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
+
+---
+
+## ADR-014: Deprecating QR Code Session Sharing in Favor of Scalable JSON Export/Import
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - Phase 10 introduced QR code generation to encode session states in URL hashes.
+  - However, physical QR codes have strict mathematical payload limits (~2,300 to ~2,953 bytes). Real tabletop campaigns with multiple ages, dozens of entities, extensive chronicle prose, and hundreds of custom painted map tiles quickly exceed QR capacity.
+  - Relying on QR codes for session sharing creates an unscalable and fragile user experience where larger worlds fail to generate or fail to scan.
+  - In a serverless, static SPA architecture, the most robust, scalable, privacy-respecting, and 100% offline method to transfer, backup, and archive worlds is **portable JSON files (`.world.json`)** and native browser file export/import.
+- **Decision**:
+  1. **Deprecate and Remove QR Code Generation**:
+     - Remove the `qrcode` library and QR rendering canvas from `ShareTableModal` and `shareService`.
+  2. **Elevate JSON File Export / Import as Canonical Tabletop Portability**:
+     - Standardize on `.world.json` format containing the full world manifest (versioned schema, stage, players, cards, map grid, chronicle, and entity graph).
+     - Provide 1-click **"Download World File (.json)"** and drag-and-drop **"Import World File"** in the primary sharing and header menus.
+  3. **Preserve Lightweight URL Seeds for Quick Starts Only**:
+     - URL hash sharing is preserved strictly for tiny setup seeds (<120 characters) and direct clipboard copy links, not high-density QR graphics.
+- **Consequences**:
+  - Eliminates payload size anxiety and scanning failures across tabletop devices.
+  - Reduces bundle size and dependency overhead.
+  - Gives players tangible, permanent backup files they own forever on their local hard drives and cloud storage.
+
 
 ---
 

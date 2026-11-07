@@ -24,7 +24,7 @@ import {
   FastForward,
   Compass,
   Check,
-  QrCode,
+  FileJson,
   Volume2,
   Home,
   Settings,
@@ -1281,8 +1281,8 @@ export function Play() {
                     }}
                     className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
                   >
-                    <QrCode className="h-3.5 w-3.5 text-primary" />
-                    <span>Share Table QR</span>
+                    <FileJson className="h-3.5 w-3.5 text-primary" />
+                    <span>Share & Backup JSON</span>
                   </button>
                   <button
                     type="button"
@@ -2834,11 +2834,17 @@ export function Play() {
         onOpenShare={() => setShowShareModal(true)}
       />
 
-      {/* Share with Table QR & Compact URL Modal */}
+      {/* Share with Table & JSON Backup Modal */}
       <ShareTableModal
         isOpen={showShareModal}
         world={world}
         onClose={() => setShowShareModal(false)}
+        onImportWorld={(imported) => {
+          setActiveWorldId(imported.id)
+          setWorld(imported)
+          setSavedWorlds(listSavedWorlds())
+          playStageAdvanceSound()
+        }}
       />
 
       {/* Incoming Shared Realm Hydration Prompt */}
