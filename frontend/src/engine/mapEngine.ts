@@ -159,9 +159,13 @@ export const RELIEF_PALETTE: Record<
 > = {
   none: { id: 'none', label: 'Flat', symbol: '', priority: 0 },
   hills: { id: 'hills', label: 'Rolling Hills', symbol: '⛰️', priority: 62 },
-  mountain: { id: 'mountain', label: 'Mountain Range', symbol: '🏔️', priority: 75 },
-  canyon: { id: 'canyon', label: 'Deep Canyon', symbol: '🏜️', priority: 72 },
-  volcano: { id: 'volcano', label: 'Active Volcano', symbol: '🌋', priority: 84 },
+  mountain: { id: 'mountain', label: 'Granite Peaks', symbol: '🏔️', priority: 75 },
+  'mountain-snow': { id: 'mountain-snow', label: 'Glacial Horns & Ice Massif', symbol: '❄️', priority: 78 },
+  'mountain-range': { id: 'mountain-range', label: 'Continuous Mountain Spine', symbol: '⛰️', priority: 77 },
+  mesa: { id: 'mesa', label: 'Stepped Mesa & Tableland', symbol: '🏜️', priority: 71 },
+  crag: { id: 'crag', label: 'Obsidian Crags & Needle Spires', symbol: '🪨', priority: 74 },
+  canyon: { id: 'canyon', label: 'Deep Canyon & Gorge', symbol: '🏜️', priority: 72 },
+  volcano: { id: 'volcano', label: 'Active Volcanic Caldera', symbol: '🌋', priority: 84 },
 }
 
 export const FLORA_PALETTE: Record<

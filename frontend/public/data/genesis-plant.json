@@ -2,8 +2,17 @@
   "stage": "genesis",
   "suit": "♣",
   "power": "Plant",
-  "description": "This power represents the vegetation, flora, and plants: forests, jungles, grasslands, rainforests, marshes, etc.",
-  "fantasticalDescription": "This power represents fantastical vegetation: sentient forests, glowing mushrooms, trees that reach the sky, etc.",
-  "examples": "This power represents the vegetation, flora, and plants: forests, jungles, grasslands, rainforests, marshes, etc."
+  "description": "This power represents flora and ecosystems: primeval oak woodlands, boreal conifer taiga, dense tropical triple-canopy rainforests, tidal mangrove labyrinths, and waving amber steppes with date palm oases.",
+  "fantasticalDescription": "This power represents fantastical vegetation: colossal World-Trees bridging cloud layers, bioluminescent fungal forests glowing in twilight, predatory brambles, and orchards of weeping starlight-fruit.",
+  "examples": "Ancient Old-Growth Forests, Subarctic Taiga, Dense Jungle Rainforests, Mangrove Coastlines, Golden Steppes, and Desert Oases.",
+  "creativePrompts": [
+    "How old is this forest canopy, and what forgotten ancient seeds slumber beneath its moss?",
+    "How do the plants defend themselves against storms, droughts, and primordial beasts?",
+    "Does this flora produce valuable spices, rare lumber, or strange psychoactive resins?"
+  ],
+  "exampleNarratives": [
+    "Towering cedar sentinels rose hundreds of feet, cloaking the continent in a dense, mossy green silence.",
+    "A tidal mangrove labyrinth locked roots with the sea floor, buffering the mainland against ocean storm surges.",
+    "Subarctic spruce taiga stretched across endless permafrost, glowing with silver frost under the pale moon."
+  ]
 }
-

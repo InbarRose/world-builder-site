@@ -2,8 +2,17 @@
   "stage": "genesis",
   "suit": "♠",
   "power": "Earth",
-  "description": "This power represents earthly features: mountains, hills, canyons, deserts, cliffs, caves, etc.",
-  "fantasticalDescription": "This power represents fantastical earthly features: floating mountains, crystal caves, living rock formations, etc.",
-  "examples": "This power represents earthly features: mountains, hills, canyons, deserts, cliffs, caves, etc."
+  "description": "This power represents primordial elevation and landmass sculpting: granite mountains, snow-capped massifs, continuous ridge spines, flat-topped mesas, obsidian needle crags, active volcanoes, deep canyons, and rolling highlands.",
+  "fantasticalDescription": "This power represents fantastical earthly geology: floating lodestone islands, singing crystal spires, inverted mountains held by gravitational ley lines, and living subterranean stone veins.",
+  "examples": "Granite Mountain Ranges, Glacial Horns, Stepped Redstone Mesas, Volcanic Calderas, Obsidian Crags, Redstone Gorges, and Chalk Downs.",
+  "creativePrompts": [
+    "What ancient tectonic violence thrust these mountains upward?",
+    "Does this ridge form an impassable barrier that divides two distinct weather systems?",
+    "What rare ores, crystals, or slumbering elemental forces sleep inside the bedrock?"
+  ],
+  "exampleNarratives": [
+    "The Granite Teeth tore upward through the crust, locking the northern steppes in a permanent rain shadow.",
+    "A roaring stratovolcano spewed basalt ash and rivers of fire, cooling into new fertile black shores.",
+    "Sheer redstone mesas rose from the baking basin like titanic altars to the dawn sun."
+  ]
 }
-

@@ -14,7 +14,6 @@ import {
 import { WorldState } from '../engine/types'
 import {
   generateSeedShareUrl,
-  generateFullStateShareUrl,
 } from '../engine/shareService'
 import { parseImportedWorld, saveWorld, serializeWorld } from '../engine/storageService'
 import { downloadExportFile } from '../engine/exportService'
@@ -40,7 +39,6 @@ export function ShareTableModal({ isOpen, world, onClose, onImportWorld }: Share
 
   const origin = typeof window !== 'undefined' ? `${window.location.origin}/play` : undefined
   const seedShareUrl = generateSeedShareUrl(world, origin)
-  const fullShareUrl = generateFullStateShareUrl(world, origin)
   const jsonString = serializeWorld(world)
   const fileSizeKb = (new Blob([jsonString]).size / 1024).toFixed(1)
 
@@ -255,7 +253,7 @@ export function ShareTableModal({ isOpen, world, onClose, onImportWorld }: Share
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  History: {importedPreview.drawHistory.length} turns • Tiles: {importedPreview.map.tiles.length} • Entities: {importedPreview.entities.length}
+                  History: {importedPreview.drawHistory.length} turns • Tiles: {Object.keys(importedPreview.map.tiles).length} • Entities: {importedPreview.entities.length}
                 </p>
                 <button
                   type="button"

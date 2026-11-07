@@ -2,8 +2,17 @@
   "stage": "genesis",
   "suit": "♦",
   "power": "Feature",
-  "description": "This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren't really represented with the other powers.",
-  "fantasticalDescription": "This power represents fantastical features: magical weather patterns, portals, ley lines, etc.",
-  "examples": "This power represents specific features, or elements in the world: weather, climates, unique places, special formations, complex geological elements, for example; geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources, etc. Things that you would put on a map that aren't really represented with the other powers."
+  "description": "This power represents distinct geographic anomalies and landmarks: geothermal geysers and mineral terraces, titanic meteor impact craters ringed with star-glass, hexagonal basalt column monoliths, vast blinding salt pans, and subterranean crystal caverns.",
+  "fantasticalDescription": "This power represents fantastical cosmic wonders: singing quartz leylines humming with celestial harmonies, permanent aurora veils, tears in reality leaking arcane radiation, and anti-gravity anomalies.",
+  "examples": "Geothermal Terraces, Meteor Craters, Hexagonal Basalt Columns, Expansive Salt Pans, Cavern Labyrinths, and Arcane Leyline Nexuses.",
+  "creativePrompts": [
+    "What bizarre mineral or metaphysical properties make this landmark instantly recognizable from leagues away?",
+    "How does this feature alter the local climate, magnetic compasses, or weather patterns around it?",
+    "Will future civilizations revere this site as an altar of pilgrimage or avoid it as a cursed zone?"
+  ],
+  "exampleNarratives": [
+    "Steaming geothermal terraces cascaded into rainbow-hued mineral pools, hissing with volcanic vapor.",
+    "A star fell in primordial blinding fury, carving a five-league amphitheater ringed with fused silica tektites.",
+    "Thousands of geometric basalt pillars stepped out of the ocean surf like the abandoned causeway of giants."
+  ]
 }
-
