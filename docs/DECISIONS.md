@@ -583,3 +583,48 @@ status: active
   - Delivers complete parity across all 4 stages of the game.
   - Empowers both human tabletop groups (brainstorming prompts, narrative flavor) and autonomous bot players with diverse worldbuilding decisions.
 
+---
+
+## ADR-023: Studio Preset Categorization, Affinity/Anti-Affinity Decision Engine, and Evocative Flavor Name Generation
+
+- **Status**: Accepted
+- **Context**:
+  To ensure tabletop worldbuilding feels cohesive, rewarding, and creatively inspiring, the user directed:
+  > "for the studio, expand more items, options, presets, etc. make categories, filtering, etc. allow internal meta data to link them with scores for certain types of other preset behaviours, and elements, so that certain behaviours, elements, intrigues, primals,etc. have affinity or anti-affinity. this will help make the bot selection more realistic with weighted choices that do not seem so random and disconnected. make sure the bot players have configurable weights, can be edited or adjusted after selection (if not fully automatic world) and that each of the selections, has some basic description to go along in the ledger. names of forests, names of canyons, names of creatures, towns, empires, characters, etc."
+- **Decision**:
+  1. **Affinity & Anti-Affinity Decision Engine (`affinityEngine.ts`)**:
+     - Defined studio concept groups (`habitations`, `geography`, `traditions`, `statecraft`, `intrigue`, `myths`).
+     - Implemented semantic tag inference (`inferPresetTags`) identifying cultural, military, ecological, and esoteric themes.
+     - Built dynamic affinity evaluator (`evaluatePresetAffinity`) calculating:
+       - **World Historical Precedents**: +10 to +30 bonus when candidate presets reinforce established traditions, species traits, or previous turn events (e.g., prior seafaring culture boosts maritime ports and naval expansion).
+       - **Geographic Suitability**: +20 to +25 bonus for terrain alignment (highland citadels on mountains, watermills along rivers).
+       - **Anti-Affinity Penalties**: -25 to -40 penalty for discordant combinations (e.g. maritime ports in deep desert basins, wanton mass purges in high-cooperation peaceful republics).
+       - **Bot Personality Weights**: Multiplies weights by configured bot parameters (`geography`, `ecology`, `civilization`, `diplomacy`, `conflict`, `myth`).
+     - Created `sampleWeightedPreset` utilizing roulette-wheel probability distribution, giving high-affinity choices higher selection probability while maintaining creative variety.
+     - Built `recommendBestPreset` to surface the optimal choice and transparent rationale to human creators.
+  2. **Combinatorial Fantasy Name & Ledger Narrative Generator (`flavorNameEngine.ts`)**:
+     - Procedural name generation with deterministic seed support for:
+       - Mountain peaks, spires, and crags
+       - Canyons, gorges, and rifts
+       - Forests, wealds, and groves
+       - Rivers, waterfalls, and lakes
+       - Towns, havens, citadels, and keeps
+       - Species, empires/leagues, historical leaders, and ancient myths
+     - Implemented `generateLedgerProse` to weave names, coordinates, and entity affiliations seamlessly into complete chronicle notes.
+  3. **Studio Preset Workshop UI Expansion (`Play.tsx`)**:
+     - Integrated instant search input for real-time preset filtering.
+     - Added 7 category filter pills (`All`, `Habitations`, `Geography`, `Traditions`, `Statecraft`, `Intrigue`, `Myths`) with dynamic item counts.
+     - Added "🤖 Bot Pick" recommendation banner with affinity score and expandable rationale breakdown ("Why this Pick?").
+     - Added Evocative Feature & Entity Name customizer with `🎲 Re-roll Name` and `✍️ Sync to Note` buttons.
+     - Embedded direct access to tune bot decision weights.
+  4. **Smart Auto-Play Simulation (`autoPlayEngine.ts`)**:
+     - Upgraded bot turn execution to use weighted affinity selection, assign cartographic symbols, apply traits/abilities, and chronicle rich narrative ledger notes.
+  5. **Automated Test Coverage**:
+     - Added unit test suites `affinityEngine.test.ts` (6 tests) and `flavorNameEngine.test.ts` (4 tests).
+     - Expanded `PlayStudio.test.tsx` verifying category filtering, text search, bot recommendation, and name re-rolling.
+     - All 20 test suites passing (149 / 149 tests).
+- **Consequences**:
+  - Eliminates disconnected, random-feeling bot turns by ensuring choices reflect world history, geography, and seat personalities.
+  - Provides tabletop players with immediate creative flavor and evocative names to overcome blank-page syndrome.
+
+

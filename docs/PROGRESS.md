@@ -168,6 +168,13 @@ status: active
   - [x] Expanded Primal (Stage 2), Civilization (Stage 3), and Intrigue (Stage 4) to 8+ rich presets per suit (97 multi-stage presets total)
   - [x] Codex/archive icons, narrative examples, creative prompts, and abilities for all cultural traditions, resources, evolutionary skills, enlightenment, expansion, treaties, conflicts, schemes, and myths
   - [x] Automated test suite in `cartographicSymbolEngine.test.ts` (138/138 tests passing across 18 suites)
+- [x] **Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names** *(ADR-023)*
+  - [x] Dynamic affinity/anti-affinity decision engine (`affinityEngine.ts`) weighting candidate choices by world history, bot personality, and tile geography
+  - [x] Combinatorial fantasy name generator (`flavorNameEngine.ts`) for geographic features, settlements, empires, and characters
+  - [x] Studio Preset Workshop UI in `Play.tsx` with search filtering, 7 category pills, "🤖 Bot Pick" recommendation banner, and expandable affinity rationale
+  - [x] Evocative Name generator input with 1-click `🎲 Re-roll Name` and `✍️ Sync to Note`
+  - [x] Smart auto-play engine integration with weighted probabilistic sampling and complete chronicle ledger notes
+  - [x] Automated unit test suites in `affinityEngine.test.ts`, `flavorNameEngine.test.ts`, and `PlayStudio.test.tsx` (149/149 tests passing across 20 suites)
 - [ ] **Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics** *(Target: 78.0 / 100)*
   - [ ] WebRTC / BroadcastChannel zero-server room sync where GM and players see card flips and map stamps in real-time
   - [ ] Tablet touch ergonomics (pinch-to-zoom, two-finger pan, 48px touch targets)
@@ -200,6 +207,7 @@ status: active
 - [x] Implement Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase (ADR-020).
 - [x] Implement Phase 20.6: Comprehensive Genesis Variants Catalog & Multi-Tile Concepts (ADR-021).
 - [x] Implement Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System (ADR-022).
+- [x] Implement Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names (ADR-023).
 - [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
 
 

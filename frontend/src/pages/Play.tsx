@@ -85,6 +85,15 @@ import {
   StageActionPreset,
   getActionPresetsForDraw,
 } from '../engine/presets'
+import {
+  StudioConceptGroup,
+  getPresetConceptGroup,
+  recommendBestPreset,
+} from '../engine/affinityEngine'
+import {
+  generateFeatureName,
+  generateLedgerProse,
+} from '../engine/flavorNameEngine'
 import { addSlotToTile, createDefaultTile, getTileId } from '../engine/mapEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
@@ -177,6 +186,10 @@ export function Play() {
   const [turnPhase, setTurnPhase] = useState<TurnPhase>('await_draw')
   const [pendingNote, setPendingNote] = useState('')
   const [selectedPreset, setSelectedPreset] = useState<StageActionPreset | null>(null)
+  const [presetCategory, setPresetCategory] = useState<StudioConceptGroup>('all')
+  const [presetSearchQuery, setPresetSearchQuery] = useState('')
+  const [showAffinityDetails, setShowAffinityDetails] = useState(false)
+  const [generatedFeatureName, setGeneratedFeatureName] = useState('')
   const [showTurnVerifyDialog, setShowTurnVerifyDialog] = useState(false)
   const [turnModifiedTiles, setTurnModifiedTiles] = useState<string[]>([])
   const [turnModifiedEntities, setTurnModifiedEntities] = useState<string[]>([])
@@ -655,6 +668,10 @@ export function Play() {
     setDeck(newDeck)
     setDrawnCard(card)
     setSelectedPreset(null)
+    setGeneratedFeatureName('')
+    setPresetCategory('all')
+    setPresetSearchQuery('')
+    setShowAffinityDetails(false)
     setPendingNote('')
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
@@ -829,11 +846,12 @@ export function Play() {
           if (selectedPreset.cartographicSymbol) updated.cartographicSymbol = selectedPreset.cartographicSymbol
           if (selectedPreset.hasRiver) updated.hasRiver = true
           if (selectedPreset.hasRoad) updated.hasRoad = true
+          if (generatedFeatureName) updated.label = generatedFeatureName
 
           updated = addSlotToTile(updated, {
             category: selectedPreset.slotCategory,
             type: selectedPreset.id,
-            name: selectedPreset.name,
+            name: generatedFeatureName || selectedPreset.name,
             icon: selectedPreset.icon,
             priority: selectedPreset.slotPriority,
             linkedEventId: record.id,
@@ -877,6 +895,10 @@ export function Play() {
     setTurnPhase('await_draw')
     setShowTurnVerifyDialog(false)
     setSelectedPreset(null)
+    setGeneratedFeatureName('')
+    setPresetCategory('all')
+    setPresetSearchQuery('')
+    setShowAffinityDetails(false)
     setPendingNote('')
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
@@ -1084,6 +1106,49 @@ export function Play() {
         isDisasterAce
       )
     : []
+
+  const botRecommendation = useMemo(() => {
+    if (!drawnCard || availableActionPresets.length === 0) return null
+    return recommendBestPreset(availableActionPresets, world, activePlayer, selectedTileId)
+  }, [availableActionPresets, world, activePlayer, selectedTileId, drawnCard])
+
+  const filteredActionPresets = useMemo(() => {
+    return availableActionPresets.filter((preset) => {
+      if (presetCategory !== 'all') {
+        const group = getPresetConceptGroup(preset)
+        if (group !== presetCategory) return false
+      }
+      if (presetSearchQuery.trim()) {
+        const q = presetSearchQuery.toLowerCase()
+        const match =
+          preset.name.toLowerCase().includes(q) ||
+          preset.description.toLowerCase().includes(q) ||
+          preset.id.toLowerCase().includes(q)
+        if (!match) return false
+      }
+      return true
+    })
+  }, [availableActionPresets, presetCategory, presetSearchQuery])
+
+  const handleSelectPreset = (preset: StageActionPreset | null) => {
+    if (!preset) {
+      setSelectedPreset(null)
+      return
+    }
+    setSelectedPreset(preset)
+    const newName = generateFeatureName(preset.slotCategory, preset.cartographicSymbol || preset.name)
+    setGeneratedFeatureName(newName)
+    if (!pendingNote.trim()) {
+      setPendingNote(generateLedgerProse(preset, newName, undefined, selectedTileId))
+    }
+  }
+
+  const handleRerollFeatureName = () => {
+    if (!selectedPreset) return
+    const newName = generateFeatureName(selectedPreset.slotCategory, selectedPreset.cartographicSymbol || selectedPreset.name)
+    setGeneratedFeatureName(newName)
+    setPendingNote(generateLedgerProse(selectedPreset, newName, undefined, selectedTileId))
+  }
 
   const { color, bgColor } = drawnCard
     ? getCardDisplay(drawnCard, cardColors)
@@ -2521,75 +2586,239 @@ export function Play() {
                           </div>
                         </div>
 
-                        {/* Optional Action Presets Chips */}
+                        {/* Optional Action Presets Workshop with Categories, Search, and Affinity Engine */}
                         {availableActionPresets.length > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-semibold text-muted-foreground">
-                                Choose a Preset Action (Applies to Tile {selectedTileId}) OR Edit Map/Codex Directly:
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                              {availableActionPresets.map((preset) => {
-                                const isSelected = selectedPreset?.id === preset.id
-                                return (
-                                  <button
-                                    key={preset.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setSelectedPreset(isSelected ? null : preset)
-                                    }
-                                    className={`p-2.5 rounded-lg border text-left text-xs transition-all flex items-start gap-2 ${
-                                      isSelected
-                                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
-                                        : 'border-border bg-background hover:border-primary/50'
-                                    }`}
-                                  >
-                                    <span className="text-xl shrink-0">{preset.icon}</span>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="font-bold truncate">{preset.name}</div>
-                                      <div className="text-[10px] text-muted-foreground line-clamp-1">
-                                        {preset.description}
-                                      </div>
+                          <div className="space-y-3 pt-2">
+                            {/* Bot Recommendation Banner */}
+                            {botRecommendation && (
+                              <div className="p-3 rounded-xl bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/5 border border-primary/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
+                                    <Bot className="h-4 w-4" />
+                                  </div>
+                                  <div>
+                                    <div className="font-bold flex items-center gap-1.5">
+                                      <span>Recommended: {botRecommendation.preset.icon} {botRecommendation.preset.name}</span>
+                                      <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[10px] font-mono">
+                                        Score: {botRecommendation.evaluation.totalScore}
+                                      </span>
                                     </div>
+                                    <div className="text-[11px] text-muted-foreground">
+                                      Weighted by world history, tile terrain, and {activePlayer?.name || 'Bot'} personality
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectPreset(botRecommendation.preset)}
+                                    className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-all flex items-center gap-1 shadow-sm"
+                                  >
+                                    <Check className="h-3 w-3" />
+                                    <span>Apply Bot Pick</span>
                                   </button>
-                                )
-                              })}
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowAffinityDetails((prev) => !prev)}
+                                    className="px-2.5 py-1 rounded-lg bg-background border border-border text-xs hover:bg-muted font-medium transition-all"
+                                    title="View affinity score breakdown and weights"
+                                  >
+                                    {showAffinityDetails ? 'Hide Rationale' : 'Why this Pick?'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowPlayersModal(true)}
+                                    className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
+                                    title="Configure bot decision weights & personality"
+                                  >
+                                    <Settings className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Affinity Breakdown Detail Box */}
+                            {showAffinityDetails && botRecommendation && (
+                              <div className="p-3 rounded-xl bg-card border border-border/80 text-xs space-y-2 animate-in fade-in duration-150">
+                                <div className="font-bold text-muted-foreground flex items-center justify-between">
+                                  <span>Affinity Breakdown for {botRecommendation.preset.name}:</span>
+                                  <span className="font-mono text-primary font-bold">{botRecommendation.evaluation.totalScore} pts</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                  {botRecommendation.evaluation.factors.map((f, idx) => (
+                                    <div key={idx} className="flex items-center justify-between px-2 py-1 rounded bg-muted/40 border border-border/40 text-[11px]">
+                                      <span className="text-muted-foreground truncate">{f.label}</span>
+                                      <span className={`font-mono font-bold ${f.score >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
+                                        {f.score >= 0 ? `+${f.score}` : f.score}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Category Filter Pills & Search Bar */}
+                            <div className="space-y-2">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-[11px]">
+                                  {(
+                                    [
+                                      { id: 'all', label: 'All', icon: '🌐' },
+                                      { id: 'habitations', label: 'Habitations', icon: '🏘️' },
+                                      { id: 'geography', label: 'Geography', icon: '🌲' },
+                                      { id: 'traditions', label: 'Traditions', icon: '📜' },
+                                      { id: 'statecraft', label: 'Statecraft', icon: '⚖️' },
+                                      { id: 'intrigue', label: 'Intrigue', icon: '⚔️' },
+                                      { id: 'myths', label: 'Myths', icon: '✨' },
+                                    ] as const
+                                  ).map((cat) => {
+                                    const count = cat.id === 'all'
+                                      ? availableActionPresets.length
+                                      : availableActionPresets.filter((p) => getPresetConceptGroup(p) === cat.id).length
+                                    if (count === 0 && cat.id !== 'all') return null
+                                    const isActive = presetCategory === cat.id
+                                    return (
+                                      <button
+                                        key={cat.id}
+                                        type="button"
+                                        onClick={() => setPresetCategory(cat.id)}
+                                        className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap flex items-center gap-1 ${
+                                          isActive
+                                            ? 'bg-primary text-primary-foreground shadow-sm'
+                                            : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        }`}
+                                      >
+                                        <span>{cat.icon}</span>
+                                        <span>{cat.label}</span>
+                                        <span className={`text-[9px] px-1 rounded-full ${isActive ? 'bg-primary-foreground/20' : 'bg-muted-foreground/20'}`}>
+                                          {count}
+                                        </span>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                                <div className="relative shrink-0 sm:w-48">
+                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                                  <input
+                                    type="text"
+                                    value={presetSearchQuery}
+                                    onChange={(e) => setPresetSearchQuery(e.target.value)}
+                                    placeholder="Filter presets..."
+                                    className="w-full pl-8 pr-3 py-1 rounded-lg bg-background border border-border text-xs focus:ring-1 focus:ring-primary outline-none"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Presets Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-72 overflow-y-auto pr-1">
+                                {filteredActionPresets.map((preset) => {
+                                  const isSelected = selectedPreset?.id === preset.id
+                                  const isTopBotPick = botRecommendation?.preset.id === preset.id
+                                  return (
+                                    <button
+                                      key={preset.id}
+                                      type="button"
+                                      onClick={() => handleSelectPreset(isSelected ? null : preset)}
+                                      className={`p-2.5 rounded-lg border text-left text-xs transition-all flex items-start gap-2 relative ${
+                                        isSelected
+                                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                                          : 'border-border bg-background hover:border-primary/50'
+                                      }`}
+                                    >
+                                      <span className="text-xl shrink-0">{preset.icon}</span>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="font-bold truncate flex items-center gap-1">
+                                          <span>{preset.name}</span>
+                                          {isTopBotPick && (
+                                            <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold shrink-0">
+                                              ⭐ Bot Pick
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="text-[10px] text-muted-foreground line-clamp-1">
+                                          {preset.description}
+                                        </div>
+                                      </div>
+                                    </button>
+                                  )
+                                })}
+                                {filteredActionPresets.length === 0 && (
+                                  <div className="col-span-full py-4 text-center text-xs text-muted-foreground italic">
+                                    No presets found matching &ldquo;{presetSearchQuery}&rdquo; in this category.
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )}
 
-                        {/* Selected Preset Creative Prompt & Narrative Example Box */}
-                        {selectedPreset &&
-                          (selectedPreset.creativePrompt || selectedPreset.exampleNarrative) && (
-                            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-2 animate-in fade-in duration-150">
-                              {selectedPreset.creativePrompt && (
-                                <div className="text-amber-900 dark:text-amber-200 leading-relaxed">
-                                  <strong className="font-bold text-amber-700 dark:text-amber-400">
-                                    💡 Creative Prompt:{' '}
-                                  </strong>
-                                  <span>{selectedPreset.creativePrompt}</span>
-                                </div>
-                              )}
-                              {selectedPreset.exampleNarrative && (
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1.5 border-t border-amber-500/20">
-                                  <div className="text-muted-foreground italic text-[11px] leading-relaxed border-l-2 border-amber-500/50 pl-2">
-                                    &ldquo;{selectedPreset.exampleNarrative}&rdquo;
-                                  </div>
+                        {/* Selected Preset Evocative Name Generator & Creative Prompt */}
+                        {selectedPreset && (
+                          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-3 animate-in fade-in duration-150">
+                            {/* Evocative Name Customizer & Re-roll */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-background/80 p-2.5 rounded-lg border border-amber-500/30">
+                              <div className="flex-1 w-full">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block mb-1">
+                                  Evocative Name / Map Label:
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={generatedFeatureName}
+                                    onChange={(e) => {
+                                      setGeneratedFeatureName(e.target.value)
+                                      setPendingNote(generateLedgerProse(selectedPreset, e.target.value, undefined, selectedTileId))
+                                    }}
+                                    className="flex-1 px-2.5 py-1 rounded bg-background border border-border text-xs font-semibold focus:ring-1 focus:ring-amber-500 outline-none"
+                                    placeholder="Enter or generate feature name..."
+                                  />
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      setPendingNote(selectedPreset.exampleNarrative || '')
-                                    }
-                                    className="shrink-0 px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-semibold transition-colors flex items-center gap-1"
-                                    title="Copy this example prose directly into your turn chronicle note"
+                                    onClick={handleRerollFeatureName}
+                                    className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-semibold transition-all flex items-center gap-1 shrink-0"
+                                    title="Re-roll an evocative combinatorial fantasy name"
                                   >
-                                    <span>✍️ Use Example Prose</span>
+                                    <span>🎲 Re-roll</span>
                                   </button>
                                 </div>
-                              )}
+                              </div>
                             </div>
-                          )}
+
+                            {selectedPreset.creativePrompt && (
+                              <div className="text-amber-900 dark:text-amber-200 leading-relaxed">
+                                <strong className="font-bold text-amber-700 dark:text-amber-400">
+                                  💡 Creative Prompt:{' '}
+                                </strong>
+                                <span>{selectedPreset.creativePrompt}</span>
+                              </div>
+                            )}
+
+                            {selectedPreset.exampleNarrative && (
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1.5 border-t border-amber-500/20">
+                                <div className="text-muted-foreground italic text-[11px] leading-relaxed border-l-2 border-amber-500/50 pl-2">
+                                  &ldquo;{selectedPreset.exampleNarrative}&rdquo;
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setPendingNote(
+                                      generateLedgerProse(
+                                        selectedPreset,
+                                        generatedFeatureName || selectedPreset.name,
+                                        undefined,
+                                        selectedTileId
+                                      )
+                                    )
+                                  }
+                                  className="shrink-0 px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-semibold transition-colors flex items-center gap-1"
+                                  title="Copy this example prose directly into your turn chronicle note"
+                                >
+                                  <span>✍️ Sync to Note</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Live Turn Activity Basket (Shows Map Tiles & Codex Entries touched this turn) */}
                         <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 space-y-2.5 text-xs">

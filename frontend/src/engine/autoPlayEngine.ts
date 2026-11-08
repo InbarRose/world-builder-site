@@ -17,6 +17,8 @@ import {
   getActionPresetsForDraw,
   getEffectiveBotWeights,
 } from './presets'
+import { sampleWeightedPreset } from './affinityEngine'
+import { generateFeatureName, generateLedgerProse } from './flavorNameEngine'
 import { cloneMapState, recordTurnSnapshot } from './storageService'
 import {
   BotPersonalityId,
@@ -328,7 +330,9 @@ export function executeAutomatedTurn(
   const candidatePresets =
     enabledCandidates.length > 0 ? enabledCandidates : rawCandidates
   const chosenPreset: StageActionPreset | undefined =
-    candidatePresets.length > 0 ? pickRandom(candidatePresets, rng) : undefined
+    candidatePresets.length > 0
+      ? sampleWeightedPreset(candidatePresets, world, activePlayer, undefined, rng)
+      : undefined
 
   const moveId = world.drawHistory.length + 1
   const eventId = `draw_${moveId}_${Math.floor(rng() * 100000)}`
@@ -460,90 +464,110 @@ export function executeAutomatedTurn(
       const isCanyon = rng() > 0.65
       const newTerrain: TerrainType = isCanyon ? 'canyon' : 'mountain'
       const noun = pickRandom(LANDMARK_NOUNS[isCanyon ? 'canyon' : 'mountain'], rng)
-      const label = `${adj} ${noun}`
+      const label = chosenPreset
+        ? generateFeatureName('mountain', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} ${noun}`
       const slotTile = addTrackedSlot(
         targetTile,
         'elevation',
-        isCanyon ? 'canyon' : 'mountain',
+        chosenPreset?.reliefChange || (isCanyon ? 'canyon' : 'mountain'),
         label,
-        isFantastical ? '✨' : isCanyon ? '🏜️' : '🏔️',
+        chosenPreset?.icon || (isFantastical ? '✨' : isCanyon ? '🏜️' : '🏔️'),
         isFantastical ? 88 : 75
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        terrain: newTerrain,
-        relief: isCanyon ? 'canyon' : 'mountain',
+        terrain: chosenPreset?.terrainChange || newTerrain,
+        relief: chosenPreset?.reliefChange || (isCanyon ? 'canyon' : 'mountain'),
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
         label,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, undefined, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Earth] Floating sky-crags and crystalline peaks rise at ${label} (${targetTile.id}), defying gravity.`
         : `Colossal ${isCanyon ? 'canyons' : 'mountain peaks'} are forged at ${label} (${targetTile.id}).`
     } else if (effectiveSuit === '♥') {
       // Water (Lakes & Rivers on land remain land tiles!)
       const noun = pickRandom(LANDMARK_NOUNS.water, rng)
-      const label = `${adj} ${noun}`
+      const label = chosenPreset
+        ? generateFeatureName('water', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} ${noun}`
       const slotTile = addTrackedSlot(
         targetTile,
         'hydrology',
         'lake_river',
         label,
-        isFantastical ? '🌀' : '💧',
+        chosenPreset?.icon || (isFantastical ? '🌀' : '💧'),
         isFantastical ? 86 : 66
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        hasRiver: true,
+        hasRiver: chosenPreset?.hasRiver ?? true,
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
         label,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, undefined, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Water] The luminous waters of ${label} (${targetTile.id}) flow with restorative, shimmering currents.`
         : `The ${label} carves a fertile river basin and highland lake through (${targetTile.id}) toward the sea.`
     } else if (effectiveSuit === '♣') {
       // Plant
       const isJungle = rng() > 0.6
       const noun = pickRandom(LANDMARK_NOUNS.forest, rng)
-      const label = `${adj} ${noun}`
+      const label = chosenPreset
+        ? generateFeatureName('forest', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} ${noun}`
       const slotTile = addTrackedSlot(
         targetTile,
         'vegetation',
         isJungle ? 'jungle' : 'forest',
         label,
-        isFantastical ? '🌳' : isJungle ? '🌴' : '🌲',
+        chosenPreset?.icon || (isFantastical ? '🌳' : isJungle ? '🌴' : '🌲'),
         isFantastical ? 89 : 64
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        terrain: isJungle ? 'jungle' : 'forest',
-        flora: isJungle ? 'jungle' : 'forest',
-        relief: targetTile.relief !== 'none' ? targetTile.relief : 'hills',
+        terrain: chosenPreset?.terrainChange || (isJungle ? 'jungle' : 'forest'),
+        flora: chosenPreset?.floraChange || (isJungle ? 'jungle' : 'forest'),
+        relief: chosenPreset?.reliefChange || (targetTile.relief !== 'none' ? targetTile.relief : 'hills'),
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
         label,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, undefined, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Plant] Sentient, bioluminescent world-trees awaken in the ${label} (${targetTile.id}).`
         : `Dense ${isJungle ? 'tropical jungles' : 'ancient woodlands'} spread across the ${
             targetTile.relief === 'mountain' ? 'mountain slopes' : 'highlands'
           } of ${label} (${targetTile.id}).`
     } else {
       // Feature
-      const label = `${adj} Cavern`
+      const label = chosenPreset
+        ? generateFeatureName('feature', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} Cavern`
       const slotTile = addTrackedSlot(
         targetTile,
-        isFantastical ? 'myth' : 'resource',
+        chosenPreset?.slotCategory || (isFantastical ? 'myth' : 'resource'),
         isFantastical ? 'leyline' : 'cavern',
         label,
-        isFantastical ? '💎' : '♨️',
+        chosenPreset?.icon || (isFantastical ? '💎' : '♨️'),
         isFantastical ? 88 : 68
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        overlay: isFantastical ? 'myth' : 'cave',
+        overlay: chosenPreset?.overlayChange || (isFantastical ? 'myth' : 'cave'),
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
         label,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, undefined, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Feature] A ley-line nexus and singing crystal grotto form at ${label} (${targetTile.id}).`
         : `A natural wonder and deep geothermal cavern system is discovered at ${label} (${targetTile.id}).`
     }
@@ -559,9 +583,11 @@ export function executeAutomatedTurn(
     if (effectiveSuit === '♠') {
       // Settlement
       const noun = pickRandom(LANDMARK_NOUNS.settlement, rng)
-      const label = `${adj} ${noun}`
+      const label = chosenPreset
+        ? generateFeatureName('settlement', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} ${noun}`
       const settleIcon =
-        chosenSpecies?.settlementIcons?.village || (isFantastical ? '🏯' : '🏡')
+        chosenPreset?.icon || chosenSpecies?.settlementIcons?.village || (isFantastical ? '🏯' : '🏡')
       const slotTile = addTrackedSlot(
         targetTile,
         'settlement',
@@ -573,7 +599,9 @@ export function executeAutomatedTurn(
         chosenSpecies?.color
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        overlay: 'settlement',
+        overlay: chosenPreset?.overlayChange || 'settlement',
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
+        hasRoad: chosenPreset?.hasRoad,
         territoryId: chosenSpecies?.id || targetTile.territoryId,
         label,
         slots: slotTile.slots,
@@ -582,14 +610,16 @@ export function executeAutomatedTurn(
           ? Array.from(new Set([...targetTile.linkedEntityIds, chosenSpecies.id]))
           : targetTile.linkedEntityIds,
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, spName, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Settlement] ${spName} establish ${label} (${targetTile.id}), a sanctuary woven into living elemental stone.`
         : `${spName} found the thriving settlement of ${label} at (${targetTile.id}).`
     } else if (effectiveSuit === '♥') {
       // Tradition
-      const tradition = isFantastical
+      const tradition = chosenPreset?.traitGranted || (isFantastical
         ? `${adj} Astral Communion`
-        : `Rite of the ${adj} Harvest`
+        : `Rite of the ${adj} Harvest`)
       if (chosenSpecies && !chosenSpecies.traits.includes(tradition)) {
         chosenSpecies.traits.push(tradition)
       }
@@ -598,7 +628,7 @@ export function executeAutomatedTurn(
         'structure',
         'shrine',
         tradition,
-        '🕯️',
+        chosenPreset?.icon || '🕯️',
         72,
         chosenSpecies?.id,
         chosenSpecies?.color
@@ -607,16 +637,21 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${spName} adopt the cultural tradition of "${tradition}" near (${targetTile.id}), uniting their clans.`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, tradition, spName, targetTile.id)
+        : `${spName} adopt the cultural tradition of "${tradition}" near (${targetTile.id}), uniting their clans.`
     } else if (effectiveSuit === '♣') {
       // Resource
-      const resourceName = isFantastical ? `${adj} Aether-Ore` : `${adj} Iron & Timber`
+      const resourceName = chosenPreset?.name || (isFantastical ? `${adj} Aether-Ore` : `${adj} Iron & Timber`)
+      if (chosenPreset?.traitGranted && chosenSpecies && !chosenSpecies.traits.includes(chosenPreset.traitGranted)) {
+        chosenSpecies.traits.push(chosenPreset.traitGranted)
+      }
       const slotTile = addTrackedSlot(
         targetTile,
         'resource',
         'resource',
         resourceName,
-        isFantastical ? '💎' : '⛏️',
+        chosenPreset?.icon || (isFantastical ? '💎' : '⛏️'),
         68,
         chosenSpecies?.id
       )
@@ -626,10 +661,12 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${spName} harness rich deposits of ${resourceName} at (${targetTile.id}), fueling their early growth.`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, resourceName, spName, targetTile.id)
+        : `${spName} harness rich deposits of ${resourceName} at (${targetTile.id}), fueling their early growth.`
     } else {
       // Skill
-      const skillName = isFantastical ? `${adj} Rune-Shaping` : `${adj} Navigation & Smithing`
+      const skillName = chosenPreset?.abilityGranted || chosenPreset?.name || (isFantastical ? `${adj} Rune-Shaping` : `${adj} Navigation & Smithing`)
       if (chosenSpecies) {
         chosenSpecies.abilities = Array.from(
           new Set([...(chosenSpecies.abilities || []), skillName])
@@ -640,7 +677,7 @@ export function executeAutomatedTurn(
         'structure',
         'guild',
         skillName,
-        '⚒️',
+        chosenPreset?.icon || '⚒️',
         66,
         chosenSpecies?.id
       )
@@ -648,7 +685,9 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${spName} master the art of ${skillName} at (${targetTile.id}), setting them apart from neighboring peoples.`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, skillName, spName, targetTile.id)
+        : `${spName} master the art of ${skillName} at (${targetTile.id}), setting them apart from neighboring peoples.`
     }
   } else if (stage === 'civilization') {
     const societyList = updatedEntities.filter((e) => e.category === 'society')
@@ -662,9 +701,11 @@ export function executeAutomatedTurn(
     if (effectiveSuit === '♠') {
       // Construction
       const noun = pickRandom(LANDMARK_NOUNS.monument, rng)
-      const label = `${adj} ${noun}`
+      const label = chosenPreset
+        ? generateFeatureName('castle', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : `${adj} ${noun}`
       const icon =
-        chosenSociety?.settlementIcons?.city || (isFantastical ? '🏛️' : '🏰')
+        chosenPreset?.icon || chosenSociety?.settlementIcons?.city || (isFantastical ? '🏛️' : '🏰')
       const slotTile = addTrackedSlot(
         targetTile,
         'structure',
@@ -676,19 +717,22 @@ export function executeAutomatedTurn(
         chosenSociety?.color
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        overlay: isFantastical ? 'monument' : 'castle',
-        hasRoad: true,
+        overlay: chosenPreset?.overlayChange || (isFantastical ? 'monument' : 'castle'),
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
+        hasRoad: chosenPreset?.hasRoad ?? true,
         territoryId: chosenSociety?.id || targetTile.territoryId,
         label,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = isFantastical
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, label, socName, targetTile.id)
+        : isFantastical
         ? `✨ [Fantastical Construction] ${socName} erects the ${label} at (${targetTile.id}), an architectural wonder visible for leagues.`
         : `${socName} constructs the fortified ${label} and paved trade roads across (${targetTile.id}).`
     } else if (effectiveSuit === '♥') {
       // Enlightenment
-      const idea = isFantastical ? `Arcane Philosophy of ${adj}` : `${adj} Code of Civic Law`
+      const idea = chosenPreset?.name || (isFantastical ? `Arcane Philosophy of ${adj}` : `${adj} Code of Civic Law`)
       if (chosenSociety && !chosenSociety.traits.includes(idea)) {
         chosenSociety.traits.push(idea)
       }
@@ -697,7 +741,7 @@ export function executeAutomatedTurn(
         'structure',
         'academy',
         idea,
-        '📜',
+        chosenPreset?.icon || '📜',
         80,
         chosenSociety?.id,
         chosenSociety?.color
@@ -706,11 +750,15 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `Scholars of ${socName} usher in a golden age of enlightenment with the "${idea}" at (${targetTile.id}).`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, idea, socName, targetTile.id)
+        : `Scholars of ${socName} usher in a golden age of enlightenment with the "${idea}" at (${targetTile.id}).`
     } else if (effectiveSuit === '♣') {
       // Expansion
-      const cityLabel = targetTile.label || `Port ${adj}`
-      const cityIcon = chosenSociety?.settlementIcons?.town || '🏘️'
+      const cityLabel = chosenPreset
+        ? generateFeatureName('settlement', chosenPreset.cartographicSymbol || chosenPreset.name, rng())
+        : (targetTile.label || `Port ${adj}`)
+      const cityIcon = chosenPreset?.icon || chosenSociety?.settlementIcons?.town || '🏘️'
       const slotTile = addTrackedSlot(
         targetTile,
         'settlement',
@@ -722,30 +770,31 @@ export function executeAutomatedTurn(
         chosenSociety?.color
       )
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
-        overlay: targetTile.overlay === 'none' ? 'town' : 'city',
-        hasRoad: true,
+        overlay: chosenPreset?.overlayChange || (targetTile.overlay === 'none' ? 'town' : 'city'),
+        cartographicSymbol: chosenPreset?.cartographicSymbol,
+        hasRoad: chosenPreset?.hasRoad ?? true,
         territoryId: chosenSociety?.id || targetTile.territoryId,
         label: cityLabel,
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${socName} expands its borders into (${targetTile.id}), establishing ${cityLabel} and connecting it by road.`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, cityLabel, socName, targetTile.id)
+        : `${socName} expands its borders into (${targetTile.id}), establishing ${cityLabel} and connecting it by road.`
     } else {
       // Diplomacy
       const otherSociety = societyList.find((s) => s.id !== chosenSociety?.id)
       if (otherSociety && chosenSociety) {
         linkedEntityIds.push(otherSociety.id)
-        const relPreset =
-          card.value === '2'
-            ? RELATIONSHIP_PRESETS.find((r) => r.type === 'royal_marriage')!
-            : RELATIONSHIP_PRESETS.find((r) => r.type === 'trade_pact')!
+        const relType = chosenPreset?.relationshipType || (card.value === '2' ? 'royal_marriage' : 'trade_pact')
+        const relPreset = RELATIONSHIP_PRESETS.find((r) => r.type === relType) || RELATIONSHIP_PRESETS[0]
         const relEntry: EntityRelationship = {
           id: `rel_${moveId}`,
           targetEntityId: otherSociety.id,
           targetEntityName: otherSociety.name,
-          type: relPreset.type,
-          label: `${adj} ${relPreset.label}`,
-          icon: relPreset.icon,
+          type: relType,
+          label: chosenPreset?.name || `${adj} ${relPreset.label}`,
+          icon: chosenPreset?.icon || relPreset.icon,
           createdAtMove: moveId,
           linkedEventId: eventId,
         }
@@ -760,12 +809,13 @@ export function executeAutomatedTurn(
           icon: relEntry.icon,
         }
       }
-      const partnerName = otherSociety?.name || 'neighboring free cities'
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         hasRoad: true,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `${socName} and ${partnerName} sign the ${adj} Concord at (${targetTile.id}), opening shared trade routes and embassies.`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, chosenPreset.name, `${socName} and ${otherSociety?.name || 'Allied Peoples'}`, targetTile.id)
+        : `Envoys from ${socName} and ${otherSociety?.name || 'neighboring realms'} sign the ${adj} Accord at (${targetTile.id}), opening shared trade routes and embassies.`
     }
   } else {
     // Intrigue stage
@@ -816,7 +866,9 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `⚔️ [Conflict] Forces of ${chosenSociety?.name || 'the Crown'} and ${
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, chosenPreset.name, `${chosenSociety?.name || 'The Crown'} vs ${rivalSociety?.name || 'the Rebel Coalition'}`, targetTile.id)
+        : `⚔️ [Conflict] Forces of ${chosenSociety?.name || 'the Crown'} and ${
         rivalSociety?.name || 'the Rebel Coalition'
       } clash at the Battle of ${targetTile.label || `(${targetTile.id})`}.`
     } else if (effectiveSuit === '♥') {
@@ -828,8 +880,8 @@ export function executeAutomatedTurn(
           targetEntityId: rivalSociety.id,
           targetEntityName: rivalSociety.name,
           type: 'alliance',
-          label: `${adj} Grand Coalition`,
-          icon: '🤝',
+          label: chosenPreset?.name || `${adj} Grand Coalition`,
+          icon: chosenPreset?.icon || '🤝',
           createdAtMove: moveId,
           linkedEventId: eventId,
         }
@@ -841,25 +893,27 @@ export function executeAutomatedTurn(
           sourceId: chosenSociety.id,
           targetId: rivalSociety.id,
           label: relEntry.label,
-          icon: '🤝',
+          icon: relEntry.icon,
         }
       }
       updatedMap = paintTile(updatedMap, targetTile.col, targetTile.row, {
         overlay: targetTile.overlay === 'battle' ? 'city' : targetTile.overlay,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `🤝 [Cooperation] ${chosenSociety?.name || 'Allied Realms'} and ${
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, chosenPreset.name, `${chosenSociety?.name || 'Allied Realms'} and ${rivalSociety?.name || 'Free Guilds'}`, targetTile.id)
+        : `🤝 [Cooperation] ${chosenSociety?.name || 'Allied Realms'} and ${
         rivalSociety?.name || 'Free Guilds'
       } forge a grand alliance at (${targetTile.id}) to safeguard the realm.`
     } else if (effectiveSuit === '♣') {
       // Scheme
-      const schemeName = `The ${adj} Conspiracy`
+      const schemeName = chosenPreset?.name || `The ${adj} Conspiracy`
       const slotTile = addTrackedSlot(
         targetTile,
         'myth',
         'scheme',
         schemeName,
-        '🎭',
+        chosenPreset?.icon || '🎭',
         84,
         chosenSociety?.id
       )
@@ -867,7 +921,9 @@ export function executeAutomatedTurn(
         slots: slotTile.slots,
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
       })
-      note = `🗡️ [Scheme] Agents within ${
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, schemeName, chosenSociety?.name || 'the Royal Court', targetTile.id)
+        : `🗡️ [Scheme] Agents within ${
         chosenSociety?.name || 'the Royal Court'
       } set "${schemeName}" into motion at (${targetTile.id}), shifting the balance of power in secret.`
     } else {
@@ -913,7 +969,9 @@ export function executeAutomatedTurn(
         linkedEventIds: [...targetTile.linkedEventIds, eventId],
         linkedEntityIds: [...targetTile.linkedEntityIds, mythId],
       })
-      note = `✨ [Myth] Legend awakens at (${targetTile.id}): ${newMyth.name} — ${mythPreset.description}`
+      note = chosenPreset
+        ? generateLedgerProse(chosenPreset, chosenPreset.name, undefined, targetTile.id)
+        : `✨ [Myth] Legend awakens at (${targetTile.id}): ${newMyth.name} — ${mythPreset.description}`
     }
   }
 
