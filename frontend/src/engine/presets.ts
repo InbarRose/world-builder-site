@@ -4842,10 +4842,17 @@ export const SETTLEMENT_ICON_SETS: SettlementIconSetPreset[] = [
   },
 ]
 
+export interface ModularBlockItem {
+  label: string
+  icon: string
+  description?: string
+  tags?: string[]
+}
+
 export interface ModularBlockGroup {
   category: string
   suitHint: Suit
-  items: { label: string; icon: string }[]
+  items: ModularBlockItem[]
 }
 
 export const MODULAR_TRAIT_BLOCKS: ModularBlockGroup[] = [
@@ -4853,36 +4860,174 @@ export const MODULAR_TRAIT_BLOCKS: ModularBlockGroup[] = [
     category: 'Traditions & Culture',
     suitHint: '♦',
     items: [
-      { label: 'Oral Song-Lore', icon: '🎵' },
-      { label: 'Ancestor Veneration', icon: '🕯️' },
-      { label: 'Starlight Navigation', icon: '✨' },
-      { label: 'Harvest Festivals', icon: '🌾' },
-      { label: 'Solar Calendar', icon: '☀️' },
-      { label: 'Unbreakable Oaths', icon: '🤝' },
+      {
+        label: 'Oral Song-Lore',
+        icon: '🎵',
+        description: 'Generational memory and legal codes preserved solely through rhythmic ballads and skaldic epics.',
+        tags: ['tradition', 'culture', 'folklore'],
+      },
+      {
+        label: 'Ancestor Veneration',
+        icon: '🕯️',
+        description: 'Offerings of honey, wine, and smoke given to heroic forefathers who guard the hearth.',
+        tags: ['spiritual', 'faith', 'tradition'],
+      },
+      {
+        label: 'Sacred Burial Mounds',
+        icon: '🪦',
+        description: 'Constructing stone-lined earthen tumuli to honor fallen chieftains and mark clan territories.',
+        tags: ['spiritual', 'monument', 'tradition'],
+      },
+      {
+        label: 'Shamanic Totemism',
+        icon: '🐺',
+        description: 'Communion with beast and storm spirits that guide tribal hunts and warn of incoming disasters.',
+        tags: ['spiritual', 'nature', 'shamanism'],
+      },
+      {
+        label: 'Starlight Navigation',
+        icon: '✨',
+        description: 'Mapping desert dunes and trackless ocean tides by aligning voyaging craft to celestial star paths.',
+        tags: ['navigation', 'astronomy', 'seafaring'],
+      },
+      {
+        label: 'Harvest Festivals',
+        icon: '🌾',
+        description: 'Great communal feasts celebrating autumn yields with games of strength, dancing, and grain tributes.',
+        tags: ['agriculture', 'celebration', 'community'],
+      },
+      {
+        label: 'Solar Calendar & Sun Dance',
+        icon: '☀️',
+        description: 'Tracking solstices through megalith alignments and performing endurance rites to welcome the dawn.',
+        tags: ['spiritual', 'astronomy', 'calendar'],
+      },
+      {
+        label: 'Sacred Hospitality (Xenia)',
+        icon: '🏺',
+        description: 'Ancient, inviolable taboo guaranteeing safe passage and refuge to guests who share bread and salt.',
+        tags: ['law', 'diplomacy', 'ethics'],
+      },
+      {
+        label: 'Blood Oaths & Brotherhood',
+        icon: '🗡️',
+        description: 'Ceremonial mingling of blood forging unbreakable covenants between allied clan leaders and warriors.',
+        tags: ['martial', 'oath', 'alliance'],
+      },
+      {
+        label: 'Fire-Tending Rituals',
+        icon: '🔥',
+        description: 'Sacred hearth-keepers maintain continuous embers, strictly forbidding a cold hearth during winter.',
+        tags: ['ritual', 'hearth', 'community'],
+      },
     ],
   },
   {
     category: 'Ecology & Habitat',
     suitHint: '♣',
     items: [
-      { label: 'Canopy Dwellers', icon: '🌳' },
-      { label: 'Subterranean Delvers', icon: '⛏️' },
-      { label: 'Nomadic Herders', icon: '🐎' },
-      { label: 'Reef & Atoll Mariners', icon: '🐚' },
-      { label: 'Glacial Wayfarers', icon: '❄️' },
-      { label: 'Symbiotic Grove-Kin', icon: '🍄' },
+      {
+        label: 'Canopy Dwellers',
+        icon: '🌳',
+        description: 'Constructing rope bridges and timber treehouse villages high in the colossal redwood canopy.',
+        tags: ['forest', 'settlement', 'habitat'],
+      },
+      {
+        label: 'Subterranean Delvers',
+        icon: '⛏️',
+        description: 'Excavating multi-tiered stone warrens and mushroom galleries within living cavern bedrock.',
+        tags: ['underground', 'mining', 'dwarf'],
+      },
+      {
+        label: 'Nomadic Steppe Herders',
+        icon: '🐎',
+        description: 'Following seasonal grazing herds across vast open grasslands with collapsible felt yurts.',
+        tags: ['nomad', 'plains', 'herds'],
+      },
+      {
+        label: 'Reef & Atoll Mariners',
+        icon: '🐚',
+        description: 'Diving for black pearls and spearing reef fish from outrigger canoes among tropical coral atolls.',
+        tags: ['maritime', 'coastal', 'ocean'],
+      },
+      {
+        label: 'Glacial Wayfarers',
+        icon: '❄️',
+        description: 'Crossing crevasse fields on bone crampons and building dome snow shelters during raging blizzards.',
+        tags: ['arctic', 'frost', 'survival'],
+      },
+      {
+        label: 'Symbiotic Grove-Kin',
+        icon: '🍄',
+        description: 'Cultivating sentient bioluminescent fungi that illuminate deep glens and purify tainted water.',
+        tags: ['fungi', 'nature', 'symbiosis'],
+      },
+      {
+        label: 'Cliffside Pueblos',
+        icon: '🏜️',
+        description: 'Carving multi-story stone and adobe dwellings into the shade of sheer canyon alcoves.',
+        tags: ['canyon', 'architecture', 'shelter'],
+      },
+      {
+        label: 'Oasis Caravan Havens',
+        icon: '🌴',
+        description: 'Nurturing freshwater palm springs that serve as vital crossroads for desert spice traders.',
+        tags: ['desert', 'water', 'trade'],
+      },
     ],
   },
   {
     category: 'Craft & Governance',
     suitHint: '♥',
     items: [
-      { label: 'Runic Metallurgy', icon: '⚒️' },
-      { label: 'Chartered Guilds', icon: '⚖️' },
-      { label: 'Ziggurat Masonry', icon: '🛕' },
-      { label: 'Clockwork Artifice', icon: '⚙️' },
-      { label: 'Council of Elders', icon: '🏛️' },
-      { label: 'Caravan Safe-Conduct', icon: '🐪' },
+      {
+        label: 'Runic Metallurgy',
+        icon: '⚒️',
+        description: 'Etching protective runes and lineage makers-marks into damask pattern-welded blades and armor.',
+        tags: ['smithing', 'craft', 'metal'],
+      },
+      {
+        label: 'Chartered Merchant Guilds',
+        icon: '⚖️',
+        description: 'Regulating quality standards, trade monopolies, and apprentice training through sealed city charters.',
+        tags: ['commerce', 'guilds', 'economy'],
+      },
+      {
+        label: 'Ziggurat & Monument Masonry',
+        icon: '🛕',
+        description: 'Quarrying colossal limestone blocks to construct stepped pyramids dedicated to gods and monarchs.',
+        tags: ['architecture', 'monument', 'masonry'],
+      },
+      {
+        label: 'Clockwork & Water Artifice',
+        icon: '⚙️',
+        description: 'Harnessing gears, waterwheels, and counterweights to power grain mills and astronomical orreries.',
+        tags: ['technology', 'engineering', 'invention'],
+      },
+      {
+        label: 'Council of Elders',
+        icon: '🏛️',
+        description: 'Decisions of war, trade, and law debated openly and resolved by consensus of the clan matriarchs.',
+        tags: ['governance', 'democracy', 'elders'],
+      },
+      {
+        label: 'Caravan Safe-Conduct',
+        icon: '🐪',
+        description: 'Enforcing royal toll roads and armed escorts to protect foreign merchants across dangerous frontiers.',
+        tags: ['trade', 'security', 'roads'],
+      },
+      {
+        label: 'Written Legal Code & Papyrus',
+        icon: '📜',
+        description: 'Carving common laws into public basalt steles so justice is uniform and immune to bribery.',
+        tags: ['law', 'literacy', 'statecraft'],
+      },
+      {
+        label: 'Chivalric Feudal Knighthood',
+        icon: '🛡️',
+        description: 'Sworn warrior retinues granted land in exchange for military service and chivalric obedience.',
+        tags: ['feudal', 'military', 'honor'],
+      },
     ],
   },
 ]
@@ -4892,36 +5037,138 @@ export const MODULAR_ABILITY_BLOCKS: ModularBlockGroup[] = [
     category: 'Adaptations & Physiology',
     suitHint: '♥',
     items: [
-      { label: 'Deep-Stone Sense', icon: '🪨' },
-      { label: 'Amphibious Respiration', icon: '🌊' },
-      { label: 'Thermal & Fire Resilience', icon: '🔥' },
-      { label: 'Frost Endurance', icon: '❄️' },
-      { label: 'Night-Sight & Camouflage', icon: '🌙' },
-      { label: 'Crystalline Carapace', icon: '💎' },
+      {
+        label: 'Deep-Stone Sense',
+        icon: '🪨',
+        description: 'Inherent tremor-sense enabling navigation through unmapped caves and detection of hollow shafts.',
+        tags: ['underground', 'adaptation', 'senses'],
+      },
+      {
+        label: 'Amphibious Respiration',
+        icon: '🌊',
+        description: 'Gills and webbed appendages permitting extended diving in freezing oceanic abysses.',
+        tags: ['aquatic', 'adaptation', 'water'],
+      },
+      {
+        label: 'Thermal & Fire Resilience',
+        icon: '🔥',
+        description: 'Thick scaled epidermis and heat-resistant blood allowing work near active magma flows.',
+        tags: ['fire', 'adaptation', 'volcanic'],
+      },
+      {
+        label: 'Frost & Blizzard Endurance',
+        icon: '❄️',
+        description: 'Dense sub-dermal fat and thermal fur insulating against sub-zero mountain winds.',
+        tags: ['arctic', 'adaptation', 'cold'],
+      },
+      {
+        label: 'Night-Sight & Camouflage',
+        icon: '🌙',
+        description: 'Tapetum lucidum eyes and adaptive skin pigmentation blending seamlessly into deep forest shadows.',
+        tags: ['stealth', 'night', 'senses'],
+      },
+      {
+        label: 'Crystalline Carapace',
+        icon: '💎',
+        description: 'Mineral-infused exoskeleton that deflects slashing blows and refracts radiant energies.',
+        tags: ['defense', 'armor', 'minerals'],
+      },
     ],
   },
   {
     category: 'Skills & Mastery',
     suitHint: '♠',
     items: [
-      { label: 'Master Archery', icon: '🏹' },
-      { label: 'Unbreakable Phalanx', icon: '🛡️' },
-      { label: 'Thunder Cavalry', icon: '🐎' },
-      { label: 'Grand Armada Navigation', icon: '⛵' },
-      { label: 'Siege Engineering', icon: '🏰' },
-      { label: 'Beast Taming', icon: '🐺' },
+      {
+        label: 'Master Composite Archery',
+        icon: '🏹',
+        description: 'Precision volley firing with horn recurve bows capable of piercing plate armor at long range.',
+        tags: ['ranged', 'combat', 'archery'],
+      },
+      {
+        label: 'Unbreakable Phalanx Shieldwall',
+        icon: '🛡️',
+        description: 'Locking heavy tower shields into an impenetrable wall bristling with long thrusting pikes.',
+        tags: ['tactics', 'defense', 'infantry'],
+      },
+      {
+        label: 'Thunder Shock Cavalry',
+        icon: '🐎',
+        description: 'Heavily barded warhorses trained to smash enemy formations with couched lances in wedge charges.',
+        tags: ['cavalry', 'combat', 'shock'],
+      },
+      {
+        label: 'Grand Armada Navigation',
+        icon: '⛵',
+        description: 'Maneuvering galleys and multi-masted caravels through reef-choked shallows and stormy straits.',
+        tags: ['naval', 'seafaring', 'tactics'],
+      },
+      {
+        label: 'Siege Engineering & Sappers',
+        icon: '🏰',
+        description: 'Designing trebuchets, battering rams, and subterranean saps to bring down curtain walls.',
+        tags: ['siege', 'engineering', 'warfare'],
+      },
+      {
+        label: 'Beast Taming & Falconry',
+        icon: '🐺',
+        description: 'Training dire wolves, giant eagles, and hunting hounds to fight and scout alongside handlers.',
+        tags: ['animals', 'beasts', 'companions'],
+      },
+      {
+        label: 'Spear & Atlatl Throwing',
+        icon: '🎯',
+        description: 'Propelling flint-tipped javelins with wooden throwing levers for lethal big-game hunting.',
+        tags: ['hunting', 'primitive', 'survival'],
+      },
+      {
+        label: 'Herbal Brewing & Medicine',
+        icon: '🌿',
+        description: 'Extracting antiseptics, febrifuges, and sleeping tinctures from rare mountain barks and fungi.',
+        tags: ['healing', 'medicine', 'alchemy'],
+      },
     ],
   },
   {
     category: 'Arcane & Wonder',
     suitHint: '♦',
     items: [
-      { label: 'Astral Weaving', icon: '✨' },
-      { label: 'Storm-Calling', icon: '⚡' },
-      { label: 'Mycelial Telepathy', icon: '🍄' },
-      { label: 'Glamour & Illusion', icon: '🦋' },
-      { label: 'Harmonic Resonance', icon: '🔮' },
-      { label: 'Geomantic Shaping', icon: '🏔️' },
+      {
+        label: 'Astral Weaving',
+        icon: '✨',
+        description: 'Channeling starlight into tangible warding barriers, guiding beacons, and luminous thread.',
+        tags: ['magic', 'astral', 'celestial'],
+      },
+      {
+        label: 'Storm-Calling',
+        icon: '⚡',
+        description: 'Singing ancient meteorological chants that summon rain over parched crops or cast lightning.',
+        tags: ['magic', 'weather', 'storm'],
+      },
+      {
+        label: 'Mycelial Telepathy',
+        icon: '🍄',
+        description: 'Transmitting thoughts, sensory impressions, and emotional warnings across miles via fungal roots.',
+        tags: ['telepathy', 'psionics', 'fungi'],
+      },
+      {
+        label: 'Glamour & Fey Illusion',
+        icon: '🦋',
+        description: 'Bending sensory perception to make humble glades resemble celestial palaces or conceal armadas.',
+        tags: ['illusion', 'fey', 'charm'],
+      },
+      {
+        label: 'Harmonic Resonance',
+        icon: '🔮',
+        description: 'Vocal frequencies that shatter stone, mend fractured crystals, and awaken dormant golems.',
+        tags: ['sound', 'crystals', 'resonance'],
+      },
+      {
+        label: 'Geomantic Earth-Shaping',
+        icon: '🏔️',
+        description: 'Resonating with tectonic fault lines to raise defensive earthen berms or divert flood channels.',
+        tags: ['earth', 'magic', 'shaping'],
+      },
     ],
   },
 ]

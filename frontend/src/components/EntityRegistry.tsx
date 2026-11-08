@@ -42,6 +42,7 @@ import {
   SOCIETY_PRESETS,
   SPECIES_PRESETS,
 } from '../engine/presets'
+import { findCompendiumTrait } from '../engine/compendiumEngine'
 import { computeEntityAchievements } from '../engine/narrativeEngine'
 
 interface EntityRegistryProps {
@@ -53,6 +54,7 @@ interface EntityRegistryProps {
   onSelectEntity?: (entityId: string | null) => void
   onSelectTile?: (tileId: string) => void
   onSelectEvent?: (moveId: number) => void
+  onOpenCompendium?: () => void
   onChange: (newEntities: WorldEntity[]) => void
 }
 
@@ -132,6 +134,7 @@ export function EntityRegistry({
   onSelectEntity,
   onSelectTile,
   onSelectEvent,
+  onOpenCompendium,
   onChange,
 }: EntityRegistryProps) {
   const [activeTab, setActiveTab] = useState<EntityCategory | 'all'>('all')
@@ -507,6 +510,18 @@ export function EntityRegistry({
 
         {/* Right: Mode Toggles (+ New Entry, Forge Link, Browse Only) */}
         <div className="flex flex-wrap items-center gap-2">
+          {onOpenCompendium && (
+            <button
+              type="button"
+              onClick={onOpenCompendium}
+              className="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors bg-background border-border hover:bg-accent text-primary"
+              title="Open full Tabletop Presets & Tropes Compendium (200+ presets, powers, and traditions)"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>📖 Compendium</span>
+            </button>
+          )}
+
           {entities.length >= 2 && (
             <button
               type="button"
@@ -1068,6 +1083,7 @@ export function EntityRegistry({
                                     key={item.label}
                                     type="button"
                                     onClick={() => toggleFormTraitBlock(item.label)}
+                                    title={item.description ? `${item.label}: ${item.description}` : item.label}
                                     className={`px-2 py-0.5 rounded text-[11px] border transition-colors ${
                                       active
                                         ? 'bg-primary text-primary-foreground border-primary font-semibold'
@@ -1100,6 +1116,7 @@ export function EntityRegistry({
                                     key={item.label}
                                     type="button"
                                     onClick={() => toggleFormAbilityBlock(item.label)}
+                                    title={item.description ? `${item.label}: ${item.description}` : item.label}
                                     className={`px-2 py-0.5 rounded text-[11px] border transition-colors ${
                                       active
                                         ? 'bg-primary text-primary-foreground border-primary font-semibold'
@@ -1537,6 +1554,7 @@ export function EntityRegistry({
                                       onClick={() =>
                                         handleToggleEntityTrait(ent, item.label)
                                       }
+                                      title={item.description ? `${item.label}: ${item.description}` : item.label}
                                       className={`px-1.5 py-0.5 rounded text-[10px] border ${
                                         has
                                           ? 'bg-primary text-primary-foreground border-primary font-semibold'
@@ -1566,6 +1584,7 @@ export function EntityRegistry({
                                       onClick={() =>
                                         handleToggleEntityAbility(ent, item.label)
                                       }
+                                      title={item.description ? `${item.label}: ${item.description}` : item.label}
                                       className={`px-1.5 py-0.5 rounded text-[10px] border ${
                                         has
                                           ? 'bg-primary text-primary-foreground border-primary font-semibold'
@@ -1609,17 +1628,24 @@ export function EntityRegistry({
                             Traditions, Qualities & Resources
                           </span>
                           <div className="flex flex-wrap gap-1">
-                            {ent.traits.map((trait) => (
-                              <button
-                                key={trait}
-                                type="button"
-                                onClick={() => setSearchQuery(trait)}
-                                className="text-[11px] px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-foreground/80 transition-colors"
-                                title={`Filter Codex by "${trait}"`}
-                              >
-                                {trait}
-                              </button>
-                            ))}
+                            {ent.traits.map((trait) => {
+                              const compendiumTrait = findCompendiumTrait(trait)
+                              return (
+                                <button
+                                  key={trait}
+                                  type="button"
+                                  onClick={() => setSearchQuery(trait)}
+                                  className="text-[11px] px-2 py-0.5 rounded bg-background border border-border hover:border-primary text-foreground/80 transition-colors"
+                                  title={
+                                    compendiumTrait?.description
+                                      ? `${trait}: ${compendiumTrait.description}`
+                                      : `Filter Codex by "${trait}"`
+                                  }
+                                >
+                                  {compendiumTrait?.icon ? `${compendiumTrait.icon} ` : ''}{trait}
+                                </button>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
@@ -1630,17 +1656,24 @@ export function EntityRegistry({
                             Skills & Powers
                           </span>
                           <div className="flex flex-wrap gap-1">
-                            {ent.abilities.map((ab) => (
-                              <button
-                                key={ab}
-                                type="button"
-                                onClick={() => setSearchQuery(ab)}
-                                className="text-[11px] px-2 py-0.5 rounded bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
-                                title={`Filter Codex by "${ab}"`}
-                              >
-                                ⚡ {ab}
-                              </button>
-                            ))}
+                            {ent.abilities.map((ab) => {
+                              const compendiumTrait = findCompendiumTrait(ab)
+                              return (
+                                <button
+                                  key={ab}
+                                  type="button"
+                                  onClick={() => setSearchQuery(ab)}
+                                  className="text-[11px] px-2 py-0.5 rounded bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
+                                  title={
+                                    compendiumTrait?.description
+                                      ? `${ab}: ${compendiumTrait.description}`
+                                      : `Filter Codex by "${ab}"`
+                                  }
+                                >
+                                  {compendiumTrait?.icon ? `${compendiumTrait.icon} ` : '⚡ '}{ab}
+                                </button>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
