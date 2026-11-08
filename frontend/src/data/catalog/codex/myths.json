@@ -1,0 +1,157 @@
+[
+  {
+    "id": "preset_slumbering_dragon",
+    "name": "Cinder-Wyrm of Mount Ash",
+    "category": "myth",
+    "icon": "🐉",
+    "color": "#ea580c",
+    "secondaryColor": "#fed7aa",
+    "archetype": "Ancient Calamity Beast",
+    "description": "An elder dragon whose restless dreams cause tremors and ash-fall across neighboring realms.",
+    "traits": [
+      "Hoard of First-Age Relics",
+      "Volcanic Lair",
+      "Prophesied Awakening"
+    ],
+    "abilities": [
+      "Dragonfire Cataclysm",
+      "Aura of Dread"
+    ],
+    "preferredTerrains": [
+      "volcano",
+      "mountain",
+      "canyon"
+    ],
+    "settlementIcons": {
+      "camp": "🔥",
+      "village": "🐉",
+      "town": "🌋",
+      "city": "🐉",
+      "metropolis": "🐉"
+    }
+  },
+  {
+    "id": "preset_sunken_citadel",
+    "name": "The Sunken Star-Citadel",
+    "category": "myth",
+    "icon": "🏛️",
+    "color": "#0891b2",
+    "secondaryColor": "#a5f3fc",
+    "archetype": "Lost Precursor Ruin",
+    "description": "A pre-history spire submerged beneath the waves whose bells still toll before great storms.",
+    "traits": [
+      "Precursor Glyphs",
+      "Abyssal Guardians",
+      "Tidal Anomaly"
+    ],
+    "abilities": [
+      "Ancient Knowledge",
+      "Cursed Treasure"
+    ],
+    "preferredTerrains": [
+      "ocean",
+      "water",
+      "swamp"
+    ],
+    "settlementIcons": {
+      "camp": "🏛️",
+      "village": "🏛️",
+      "town": "🏛️",
+      "city": "🏛️",
+      "metropolis": "🏛️"
+    }
+  },
+  {
+    "id": "preset_whispering_cabal",
+    "name": "Order of the Veiled Eclipse",
+    "category": "myth",
+    "icon": "🎭",
+    "color": "#4f46e5",
+    "secondaryColor": "#c7d2fe",
+    "archetype": "Secret Political Conspiracy",
+    "description": "A clandestine network of spymasters and merchants pulling strings across royal courts.",
+    "traits": [
+      "Ciphered Coins",
+      "Shadow Informants",
+      "Infiltrated Councils"
+    ],
+    "abilities": [
+      "Silent Coup",
+      "Black Market Trade"
+    ],
+    "preferredTerrains": [
+      "plains",
+      "desert",
+      "earth"
+    ],
+    "settlementIcons": {
+      "camp": "🎭",
+      "village": "🎭",
+      "town": "🎭",
+      "city": "🎭",
+      "metropolis": "🎭"
+    }
+  },
+  {
+    "id": "preset_lich_necropolis",
+    "name": "Ashen Crown Necropolis",
+    "category": "myth",
+    "icon": "💀",
+    "color": "#6b21a8",
+    "secondaryColor": "#e9d5ff",
+    "archetype": "Undying Sorcerer-King Domain",
+    "description": "A haunted mausoleum-city where an immortal arch-mage guards forbidden scrolls of the First Age.",
+    "traits": [
+      "Eternal Watchguard",
+      "Soul-Gem Vaults",
+      "Whispering Catacombs"
+    ],
+    "abilities": [
+      "Necromantic Mist",
+      "Ancient Grimoires"
+    ],
+    "preferredTerrains": [
+      "swamp",
+      "desert",
+      "mountain"
+    ],
+    "settlementIcons": {
+      "camp": "💀",
+      "village": "💀",
+      "town": "💀",
+      "city": "💀",
+      "metropolis": "💀"
+    }
+  },
+  {
+    "id": "preset_world_tree_heart",
+    "name": "Yggdrasil’s Wounded Root",
+    "category": "myth",
+    "icon": "🌳",
+    "color": "#059669",
+    "secondaryColor": "#a7f3d0",
+    "archetype": "Sacred Cosmic Landmark",
+    "description": "A colossal primordial tree whose sap grants visions of the past and draws pilgrims from every kingdom.",
+    "traits": [
+      "Luminous Sap-Springs",
+      "Pilgrimage Sanctuary",
+      "Planar Roots"
+    ],
+    "abilities": [
+      "Miraculous Healing",
+      "Prophetic Dreams"
+    ],
+    "preferredTerrains": [
+      "forest",
+      "jungle",
+      "plains"
+    ],
+    "settlementIcons": {
+      "camp": "🌳",
+      "village": "🌳",
+      "town": "🌳",
+      "city": "🌳",
+      "metropolis": "🌳"
+    }
+  }
+]

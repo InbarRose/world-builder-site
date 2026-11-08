@@ -1,0 +1,34 @@
+{
+  "stage": "civilization",
+  "title": "3. Civilization Stage — Kingdoms, Monuments & Statecraft",
+  "suits": [
+    {
+      "suit": "♠",
+      "file": "constructions.json",
+      "name": "Constructions",
+      "defaultSlotCategory": "structure",
+      "defaultPriority": 84
+    },
+    {
+      "suit": "♥",
+      "file": "enlightenment.json",
+      "name": "Enlightenment",
+      "defaultSlotCategory": "structure",
+      "defaultPriority": 75
+    },
+    {
+      "suit": "♣",
+      "file": "expansion.json",
+      "name": "Expansion",
+      "defaultSlotCategory": "settlement",
+      "defaultPriority": 88
+    },
+    {
+      "suit": "♦",
+      "file": "diplomacy.json",
+      "name": "Diplomacy",
+      "defaultSlotCategory": "structure",
+      "defaultPriority": 76
+    }
+  ]
+}

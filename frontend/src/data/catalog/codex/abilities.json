@@ -1,0 +1,220 @@
+[
+  {
+    "category": "Adaptations & Physiology",
+    "suitHint": "♥",
+    "items": [
+      {
+        "label": "Deep-Stone Sense",
+        "icon": "🪨",
+        "description": "Inherent tremor-sense enabling navigation through unmapped caves and detection of hollow shafts.",
+        "tags": [
+          "underground",
+          "adaptation",
+          "senses"
+        ]
+      },
+      {
+        "label": "Amphibious Respiration",
+        "icon": "🌊",
+        "description": "Gills and webbed appendages permitting extended diving in freezing oceanic abysses.",
+        "tags": [
+          "aquatic",
+          "adaptation",
+          "water"
+        ]
+      },
+      {
+        "label": "Thermal & Fire Resilience",
+        "icon": "🔥",
+        "description": "Thick scaled epidermis and heat-resistant blood allowing work near active magma flows.",
+        "tags": [
+          "fire",
+          "adaptation",
+          "volcanic"
+        ]
+      },
+      {
+        "label": "Frost & Blizzard Endurance",
+        "icon": "❄️",
+        "description": "Dense sub-dermal fat and thermal fur insulating against sub-zero mountain winds.",
+        "tags": [
+          "arctic",
+          "adaptation",
+          "cold"
+        ]
+      },
+      {
+        "label": "Night-Sight & Camouflage",
+        "icon": "🌙",
+        "description": "Tapetum lucidum eyes and adaptive skin pigmentation blending seamlessly into deep forest shadows.",
+        "tags": [
+          "stealth",
+          "night",
+          "senses"
+        ]
+      },
+      {
+        "label": "Crystalline Carapace",
+        "icon": "💎",
+        "description": "Mineral-infused exoskeleton that deflects slashing blows and refracts radiant energies.",
+        "tags": [
+          "defense",
+          "armor",
+          "minerals"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "Skills & Mastery",
+    "suitHint": "♠",
+    "items": [
+      {
+        "label": "Master Composite Archery",
+        "icon": "🏹",
+        "description": "Precision volley firing with horn recurve bows capable of piercing plate armor at long range.",
+        "tags": [
+          "ranged",
+          "combat",
+          "archery"
+        ]
+      },
+      {
+        "label": "Unbreakable Phalanx Shieldwall",
+        "icon": "🛡️",
+        "description": "Locking heavy tower shields into an impenetrable wall bristling with long thrusting pikes.",
+        "tags": [
+          "tactics",
+          "defense",
+          "infantry"
+        ]
+      },
+      {
+        "label": "Thunder Shock Cavalry",
+        "icon": "🐎",
+        "description": "Heavily barded warhorses trained to smash enemy formations with couched lances in wedge charges.",
+        "tags": [
+          "cavalry",
+          "combat",
+          "shock"
+        ]
+      },
+      {
+        "label": "Grand Armada Navigation",
+        "icon": "⛵",
+        "description": "Maneuvering galleys and multi-masted caravels through reef-choked shallows and stormy straits.",
+        "tags": [
+          "naval",
+          "seafaring",
+          "tactics"
+        ]
+      },
+      {
+        "label": "Siege Engineering & Sappers",
+        "icon": "🏰",
+        "description": "Designing trebuchets, battering rams, and subterranean saps to bring down curtain walls.",
+        "tags": [
+          "siege",
+          "engineering",
+          "warfare"
+        ]
+      },
+      {
+        "label": "Beast Taming & Falconry",
+        "icon": "🐺",
+        "description": "Training dire wolves, giant eagles, and hunting hounds to fight and scout alongside handlers.",
+        "tags": [
+          "animals",
+          "beasts",
+          "companions"
+        ]
+      },
+      {
+        "label": "Spear & Atlatl Throwing",
+        "icon": "🎯",
+        "description": "Propelling flint-tipped javelins with wooden throwing levers for lethal big-game hunting.",
+        "tags": [
+          "hunting",
+          "primitive",
+          "survival"
+        ]
+      },
+      {
+        "label": "Herbal Brewing & Medicine",
+        "icon": "🌿",
+        "description": "Extracting antiseptics, febrifuges, and sleeping tinctures from rare mountain barks and fungi.",
+        "tags": [
+          "healing",
+          "medicine",
+          "alchemy"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "Arcane & Wonder",
+    "suitHint": "♦",
+    "items": [
+      {
+        "label": "Astral Weaving",
+        "icon": "✨",
+        "description": "Channeling starlight into tangible warding barriers, guiding beacons, and luminous thread.",
+        "tags": [
+          "magic",
+          "astral",
+          "celestial"
+        ]
+      },
+      {
+        "label": "Storm-Calling",
+        "icon": "⚡",
+        "description": "Singing ancient meteorological chants that summon rain over parched crops or cast lightning.",
+        "tags": [
+          "magic",
+          "weather",
+          "storm"
+        ]
+      },
+      {
+        "label": "Mycelial Telepathy",
+        "icon": "🍄",
+        "description": "Transmitting thoughts, sensory impressions, and emotional warnings across miles via fungal roots.",
+        "tags": [
+          "telepathy",
+          "psionics",
+          "fungi"
+        ]
+      },
+      {
+        "label": "Glamour & Fey Illusion",
+        "icon": "🦋",
+        "description": "Bending sensory perception to make humble glades resemble celestial palaces or conceal armadas.",
+        "tags": [
+          "illusion",
+          "fey",
+          "charm"
+        ]
+      },
+      {
+        "label": "Harmonic Resonance",
+        "icon": "🔮",
+        "description": "Vocal frequencies that shatter stone, mend fractured crystals, and awaken dormant golems.",
+        "tags": [
+          "sound",
+          "crystals",
+          "resonance"
+        ]
+      },
+      {
+        "label": "Geomantic Earth-Shaping",
+        "icon": "🏔️",
+        "description": "Resonating with tectonic fault lines to raise defensive earthen berms or divert flood channels.",
+        "tags": [
+          "earth",
+          "magic",
+          "shaping"
+        ]
+      }
+    ]
+  }
+]

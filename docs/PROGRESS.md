@@ -209,6 +209,7 @@ status: active
 - [x] Implement Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System (ADR-022).
 - [x] Implement Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names (ADR-023).
 - [x] Implement Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration (ADR-024).
+- [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
 - [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
 
 

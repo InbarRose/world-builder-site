@@ -1,0 +1,59 @@
+[
+  {
+    "id": "dis_genesis_volcano",
+    "stage": "genesis",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "Cataclysmic Volcanic Eruption",
+    "icon": "🌋",
+    "description": "Tectonic fury raises a smoking caldera and blankets surrounding valleys in ash.",
+    "slotCategory": "elevation",
+    "slotPriority": 90,
+    "terrainChange": "volcano",
+    "reliefChange": "volcano",
+    "primaryColor": "#b91c1c",
+    "secondaryColor": "#fca5a5"
+  },
+  {
+    "id": "dis_primal_deluge",
+    "stage": "primal",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "The Great Deluge & Sundering",
+    "icon": "🌊",
+    "description": "A generational flood or meteor strike forces early species to migrate and adapt.",
+    "slotCategory": "hydrology",
+    "slotPriority": 88,
+    "terrainChange": "swamp",
+    "floraChange": "marsh",
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "dis_civ_fall",
+    "stage": "civilization",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "Earthquake & Doom of the Old Capital",
+    "icon": "☄️",
+    "description": "A great tremor or plague shatters a proud city, leaving storied ruins in its wake.",
+    "slotCategory": "structure",
+    "slotPriority": 90,
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "dis_int_cataclysm",
+    "stage": "intrigue",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "The Red Comet & Arcane Reckoning",
+    "icon": "☄️",
+    "description": "A prophetic omen splits the sky, triggering upheaval across every kingdom.",
+    "slotCategory": "myth",
+    "slotPriority": 94,
+    "overlayChange": "ruins"
+  }
+]

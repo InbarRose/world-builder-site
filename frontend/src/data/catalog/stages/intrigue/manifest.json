@@ -1,0 +1,34 @@
+{
+  "stage": "intrigue",
+  "title": "4. Intrigue Stage — Wars, Coalitions, Schemes & Legends",
+  "suits": [
+    {
+      "suit": "♠",
+      "file": "conflict.json",
+      "name": "Conflict",
+      "defaultSlotCategory": "myth",
+      "defaultPriority": 88
+    },
+    {
+      "suit": "♥",
+      "file": "cooperation.json",
+      "name": "Cooperation",
+      "defaultSlotCategory": "structure",
+      "defaultPriority": 80
+    },
+    {
+      "suit": "♣",
+      "file": "scheme.json",
+      "name": "Scheme",
+      "defaultSlotCategory": "myth",
+      "defaultPriority": 86
+    },
+    {
+      "suit": "♦",
+      "file": "myth.json",
+      "name": "Myth & Mystery",
+      "defaultSlotCategory": "myth",
+      "defaultPriority": 95
+    }
+  ]
+}

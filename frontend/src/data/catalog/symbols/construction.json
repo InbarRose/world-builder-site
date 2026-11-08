@@ -1,0 +1,155 @@
+[
+  {
+    "id": "const-castle",
+    "name": "Feudal Castle Keep",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Castle Keep",
+    "category": "construction",
+    "icon": "🏰",
+    "description": "Imposing stone fortress keep with crenellated battlements and iron portcullis.",
+    "tags": [
+      "construction",
+      "castle",
+      "keep",
+      "fortress",
+      "bastion"
+    ]
+  },
+  {
+    "id": "const-citadel",
+    "name": "Mountain Peak Citadel",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Mountain Citadel",
+    "category": "construction",
+    "icon": "⛰️🏰",
+    "description": "Impregnable mountain redoubt crowning a sheer granite pinnacle.",
+    "tags": [
+      "construction",
+      "citadel",
+      "mountain",
+      "redoubt",
+      "bastion"
+    ]
+  },
+  {
+    "id": "const-port",
+    "name": "Deepwater Harbor & Port",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Harbor & Port",
+    "category": "construction",
+    "icon": "⚓🏙️",
+    "description": "Stone quays, drydocks, and deepwater piers sheltering naval fleets.",
+    "tags": [
+      "construction",
+      "port",
+      "harbor",
+      "naval",
+      "quays"
+    ]
+  },
+  {
+    "id": "const-bridge",
+    "name": "Arched Stone Bridge",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Stone Bridge",
+    "category": "construction",
+    "icon": "🌉",
+    "description": "Monumental masonry bridge spanning a canyon gorge or great river.",
+    "tags": [
+      "construction",
+      "bridge",
+      "river",
+      "crossing",
+      "arch"
+    ]
+  },
+  {
+    "id": "const-wall",
+    "name": "Great Border Wall",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Great Border Wall",
+    "category": "construction",
+    "icon": "🧱🛡️",
+    "description": "Continental fortification wall with crenellations, ditch, and watch garrisons.",
+    "tags": [
+      "construction",
+      "wall",
+      "border",
+      "rampart",
+      "defense"
+    ]
+  },
+  {
+    "id": "const-monument",
+    "name": "Monumental Stone Pyramid",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Monumental Pyramid",
+    "category": "construction",
+    "icon": "🏛️🔺",
+    "description": "Gigantic stepped wonder dedicated to the gods or celestial sovereigns.",
+    "tags": [
+      "construction",
+      "monument",
+      "pyramid",
+      "wonder",
+      "temple"
+    ]
+  },
+  {
+    "id": "const-university",
+    "name": "Grand Domed Academy",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Grand Academy",
+    "category": "construction",
+    "icon": "🏛️📚",
+    "description": "Collegiate library and domed academy housing the realm's scholars and scrolls.",
+    "tags": [
+      "construction",
+      "academy",
+      "university",
+      "library",
+      "dome"
+    ]
+  },
+  {
+    "id": "const-aqueduct",
+    "name": "Stone Water Aqueduct",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Stone Aqueduct",
+    "category": "construction",
+    "icon": "🏛️💧",
+    "description": "Elevated stone arcade channeling mountain spring water into cities.",
+    "tags": [
+      "construction",
+      "aqueduct",
+      "water",
+      "arches",
+      "civic"
+    ]
+  },
+  {
+    "id": "const-lighthouse",
+    "name": "Grand Coastal Beacon Lighthouse",
+    "concept": "construction",
+    "conceptLabel": "Constructions",
+    "variantName": "Lighthouse Beacon",
+    "category": "construction",
+    "icon": "🗼💡",
+    "description": "Towering stone lighthouse guiding ships safely past treacherous reefs.",
+    "tags": [
+      "construction",
+      "lighthouse",
+      "beacon",
+      "coast",
+      "tower"
+    ]
+  }
+]
