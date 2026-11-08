@@ -627,4 +627,37 @@ status: active
   - Eliminates disconnected, random-feeling bot turns by ensuring choices reflect world history, geography, and seat personalities.
   - Provides tabletop players with immediate creative flavor and evocative names to overcome blank-page syndrome.
 
+---
+
+## ADR-024: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  The user noted that navigating presets, powers, and traditions was still clunky, and asked for an inventory/catalog of presets with descriptions of traditions, traits, and powers, covering expected common tropes and basic elements with filters and categories:
+  > "the codex, studio, etc. its still a bit clunky and hard to navigate. would be nice to have an inventory of presets, descriptions on the traditions, traits, powers, etc. the presets do not cover expected common tropes and basic ones you would expect to see. there should be many more. with filters and categories."
+- **Decision**:
+  1. **Enriched Cultural Traditions & Abilities with Lore Descriptions (`presets.ts`)**:
+     - Extended `ModularBlockItem` to support full descriptions and search tags (`{ label, icon, description, tags }`).
+     - Added rich tabletop lore descriptions and common fantasy tropes across all 26 cultural traditions (Shamanic Totems, Sacred Burial Mounds, Blood Oaths, Druidic Hermitage, Fire-Tending, Sacred Hospitality, Spear Hunting, Hide Tanning, Herbal Brewing, Animal Taming, Phalanx Shieldwall, Celestial Navigation, etc.) and 22 modular abilities (Astral Weaving, Deep-Stone Sense, Storm-Calling, Beast Tongue, Runesmithing, Shadowmeld, Berserker Rage, Siege Craft, etc.).
+  2. **Unified Tabletop Compendium Indexer (`compendiumEngine.ts`)**:
+     - Built comprehensive inventory indexer aggregating 200+ canonical powers, whiteboard tropes, action presets, traditions, skills, ancestries, realms, and myths.
+     - Added multi-faceted filtering by 9 categories (`powers`, `tropes`, `actions`, `traditions`, `abilities`, `ancestries`, `realms`, `myths`), stage (`genesis`, `primal`, `civilization`, `intrigue`), and full-text keyword search across titles, summaries, prompts, and lore notes.
+     - Implemented `findCompendiumTrait()` to resolve any trait or ability string to its full tabletop lore and icon.
+  3. **Interactive Presets & Tropes Compendium Modal (`PresetCompendiumModal.tsx`)**:
+     - Modern searchable inventory modal with live category pill filters, stage filter tabs, dynamic item counts, and quick copy-to-clipboard for storytelling notes.
+     - Surfaced tabletop storytelling prompts ("What primordial forces raised this mountain peak?"), example narratives, and direct 1-click "Select for Turn" integration when drafting turns.
+  4. **Codex & Studio UI Ergonomics Integration**:
+     - Added "📖 Compendium" launcher in the Studio top bar, Share/Export menu, and Turn Drafting Workshop header in `Play.tsx`.
+     - Integrated Compendium launcher into the Codex Wiki header in `EntityRegistry.tsx`.
+     - Enriched modular snap-blocks and entity trait/ability badges with rich hover tooltips displaying lore descriptions.
+     - Exposed Compendium action in the Global Spotlight Command Palette (`Ctrl+K`).
+  5. **Automated Test Coverage (`compendiumEngine.test.ts`)**:
+     - 5 comprehensive unit tests verifying catalog inventory size (>= 200 items), canonical powers indexing, category breakdowns, and multi-field keyword filtering.
+     - Maintained 100% test pass rate (21 suites, 154 tests passing).
+- **Consequences**:
+  - Provides players and GMs with an exhaustive, instantly accessible tabletop reference encyclopedia.
+  - Eliminates mechanical obscurity by providing clear lore explanations and tabletop prompts for every trait and ability.
+
+
 

@@ -45,6 +45,7 @@ interface CommandPaletteProps {
   onOpenShareModal: () => void
   onOpenCampaignHooksModal?: () => void
   onOpenSessionZeroPrimerModal?: () => void
+  onOpenCompendiumModal?: () => void
   onOpenCodexEntity?: (entityId: string) => void
   onReturnToLauncher: () => void
   onOpenShortcutsModal: () => void
@@ -68,6 +69,7 @@ export function CommandPalette({
   onOpenShareModal,
   onOpenCampaignHooksModal,
   onOpenSessionZeroPrimerModal,
+  onOpenCompendiumModal,
   onOpenCodexEntity,
   onReturnToLauncher,
   onOpenShortcutsModal,
@@ -189,6 +191,17 @@ export function CommandPalette({
         onSelect: () => {
           onClose()
           onOpenCampaignHooksModal?.()
+        },
+      },
+      {
+        id: 'action_compendium',
+        title: '📖 Tabletop Presets & Tropes Compendium',
+        category: 'Tabletop Actions',
+        description: 'Browse 200+ canonical powers, tropes, traditions, and action presets',
+        icon: <BookOpen className="h-4 w-4 text-indigo-500" />,
+        onSelect: () => {
+          onClose()
+          onOpenCompendiumModal?.()
         },
       },
       {

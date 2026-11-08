@@ -113,6 +113,7 @@ import { EpochCeremonyModal } from '../components/EpochCeremonyModal'
 import { CommandPalette } from '../components/CommandPalette'
 import { KeyboardShortcutsModal } from '../components/KeyboardShortcutsModal'
 import { CampaignHooksModal } from '../components/CampaignHooksModal'
+import { PresetCompendiumModal } from '../components/PresetCompendiumModal'
 import { SessionZeroPrimerModal } from '../components/SessionZeroPrimerModal'
 import {
   getRandomCreativeSpark,
@@ -215,6 +216,7 @@ export function Play() {
   const [isDraftingWorkshop, setIsDraftingWorkshop] = useState(false)
   const [showCampaignHooksModal, setShowCampaignHooksModal] = useState(false)
   const [showSessionZeroPrimerModal, setShowSessionZeroPrimerModal] = useState(false)
+  const [showCompendiumModal, setShowCompendiumModal] = useState(false)
   const [activeCreativeSpark, setActiveCreativeSpark] = useState<CreativeSpark | null>(null)
   const [conclaveHandoff, setConclaveHandoff] = useState<{
     active: boolean
@@ -1414,6 +1416,16 @@ export function Play() {
             {/* TTRPG Campaign Quick Launchers */}
             <button
               type="button"
+              onClick={() => setShowCompendiumModal(true)}
+              aria-label="Tabletop Presets & Tropes Compendium"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
+              title="Tabletop Presets & Tropes Compendium (200+ canonical powers, whiteboard tropes, traditions, and skills)"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Compendium</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowCampaignHooksModal(true)}
               aria-label="Tabletop Campaign Adventure Hooks"
               className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
@@ -1453,6 +1465,17 @@ export function Play() {
 
               {showShareMenu && (
                 <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCompendiumModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-indigo-600 dark:text-indigo-400"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span>📖 Presets & Tropes Compendium</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -2255,6 +2278,7 @@ export function Play() {
                 onSelectEntity={setSelectedEntityId}
                 onSelectTile={handleNavigateToTile}
                 onSelectEvent={handleNavigateToEvent}
+                onOpenCompendium={() => setShowCompendiumModal(true)}
                 onChange={handleWorkspaceEntitiesChange}
               />
             </section>
@@ -2584,6 +2608,22 @@ export function Play() {
                               {powerData.examples}
                             </p>
                           </div>
+                        </div>
+
+                        {/* Action Presets & Tabletop Compendium Header */}
+                        <div className="flex items-center justify-between gap-2 pt-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Action Presets & Tabletop Tropes
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setShowCompendiumModal(true)}
+                            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                            title="Browse all 200+ canonical powers, whiteboard tropes, traditions, and action presets"
+                          >
+                            <BookOpen className="h-3.5 w-3.5" />
+                            <span>Browse 200+ Tropes Compendium</span>
+                          </button>
                         </div>
 
                         {/* Optional Action Presets Workshop with Categories, Search, and Affinity Engine */}
@@ -3163,6 +3203,7 @@ export function Play() {
                       onSelectEntity={setSelectedEntityId}
                       onSelectTile={handleNavigateToTile}
                       onSelectEvent={handleNavigateToEvent}
+                      onOpenCompendium={() => setShowCompendiumModal(true)}
                       onChange={handleWorkspaceEntitiesChange}
                     />
                   )}
@@ -3238,6 +3279,7 @@ export function Play() {
                 onSelectEntity={setSelectedEntityId}
                 onSelectTile={handleNavigateToTile}
                 onSelectEvent={handleNavigateToEvent}
+                onOpenCompendium={() => setShowCompendiumModal(true)}
                 onChange={handleWorkspaceEntitiesChange}
               />
             </section>
@@ -3577,6 +3619,14 @@ export function Play() {
         onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
       />
 
+      {/* Tabletop Presets & Tropes Compendium Modal */}
+      <PresetCompendiumModal
+        isOpen={showCompendiumModal}
+        onClose={() => setShowCompendiumModal(false)}
+        onSelectActionPreset={handleSelectPreset}
+        currentStage={currentStage}
+      />
+
       {/* Global Spotlight Command Palette (Ctrl+K) */}
       <CommandPalette
         isOpen={showCommandPalette}
@@ -3596,6 +3646,7 @@ export function Play() {
         onOpenShareModal={() => setShowShareModal(true)}
         onOpenCampaignHooksModal={() => setShowCampaignHooksModal(true)}
         onOpenSessionZeroPrimerModal={() => setShowSessionZeroPrimerModal(true)}
+        onOpenCompendiumModal={() => setShowCompendiumModal(true)}
         onOpenCodexEntity={(eid) => setFlyoutEntityId(eid)}
         onReturnToLauncher={handleReturnToLauncher}
         onOpenShortcutsModal={() => setShowShortcutsModal(true)}
