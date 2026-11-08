@@ -190,6 +190,12 @@ status: active
   - [x] Tablet touch ergonomics (`MapCanvas.tsx` two-finger pinch-to-zoom and touch pan gestures)
   - [x] Inline Live Bot Weight & Personality Tuner (`inline-bot-weight-tuner` in `Play.tsx`) allowing mid-session adjustment of bot weights with instant affinity recalculation
   - [x] Automated test suite in `peerSyncEngine.test.ts`, `PlayStudio.test.tsx`, and `MapCanvas.test.tsx` (164/164 tests passing across 23 suites)
+- [x] **Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility** *(Score: 83.0 / 100 via ADR-028)*
+  - [x] Persistent Tabletop Speaker & Chime-In Attribution Bar (`tabletop-speaker-bar` in `Play.tsx`) with 1-click turn attribution and seat creation
+  - [x] Complete Card Freedom controls (`🔄 Redraw` mulligan and `🎴 Pick Card` Suit/Value popover `specific-card-picker`)
+  - [x] Zero-ping-pong in-turn interactivity: `🎲 Auto-Pick Tile` (`pickSmartTargetTileForPreset`), Inline Mini-Map Coordinate Picker (`inline-minimap-picker`), and Inline Quick-Forge Codex Entity (`inline-quick-forge-entity`)
+  - [x] 3D cursor-following card tilt (`computeCardTiltTransform`), visual deck stack thickness (`computeDeckStackLayers`), ±4% pitch jitter, and Ace/Joker audio stingers (`soundEngine.ts`)
+  - [x] Automated test suite in `cardPhysicsEngine.test.ts`, `soundEngine.test.ts`, and `PlayStudio.test.tsx` (169/169 tests passing across 24 suites)
 
 ---
 
@@ -223,6 +229,7 @@ status: active
 - [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
 - [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
 - [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
-- [ ] Implement Phase 22: Kinetic Card Physics, Dynamic Particle FX & Acoustic Stems (Target: 85.0 / 100).
+- [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
+- [ ] Implement Phase 23: Interactive Codex Relationship Graph, Bulk Turn Inspector & Studio UX Polish (Target: 87.5 / 100).
 
 

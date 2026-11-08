@@ -15,6 +15,9 @@ import {
   stopAmbientSoundscape,
   getAmbientVolume,
   setAmbientVolume,
+  computePitchJitterMultiplier,
+  playAceCataclysmStinger,
+  playJokerWonderStinger,
 } from '../engine/soundEngine'
 
 describe('SoundEngine Module', () => {
@@ -85,5 +88,15 @@ describe('SoundEngine Module', () => {
 
     expect(() => stopAmbientSoundscape()).not.toThrow()
     expect(getAmbientMood()).toBe('none')
+  })
+
+  it('computes pitch jitter within ±4% and executes Ace/Joker stingers safely', () => {
+    const jitter = computePitchJitterMultiplier(42)
+    expect(jitter).toBeGreaterThanOrEqual(0.96)
+    expect(jitter).toBeLessThanOrEqual(1.04)
+
+    setSoundEnabled(true)
+    expect(() => playAceCataclysmStinger()).not.toThrow()
+    expect(() => playJokerWonderStinger()).not.toThrow()
   })
 })

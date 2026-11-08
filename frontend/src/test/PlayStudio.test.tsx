@@ -531,4 +531,77 @@ describe('Play Studio & Rules Integration', () => {
     })
     expect(tunerBox).toHaveTextContent('95%')
   })
+
+  it('supports Single-PC Tabletop Speaker Chime-In Bar, Pick Card, Redraw, Inline Mini-Map Picker, and Quick-Forge Codex Entity', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Verify Tabletop Speaker / Chime-In Bar is visible on the main card screen
+    const speakerBar = screen.getByTestId('tabletop-speaker-bar')
+    expect(speakerBar).toBeInTheDocument()
+
+    // Add a second player seat right from the Speaker Bar
+    const addSeatBtn = screen.getByRole('button', { name: /Add Seat/i })
+    await act(async () => {
+      fireEvent.click(addSeatBtn)
+    })
+    expect(screen.getByText(/Council Roster \(2\)/i)).toBeInTheDocument()
+
+    // Open "Pick Card" popover to choose a specific card (e.g., 10♠)
+    const pickCardBtn = screen.getByRole('button', { name: /Pick Card/i })
+    await act(async () => {
+      fireEvent.click(pickCardBtn)
+    })
+    const cardPicker = screen.getByTestId('specific-card-picker')
+    expect(cardPicker).toBeInTheDocument()
+
+    const tenSpadeBtn = screen.getByRole('button', { name: '10♠' })
+    await act(async () => {
+      fireEvent.click(tenSpadeBtn)
+    })
+
+    // Verify turn entered action_select and Redraw button is available
+    const redrawBtn = screen.getByRole('button', { name: /Redraw/i })
+    expect(redrawBtn).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(redrawBtn)
+    })
+
+    // Test Inline Mini-Map Coordinate Picker inside Turn Workshop
+    const targetBtn = screen.getByRole('button', { name: /🎯 Target/i })
+    await act(async () => {
+      fireEvent.click(targetBtn)
+    })
+    expect(screen.getByTestId('inline-minimap-picker')).toBeInTheDocument()
+    const miniTile = screen.getByTestId('minimap-tile-4-3')
+    await act(async () => {
+      fireEvent.click(miniTile)
+    })
+    expect(screen.getByRole('button', { name: /🎯 Target \(4,3\)/i })).toBeInTheDocument()
+
+    // Test Inline Quick-Forge Codex Entity inside Turn Workshop
+    const quickForgeBtn = screen.getByRole('button', { name: /➕ Quick-Forge Lore/i })
+    await act(async () => {
+      fireEvent.click(quickForgeBtn)
+    })
+    expect(screen.getByTestId('inline-quick-forge-entity')).toBeInTheDocument()
+    const nameInput = screen.getByPlaceholderText(/Enter name \(or leave blank to auto-name\)/i)
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Ironbeard Clan' } })
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Forge & Link to Turn/i }))
+    })
+
+    // Newly forged entity chip appears in the Turn Activity Recorded basket!
+    expect(screen.getAllByText(/Ironbeard Clan/i).length).toBeGreaterThan(0)
+  })
 })
