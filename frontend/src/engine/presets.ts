@@ -3,8 +3,9 @@
  * TypeScript interfaces and query helpers for Stage Action Presets, Codex Entities,
  * Modular Trait/Ability Blocks, and Bot Personalities.
  *
- * All content data is stored in human-editable JSON catalogs under `src/data/catalog/`
- * and hydrated with smart defaults and graphic fallbacks via `catalogLoader.ts` (ADR-025).
+ * All content data is stored in multi-shard JSON catalogs under `src/data/catalog/`
+ * with structured `graphic` sub-JSON leaves (`GraphicSpec`) referencing the Graphics
+ * Assets Manifest (`src/data/catalog/assets/manifest.json`) (ADR-026).
  */
 
 import {
@@ -23,10 +24,13 @@ import {
   TileSlotCategory,
 } from './types'
 import {
+  GraphicSpec,
   loadCatalogBots,
   loadCatalogCodex,
   loadCatalogStagePresets,
 } from './catalogLoader'
+
+export type { GraphicSpec }
 
 export interface BotPersonalityMeta {
   id: BotPersonalityId
@@ -36,6 +40,7 @@ export interface BotPersonalityMeta {
   description: string
   preferredTerrains: TerrainType[]
   defaultWeights: BotPersonalityWeights
+  graphic?: GraphicSpec
 }
 
 export interface EntityPreset {
@@ -51,6 +56,7 @@ export interface EntityPreset {
   abilities: string[]
   preferredTerrains: TerrainType[]
   settlementIcons: CompanionSettlementIcons
+  graphic?: GraphicSpec
 }
 
 export interface RelationshipPreset {
@@ -58,6 +64,7 @@ export interface RelationshipPreset {
   label: string
   icon: string
   description: string
+  graphic?: GraphicSpec
 }
 
 export interface StageActionPreset {
@@ -71,15 +78,12 @@ export interface StageActionPreset {
   description: string
   slotCategory: TileSlotCategory
   slotPriority: number
+  graphic?: GraphicSpec
   terrainChange?: TerrainType
   reliefChange?: ReliefType
   floraChange?: FloraType
   overlayChange?: TileOverlay
   cartographicSymbol?: string
-  /**
-   * Optional ID of an existing cartographic symbol graphic to reuse when no dedicated
-   * graphic exists for this preset (e.g. `"crater-impact"` or `"mountain-peak"`).
-   */
   graphicFallback?: string
   hasRiver?: boolean
   hasRoad?: boolean
@@ -108,6 +112,7 @@ export interface SettlementIconSetPreset {
   id: string
   name: string
   icons: CompanionSettlementIcons
+  graphic?: GraphicSpec
 }
 
 export interface ModularBlockItem {
@@ -115,6 +120,7 @@ export interface ModularBlockItem {
   icon: string
   description?: string
   tags?: string[]
+  graphic?: GraphicSpec
 }
 
 export interface ModularBlockGroup {

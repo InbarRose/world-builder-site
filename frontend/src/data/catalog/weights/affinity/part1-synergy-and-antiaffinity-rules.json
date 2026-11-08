@@ -1,0 +1,90 @@
+{
+  "baseScore": 25,
+  "historicalSynergies": [
+    {
+      "tag": "maritime",
+      "matchTags": [
+        "maritime",
+        "water"
+      ],
+      "bonus": 22,
+      "label": "Maritime Tradition Synergy"
+    },
+    {
+      "tag": "mining",
+      "matchTags": [
+        "mining",
+        "mountain",
+        "subterranean"
+      ],
+      "bonus": 20,
+      "label": "Deep-Stone & Mining Tradition"
+    },
+    {
+      "tag": "martial",
+      "matchTags": [
+        "martial",
+        "fortification"
+      ],
+      "bonus": 18,
+      "label": "Militaristic Ethos Alignment"
+    },
+    {
+      "tag": "arcane",
+      "matchTags": [
+        "arcane",
+        "spiritual"
+      ],
+      "bonus": 20,
+      "label": "Mystic & Esoteric Resonance"
+    },
+    {
+      "tag": "agrarian",
+      "matchTags": [
+        "agrarian",
+        "flora"
+      ],
+      "bonus": 18,
+      "label": "Agrarian Heartland Continuity"
+    },
+    {
+      "tag": "trade",
+      "matchTags": [
+        "trade",
+        "diplomacy"
+      ],
+      "bonus": 18,
+      "label": "Mercantile Network Synergy"
+    }
+  ],
+  "antiAffinities": [
+    {
+      "candidateTag": "maritime",
+      "forbiddenTerrains": [
+        "desert",
+        "canyon"
+      ],
+      "penalty": -35,
+      "label": "Anti-Affinity: Maritime Action in Arid Interior"
+    },
+    {
+      "candidateTag": "arid",
+      "forbiddenTerrains": [
+        "water",
+        "swamp"
+      ],
+      "penalty": -30,
+      "label": "Anti-Affinity: Desert Feature on Wetland/Sea"
+    },
+    {
+      "candidateTag": "cryo",
+      "forbiddenTerrains": [
+        "desert",
+        "volcano",
+        "jungle"
+      ],
+      "penalty": -35,
+      "label": "Anti-Affinity: Glacial Feature in Tropical/Volcanic Zone"
+    }
+  ]
+}

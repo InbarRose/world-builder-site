@@ -1,0 +1,104 @@
+[
+  {
+    "category": "Arcane & Wonder",
+    "suitHint": "♦",
+    "items": [
+      {
+        "label": "Astral Weaving",
+        "description": "Channeling starlight into tangible warding barriers, guiding beacons, and luminous thread.",
+        "tags": [
+          "magic",
+          "astral",
+          "celestial"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "✨",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Storm-Calling",
+        "description": "Singing ancient meteorological chants that summon rain over parched crops or cast lightning.",
+        "tags": [
+          "magic",
+          "weather",
+          "storm"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⚡",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Mycelial Telepathy",
+        "description": "Transmitting thoughts, sensory impressions, and emotional warnings across miles via fungal roots.",
+        "tags": [
+          "telepathy",
+          "psionics",
+          "fungi"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🍄",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Glamour & Fey Illusion",
+        "description": "Bending sensory perception to make humble glades resemble celestial palaces or conceal armadas.",
+        "tags": [
+          "illusion",
+          "fey",
+          "charm"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🦋",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Harmonic Resonance",
+        "description": "Vocal frequencies that shatter stone, mend fractured crystals, and awaken dormant golems.",
+        "tags": [
+          "sound",
+          "crystals",
+          "resonance"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🔮",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Geomantic Earth-Shaping",
+        "description": "Resonating with tectonic fault lines to raise defensive earthen berms or divert flood channels.",
+        "tags": [
+          "earth",
+          "magic",
+          "shaping"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏔️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  }
+]

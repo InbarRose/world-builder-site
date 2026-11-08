@@ -1,0 +1,245 @@
+[
+  {
+    "id": "gen_earth_mountain_peak",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Mountain Peak (Single Peak)",
+    "description": "Classic solitary triangular peak with center ridge and shaded slope.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mountain-peak",
+      "fallbackAssetId": null,
+      "glyph": "⛰️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain",
+    "creativePrompt": "How does this mountain peak shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The mountain peak was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_mountain_twin",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Twin Horn Peaks (Twin Horns)",
+    "description": "Dual companion summits rising side-by-side with central col pass.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mountain-twin",
+      "fallbackAssetId": null,
+      "glyph": "🏔️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain",
+    "creativePrompt": "How does this twin horn peaks shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The twin horn peaks was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_mountain_spire",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Jagged Needle Spires (Needle Spires)",
+    "description": "Sharp, sheer karst pinnacles and needle-like rocky crags.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mountain-spire",
+      "fallbackAssetId": null,
+      "glyph": "🗡️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "crag",
+    "creativePrompt": "How does this jagged needle spires shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The jagged needle spires was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_mountain_snow",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Snow-Capped Massif (Snow Massif)",
+    "description": "Glaciated alpine summit with perpetual snowfields.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mountain-snow",
+      "fallbackAssetId": null,
+      "glyph": "❄️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain-snow",
+    "creativePrompt": "How does this snow-capped massif shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The snow-capped massif was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_mountain_range",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Mountain Range Spine (Continuous Spine)",
+    "description": "Continuous three-peak ridge forming a continental divide.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mountain-range",
+      "fallbackAssetId": null,
+      "glyph": "⛰️⛰️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain-range",
+    "creativePrompt": "How does this mountain range spine shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The mountain range spine was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_hill_rolling",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rolling Low Hills (Rolling Low Hills)",
+    "description": "Gentle, rounded low grassy mounds and undulating rises.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "hill-rolling",
+      "fallbackAssetId": null,
+      "glyph": "🌱",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "hills",
+    "creativePrompt": "How does this rolling low hills shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rolling low hills was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_hill_knolls",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Triple Rounded Knolls (Triple Knolls)",
+    "description": "Cluster of three distinct rounded hillocks and knolls.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "hill-knolls",
+      "fallbackAssetId": null,
+      "glyph": "🟢",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "hills",
+    "creativePrompt": "How does this triple rounded knolls shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The triple rounded knolls was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_hill_rocky",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rocky Scree Hills (Rocky Scree)",
+    "description": "Rugged hillocks with exposed boulder outcrops and scree slopes.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "hill-rocky",
+      "fallbackAssetId": null,
+      "glyph": "🪨",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "hills",
+    "creativePrompt": "How does this rocky scree hills shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rocky scree hills was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_hill_low",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Low Undulating Mounds (Low Mounds)",
+    "description": "Subtle wave-like grassy crests rising above the plains.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "hill-low",
+      "fallbackAssetId": null,
+      "glyph": "〰️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "hills",
+    "creativePrompt": "How does this low undulating mounds shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The low undulating mounds was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

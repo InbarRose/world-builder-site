@@ -1,0 +1,218 @@
+[
+  {
+    "id": "gen_water_lake_tarn",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Alpine Mountain Tarn (Alpine Tarn)",
+    "description": "High-altitude crystalline glacial tarn nested below mountain peaks.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "lake-tarn",
+      "fallbackAssetId": null,
+      "glyph": "🏔️💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this alpine mountain tarn shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The alpine mountain tarn was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_lake_oxbow",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Crescent Oxbow Lake (Oxbow Lake)",
+    "description": "Curving u-shaped lake formed when a river meander loop is cut off.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "lake-oxbow",
+      "fallbackAssetId": null,
+      "glyph": "🌙",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this crescent oxbow lake shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The crescent oxbow lake was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_lake_crater",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Volcanic Crater Lake (Crater Lake)",
+    "description": "Round, fathomless deep sapphire lake resting inside an extinct caldera.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "lake-crater",
+      "fallbackAssetId": null,
+      "glyph": "🌋💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this volcanic crater lake shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The volcanic crater lake was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_swamp_mangrove",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Mangrove Stilt Swamp (Mangrove Swamp)",
+    "description": "Tangled network of aerial stilt roots rising from brackish coastal waters.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "swamp-mangrove",
+      "fallbackAssetId": null,
+      "glyph": "🌿",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "swamp",
+    "reliefChange": "none",
+    "creativePrompt": "How does this mangrove stilt swamp shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The mangrove stilt swamp was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_swamp_peat",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Peat Moss Bog (Peat Bog)",
+    "description": "Waterlogged, acidic wetland formed of decaying moss hummocks.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "swamp-peat",
+      "fallbackAssetId": null,
+      "glyph": "🪵",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "swamp",
+    "reliefChange": "none",
+    "creativePrompt": "How does this peat moss bog shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The peat moss bog was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_marsh_reeds",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Reed & Cattail Marsh (Reed Marsh)",
+    "description": "Flooded riparian marshland bristling with tall reed stalks and cattails.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "marsh-reeds",
+      "fallbackAssetId": null,
+      "glyph": "🌾",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "swamp",
+    "reliefChange": "none",
+    "creativePrompt": "How does this reed & cattail marsh shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The reed & cattail marsh was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_marsh_fen",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Flooded Grassy Fen (Grassy Fen)",
+    "description": "Alkaline mineral-rich wetland covered in sedges, rushes, and slow streams.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "marsh-fen",
+      "fallbackAssetId": null,
+      "glyph": "🌱💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "swamp",
+    "reliefChange": "none",
+    "creativePrompt": "How does this flooded grassy fen shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The flooded grassy fen was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_tidal_pools",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rocky Shore Tidal Pools (Tidal Pools)",
+    "description": "Intertidal marine basins carved into coastal granite rock ledges.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "tidal-pools",
+      "fallbackAssetId": null,
+      "glyph": "🦀",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this rocky shore tidal pools shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rocky shore tidal pools was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

@@ -1,0 +1,198 @@
+[
+  {
+    "id": "preset_tideborn",
+    "name": "Tideborn Pelagians",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "water",
+      "ocean"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🔱",
+      "primaryColor": "#06b6d4",
+      "secondaryColor": "#cffafe",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🐚",
+        "village": "⚓",
+        "town": "⛵",
+        "city": "🔱",
+        "metropolis": "🌊",
+        "architectureStyle": "Coral Spires & Floating Atolls"
+      }
+    }
+  },
+  {
+    "id": "preset_clockwork_automata",
+    "name": "Aether-Forged Collective",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "earth",
+      "mountain",
+      "canyon"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "⚙️",
+      "primaryColor": "#6366f1",
+      "secondaryColor": "#fcd34d",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🔩",
+        "village": "⚙️",
+        "town": "🏭",
+        "city": "⚡",
+        "metropolis": "🔮",
+        "architectureStyle": "Clockwork Foundry-Towers"
+      }
+    }
+  },
+  {
+    "id": "preset_frost_giants",
+    "name": "Rime-Kin Goliath Clans",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "tundra",
+      "mountain"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "❄️",
+      "primaryColor": "#38bdf8",
+      "secondaryColor": "#e0f2fe",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "❄️",
+        "village": "🧊",
+        "town": "🗿",
+        "city": "🏔️",
+        "metropolis": "👑",
+        "architectureStyle": "Glacial Megalith Halls"
+      }
+    }
+  },
+  {
+    "id": "preset_fen_myconids",
+    "name": "Gloom-Spore Myconids",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "swamp",
+      "forest",
+      "jungle"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🍄",
+      "primaryColor": "#a855f7",
+      "secondaryColor": "#86efac",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🍄",
+        "village": "🌿",
+        "town": "🔮",
+        "city": "🌺",
+        "metropolis": "✨",
+        "architectureStyle": "Bioluminescent Fungal Domes"
+      }
+    }
+  },
+  {
+    "id": "preset_twilight_fae",
+    "name": "Twilight Court Sidhe",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "forest",
+      "plains",
+      "swamp"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🦋",
+      "primaryColor": "#ec4899",
+      "secondaryColor": "#f3e8ff",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🦋",
+        "village": "🌸",
+        "town": "🌙",
+        "city": "🏰",
+        "metropolis": "✨",
+        "architectureStyle": "Gossamer & Moonstone Pavilions"
+      }
+    }
+  },
+  {
+    "id": "preset_crystal_lithids",
+    "name": "Prism-Core Lithids",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "canyon",
+      "mountain",
+      "desert"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "💎",
+      "primaryColor": "#14b8a6",
+      "secondaryColor": "#f0fdfa",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🔹",
+        "village": "💎",
+        "town": "🔷",
+        "city": "🏛️",
+        "metropolis": "💠",
+        "architectureStyle": "Refractive Crystal Spires"
+      }
+    }
+  }
+]

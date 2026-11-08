@@ -1,0 +1,198 @@
+[
+  {
+    "id": "preset_sylvan_elves",
+    "name": "Sylvan Star-Elves",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "forest",
+      "jungle"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🧝",
+      "primaryColor": "#10b981",
+      "secondaryColor": "#fef3c7",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🍃",
+        "village": "🌳",
+        "town": "🎋",
+        "city": "🗼",
+        "metropolis": "🌟",
+        "architectureStyle": "Living Canopy Spires"
+      }
+    }
+  },
+  {
+    "id": "preset_iron_dwarves",
+    "name": "Ironpeak Delvers",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "mountain",
+      "earth",
+      "volcano"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "⛏️",
+      "primaryColor": "#f59e0b",
+      "secondaryColor": "#78350f",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "⛺",
+        "village": "🪨",
+        "town": "⚒️",
+        "city": "🏰",
+        "metropolis": "🏔️",
+        "architectureStyle": "Carved Granite Holds"
+      }
+    }
+  },
+  {
+    "id": "preset_dawnwatch_humans",
+    "name": "Dawnwatch Humans",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "earth",
+      "water"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🛡️",
+      "primaryColor": "#2563eb",
+      "secondaryColor": "#dbeafe",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "⛺",
+        "village": "🏡",
+        "town": "🏘️",
+        "city": "🏰",
+        "metropolis": "👑",
+        "architectureStyle": "Timber & Stone Walled Keeps"
+      }
+    }
+  },
+  {
+    "id": "preset_steppe_orcs",
+    "name": "Thunder-Steppe Orcs",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "earth",
+      "canyon"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🐺",
+      "primaryColor": "#dc2626",
+      "secondaryColor": "#fde68a",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "⛺",
+        "village": "🔥",
+        "town": "🛡️",
+        "city": "⚔️",
+        "metropolis": "🚩",
+        "architectureStyle": "Great Horned War-Camps & Citadels"
+      }
+    }
+  },
+  {
+    "id": "preset_meadow_halflings",
+    "name": "Riverbend Halflings",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "water"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🌾",
+      "primaryColor": "#84cc16",
+      "secondaryColor": "#fef9c3",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "🏕️",
+        "village": "🌻",
+        "town": "🏡",
+        "city": "🏛️",
+        "metropolis": "🎡",
+        "architectureStyle": "Hillside Burrows & Mill-Towns"
+      }
+    }
+  },
+  {
+    "id": "preset_sunscale_draconids",
+    "name": "Sun-Scale Saurians",
+    "category": "species",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "desert",
+      "canyon",
+      "jungle"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": "settle-village",
+      "glyph": "🦎",
+      "primaryColor": "#eab308",
+      "secondaryColor": "#991b1b",
+      "params": {
+        "scale": 1,
+        "fillOpacity": 0.2
+      },
+      "settlementIcons": {
+        "camp": "☀️",
+        "village": "🏜️",
+        "town": "🛕",
+        "city": "🏛️",
+        "metropolis": "🌞",
+        "architectureStyle": "Golden Stepped Ziggurats"
+      }
+    }
+  }
+]

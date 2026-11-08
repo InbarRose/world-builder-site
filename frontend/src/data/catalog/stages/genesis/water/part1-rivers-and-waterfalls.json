@@ -1,0 +1,218 @@
+[
+  {
+    "id": "gen_water_river_meander",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Meandering River Channel (Meandering River)",
+    "description": "Winding, natural S-curve river channel traversing lowlands.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "river-meander",
+      "fallbackAssetId": null,
+      "glyph": "🌊",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this meandering river channel shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The meandering river channel was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_river_braided",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Braided Gravel River (Braided River)",
+    "description": "Network of interweaving alluvial river channels weaving between gravel bars.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "river-braided",
+      "fallbackAssetId": null,
+      "glyph": "🔀",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this braided gravel river shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The braided gravel river was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_river_delta",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Braided River Delta (River Delta)",
+    "description": "Branching distributary fan depositing silt into the sea.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "river-delta",
+      "fallbackAssetId": null,
+      "glyph": "🔱",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this braided river delta shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The braided river delta was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_river_rapids",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Whitewater River Rapids (River Rapids)",
+    "description": "Turbulent mountain torrent churning through boulder chutes.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "river-rapids",
+      "fallbackAssetId": null,
+      "glyph": "⚡🌊",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this whitewater river rapids shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The whitewater river rapids was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_waterfall_cataract",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Roaring Cataract Waterfall (High Cataract)",
+    "description": "Sheer cliff plunge where river cascades into a mist-shrouded gorge.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "waterfall-cataract",
+      "fallbackAssetId": null,
+      "glyph": "💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this roaring cataract waterfall shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The roaring cataract waterfall was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_waterfall_cascades",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Stepped Tiered Cascades (Tiered Cascades)",
+    "description": "Series of descending rock steps and natural stone shelves.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "waterfall-cascades",
+      "fallbackAssetId": null,
+      "glyph": "🪜💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this stepped tiered cascades shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The stepped tiered cascades was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_waterfall_gorge",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Canyon Plunge Waterfall (Canyon Plunge)",
+    "description": "Massive plume of water trapped between high rock canyon cliffs.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "waterfall-gorge",
+      "fallbackAssetId": null,
+      "glyph": "🏞️💧",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this canyon plunge waterfall shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The canyon plunge waterfall was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_water_lake_basin",
+    "stage": "genesis",
+    "suit": "♥",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Freshwater Lake Basin (Lake Basin)",
+    "description": "Broad inland freshwater body cradled by surrounding shores.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "lake-basin",
+      "fallbackAssetId": null,
+      "glyph": "🏞️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "ocean",
+    "reliefChange": "none",
+    "creativePrompt": "How does this freshwater lake basin shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The freshwater lake basin was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

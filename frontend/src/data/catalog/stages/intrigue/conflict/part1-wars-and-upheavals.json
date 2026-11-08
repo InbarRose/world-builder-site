@@ -1,0 +1,218 @@
+[
+  {
+    "id": "int_conf_war",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Great Border War & Field Battle",
+    "description": "Two imperial hosts clash in a decisive field engagement, leaving thousands of fallen and shattered banners.",
+    "slotCategory": "structure",
+    "slotPriority": 90,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚔️🚩",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "war",
+    "creativePrompt": "What disputed province was the cause of war? Which heroic cavalry charge decided the day?",
+    "exampleNarrative": "Steel met steel on the muddy floodplains, sixty thousand men locked in a deafening storm of arrows, pikes, and blood."
+  },
+  {
+    "id": "int_conf_siege",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Protracted Fortress Siege & Sapping",
+    "description": "Invest an unbreached border fortress with catapults, sapper tunnels, and disease over a bitter winter siege.",
+    "slotCategory": "structure",
+    "slotPriority": 91,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏰💣",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "relationshipType": "war",
+    "creativePrompt": "How long did the defenders hold out on boiled leather and rainwater before the walls crumbled?",
+    "exampleNarrative": "For nine months trebuchet stones pounded the outer walls until a sapper explosion collapsed the western gatehouse."
+  },
+  {
+    "id": "int_conf_rebellion",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Peasant & Underclass Uprising",
+    "description": "Oppressed serfs and miners rise with scythes and torches, burning manor houses and declaring freedom.",
+    "slotCategory": "structure",
+    "slotPriority": 88,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🔥🌾",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "rivalry",
+    "creativePrompt": "What charismatic folk hero or prophet leads the peasant revolt? What are their demands?",
+    "exampleNarrative": "Torches illuminated the night as thirty thousand pitchfork-wielding peasants marched upon the lordly manor houses."
+  },
+  {
+    "id": "int_conf_civil_war",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Dynastic War of the Pretenders",
+    "description": "A sudden royal death splits the kingdom between two rival cousins claiming the rightful crown.",
+    "slotCategory": "structure",
+    "slotPriority": 92,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "👑⚔️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "war",
+    "creativePrompt": "Which great houses back the elder brother, and which champion the charismatic younger sister?",
+    "exampleNarrative": "Brother turned sword on brother across the realm as rival heralds proclaimed competing monarchs on the same throne."
+  },
+  {
+    "id": "int_conf_inquisition",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Zealot Inquisitorial Purge",
+    "description": "Religious zealots take power, burning heretical scrolls and executing accused sorcerers in public squares.",
+    "slotCategory": "myth",
+    "slotPriority": 87,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🔥⚖️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "relationshipType": "rivalry",
+    "creativePrompt": "What ancient religious scripture was deemed forbidden heresy? How do underground believers hide?",
+    "exampleNarrative": "Pyres of forbidden books and condemned scholars lit the midnight sky as black-robed inquisitors purged the university."
+  },
+  {
+    "id": "int_conf_blockade",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Privateer Naval Blockade",
+    "description": "Rogue privateers and naval squadrons strangle a rival capital maritime trade, starving its grain supplies.",
+    "slotCategory": "structure",
+    "slotPriority": 89,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏴‍☠️⚓",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "war",
+    "creativePrompt": "Which admiral was secretly commissioned by a rival prince to fly the black pirate flag?",
+    "exampleNarrative": "Corsair galleons formed a deadly cordon across the harbor narrows, burning every merchant ship that attempted to run the blockade."
+  },
+  {
+    "id": "int_conf_raids",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Border Scorched Earth Raids",
+    "description": "Lightning cavalry raids burn granaries and bridges along the border, denying forage to advancing hosts.",
+    "slotCategory": "structure",
+    "slotPriority": 86,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🐎🔥",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "rivalry",
+    "creativePrompt": "What bitter grievance drove the raiders to burn the fertile harvest right before winter?",
+    "exampleNarrative": "Fast-riding horse archers torched the outlying villages and vanished into the hills before the garrison could mobilize."
+  },
+  {
+    "id": "int_conf_fantastical",
+    "stage": "intrigue",
+    "suit": "♠",
+    "isFantastical": true,
+    "isDisaster": false,
+    "name": "War of the Awakening Titans",
+    "description": "Arcane superweapons shatter the crust, awakening two colossal elemental titans in cataclysmic clash.",
+    "slotCategory": "myth",
+    "slotPriority": 98,
+    "graphic": {
+      "assetId": "titan-bones",
+      "fallbackAssetId": null,
+      "glyph": "✨⚡",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "battle",
+    "relationshipType": "war",
+    "creativePrompt": "How does the clash between mountain and sea titans physically reshape the world map?",
+    "exampleNarrative": "The heavens tore as two thousand-foot colossi collided, each blow cracking mountains and boiling coastal bays."
+  }
+]

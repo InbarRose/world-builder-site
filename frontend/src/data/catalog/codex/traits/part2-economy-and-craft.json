@@ -1,0 +1,136 @@
+[
+  {
+    "category": "Craft & Governance",
+    "suitHint": "♥",
+    "items": [
+      {
+        "label": "Runic Metallurgy",
+        "description": "Etching protective runes and lineage makers-marks into damask pattern-welded blades and armor.",
+        "tags": [
+          "smithing",
+          "craft",
+          "metal"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⚒️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Chartered Merchant Guilds",
+        "description": "Regulating quality standards, trade monopolies, and apprentice training through sealed city charters.",
+        "tags": [
+          "commerce",
+          "guilds",
+          "economy"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⚖️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Ziggurat & Monument Masonry",
+        "description": "Quarrying colossal limestone blocks to construct stepped pyramids dedicated to gods and monarchs.",
+        "tags": [
+          "architecture",
+          "monument",
+          "masonry"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🛕",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Clockwork & Water Artifice",
+        "description": "Harnessing gears, waterwheels, and counterweights to power grain mills and astronomical orreries.",
+        "tags": [
+          "technology",
+          "engineering",
+          "invention"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⚙️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Council of Elders",
+        "description": "Decisions of war, trade, and law debated openly and resolved by consensus of the clan matriarchs.",
+        "tags": [
+          "governance",
+          "democracy",
+          "elders"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏛️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Caravan Safe-Conduct",
+        "description": "Enforcing royal toll roads and armed escorts to protect foreign merchants across dangerous frontiers.",
+        "tags": [
+          "trade",
+          "security",
+          "roads"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐪",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Written Legal Code & Papyrus",
+        "description": "Carving common laws into public basalt steles so justice is uniform and immune to bribery.",
+        "tags": [
+          "law",
+          "literacy",
+          "statecraft"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "📜",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Chivalric Feudal Knighthood",
+        "description": "Sworn warrior retinues granted land in exchange for military service and chivalric obedience.",
+        "tags": [
+          "feudal",
+          "military",
+          "honor"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🛡️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  }
+]

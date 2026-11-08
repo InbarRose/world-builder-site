@@ -1,0 +1,652 @@
+[
+  {
+    "id": "mountain-peak",
+    "name": "Mountain Peak",
+    "concept": "mountain",
+    "conceptLabel": "Mountains",
+    "variantName": "Single Peak",
+    "category": "earth",
+    "description": "Classic solitary triangular peak with center ridge and shaded slope.",
+    "tags": [
+      "mountain",
+      "peak",
+      "elevation",
+      "highland"
+    ],
+    "graphic": {
+      "assetId": "mountain-peak",
+      "fallbackAssetId": null,
+      "glyph": "⛰️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "mountain-twin",
+    "name": "Twin Horn Peaks",
+    "concept": "mountain",
+    "conceptLabel": "Mountains",
+    "variantName": "Twin Horns",
+    "category": "earth",
+    "description": "Dual companion summits rising side-by-side with central col pass.",
+    "tags": [
+      "mountain",
+      "twin",
+      "horns",
+      "pass"
+    ],
+    "graphic": {
+      "assetId": "mountain-twin",
+      "fallbackAssetId": null,
+      "glyph": "🏔️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "mountain-spire",
+    "name": "Jagged Needle Spires",
+    "concept": "mountain",
+    "conceptLabel": "Mountains",
+    "variantName": "Needle Spires",
+    "category": "earth",
+    "description": "Sharp, sheer karst pinnacles and needle-like rocky crags.",
+    "tags": [
+      "mountain",
+      "crag",
+      "spire",
+      "needle"
+    ],
+    "graphic": {
+      "assetId": "mountain-spire",
+      "fallbackAssetId": null,
+      "glyph": "🗡️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "mountain-snow",
+    "name": "Snow-Capped Massif",
+    "concept": "mountain",
+    "conceptLabel": "Mountains",
+    "variantName": "Snow Massif",
+    "category": "earth",
+    "description": "Glaciated alpine summit with perpetual snowfields.",
+    "tags": [
+      "mountain",
+      "snow",
+      "glacier",
+      "alpine"
+    ],
+    "graphic": {
+      "assetId": "mountain-snow",
+      "fallbackAssetId": null,
+      "glyph": "❄️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "mountain-range",
+    "name": "Mountain Range Spine",
+    "concept": "mountain",
+    "conceptLabel": "Mountains",
+    "variantName": "Continuous Spine",
+    "category": "earth",
+    "description": "Continuous three-peak ridge forming a continental divide.",
+    "tags": [
+      "mountain",
+      "range",
+      "spine",
+      "ridge"
+    ],
+    "graphic": {
+      "assetId": "mountain-range",
+      "fallbackAssetId": null,
+      "glyph": "⛰️⛰️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "hill-rolling",
+    "name": "Rolling Low Hills",
+    "concept": "hill",
+    "conceptLabel": "Hills",
+    "variantName": "Rolling Low Hills",
+    "category": "earth",
+    "description": "Gentle, rounded low grassy mounds and undulating rises.",
+    "tags": [
+      "hills",
+      "rolling",
+      "lowlands",
+      "mounds"
+    ],
+    "graphic": {
+      "assetId": "hill-rolling",
+      "fallbackAssetId": null,
+      "glyph": "🌱",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "hill-knolls",
+    "name": "Triple Rounded Knolls",
+    "concept": "hill",
+    "conceptLabel": "Hills",
+    "variantName": "Triple Knolls",
+    "category": "earth",
+    "description": "Cluster of three distinct rounded hillocks and knolls.",
+    "tags": [
+      "hills",
+      "knolls",
+      "hillocks",
+      "rolling"
+    ],
+    "graphic": {
+      "assetId": "hill-knolls",
+      "fallbackAssetId": null,
+      "glyph": "🟢",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "hill-rocky",
+    "name": "Rocky Scree Hills",
+    "concept": "hill",
+    "conceptLabel": "Hills",
+    "variantName": "Rocky Scree",
+    "category": "earth",
+    "description": "Rugged hillocks with exposed boulder outcrops and scree slopes.",
+    "tags": [
+      "hills",
+      "rocky",
+      "scree",
+      "boulder"
+    ],
+    "graphic": {
+      "assetId": "hill-rocky",
+      "fallbackAssetId": null,
+      "glyph": "🪨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "hill-low",
+    "name": "Low Undulating Mounds",
+    "concept": "hill",
+    "conceptLabel": "Hills",
+    "variantName": "Low Mounds",
+    "category": "earth",
+    "description": "Subtle wave-like grassy crests rising above the plains.",
+    "tags": [
+      "hills",
+      "low",
+      "undulating",
+      "plains"
+    ],
+    "graphic": {
+      "assetId": "hill-low",
+      "fallbackAssetId": null,
+      "glyph": "〰️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "canyon-gorge",
+    "name": "Deep Canyon Gorge",
+    "concept": "canyon",
+    "conceptLabel": "Canyons & Cliffs",
+    "variantName": "Canyon Gorge",
+    "category": "earth",
+    "description": "Sheer vertical rock rift sliced deep through the plateau.",
+    "tags": [
+      "canyon",
+      "gorge",
+      "chasm",
+      "rift"
+    ],
+    "graphic": {
+      "assetId": "canyon-gorge",
+      "fallbackAssetId": null,
+      "glyph": "🏜️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "cliff-sheer",
+    "name": "Sheer Escarpment Wall",
+    "concept": "canyon",
+    "conceptLabel": "Canyons & Cliffs",
+    "variantName": "Sheer Escarpment",
+    "category": "earth",
+    "description": "Imposing vertical cliff wall dropping off from high tableland.",
+    "tags": [
+      "cliff",
+      "escarpment",
+      "bluff",
+      "drop"
+    ],
+    "graphic": {
+      "assetId": "cliff-sheer",
+      "fallbackAssetId": null,
+      "glyph": "🧗",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "cliff-coastal",
+    "name": "Coastal Sea Cliffs",
+    "concept": "canyon",
+    "conceptLabel": "Canyons & Cliffs",
+    "variantName": "Coastal Cliffs",
+    "category": "earth",
+    "description": "Craggy sea cliff bluff meeting coastal breaker waves below.",
+    "tags": [
+      "cliff",
+      "coastal",
+      "sea",
+      "ocean"
+    ],
+    "graphic": {
+      "assetId": "cliff-coastal",
+      "fallbackAssetId": null,
+      "glyph": "🌊🧗",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "mesa-plateau",
+    "name": "Flat-Topped Mesa Bluff",
+    "concept": "canyon",
+    "conceptLabel": "Canyons & Cliffs",
+    "variantName": "Flat Mesa Bluff",
+    "category": "earth",
+    "description": "Elevated flat tableland flanked by steep, stepped rock slopes.",
+    "tags": [
+      "mesa",
+      "plateau",
+      "tableland",
+      "bluff"
+    ],
+    "graphic": {
+      "assetId": "mesa-plateau",
+      "fallbackAssetId": null,
+      "glyph": "🟫",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "badland-buttes",
+    "name": "Stepped Badland Buttes",
+    "concept": "canyon",
+    "conceptLabel": "Canyons & Cliffs",
+    "variantName": "Badland Buttes",
+    "category": "earth",
+    "description": "Arid, wind-carved sedimentary towers, chimneys, and coulees.",
+    "tags": [
+      "badlands",
+      "buttes",
+      "arid",
+      "erosion"
+    ],
+    "graphic": {
+      "assetId": "badland-buttes",
+      "fallbackAssetId": null,
+      "glyph": "🏜️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "desert-dunes",
+    "name": "Crescent Sand Dunes",
+    "concept": "desert",
+    "conceptLabel": "Deserts",
+    "variantName": "Crescent Dunes",
+    "category": "earth",
+    "description": "Sweeping barchan crescent dunes sculpted by desert trade winds.",
+    "tags": [
+      "desert",
+      "dunes",
+      "sand",
+      "arid",
+      "barchan"
+    ],
+    "graphic": {
+      "assetId": "desert-dunes",
+      "fallbackAssetId": null,
+      "glyph": "🐪",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "desert-erg",
+    "name": "Rippling Sand Sea Erg",
+    "concept": "desert",
+    "conceptLabel": "Deserts",
+    "variantName": "Sand Sea Erg",
+    "category": "earth",
+    "description": "Endless horizon of overlapping wave-like sand ripple crests.",
+    "tags": [
+      "desert",
+      "erg",
+      "sand",
+      "ripples"
+    ],
+    "graphic": {
+      "assetId": "desert-erg",
+      "fallbackAssetId": null,
+      "glyph": "⏳",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "desert-rocky",
+    "name": "Rocky Reg Pavement",
+    "concept": "desert",
+    "conceptLabel": "Deserts",
+    "variantName": "Rocky Reg Pavement",
+    "category": "earth",
+    "description": "Stoney desert pavement studded with wind-polished ventifacts.",
+    "tags": [
+      "desert",
+      "reg",
+      "stoney",
+      "pavement",
+      "gravel"
+    ],
+    "graphic": {
+      "assetId": "desert-rocky",
+      "fallbackAssetId": null,
+      "glyph": "🪨🏜️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "desert-cracked",
+    "name": "Sun-Cracked Arid Flats",
+    "concept": "desert",
+    "conceptLabel": "Deserts",
+    "variantName": "Sun-Cracked Flats",
+    "category": "earth",
+    "description": "Parched, desiccated clay pan etched with polygonal fissure fractures.",
+    "tags": [
+      "desert",
+      "cracked",
+      "arid",
+      "mud",
+      "parched"
+    ],
+    "graphic": {
+      "assetId": "desert-cracked",
+      "fallbackAssetId": null,
+      "glyph": "☀️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "cave-maw",
+    "name": "Subterranean Cave Maw",
+    "concept": "cave",
+    "conceptLabel": "Caves",
+    "variantName": "Cavern Maw",
+    "category": "earth",
+    "description": "Dark, yawning entrance leading into subterranean depths.",
+    "tags": [
+      "cave",
+      "maw",
+      "subterranean",
+      "entrance",
+      "dungeon"
+    ],
+    "graphic": {
+      "assetId": "cave-maw",
+      "fallbackAssetId": null,
+      "glyph": "🕳️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "cave-cliff",
+    "name": "Cliffside Grotto Mouth",
+    "concept": "cave",
+    "conceptLabel": "Caves",
+    "variantName": "Cliff Grotto",
+    "category": "earth",
+    "description": "Hidden cavern opening embedded into an impassable rock escarpment.",
+    "tags": [
+      "cave",
+      "cliff",
+      "grotto",
+      "escarpment"
+    ],
+    "graphic": {
+      "assetId": "cave-cliff",
+      "fallbackAssetId": null,
+      "glyph": "🧗🕳️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "cave-sinkhole",
+    "name": "Collapsed Pit Cenote",
+    "concept": "cave",
+    "conceptLabel": "Caves",
+    "variantName": "Pit Cenote",
+    "category": "earth",
+    "description": "Sudden vertical collapse opening downward into a subterranean chasm.",
+    "tags": [
+      "cave",
+      "sinkhole",
+      "cenote",
+      "pit",
+      "chasm"
+    ],
+    "graphic": {
+      "assetId": "cave-sinkhole",
+      "fallbackAssetId": null,
+      "glyph": "⭕",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "volcano-active",
+    "name": "Active Erupting Volcano",
+    "concept": "volcano",
+    "conceptLabel": "Volcanoes",
+    "variantName": "Active Erupting",
+    "category": "earth",
+    "description": "Steep volcanic cone venting ash plumes and molten lava bombs.",
+    "tags": [
+      "volcano",
+      "lava",
+      "magma",
+      "eruption",
+      "caldera"
+    ],
+    "graphic": {
+      "assetId": "volcano-active",
+      "fallbackAssetId": null,
+      "glyph": "🌋",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "volcano-caldera",
+    "name": "Collapsed Volcanic Caldera",
+    "concept": "volcano",
+    "conceptLabel": "Volcanoes",
+    "variantName": "Collapsed Caldera",
+    "category": "earth",
+    "description": "Ancient mega-caldera crater rim cradling a sunken steaming caldera floor.",
+    "tags": [
+      "volcano",
+      "caldera",
+      "crater",
+      "basin"
+    ],
+    "graphic": {
+      "assetId": "volcano-caldera",
+      "fallbackAssetId": null,
+      "glyph": "🌋⭕",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  }
+]

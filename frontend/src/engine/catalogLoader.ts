@@ -1,68 +1,27 @@
 /**
  * catalogLoader.ts
- * Data-Driven Content Taxonomy & Surgical Authoring Loader (ADR-025).
+ * SOLID Multi-Shard Catalog Loader, Graphic Sub-Leaf Hydrator & Asset Resolver (ADR-026).
  *
- * Loads the hierarchical JSON catalog from `src/data/catalog/` and provides:
- * 1. Smart schema normalization so human authors can add new presets or symbols
- *    in JSON with minimal boilerplate (inheriting stage, suit, slotCategory, and priority
- *    automatically from the directory/file context).
- * 2. Automatic graphic fallback resolution (`graphicFallback` / concept fallback /
- *    terrain-relief inference) so authors never need to draw a new SVG graphic when
- *    adding a new preset or symbol—they can simply reference any existing graphic ID
- *    or let the engine infer one automatically.
+ * Architectural Principles:
+ * 1. Open/Closed Principle (OCP) via Multi-Shard Manifests:
+ *    Uses Vite eager glob imports across `src/data/catalog/` to resolve
+ *    `shards: string[]` declared in each directory's `manifest.json`. Splitting a large JSON
+ *    into `part1.json`, `part2.json`, or sub-category files requires ONLY editing `manifest.json`
+ *    (zero TypeScript import changes).
+ * 2. Dedicated `graphic` Sub-Leaf Schema (`GraphicSpec`):
+ *    Catalog entities do not use primitive top-level `"icon"` properties in JSON; instead,
+ *    every entity defines a structured `"graphic"` sub-JSON leaf referencing the Graphics Assets
+ *    Manifest (`assetId`, `fallbackAssetId`), visual glyph, color parameters (`primaryColor`,
+ *    `secondaryColor`), and SVG render parameters (`strokeWidth`, `fillOpacity`, `scale`).
+ * 3. Externalized Weights & Heuristics:
+ *    Bot personalities and affinity/anti-affinity scoring matrices are loaded from
+ *    `src/data/catalog/weights/` shards.
  */
-
-import rootManifest from '../data/catalog/manifest.json'
-import stagesManifest from '../data/catalog/stages/manifest.json'
-import genesisManifest from '../data/catalog/stages/genesis/manifest.json'
-import primalManifest from '../data/catalog/stages/primal/manifest.json'
-import civilizationManifest from '../data/catalog/stages/civilization/manifest.json'
-import intrigueManifest from '../data/catalog/stages/intrigue/manifest.json'
-
-import genesisEarth from '../data/catalog/stages/genesis/earth.json'
-import genesisWater from '../data/catalog/stages/genesis/water.json'
-import genesisPlant from '../data/catalog/stages/genesis/plant.json'
-import genesisFeature from '../data/catalog/stages/genesis/feature.json'
-
-import primalSettlements from '../data/catalog/stages/primal/settlements.json'
-import primalTraditions from '../data/catalog/stages/primal/traditions.json'
-import primalResources from '../data/catalog/stages/primal/resources.json'
-import primalSkills from '../data/catalog/stages/primal/skills.json'
-
-import civConstructions from '../data/catalog/stages/civilization/constructions.json'
-import civEnlightenment from '../data/catalog/stages/civilization/enlightenment.json'
-import civExpansion from '../data/catalog/stages/civilization/expansion.json'
-import civDiplomacy from '../data/catalog/stages/civilization/diplomacy.json'
-
-import intrigueConflict from '../data/catalog/stages/intrigue/conflict.json'
-import intrigueCooperation from '../data/catalog/stages/intrigue/cooperation.json'
-import intrigueScheme from '../data/catalog/stages/intrigue/scheme.json'
-import intrigueMyth from '../data/catalog/stages/intrigue/myth.json'
-
-import stageDisasters from '../data/catalog/stages/disasters.json'
-
-import codexManifest from '../data/catalog/codex/manifest.json'
-import speciesCatalog from '../data/catalog/codex/species.json'
-import societiesCatalog from '../data/catalog/codex/societies.json'
-import mythsCatalog from '../data/catalog/codex/myths.json'
-import relationshipsCatalog from '../data/catalog/codex/relationships.json'
-import traitsCatalog from '../data/catalog/codex/traits.json'
-import abilitiesCatalog from '../data/catalog/codex/abilities.json'
-import palettesCatalog from '../data/catalog/codex/palettes.json'
-
-import symbolsManifest from '../data/catalog/symbols/manifest.json'
-import symbolsEarth from '../data/catalog/symbols/earth.json'
-import symbolsWater from '../data/catalog/symbols/water.json'
-import symbolsPlant from '../data/catalog/symbols/plant.json'
-import symbolsFeature from '../data/catalog/symbols/feature.json'
-import symbolsSettlement from '../data/catalog/symbols/settlement.json'
-import symbolsConstruction from '../data/catalog/symbols/construction.json'
-
-import botsManifest from '../data/catalog/bots/manifest.json'
-import botPersonalitiesCatalog from '../data/catalog/bots/personalities.json'
 
 import {
   BotPersonalityId,
+  CompanionSettlementIcons,
+  EntityCategory,
   FloraType,
   RelationshipType,
   ReliefType,
@@ -84,30 +43,207 @@ import type {
 } from './presets'
 import type { CartographicCategory, CartographicSymbolMeta } from './cartographicSymbolEngine'
 
-export const CATALOG_ROOT_MANIFEST = rootManifest
-export const STAGES_MANIFEST = stagesManifest
-export const STAGE_MANIFESTS = {
-  genesis: genesisManifest,
-  primal: primalManifest,
-  civilization: civilizationManifest,
-  intrigue: intrigueManifest,
+// ========================================================
+// 1. GRAPHIC SUB-LEAF SCHEMA & INTERFACES
+// ========================================================
+
+export interface GraphicRenderParams {
+  strokeWidth?: number
+  fillOpacity?: number
+  opacity?: number
+  scale?: number
+  rotation?: number
+  viewBox?: string
+  variant?: string
 }
-export const CODEX_MANIFEST = codexManifest
-export const SYMBOLS_MANIFEST = symbolsManifest
-export const BOTS_MANIFEST = botsManifest
 
 /**
- * Minimal, surgical authoring interface for Stage Action Presets in JSON files.
- * Only `id`, `name`, `icon`, and `description` are strictly required when adding
- * an entry inside `src/data/catalog/stages/<stage>/<suit>.json`.
- * All contextual fields (`stage`, `suit`, `slotCategory`, `slotPriority`, `isFantastical`, `isDisaster`)
- * and graphic fallbacks (`cartographicSymbol` / `graphicFallback`) are automatically resolved.
+ * Structured Graphic Sub-JSON Leaf referencing the Graphics Assets Manifest (`assets/manifest.json`)
+ * and encapsulating all visual rendering parameters.
  */
+export interface GraphicSpec {
+  /**
+   * Direct link to a Graphics Assets Manifest ID (e.g. `"mountain-peak"`, `"crater-impact"`),
+   * or `null` if no dedicated vector asset is assigned.
+   */
+  assetId: string | null
+  /**
+   * Optional fallback Graphics Assets Manifest ID to render when `assetId` is `null`
+   * or has no dedicated vector path.
+   */
+  fallbackAssetId: string | null
+  /**
+   * Symbolic badge / glyph used in compact UI pills and timeline badges.
+   */
+  glyph: string
+  /**
+   * Primary hex color parameter for rendering the asset/entity.
+   */
+  primaryColor: string | null
+  /**
+   * Secondary/accent hex color parameter.
+   */
+  secondaryColor: string | null
+  /**
+   * Extensible rendering parameters passed to SVG/Canvas renderers.
+   */
+  params: GraphicRenderParams
+  /**
+   * Optional settlement tier visual glyphs for playable ancestries & civilizations.
+   */
+  settlementIcons?: CompanionSettlementIcons
+}
+
+export interface RawGraphicSpec {
+  assetId?: string | null
+  fallbackAssetId?: string | null
+  glyph?: string
+  primaryColor?: string | null
+  secondaryColor?: string | null
+  params?: GraphicRenderParams
+  settlementIcons?: CompanionSettlementIcons
+}
+
+// ========================================================
+// 2. DYNAMIC MULTI-SHARD GLOB REGISTRY (OPEN/CLOSED)
+// ========================================================
+
+const rawJsonModules = import.meta.glob('../data/catalog/**/*.json', {
+  eager: true,
+}) as Record<string, { default?: unknown }>
+
+/**
+ * Normalizes a relative path inside `src/data/catalog/` and retrieves the parsed JSON module.
+ */
+export function resolveCatalogJson<T = any>(relativePathFromCatalogRoot: string): T {
+  const cleanRel = relativePathFromCatalogRoot
+    .replace(/\\/g, '/')
+    .replace(/^\.\//, '')
+    .replace(/^\/+/, '')
+  const key = `../data/catalog/${cleanRel}`
+  const mod = rawJsonModules[key]
+  if (!mod) {
+    throw new Error(`Catalog JSON shard not found at "${key}" (from "${relativePathFromCatalogRoot}")`)
+  }
+  return (mod.default !== undefined ? mod.default : mod) as T
+}
+
+/**
+ * Resolves a path relative to a sub-directory inside `src/data/catalog/`.
+ */
+function joinCatalogPath(baseDir: string, relTarget: string): string {
+  const cleanBase = baseDir.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '')
+  const cleanTarget = relTarget.replace(/\\/g, '/').replace(/^\.\//, '')
+  return cleanBase ? `${cleanBase}/${cleanTarget}` : cleanTarget
+}
+
+/**
+ * Loads and concatenates an array of JSON shards (`part1.json`, `part2.json`, etc.)
+ * declared in any manifest's `shards` array.
+ */
+export function resolveManifestShards<T = any>(
+  baseDir: string,
+  shardsOrFile: string[] | string
+): T[] {
+  const shardList = Array.isArray(shardsOrFile) ? shardsOrFile : [shardsOrFile]
+  const combined: T[] = []
+  for (const shardRel of shardList) {
+    const fullRel = joinCatalogPath(baseDir, shardRel)
+    const data = resolveCatalogJson<T[] | T>(fullRel)
+    if (Array.isArray(data)) {
+      combined.push(...data)
+    } else {
+      combined.push(data)
+    }
+  }
+  return combined
+}
+
+// ========================================================
+// 3. MANIFEST EXPORTS
+// ========================================================
+
+export const CATALOG_ROOT_MANIFEST = resolveCatalogJson<{
+  schemaVersion: string
+  title: string
+  description: string
+  manifests: {
+    assets: string
+    stages: string
+    codex: string
+    weights: string
+  }
+}>('manifest.json')
+
+export const ASSETS_MANIFEST = resolveCatalogJson<{
+  schemaVersion: string
+  description: string
+  categories: { category: CartographicCategory; shards: string[] }[]
+  palettesShards: string[]
+  conceptFallbacks: Record<string, string>
+}>('assets/manifest.json')
+
+// Backwards-compatible alias for `SYMBOLS_MANIFEST`
+export const SYMBOLS_MANIFEST = ASSETS_MANIFEST
+
+export const STAGES_MANIFEST = resolveCatalogJson<{
+  schemaVersion: string
+  description: string
+  stages: { stage: StageId; manifest: string }[]
+  disastersShards: string[]
+}>('stages/manifest.json')
+
+export interface StageSuitManifestEntry {
+  suit: Suit
+  name: string
+  defaultSlotCategory: TileSlotCategory
+  defaultPriority: number
+  shards: string[]
+}
+
+export interface StageDirectoryManifest {
+  stage: StageId
+  title: string
+  suits: StageSuitManifestEntry[]
+}
+
+export const STAGE_MANIFESTS: Record<StageId, StageDirectoryManifest> = {
+  genesis: resolveCatalogJson<StageDirectoryManifest>('stages/genesis/manifest.json'),
+  primal: resolveCatalogJson<StageDirectoryManifest>('stages/primal/manifest.json'),
+  civilization: resolveCatalogJson<StageDirectoryManifest>('stages/civilization/manifest.json'),
+  intrigue: resolveCatalogJson<StageDirectoryManifest>('stages/intrigue/manifest.json'),
+}
+
+export const CODEX_MANIFEST = resolveCatalogJson<{
+  schemaVersion: string
+  description: string
+  speciesShards: string[]
+  societiesShards: string[]
+  mythsShards: string[]
+  relationshipsShards: string[]
+  traitsShards: string[]
+  abilitiesShards: string[]
+}>('codex/manifest.json')
+
+export const WEIGHTS_MANIFEST = resolveCatalogJson<{
+  schemaVersion: string
+  description: string
+  personalitiesShards: string[]
+  affinityRulesShards: string[]
+}>('weights/manifest.json')
+
+// Backwards-compatible alias
+export const BOTS_MANIFEST = WEIGHTS_MANIFEST
+
+// ========================================================
+// 4. SMART GRAPHIC NORMALIZATION & FALLBACK RESOLUTION
+// ========================================================
+
 export interface RawStageActionPreset {
   id: string
   name: string
-  icon: string
   description: string
+  graphic?: RawGraphicSpec
   stage?: StageId
   suit?: Suit
   isFantastical?: boolean
@@ -118,27 +254,21 @@ export interface RawStageActionPreset {
   reliefChange?: ReliefType
   floraChange?: FloraType
   overlayChange?: TileOverlay
-  cartographicSymbol?: string
-  /**
-   * Optional ID of an existing cartographic symbol graphic to reuse when no dedicated
-   * graphic exists for this preset (e.g. `"crater-impact"` or `"mountain-peak"`).
-   */
-  graphicFallback?: string
   hasRiver?: boolean
   hasRoad?: boolean
-  primaryColor?: string
-  secondaryColor?: string
   traitGranted?: string
   abilityGranted?: string
   relationshipType?: RelationshipType
   creativePrompt?: string
   exampleNarrative?: string
+  // Legacy optional fields supported for backwards-compatible programmatic calls:
+  icon?: string
+  cartographicSymbol?: string
+  graphicFallback?: string
+  primaryColor?: string
+  secondaryColor?: string
 }
 
-/**
- * Minimal authoring interface for Cartographic Symbols in `src/data/catalog/symbols/<category>.json`.
- * Authors can specify `graphicFallback` to reuse any existing vector graphic template.
- */
 export interface RawCartographicSymbol {
   id: string
   name: string
@@ -146,13 +276,11 @@ export interface RawCartographicSymbol {
   conceptLabel?: string
   variantName?: string
   category?: CartographicCategory
-  icon: string
   description: string
   tags?: string[]
-  /**
-   * Optional ID of an existing vector SVG graphic to render if this symbol does not
-   * have a custom hand-coded SVG path.
-   */
+  graphic?: RawGraphicSpec
+  // Legacy optional fields supported for programmatic calls:
+  icon?: string
   graphicFallback?: string
 }
 
@@ -173,10 +301,13 @@ const CATEGORY_GRAPHIC_FALLBACKS: Record<CartographicCategory, string> = {
 }
 
 /**
- * Infers an existing cartographic symbol ID from a preset's terrain, relief, flora,
- * overlay, or name keywords when neither `cartographicSymbol` nor `graphicFallback` is provided.
+ * Infers an existing Graphics Assets Manifest ID from a preset's `graphic` sub-leaf,
+ * terrain/relief changes, or name keywords when `graphic.assetId` is `null` or omitted.
  */
 export function inferDefaultGraphicForPreset(raw: RawStageActionPreset): string | undefined {
+  const g = raw.graphic
+  if (g?.assetId) return g.assetId
+  if (g?.fallbackAssetId) return g.fallbackAssetId
   if (raw.cartographicSymbol) return raw.cartographicSymbol
   if (raw.graphicFallback) return raw.graphicFallback
 
@@ -206,14 +337,55 @@ export function inferDefaultGraphicForPreset(raw: RawStageActionPreset): string 
 }
 
 /**
- * Normalizes a raw JSON preset object into a full `StageActionPreset`, filling in
- * omitted contextual properties and resolving `graphicFallback` / `cartographicSymbol`.
+ * Normalizes a raw `graphic` sub-JSON leaf into a complete `GraphicSpec`.
+ */
+export function normalizeGraphicSpec(
+  rawGraphic?: RawGraphicSpec,
+  fallbacks?: {
+    assetId?: string | null
+    fallbackAssetId?: string | null
+    glyph?: string
+    primaryColor?: string | null
+    secondaryColor?: string | null
+  }
+): GraphicSpec {
+  return {
+    assetId: rawGraphic?.assetId ?? fallbacks?.assetId ?? null,
+    fallbackAssetId: rawGraphic?.fallbackAssetId ?? fallbacks?.fallbackAssetId ?? null,
+    glyph: rawGraphic?.glyph ?? fallbacks?.glyph ?? '✨',
+    primaryColor: rawGraphic?.primaryColor ?? fallbacks?.primaryColor ?? null,
+    secondaryColor: rawGraphic?.secondaryColor ?? fallbacks?.secondaryColor ?? null,
+    params: {
+      strokeWidth: rawGraphic?.params?.strokeWidth ?? 1.3,
+      fillOpacity: rawGraphic?.params?.fillOpacity ?? 0.15,
+      opacity: rawGraphic?.params?.opacity ?? 0.85,
+      scale: rawGraphic?.params?.scale ?? 1.0,
+      ...(rawGraphic?.params?.rotation !== undefined ? { rotation: rawGraphic.params.rotation } : {}),
+      ...(rawGraphic?.params?.viewBox !== undefined ? { viewBox: rawGraphic.params.viewBox } : {}),
+      ...(rawGraphic?.params?.variant !== undefined ? { variant: rawGraphic.params.variant } : {}),
+    },
+    ...(rawGraphic?.settlementIcons ? { settlementIcons: rawGraphic.settlementIcons } : {}),
+  }
+}
+
+/**
+ * Normalizes a raw JSON preset object into a full `StageActionPreset`, hydrating its
+ * `graphic` sub-leaf and resolving `assetId` / `fallbackAssetId`.
  */
 export function normalizeStagePreset(
   raw: RawStageActionPreset,
   defaults: PresetContextDefaults
 ): StageActionPreset {
-  const effectiveSymbol = inferDefaultGraphicForPreset(raw)
+  const effectiveAssetId = inferDefaultGraphicForPreset(raw)
+  const graphic = normalizeGraphicSpec(raw.graphic, {
+    assetId: raw.cartographicSymbol ?? null,
+    fallbackAssetId: raw.graphicFallback ?? (effectiveAssetId ?? null),
+    glyph: raw.icon ?? '✨',
+    primaryColor: raw.primaryColor ?? null,
+    secondaryColor: raw.secondaryColor ?? null,
+  })
+
+  const resolvedSymbol = graphic.assetId || graphic.fallbackAssetId || effectiveAssetId
 
   return {
     id: raw.id,
@@ -222,20 +394,21 @@ export function normalizeStagePreset(
     isFantastical: raw.isFantastical ?? false,
     isDisaster: raw.isDisaster ?? false,
     name: raw.name,
-    icon: raw.icon,
+    icon: graphic.glyph,
     description: raw.description,
     slotCategory: raw.slotCategory ?? defaults.slotCategory,
     slotPriority: raw.slotPriority ?? defaults.slotPriority,
+    graphic,
     ...(raw.terrainChange !== undefined ? { terrainChange: raw.terrainChange } : {}),
     ...(raw.reliefChange !== undefined ? { reliefChange: raw.reliefChange } : {}),
     ...(raw.floraChange !== undefined ? { floraChange: raw.floraChange } : {}),
     ...(raw.overlayChange !== undefined ? { overlayChange: raw.overlayChange } : {}),
-    ...(effectiveSymbol !== undefined ? { cartographicSymbol: effectiveSymbol } : {}),
-    ...(raw.graphicFallback !== undefined ? { graphicFallback: raw.graphicFallback } : {}),
+    ...(resolvedSymbol !== undefined ? { cartographicSymbol: resolvedSymbol } : {}),
+    ...(graphic.fallbackAssetId ? { graphicFallback: graphic.fallbackAssetId } : {}),
     ...(raw.hasRiver !== undefined ? { hasRiver: raw.hasRiver } : {}),
     ...(raw.hasRoad !== undefined ? { hasRoad: raw.hasRoad } : {}),
-    ...(raw.primaryColor !== undefined ? { primaryColor: raw.primaryColor } : {}),
-    ...(raw.secondaryColor !== undefined ? { secondaryColor: raw.secondaryColor } : {}),
+    ...(graphic.primaryColor ? { primaryColor: graphic.primaryColor } : {}),
+    ...(graphic.secondaryColor ? { secondaryColor: graphic.secondaryColor } : {}),
     ...(raw.traitGranted !== undefined ? { traitGranted: raw.traitGranted } : {}),
     ...(raw.abilityGranted !== undefined ? { abilityGranted: raw.abilityGranted } : {}),
     ...(raw.relationshipType !== undefined ? { relationshipType: raw.relationshipType } : {}),
@@ -245,7 +418,7 @@ export function normalizeStagePreset(
 }
 
 /**
- * Normalizes a raw JSON symbol entry into a full `CartographicSymbolMeta`.
+ * Normalizes a raw JSON graphic asset entry into a full `CartographicSymbolMeta` with `graphic: GraphicSpec`.
  */
 export function normalizeCartographicSymbol(
   raw: RawCartographicSymbol,
@@ -255,6 +428,12 @@ export function normalizeCartographicSymbol(
   const conceptLabel =
     raw.conceptLabel ?? raw.concept.charAt(0).toUpperCase() + raw.concept.slice(1)
   const variantName = raw.variantName ?? raw.name
+  const graphic = normalizeGraphicSpec(raw.graphic, {
+    assetId: raw.id,
+    fallbackAssetId: raw.graphicFallback ?? null,
+    glyph: raw.icon ?? '📍',
+    primaryColor: '#262626',
+  })
 
   return {
     id: raw.id,
@@ -263,40 +442,37 @@ export function normalizeCartographicSymbol(
     conceptLabel,
     variantName,
     category,
-    icon: raw.icon,
+    icon: graphic.glyph,
     description: raw.description,
     tags: raw.tags && raw.tags.length > 0 ? raw.tags : [raw.concept, category],
-    ...(raw.graphicFallback ? { graphicFallback: raw.graphicFallback } : {}),
+    graphic,
+    ...(graphic.fallbackAssetId ? { graphicFallback: graphic.fallbackAssetId } : {}),
   }
 }
 
+// ========================================================
+// 5. MULTI-SHARD CATALOG LOADERS
+// ========================================================
+
 /**
- * Loads and normalizes all cartographic symbols from `src/data/catalog/symbols/*.json`.
+ * Loads all graphic assets across all category shards defined in `assets/manifest.json`.
  */
 export function loadCatalogSymbols(): CartographicSymbolMeta[] {
-  const groups: { category: CartographicCategory; list: RawCartographicSymbol[] }[] = [
-    { category: 'earth', list: symbolsEarth as RawCartographicSymbol[] },
-    { category: 'water', list: symbolsWater as RawCartographicSymbol[] },
-    { category: 'plant', list: symbolsPlant as RawCartographicSymbol[] },
-    { category: 'feature', list: symbolsFeature as RawCartographicSymbol[] },
-    { category: 'settlement', list: symbolsSettlement as RawCartographicSymbol[] },
-    { category: 'construction', list: symbolsConstruction as RawCartographicSymbol[] },
-  ]
-
   const all: CartographicSymbolMeta[] = []
-  for (const grp of groups) {
-    for (const raw of grp.list) {
-      all.push(normalizeCartographicSymbol(raw, grp.category))
+  for (const catEntry of ASSETS_MANIFEST.categories) {
+    const rawList = resolveManifestShards<RawCartographicSymbol>('assets', catEntry.shards)
+    for (const raw of rawList) {
+      all.push(normalizeCartographicSymbol(raw, catEntry.category))
     }
   }
   return all
 }
 
 /**
- * Resolves the fallback graphic ID for a symbol when no custom SVG path exists for `symbolId`.
- * Checks:
- * 1. `symbolMeta.graphicFallback`
- * 2. `symbolsManifest.conceptFallbacks[symbolMeta.concept]`
+ * Resolves the fallback graphic asset ID when a symbol has no custom SVG switch case.
+ * Priority:
+ * 1. `symbolMeta.graphic.fallbackAssetId` (or `symbolMeta.graphicFallback`)
+ * 2. `ASSETS_MANIFEST.conceptFallbacks[symbolMeta.concept]`
  * 3. `CATEGORY_GRAPHIC_FALLBACKS[symbolMeta.category]`
  */
 export function resolveSymbolGraphicFallback(
@@ -306,11 +482,12 @@ export function resolveSymbolGraphicFallback(
   const meta = allSymbols.find((s) => s.id === symbolId)
   if (!meta) return null
 
-  if (meta.graphicFallback && meta.graphicFallback !== symbolId) {
-    return meta.graphicFallback
+  const explicitFallback = meta.graphic?.fallbackAssetId ?? meta.graphicFallback
+  if (explicitFallback && explicitFallback !== symbolId) {
+    return explicitFallback
   }
 
-  const conceptFallbacks = (symbolsManifest.conceptFallbacks || {}) as Record<string, string>
+  const conceptFallbacks = ASSETS_MANIFEST.conceptFallbacks || {}
   const byConcept = conceptFallbacks[meta.concept]
   if (byConcept && byConcept !== symbolId) {
     return byConcept
@@ -325,117 +502,253 @@ export function resolveSymbolGraphicFallback(
 }
 
 /**
- * Loads and normalizes all stage action presets from `src/data/catalog/stages/**`.
+ * Dynamically loads and normalizes all stage action presets from the multi-shard arrays
+ * declared in `stages/<stage>/manifest.json` and `stages/manifest.json`.
  */
 export function loadCatalogStagePresets(): StageActionPreset[] {
-  const suitFiles: {
-    list: RawStageActionPreset[]
-    defaults: PresetContextDefaults
-  }[] = [
-    // 1. Genesis
-    {
-      list: genesisEarth as RawStageActionPreset[],
-      defaults: { stage: 'genesis', suit: '♠', slotCategory: 'elevation', slotPriority: 70 },
-    },
-    {
-      list: genesisWater as RawStageActionPreset[],
-      defaults: { stage: 'genesis', suit: '♥', slotCategory: 'hydrology', slotPriority: 66 },
-    },
-    {
-      list: genesisPlant as RawStageActionPreset[],
-      defaults: { stage: 'genesis', suit: '♣', slotCategory: 'vegetation', slotPriority: 64 },
-    },
-    {
-      list: genesisFeature as RawStageActionPreset[],
-      defaults: { stage: 'genesis', suit: '♦', slotCategory: 'resource', slotPriority: 68 },
-    },
-    // 2. Primal
-    {
-      list: primalSettlements as RawStageActionPreset[],
-      defaults: { stage: 'primal', suit: '♠', slotCategory: 'settlement', slotPriority: 92 },
-    },
-    {
-      list: primalTraditions as RawStageActionPreset[],
-      defaults: { stage: 'primal', suit: '♥', slotCategory: 'myth', slotPriority: 60 },
-    },
-    {
-      list: primalResources as RawStageActionPreset[],
-      defaults: { stage: 'primal', suit: '♣', slotCategory: 'resource', slotPriority: 58 },
-    },
-    {
-      list: primalSkills as RawStageActionPreset[],
-      defaults: { stage: 'primal', suit: '♦', slotCategory: 'structure', slotPriority: 62 },
-    },
-    // 3. Civilization
-    {
-      list: civConstructions as RawStageActionPreset[],
-      defaults: { stage: 'civilization', suit: '♠', slotCategory: 'structure', slotPriority: 84 },
-    },
-    {
-      list: civEnlightenment as RawStageActionPreset[],
-      defaults: { stage: 'civilization', suit: '♥', slotCategory: 'structure', slotPriority: 75 },
-    },
-    {
-      list: civExpansion as RawStageActionPreset[],
-      defaults: { stage: 'civilization', suit: '♣', slotCategory: 'settlement', slotPriority: 88 },
-    },
-    {
-      list: civDiplomacy as RawStageActionPreset[],
-      defaults: { stage: 'civilization', suit: '♦', slotCategory: 'structure', slotPriority: 76 },
-    },
-    // 4. Intrigue
-    {
-      list: intrigueConflict as RawStageActionPreset[],
-      defaults: { stage: 'intrigue', suit: '♠', slotCategory: 'myth', slotPriority: 88 },
-    },
-    {
-      list: intrigueCooperation as RawStageActionPreset[],
-      defaults: { stage: 'intrigue', suit: '♥', slotCategory: 'structure', slotPriority: 80 },
-    },
-    {
-      list: intrigueScheme as RawStageActionPreset[],
-      defaults: { stage: 'intrigue', suit: '♣', slotCategory: 'myth', slotPriority: 86 },
-    },
-    {
-      list: intrigueMyth as RawStageActionPreset[],
-      defaults: { stage: 'intrigue', suit: '♦', slotCategory: 'myth', slotPriority: 95 },
-    },
-    // Disasters
-    {
-      list: stageDisasters as RawStageActionPreset[],
-      defaults: { stage: 'genesis', suit: '♠', slotCategory: 'elevation', slotPriority: 90 },
-    },
-  ]
-
   const all: StageActionPreset[] = []
-  for (const entry of suitFiles) {
-    for (const raw of entry.list) {
-      all.push(normalizeStagePreset(raw, entry.defaults))
+
+  for (const stageRef of STAGES_MANIFEST.stages) {
+    const stageDir = `stages/${stageRef.stage}`
+    const stageManifest = STAGE_MANIFESTS[stageRef.stage]
+    for (const suitEntry of stageManifest.suits) {
+      const shardItems = resolveManifestShards<RawStageActionPreset>(stageDir, suitEntry.shards)
+      const defaults: PresetContextDefaults = {
+        stage: stageManifest.stage,
+        suit: suitEntry.suit,
+        slotCategory: suitEntry.defaultSlotCategory,
+        slotPriority: suitEntry.defaultPriority,
+      }
+      for (const raw of shardItems) {
+        all.push(normalizeStagePreset(raw, defaults))
+      }
     }
   }
+
+  // Load Disaster shards
+  const disasterItems = resolveManifestShards<RawStageActionPreset>(
+    'stages',
+    STAGES_MANIFEST.disastersShards
+  )
+  for (const raw of disasterItems) {
+    all.push(
+      normalizeStagePreset(raw, {
+        stage: raw.stage ?? 'genesis',
+        suit: raw.suit ?? '♠',
+        slotCategory: raw.slotCategory ?? 'elevation',
+        slotPriority: raw.slotPriority ?? 90,
+      })
+    )
+  }
+
   return all
 }
 
-export function loadCatalogCodex() {
+interface RawCodexEntity {
+  id: string
+  name: string
+  category: EntityCategory
+  archetype: string
+  description: string
+  traits: string[]
+  abilities: string[]
+  preferredTerrains: TerrainType[]
+  graphic: RawGraphicSpec
+}
+
+function hydrateCodexEntity(raw: RawCodexEntity): EntityPreset {
+  const graphic = normalizeGraphicSpec(raw.graphic, {
+    assetId: 'settle-hamlet',
+    glyph: '🧝',
+    primaryColor: '#3b82f6',
+    secondaryColor: '#dbeafe',
+  })
   return {
-    species: speciesCatalog as EntityPreset[],
-    societies: societiesCatalog as EntityPreset[],
-    myths: mythsCatalog as EntityPreset[],
-    relationships: relationshipsCatalog as RelationshipPreset[],
-    traits: traitsCatalog as ModularBlockGroup[],
-    abilities: abilitiesCatalog as ModularBlockGroup[],
-    slotIconPalette: palettesCatalog.slotIconPalette as {
+    id: raw.id,
+    name: raw.name,
+    category: raw.category,
+    icon: graphic.glyph,
+    color: graphic.primaryColor || '#3b82f6',
+    secondaryColor: graphic.secondaryColor || '#dbeafe',
+    archetype: raw.archetype,
+    description: raw.description,
+    traits: raw.traits,
+    abilities: raw.abilities,
+    preferredTerrains: raw.preferredTerrains,
+    settlementIcons: graphic.settlementIcons || {
+      camp: '⛺',
+      village: '🏡',
+      town: '🏘️',
+      city: '🏰',
+      metropolis: '👑',
+      architectureStyle: 'Stone & Timber Keeps',
+    },
+    graphic,
+  }
+}
+
+export function loadCatalogCodex() {
+  const rawSpecies = resolveManifestShards<RawCodexEntity>('codex', CODEX_MANIFEST.speciesShards)
+  const rawSocieties = resolveManifestShards<RawCodexEntity>('codex', CODEX_MANIFEST.societiesShards)
+  const rawMyths = resolveManifestShards<RawCodexEntity>('codex', CODEX_MANIFEST.mythsShards)
+
+  const rawRelationships = resolveManifestShards<{
+    type: RelationshipType
+    label: string
+    description: string
+    graphic: RawGraphicSpec
+  }>('codex', CODEX_MANIFEST.relationshipsShards)
+
+  const rawTraits = resolveManifestShards<{
+    category: string
+    suitHint: Suit
+    items: { label: string; description?: string; tags?: string[]; graphic: RawGraphicSpec }[]
+  }>('codex', CODEX_MANIFEST.traitsShards)
+
+  const rawAbilities = resolveManifestShards<{
+    category: string
+    suitHint: Suit
+    items: { label: string; description?: string; tags?: string[]; graphic: RawGraphicSpec }[]
+  }>('codex', CODEX_MANIFEST.abilitiesShards)
+
+  const palettesList = resolveManifestShards<{
+    slotIconPalette: {
       category: TileSlotCategory
       label: string
       defaultPriority: number
-      icons: { icon: string; name: string }[]
-    }[],
-    colorSwatchPalettes: palettesCatalog.colorSwatchPalettes as ColorSwatchPalette[],
-    entityIconGallery: palettesCatalog.entityIconGallery as IconGalleryGroup[],
-    settlementIconSets: palettesCatalog.settlementIconSets as SettlementIconSetPreset[],
+      items: { name: string; graphic: RawGraphicSpec }[]
+    }[]
+    colorSwatchPalettes: ColorSwatchPalette[]
+    entityIconGallery: {
+      category: string
+      items: { label: string; graphic: RawGraphicSpec }[]
+    }[]
+    settlementIconSets: {
+      id: string
+      name: string
+      graphic: RawGraphicSpec
+    }[]
+  }>('assets', ASSETS_MANIFEST.palettesShards)
+
+  const palettesObj = palettesList[0]
+
+  return {
+    species: rawSpecies.map(hydrateCodexEntity),
+    societies: rawSocieties.map(hydrateCodexEntity),
+    myths: rawMyths.map(hydrateCodexEntity),
+    relationships: rawRelationships.map((r) => {
+      const graphic = normalizeGraphicSpec(r.graphic, { glyph: '🤝' })
+      return {
+        type: r.type,
+        label: r.label,
+        icon: graphic.glyph,
+        description: r.description,
+        graphic,
+      } satisfies RelationshipPreset
+    }),
+    traits: rawTraits.map(
+      (grp): ModularBlockGroup => ({
+        category: grp.category,
+        suitHint: grp.suitHint,
+        items: grp.items.map((it) => {
+          const graphic = normalizeGraphicSpec(it.graphic, { glyph: '📜' })
+          return {
+            label: it.label,
+            icon: graphic.glyph,
+            description: it.description,
+            tags: it.tags,
+            graphic,
+          }
+        }),
+      })
+    ),
+    abilities: rawAbilities.map(
+      (grp): ModularBlockGroup => ({
+        category: grp.category,
+        suitHint: grp.suitHint,
+        items: grp.items.map((it) => {
+          const graphic = normalizeGraphicSpec(it.graphic, { glyph: '⚡' })
+          return {
+            label: it.label,
+            icon: graphic.glyph,
+            description: it.description,
+            tags: it.tags,
+            graphic,
+          }
+        }),
+      })
+    ),
+    slotIconPalette: palettesObj.slotIconPalette.map((grp) => ({
+      category: grp.category,
+      label: grp.label,
+      defaultPriority: grp.defaultPriority,
+      icons: grp.items.map((it) => ({
+        name: it.name,
+        icon: it.graphic.glyph || '📍',
+        graphic: normalizeGraphicSpec(it.graphic),
+      })),
+    })),
+    colorSwatchPalettes: palettesObj.colorSwatchPalettes,
+    entityIconGallery: palettesObj.entityIconGallery.map((grp): IconGalleryGroup => ({
+      category: grp.category,
+      icons: grp.items.map((it) => ({
+        label: it.label,
+        icon: it.graphic.glyph || '✨',
+      })),
+    })),
+    settlementIconSets: palettesObj.settlementIconSets.map((set): SettlementIconSetPreset => ({
+      id: set.id,
+      name: set.name,
+      icons: set.graphic.settlementIcons!,
+      graphic: normalizeGraphicSpec(set.graphic),
+    })),
   }
 }
 
 export function loadCatalogBots(): Record<BotPersonalityId, BotPersonalityMeta> {
-  return botPersonalitiesCatalog as Record<BotPersonalityId, BotPersonalityMeta>
+  const shards = resolveManifestShards<Record<string, any>>(
+    'weights',
+    WEIGHTS_MANIFEST.personalitiesShards
+  )
+  const merged: Record<string, BotPersonalityMeta> = {}
+  for (const shard of shards) {
+    for (const [key, raw] of Object.entries(shard)) {
+      const graphic = normalizeGraphicSpec(raw.graphic, { glyph: '🤖' })
+      merged[key] = {
+        id: raw.id,
+        name: raw.name,
+        title: raw.title,
+        icon: graphic.glyph,
+        description: raw.description,
+        preferredTerrains: raw.preferredTerrains,
+        defaultWeights: raw.defaultWeights,
+        graphic,
+      }
+    }
+  }
+  return merged as Record<BotPersonalityId, BotPersonalityMeta>
+}
+
+export interface CatalogAffinityRules {
+  baseScore: number
+  historicalSynergies: {
+    tag: string
+    matchTags: string[]
+    bonus: number
+    label: string
+  }[]
+  antiAffinities: {
+    candidateTag: string
+    forbiddenTerrains: TerrainType[]
+    penalty: number
+    label: string
+  }[]
+}
+
+export function loadCatalogAffinityRules(): CatalogAffinityRules {
+  const shards = resolveManifestShards<CatalogAffinityRules>(
+    'weights',
+    WEIGHTS_MANIFEST.affinityRulesShards
+  )
+  return shards[0]
 }

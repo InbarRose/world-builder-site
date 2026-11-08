@@ -1,11 +1,11 @@
 {
-  "schemaVersion": "1.0.0",
-  "title": "World Builder Tabletop Content Catalog",
-  "description": "Hierarchical, human-editable JSON catalog of stage action presets, whiteboard cartographic symbols, codex entities, modular traits/abilities, and bot personalities.",
-  "directories": {
+  "schemaVersion": "2.0.0",
+  "title": "World Builder Studio — SOLID Multi-Shard Content & Asset Catalog",
+  "description": "Hierarchical, shard-partitioned JSON catalog with dedicated graphic sub-leaf schemas, externalized graphics asset registry, and data-driven affinity weights.",
+  "manifests": {
+    "assets": "./assets/manifest.json",
     "stages": "./stages/manifest.json",
     "codex": "./codex/manifest.json",
-    "symbols": "./symbols/manifest.json",
-    "bots": "./bots/manifest.json"
+    "weights": "./weights/manifest.json"
   }
 }

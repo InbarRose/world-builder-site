@@ -1,26 +1,25 @@
 {
-  "description": "Stage-by-stage action presets organized by canonical playing card suits.",
+  "schemaVersion": "2.0.0",
+  "description": "Stage-by-stage action preset manifests supporting multi-shard suit partitions.",
   "stages": [
     {
       "stage": "genesis",
-      "title": "1. Genesis Stage — Primordial Geography & Biomes",
       "manifest": "./genesis/manifest.json"
     },
     {
       "stage": "primal",
-      "title": "2. Primal Stage — Dawn of Races, Settlements & Traditions",
       "manifest": "./primal/manifest.json"
     },
     {
       "stage": "civilization",
-      "title": "3. Civilization Stage — Kingdoms, Monuments & Statecraft",
       "manifest": "./civilization/manifest.json"
     },
     {
       "stage": "intrigue",
-      "title": "4. Intrigue Stage — Wars, Coalitions, Schemes & Legends",
       "manifest": "./intrigue/manifest.json"
     }
   ],
-  "disastersFile": "./disasters.json"
+  "disastersShards": [
+    "./disasters/part1-cataclysms.json"
+  ]
 }

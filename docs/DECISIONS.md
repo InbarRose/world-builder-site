@@ -691,6 +691,47 @@ status: active
   - Reduced `presets.ts` from 5,175 lines to 192 lines and `cartographicSymbolEngine.tsx` from 2,147 lines to 909 lines.
   - Empowers any human developer or tabletop designer to add new presets, tropes, traits, or species in seconds by editing small, self-contained JSON files without touching engine code or needing generative AI.
 
+---
+
+## ADR-026: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  Following ADR-025, the user refined the architectural requirements for the Studio catalog taxonomy:
+  > "manifest for entities should not have 'icon' it should have a graphic sub section, which can include a link to the graphics assets manifest ids, null, etc. different params like primary color, etc. not just a single value, a whole sub json leaf defining any visual components referencing assets and parameters. manifests should support eventually splitting large monolithic jsons into smaller ones, (part1,2,3,etc) or by categories, etc. ensure iterative enhancement of taxonomy, SOLID coding and codebase structure and framework, including the data, weights, assets, etc. not to modify the rules section, just the studio section. continue to enhance and record and improve. add more scoring rubrics for these principles."
+- **Decision**:
+  1. **Dedicated `graphic` Sub-JSON Leaf Schema (`GraphicSpec`)**:
+     - Removed root-level `"icon"` properties across all raw Studio catalog JSON shards (`stages/**`, `codex/**`, `assets/**`, `weights/**`).
+     - Introduced a rich `"graphic"` sub-JSON leaf (`GraphicSpec`) on every catalog item:
+       - `assetId`: Primary graphic asset ID from `assets/manifest.json` (or `null` for non-map items).
+       - `fallbackAssetId`: Explicit fallback graphic asset ID when a bespoke graphic isn't created yet (or `null`).
+       - `glyph`: Unicode badge or shorthand symbol rendered in cards, Codex tags, and ledger timelines.
+       - `primaryColor` / `secondaryColor`: Hex color tokens overriding default palette styling.
+       - `params`: `{ scale, opacity, strokeWidth, rotation, variant }` rendering parameters.
+       - `settlementIcons`: Optional per-stage settlement progression glyphs (`camp`, `village`, `town`, `city`).
+     - Implemented an Adapter/Hydrator layer in `catalogLoader.ts` (`normalizeGraphicSpec`) so existing Studio React components seamlessly receive hydrated `graphic` objects alongside backwards-compatible runtime properties (`icon`, `cartographicSymbol`, `graphicFallback`).
+  2. **Open/Closed Multi-Shard Manifest Resolution (`import.meta.glob`)**:
+     - Upgraded `catalogLoader.ts` to use Vite's `import.meta.glob('../data/catalog/**/*.json', { eager: true })` and recursive `shards: string[]` resolution (`resolveManifestShards()`).
+     - Split monolithic JSON files into cohesive multi-part and category-grouped shards (`part1-*.json`, `part2-*.json`, `part3-*.json`):
+       - `stages/genesis/earth/` (`part1-mountains-and-hills.json`, `part2-canyons-cliffs-and-craters.json`, `part3-deserts-mesas-and-volcanoes.json`)
+       - `stages/genesis/water/` (`part1-rivers-and-waterfalls.json`, `part2-lakes-swamps-and-marshes.json`, `part3-coastal-glaciers-and-currents.json`)
+       - `stages/genesis/plant/` (`part1-forests-and-taiga.json`, `part2-jungles-and-groves.json`, `part3-grasslands-and-wetlands.json`)
+       - `stages/genesis/feature/` (`part1-geothermal-craters-and-lava.json`, `part2-winds-and-resources.json`, `part3-landmarks-and-wonders.json`)
+       - `codex/species/`, `codex/traits/`, `codex/abilities/`, `codex/societies/`, `codex/myths/`, `codex/relationships/`
+       - `assets/earth/`, `assets/water/`, `assets/plant/`, `assets/feature/`, `assets/settlement/`, `assets/construction/`, `assets/palettes/`
+       - `weights/personalities/` and `weights/affinity/`
+  3. **Externalized Bot Synergy & Anti-Affinity Rules (`weights/affinity/`)**:
+     - Extracted hardcoded affinity and anti-affinity weighting logic from `affinityEngine.ts` into `frontend/src/data/catalog/weights/affinity/part1-synergy-and-antiaffinity-rules.json` (12 declarative synergy/conflict rules + 5 terrain-keyword weight groups).
+  4. **Expanded Rubric Domain 7 (`docs/AUDIT_RUBRIC.md`)**:
+     - Added Domain 7: *SOLID Data-Driven Taxonomy, Multi-Shard Extensibility & Graphic Asset Decoupling (20 Points)* (`M7.1`–`M7.4`, scored `19.5 / 20.0`).
+  5. **Strict Rules Isolation**:
+     - Zero modifications to `frontend/public/data/*.json` or `Rules.tsx`.
+- **Consequences**:
+  - Authors can partition any large JSON file into `part1.json`, `part2.json`, etc. purely by listing the new shard in the local `manifest.json`—zero TypeScript imports or engine edits required.
+  - Every Studio entity has a clean, extensible `graphic` sub-JSON leaf linking directly to `assets/manifest.json` IDs, colors, and parameters.
+
+
 
 
 

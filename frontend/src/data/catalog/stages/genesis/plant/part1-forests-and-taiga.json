@@ -1,0 +1,198 @@
+[
+  {
+    "id": "gen_plant_forest_deciduous",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Broadleaf Deciduous Forest (Broadleaf Deciduous)",
+    "description": "Lush woodland of ancient oak, beech, and maple canopies.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "forest-deciduous",
+      "fallbackAssetId": null,
+      "glyph": "🌳",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "forest",
+    "reliefChange": "none",
+    "floraChange": "forest",
+    "creativePrompt": "How does this broadleaf deciduous forest shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The broadleaf deciduous forest was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_forest_taiga",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Pine & Fir Taiga (Pine & Fir Taiga)",
+    "description": "Dense evergreen needle forest with conical spruce and fir trees.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "forest-taiga",
+      "fallbackAssetId": null,
+      "glyph": "🌲",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "forest",
+    "reliefChange": "none",
+    "floraChange": "forest",
+    "creativePrompt": "How does this pine & fir taiga shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The pine & fir taiga was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_forest_redwood",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Colossal Redwood Grove (Colossal Redwoods)",
+    "description": "Cathedral-like grove of ancient, sky-piercing colossal sequoias.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "forest-redwood",
+      "fallbackAssetId": null,
+      "glyph": "🌲🌲",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "forest",
+    "reliefChange": "none",
+    "floraChange": "forest",
+    "creativePrompt": "How does this colossal redwood grove shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The colossal redwood grove was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_forest_sparse",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Open Scattered Woodland (Scattered Woodland)",
+    "description": "Sun-dappled open woodland with widely spaced mature trees.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "forest-sparse",
+      "fallbackAssetId": null,
+      "glyph": "🌳🌾",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "forest",
+    "reliefChange": "none",
+    "floraChange": "forest",
+    "creativePrompt": "How does this open scattered woodland shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The open scattered woodland was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_forest_dead",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Gnarled Dead Wood (Gnarled Dead Wood)",
+    "description": "Bleached, leafless ghost forest of skeletal dead tree snags.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "forest-dead",
+      "fallbackAssetId": null,
+      "glyph": "🪵💀",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "forest",
+    "reliefChange": "none",
+    "floraChange": "forest",
+    "creativePrompt": "How does this gnarled dead wood shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The gnarled dead wood was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_jungle_dense",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Dense Tropical Jungle Canopy (Dense Jungle Canopy)",
+    "description": "Impenetrable tropical jungle thicket swollen with humidity and beasts.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "jungle-dense",
+      "fallbackAssetId": null,
+      "glyph": "🌴",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "jungle",
+    "reliefChange": "none",
+    "floraChange": "jungle",
+    "creativePrompt": "How does this dense tropical jungle canopy shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The dense tropical jungle canopy was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_rainforest_canopy",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Emergent Rainforest Canopy (Emergent Rainforest)",
+    "description": "Giant umbrella-like emergent tree rising high above the rain clouds.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "rainforest-canopy",
+      "fallbackAssetId": null,
+      "glyph": "🌧️🌳",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "jungle",
+    "reliefChange": "none",
+    "floraChange": "jungle",
+    "creativePrompt": "How does this emergent rainforest canopy shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The emergent rainforest canopy was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

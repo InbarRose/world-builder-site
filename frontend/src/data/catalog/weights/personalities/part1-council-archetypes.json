@@ -1,0 +1,164 @@
+{
+  "shaper": {
+    "id": "shaper",
+    "name": "Geomancer",
+    "title": "The Earth-Shaper",
+    "description": "Shapes dramatic mountain ranges, canyons, volcanic islands, and mineral-rich highlands.",
+    "preferredTerrains": [
+      "mountain",
+      "earth",
+      "canyon",
+      "volcano"
+    ],
+    "defaultWeights": {
+      "geography": 95,
+      "ecology": 40,
+      "civilization": 45,
+      "diplomacy": 30,
+      "conflict": 40,
+      "myth": 50
+    },
+    "graphic": {
+      "assetId": "mountain-peak",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "🏔️",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  },
+  "naturalist": {
+    "id": "naturalist",
+    "name": "Life-Weaver",
+    "title": "The Verdant Guardian",
+    "description": "Cultivates lush forests, river basins, sacred groves, diverse species, and harmonious pacts.",
+    "preferredTerrains": [
+      "forest",
+      "jungle",
+      "water",
+      "plains"
+    ],
+    "defaultWeights": {
+      "geography": 45,
+      "ecology": 95,
+      "civilization": 40,
+      "diplomacy": 75,
+      "conflict": 20,
+      "myth": 55
+    },
+    "graphic": {
+      "assetId": "forest-deciduous",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "🌿",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  },
+  "architect": {
+    "id": "architect",
+    "name": "Architect",
+    "title": "The Master Builder",
+    "description": "Establishes coastal ports, trade roads, fortresses, grand monuments, and sprawling empires.",
+    "preferredTerrains": [
+      "plains",
+      "water",
+      "earth",
+      "desert"
+    ],
+    "defaultWeights": {
+      "geography": 50,
+      "ecology": 35,
+      "civilization": 95,
+      "diplomacy": 70,
+      "conflict": 35,
+      "myth": 30
+    },
+    "graphic": {
+      "assetId": "const-castle",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "🏛️",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  },
+  "chronicler": {
+    "id": "chronicler",
+    "name": "Lorekeeper",
+    "title": "The Sage Diplomat",
+    "description": "Fosters cultural traditions, philosophical enlightenment, libraries, treaties, and alliances.",
+    "preferredTerrains": [
+      "plains",
+      "forest",
+      "water",
+      "tundra"
+    ],
+    "defaultWeights": {
+      "geography": 35,
+      "ecology": 55,
+      "civilization": 75,
+      "diplomacy": 95,
+      "conflict": 25,
+      "myth": 65
+    },
+    "graphic": {
+      "assetId": "const-castle",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "📜",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  },
+  "catalyst": {
+    "id": "catalyst",
+    "name": "Catalyst",
+    "title": "The Shadow Schemer",
+    "description": "Sparks border rivalries, secret cabals, dramatic upheavals, and high-stakes conflicts.",
+    "preferredTerrains": [
+      "desert",
+      "swamp",
+      "canyon",
+      "volcano"
+    ],
+    "defaultWeights": {
+      "geography": 65,
+      "ecology": 25,
+      "civilization": 55,
+      "diplomacy": 25,
+      "conflict": 95,
+      "myth": 75
+    },
+    "graphic": {
+      "assetId": "const-castle",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "🗡️",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  },
+  "mythmaker": {
+    "id": "mythmaker",
+    "name": "Myth-Maker",
+    "title": "The Wandering Bard",
+    "description": "Weaves fantastical wonders, ancient ruins, slumbering dragons, prophecies, and lost relics.",
+    "preferredTerrains": [
+      "mountain",
+      "forest",
+      "tundra",
+      "swamp"
+    ],
+    "defaultWeights": {
+      "geography": 55,
+      "ecology": 60,
+      "civilization": 40,
+      "diplomacy": 50,
+      "conflict": 45,
+      "myth": 95
+    },
+    "graphic": {
+      "assetId": "const-castle",
+      "fallbackAssetId": "mountain-peak",
+      "glyph": "✨",
+      "primaryColor": "#3b82f6",
+      "secondaryColor": "#dbeafe"
+    }
+  }
+}

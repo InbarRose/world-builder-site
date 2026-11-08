@@ -1,0 +1,185 @@
+[
+  {
+    "id": "gen_earth_canyon_gorge",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Deep Canyon Gorge (Canyon Gorge)",
+    "description": "Sheer vertical rock rift sliced deep through the plateau.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "canyon-gorge",
+      "fallbackAssetId": null,
+      "glyph": "🏜️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "canyon",
+    "creativePrompt": "How does this deep canyon gorge shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The deep canyon gorge was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_cliff_sheer",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Sheer Escarpment Wall (Sheer Escarpment)",
+    "description": "Imposing vertical cliff wall dropping off from high tableland.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "cliff-sheer",
+      "fallbackAssetId": null,
+      "glyph": "🧗",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "canyon",
+    "creativePrompt": "How does this sheer escarpment wall shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The sheer escarpment wall was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_cliff_coastal",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Coastal Sea Cliffs (Coastal Cliffs)",
+    "description": "Craggy sea cliff bluff meeting coastal breaker waves below.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "cliff-coastal",
+      "fallbackAssetId": null,
+      "glyph": "🌊🧗",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "canyon",
+    "creativePrompt": "How does this coastal sea cliffs shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The coastal sea cliffs was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_cave_maw",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Subterranean Cave Maw (Cavern Maw)",
+    "description": "Dark, yawning entrance leading into subterranean depths.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "cave-maw",
+      "fallbackAssetId": null,
+      "glyph": "🕳️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain",
+    "creativePrompt": "How does this subterranean cave maw shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The subterranean cave maw was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_cave_cliff",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Cliffside Grotto Mouth (Cliff Grotto)",
+    "description": "Hidden cavern opening embedded into an impassable rock escarpment.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "cave-cliff",
+      "fallbackAssetId": null,
+      "glyph": "🧗🕳️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain",
+    "creativePrompt": "How does this cliffside grotto mouth shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The cliffside grotto mouth was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_cave_sinkhole",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Collapsed Pit Cenote (Pit Cenote)",
+    "description": "Sudden vertical collapse opening downward into a subterranean chasm.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "cave-sinkhole",
+      "fallbackAssetId": null,
+      "glyph": "⭕",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain",
+    "creativePrompt": "How does this collapsed pit cenote shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The collapsed pit cenote was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_meteor_crater",
+    "name": "Meteor Crater",
+    "description": "Colossal impact basin scarred into the bedrock with a shattered rim and central meteorite peak.",
+    "terrainChange": "canyon",
+    "reliefChange": "crag",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": "crater-impact",
+      "glyph": "☄️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#fef08a",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "Did this ancient meteor impact leave behind star-metal ore or awaken something slumbering beneath the crust?",
+    "exampleNarrative": "The Starfall Meteor Crater spans five leagues across, its vitrified stone rim encircling a central spire of sky-iron."
+  }
+]

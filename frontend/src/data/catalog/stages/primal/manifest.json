@@ -4,31 +4,39 @@
   "suits": [
     {
       "suit": "♠",
-      "file": "settlements.json",
       "name": "Settlements",
       "defaultSlotCategory": "settlement",
-      "defaultPriority": 92
+      "defaultPriority": 92,
+      "shards": [
+        "./settlements/part1-habitations.json"
+      ]
     },
     {
       "suit": "♥",
-      "file": "traditions.json",
       "name": "Traditions",
       "defaultSlotCategory": "myth",
-      "defaultPriority": 60
+      "defaultPriority": 60,
+      "shards": [
+        "./traditions/part1-customs.json"
+      ]
     },
     {
       "suit": "♣",
-      "file": "resources.json",
       "name": "Resources",
       "defaultSlotCategory": "resource",
-      "defaultPriority": 58
+      "defaultPriority": 58,
+      "shards": [
+        "./resources/part1-flora-fauna-minerals.json"
+      ]
     },
     {
       "suit": "♦",
-      "file": "skills.json",
       "name": "Skills",
       "defaultSlotCategory": "structure",
-      "defaultPriority": 62
+      "defaultPriority": 62,
+      "shards": [
+        "./skills/part1-masteries.json"
+      ]
     }
   ]
 }

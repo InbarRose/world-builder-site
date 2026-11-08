@@ -1,0 +1,302 @@
+[
+  {
+    "category": "Traditions & Culture",
+    "suitHint": "♦",
+    "items": [
+      {
+        "label": "Oral Song-Lore",
+        "description": "Generational memory and legal codes preserved solely through rhythmic ballads and skaldic epics.",
+        "tags": [
+          "tradition",
+          "culture",
+          "folklore"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🎵",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Ancestor Veneration",
+        "description": "Offerings of honey, wine, and smoke given to heroic forefathers who guard the hearth.",
+        "tags": [
+          "spiritual",
+          "faith",
+          "tradition"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🕯️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Sacred Burial Mounds",
+        "description": "Constructing stone-lined earthen tumuli to honor fallen chieftains and mark clan territories.",
+        "tags": [
+          "spiritual",
+          "monument",
+          "tradition"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🪦",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Shamanic Totemism",
+        "description": "Communion with beast and storm spirits that guide tribal hunts and warn of incoming disasters.",
+        "tags": [
+          "spiritual",
+          "nature",
+          "shamanism"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐺",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Starlight Navigation",
+        "description": "Mapping desert dunes and trackless ocean tides by aligning voyaging craft to celestial star paths.",
+        "tags": [
+          "navigation",
+          "astronomy",
+          "seafaring"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "✨",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Harvest Festivals",
+        "description": "Great communal feasts celebrating autumn yields with games of strength, dancing, and grain tributes.",
+        "tags": [
+          "agriculture",
+          "celebration",
+          "community"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌾",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Solar Calendar & Sun Dance",
+        "description": "Tracking solstices through megalith alignments and performing endurance rites to welcome the dawn.",
+        "tags": [
+          "spiritual",
+          "astronomy",
+          "calendar"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "☀️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Sacred Hospitality (Xenia)",
+        "description": "Ancient, inviolable taboo guaranteeing safe passage and refuge to guests who share bread and salt.",
+        "tags": [
+          "law",
+          "diplomacy",
+          "ethics"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏺",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Blood Oaths & Brotherhood",
+        "description": "Ceremonial mingling of blood forging unbreakable covenants between allied clan leaders and warriors.",
+        "tags": [
+          "martial",
+          "oath",
+          "alliance"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🗡️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Fire-Tending Rituals",
+        "description": "Sacred hearth-keepers maintain continuous embers, strictly forbidding a cold hearth during winter.",
+        "tags": [
+          "ritual",
+          "hearth",
+          "community"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🔥",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  },
+  {
+    "category": "Ecology & Habitat",
+    "suitHint": "♣",
+    "items": [
+      {
+        "label": "Canopy Dwellers",
+        "description": "Constructing rope bridges and timber treehouse villages high in the colossal redwood canopy.",
+        "tags": [
+          "forest",
+          "settlement",
+          "habitat"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌳",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Subterranean Delvers",
+        "description": "Excavating multi-tiered stone warrens and mushroom galleries within living cavern bedrock.",
+        "tags": [
+          "underground",
+          "mining",
+          "dwarf"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⛏️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Nomadic Steppe Herders",
+        "description": "Following seasonal grazing herds across vast open grasslands with collapsible felt yurts.",
+        "tags": [
+          "nomad",
+          "plains",
+          "herds"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐎",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Reef & Atoll Mariners",
+        "description": "Diving for black pearls and spearing reef fish from outrigger canoes among tropical coral atolls.",
+        "tags": [
+          "maritime",
+          "coastal",
+          "ocean"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐚",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Glacial Wayfarers",
+        "description": "Crossing crevasse fields on bone crampons and building dome snow shelters during raging blizzards.",
+        "tags": [
+          "arctic",
+          "frost",
+          "survival"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "❄️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Symbiotic Grove-Kin",
+        "description": "Cultivating sentient bioluminescent fungi that illuminate deep glens and purify tainted water.",
+        "tags": [
+          "fungi",
+          "nature",
+          "symbiosis"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🍄",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Cliffside Pueblos",
+        "description": "Carving multi-story stone and adobe dwellings into the shade of sheer canyon alcoves.",
+        "tags": [
+          "canyon",
+          "architecture",
+          "shelter"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏜️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Oasis Caravan Havens",
+        "description": "Nurturing freshwater palm springs that serve as vital crossroads for desert spice traders.",
+        "tags": [
+          "desert",
+          "water",
+          "trade"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌴",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  }
+]

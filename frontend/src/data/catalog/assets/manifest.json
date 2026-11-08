@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "2.0.0",
+  "description": "Graphics Assets Registry Manifest with multi-shard category partitions and concept fallbacks.",
+  "categories": [
+    {
+      "category": "earth",
+      "shards": [
+        "./earth/part1-core.json"
+      ]
+    },
+    {
+      "category": "water",
+      "shards": [
+        "./water/part1-core.json"
+      ]
+    },
+    {
+      "category": "plant",
+      "shards": [
+        "./plant/part1-core.json"
+      ]
+    },
+    {
+      "category": "feature",
+      "shards": [
+        "./feature/part1-core.json"
+      ]
+    },
+    {
+      "category": "settlement",
+      "shards": [
+        "./settlement/part1-core.json"
+      ]
+    },
+    {
+      "category": "construction",
+      "shards": [
+        "./construction/part1-core.json"
+      ]
+    }
+  ],
+  "palettesShards": [
+    "./palettes/visual-palettes.json"
+  ],
+  "conceptFallbacks": {
+    "mountain": "mountain-peak",
+    "hill": "hill-rolling",
+    "canyon": "canyon-gorge",
+    "desert": "desert-dunes",
+    "cliff": "cliff-sheer",
+    "cave": "cave-maw",
+    "crater": "crater-impact",
+    "river": "river-meander",
+    "lake": "lake-basin",
+    "swamp": "swamp-mangrove",
+    "waterfall": "waterfall-cataract",
+    "glacier": "glacier-valley",
+    "forest": "forest-deciduous",
+    "jungle": "jungle-dense",
+    "grassland": "grass-steppe",
+    "settlement": "settle-hamlet",
+    "construction": "const-castle"
+  }
+}

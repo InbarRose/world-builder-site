@@ -175,6 +175,16 @@ status: active
   - [x] Evocative Name generator input with 1-click `🎲 Re-roll Name` and `✍️ Sync to Note`
   - [x] Smart auto-play engine integration with weighted probabilistic sampling and complete chronicle ledger notes
   - [x] Automated unit test suites in `affinityEngine.test.ts`, `flavorNameEngine.test.ts`, and `PlayStudio.test.tsx` (149/149 tests passing across 20 suites)
+- [x] **Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration** *(ADR-024)*
+  - [x] Enriched 48 cultural traditions & modular abilities with full tabletop lore descriptions and tags
+  - [x] Unified Tabletop Compendium indexer (`compendiumEngine.ts`) and modal (`PresetCompendiumModal.tsx`) across 200+ items
+- [x] **Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring** *(ADR-025)*
+  - [x] Extracted monolithic TypeScript arrays into `frontend/src/data/catalog/` with surgical authoring (`gen_earth_meteor_crater`)
+- [x] **Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights** *(ADR-026, Domain 7 Score: 19.5 / 20.0)*
+  - [x] Replaced root-level `"icon"` properties across all raw JSON catalog shards with structured `"graphic"` sub-JSON leaves (`assetId`, `fallbackAssetId`, `glyph`, `primaryColor`, `secondaryColor`, `params`, `settlementIcons`)
+  - [x] Implemented Open/Closed multi-shard manifest resolution (`import.meta.glob` + `resolveManifestShards`) and partitioned catalog into multi-part shards (`part1`, `part2`, `part3`) across `stages/`, `codex/`, `assets/`, and `weights/`
+  - [x] Externalized bot synergy, anti-affinity, and terrain weighting rules into `weights/affinity/part1-synergy-and-antiaffinity-rules.json`
+  - [x] Added Domain 7 SOLID Data-Driven Taxonomy rubric to `docs/AUDIT_RUBRIC.md` and verified 158/158 unit tests across 22 suites
 - [ ] **Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics** *(Target: 78.0 / 100)*
   - [ ] WebRTC / BroadcastChannel zero-server room sync where GM and players see card flips and map stamps in real-time
   - [ ] Tablet touch ergonomics (pinch-to-zoom, two-finger pan, 48px touch targets)
@@ -210,6 +220,7 @@ status: active
 - [x] Implement Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names (ADR-023).
 - [x] Implement Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration (ADR-024).
 - [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
+- [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
 - [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
 
 

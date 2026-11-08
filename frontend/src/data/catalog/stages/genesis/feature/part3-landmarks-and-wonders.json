@@ -1,0 +1,326 @@
+[
+  {
+    "id": "gen_feature_resource_gem",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Crystalline Gem Geode (Gemstone Geode)",
+    "description": "Cluster of prism gemstones and arcane crystal clusters embedded in stone.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "resource-gem",
+      "fallbackAssetId": null,
+      "glyph": "💎",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this crystalline gem geode shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The crystalline gem geode was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_crystal_cavern",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Luminescent Crystal Cavern (Crystal Cavern)",
+    "description": "Subterranean geode chamber bristling with glowing resonance crystals.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "crystal-cavern",
+      "fallbackAssetId": null,
+      "glyph": "🔮💎",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this luminescent crystal cavern shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The luminescent crystal cavern was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_resource_quarry",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "High-Grade Stone Quarry Strata (Stone Quarry Strata)",
+    "description": "Stepped layers of prime dimensional granite or marble building stone.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "resource-quarry",
+      "fallbackAssetId": null,
+      "glyph": "🧱",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this high-grade stone quarry strata shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The high-grade stone quarry strata was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_titan_bones",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Colossal Titan Bones (Titan Bone Bed)",
+    "description": "Towering ribcage bones of an ancient pre-primordial titan fossil.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "titan-bones",
+      "fallbackAssetId": null,
+      "glyph": "🦴",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this colossal titan bones shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The colossal titan bones was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_megalith_ring",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Megalith Stone Ring (Megalith Ring)",
+    "description": "Primordial stone trilithons aligned with solstices and celestial spheres.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "megalith-ring",
+      "fallbackAssetId": null,
+      "glyph": "🗿",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this megalith stone ring shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The megalith stone ring was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_obelisk_spires",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Ancient Obelisk Spires (Obelisk Spires)",
+    "description": "Slender carved granite pillars etched with precursor inscriptions.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "obelisk-spires",
+      "fallbackAssetId": null,
+      "glyph": "🗼",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this ancient obelisk spires shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The ancient obelisk spires was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_landmark_arch",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Natural Weathered Stone Arch (Natural Stone Arch)",
+    "description": "Monumental rock arch span carved through a plateau by centuries of wind.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "landmark-arch",
+      "fallbackAssetId": null,
+      "glyph": "🪨🌉",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this natural weathered stone arch shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The natural weathered stone arch was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_ruins_temple",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Forgotten Temple Ruins (Temple Ruins)",
+    "description": "Crumbling classical colonnade and fractured pediment of a lost order.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "ruins-temple",
+      "fallbackAssetId": null,
+      "glyph": "🏛️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this forgotten temple ruins shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The forgotten temple ruins was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_petrified_wood",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Petrified Ancient Wood (Petrified Wood)",
+    "description": "Silicified tree trunks turned to agate and jasper stone over aeons.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "petrified-wood",
+      "fallbackAssetId": null,
+      "glyph": "🪵✨",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this petrified ancient wood shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The petrified ancient wood was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_sacred_grove",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Whispering Sacred Grove (Sacred Grove)",
+    "description": "Locus of enchanted white trees where ley currents rise to the surface.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "sacred-grove",
+      "fallbackAssetId": null,
+      "glyph": "✨🌳",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this whispering sacred grove shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The whispering sacred grove was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_ley_nexus",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Ley Line Nexus Convergence (Ley Line Nexus)",
+    "description": "Intersection of planetary telluric energy channels radiating magic.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "ley-nexus",
+      "fallbackAssetId": null,
+      "glyph": "🌀✨",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "ruins",
+    "creativePrompt": "How does this ley line nexus convergence shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The ley line nexus convergence was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_ley_nexus_core",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": true,
+    "isDisaster": false,
+    "name": "Planetary Ley Nexus & Astral Rift",
+    "description": "Anchor a blinding celestial convergence where horizontal and vertical telluric energy streams intersect.",
+    "slotCategory": "myth",
+    "slotPriority": 90,
+    "graphic": {
+      "assetId": "ley-nexus",
+      "fallbackAssetId": null,
+      "glyph": "✨🌀",
+      "primaryColor": "#7c3aed",
+      "secondaryColor": "#ede9fe",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "What wild arcane energies bleed into the atmosphere at this planar nexus? How do beasts behave near it?",
+    "exampleNarrative": "The air hummed with ozone and starlight as planetary ley currents collided in a blinding spiral of wild cosmic power."
+  }
+]

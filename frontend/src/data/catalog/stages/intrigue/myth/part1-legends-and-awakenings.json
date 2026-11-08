@@ -1,0 +1,211 @@
+[
+  {
+    "id": "int_myth_dragon",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Slumbering Ancient Wyrm Lair",
+    "description": "A terrifying red dragon of the First Age sleeps upon a mountain hoard of ancient gold, stirring periodically.",
+    "slotCategory": "myth",
+    "slotPriority": 95,
+    "graphic": {
+      "assetId": "cave-maw",
+      "fallbackAssetId": null,
+      "glyph": "🐉🌋",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "cave",
+    "creativePrompt": "What legendary hero died attempting to claim the dragon hoard? What tribute do villagers offer?",
+    "exampleNarrative": "Sulfurous smoke vented from the caldera where the great wyrm slept, coiled around the crowns of fifty forgotten kings."
+  },
+  {
+    "id": "int_myth_lich",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Arch-Lich Undead Necropolis",
+    "description": "An immortal sorcerer-king raises an army of skeletal legions from an ancient crypt to reclaim their lost empire.",
+    "slotCategory": "myth",
+    "slotPriority": 94,
+    "graphic": {
+      "assetId": "ruins-temple",
+      "fallbackAssetId": null,
+      "glyph": "💀🏰",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "Where is the phylactery hidden? What ancient curse prevents the dead from resting?",
+    "exampleNarrative": "Ghostly green fire flared upon the black towers of the necropolis as legions of skeletal warriors marched forth."
+  },
+  {
+    "id": "int_myth_sunken",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Sunken Temple of the Sea-Gods",
+    "description": "Submerged coral-encrusted ruins of a drowned civilization rise briefly above the waves during spring equinox.",
+    "slotCategory": "myth",
+    "slotPriority": 93,
+    "graphic": {
+      "assetId": "atoll-reef",
+      "fallbackAssetId": null,
+      "glyph": "🌊🏛️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "What aquatic monstrosities guard the drowned altars? What lost relics can be recovered during low tide?",
+    "exampleNarrative": "At lowest ebb, dripping marble pillars and cyclopean temples arose from the surf, gleaming with pearls and weed."
+  },
+  {
+    "id": "int_myth_blade",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Lost Star-Metal Blade of Kings",
+    "description": "An enchanted meteorite sword embedded in a sacred stone, awaiting the rightful unifier of the realms.",
+    "slotCategory": "myth",
+    "slotPriority": 92,
+    "graphic": {
+      "assetId": "megalith-ring",
+      "fallbackAssetId": null,
+      "glyph": "🗡️⭐",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "monument",
+    "creativePrompt": "What prophecy foretells the coming of the hero who can draw the blade from the granite?",
+    "exampleNarrative": "Embedded deep within the altar stone, the starmetal blade hummed softly, awaiting the hand of the true sovereign."
+  },
+  {
+    "id": "int_myth_demon",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Unsealed Abyssal Demonic Breach",
+    "description": "An ancient protective ward cracks open in the badlands, allowing fiendish horrors to spill into the mortal world.",
+    "slotCategory": "myth",
+    "slotPriority": 96,
+    "graphic": {
+      "assetId": "crater-impact",
+      "fallbackAssetId": null,
+      "glyph": "👿🔥",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "What sacrifice is required to reseal the hellish rift before the fiends consume the province?",
+    "exampleNarrative": "Brimstone and red lightning tore through the fracture in the earth as horned horrors poured into the mortal twilight."
+  },
+  {
+    "id": "int_myth_barrow",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Cursed Barrow of the Witch-King",
+    "description": "Fog-shrouded burial mounds where restless wights and shadow-wraiths guard accursed cursed treasure.",
+    "slotCategory": "myth",
+    "slotPriority": 91,
+    "graphic": {
+      "assetId": "petrified-wood",
+      "fallbackAssetId": null,
+      "glyph": "🪦👻",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "What spectral cold chills the bones of anyone who steps over the barrow ditch after nightfall?",
+    "exampleNarrative": "Pale will-o-wisps danced across the heather-covered mounds where ancient kings lay in restless, gold-clad slumber."
+  },
+  {
+    "id": "int_myth_colossus",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Slumbering Stone Colossus of the Pass",
+    "description": "A thousand-foot carved stone sentinel slumbering against a mountain pass that awakens when the horn is sounded.",
+    "slotCategory": "myth",
+    "slotPriority": 95,
+    "graphic": {
+      "assetId": "obelisk-spires",
+      "fallbackAssetId": null,
+      "glyph": "🗿⛰️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "monument",
+    "creativePrompt": "Who holds the ancient ivory horn that can rouse the stone titan to defend the land?",
+    "exampleNarrative": "Travelers mistook the great weathered face for natural crags until the stone eyes slowly opened to watch the valley."
+  },
+  {
+    "id": "int_myth_fantastical",
+    "stage": "intrigue",
+    "suit": "♦",
+    "isFantastical": true,
+    "isDisaster": false,
+    "name": "Cosmic World-Gate to the Outer Heavens",
+    "description": "Activate an ancient stellar portal ring allowing star-voyagers and demigods to cross into other worlds.",
+    "slotCategory": "myth",
+    "slotPriority": 99,
+    "graphic": {
+      "assetId": "ley-nexus",
+      "fallbackAssetId": null,
+      "glyph": "✨🌌",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "monument",
+    "abilityGranted": "Cosmic World-Gate",
+    "creativePrompt": "What other created worlds lie on the far side of the gate? Who holds the keystone?",
+    "exampleNarrative": "Rings of iridescent light spun within the gigantic portal, revealing distant constellations and strange alien moons."
+  }
+]

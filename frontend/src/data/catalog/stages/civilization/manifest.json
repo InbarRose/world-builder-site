@@ -4,31 +4,39 @@
   "suits": [
     {
       "suit": "♠",
-      "file": "constructions.json",
       "name": "Constructions",
       "defaultSlotCategory": "structure",
-      "defaultPriority": 84
+      "defaultPriority": 84,
+      "shards": [
+        "./constructions/part1-monuments-and-infra.json"
+      ]
     },
     {
       "suit": "♥",
-      "file": "enlightenment.json",
       "name": "Enlightenment",
       "defaultSlotCategory": "structure",
-      "defaultPriority": 75
+      "defaultPriority": 75,
+      "shards": [
+        "./enlightenment/part1-civic-and-science.json"
+      ]
     },
     {
       "suit": "♣",
-      "file": "expansion.json",
       "name": "Expansion",
       "defaultSlotCategory": "settlement",
-      "defaultPriority": 88
+      "defaultPriority": 88,
+      "shards": [
+        "./expansion/part1-colonies-and-routes.json"
+      ]
     },
     {
       "suit": "♦",
-      "file": "diplomacy.json",
       "name": "Diplomacy",
       "defaultSlotCategory": "structure",
-      "defaultPriority": 76
+      "defaultPriority": 76,
+      "shards": [
+        "./diplomacy/part1-treaties-and-pacts.json"
+      ]
     }
   ]
 }

@@ -1,0 +1,238 @@
+[
+  {
+    "category": "Adaptations & Physiology",
+    "suitHint": "♥",
+    "items": [
+      {
+        "label": "Deep-Stone Sense",
+        "description": "Inherent tremor-sense enabling navigation through unmapped caves and detection of hollow shafts.",
+        "tags": [
+          "underground",
+          "adaptation",
+          "senses"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🪨",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Amphibious Respiration",
+        "description": "Gills and webbed appendages permitting extended diving in freezing oceanic abysses.",
+        "tags": [
+          "aquatic",
+          "adaptation",
+          "water"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌊",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Thermal & Fire Resilience",
+        "description": "Thick scaled epidermis and heat-resistant blood allowing work near active magma flows.",
+        "tags": [
+          "fire",
+          "adaptation",
+          "volcanic"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🔥",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Frost & Blizzard Endurance",
+        "description": "Dense sub-dermal fat and thermal fur insulating against sub-zero mountain winds.",
+        "tags": [
+          "arctic",
+          "adaptation",
+          "cold"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "❄️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Night-Sight & Camouflage",
+        "description": "Tapetum lucidum eyes and adaptive skin pigmentation blending seamlessly into deep forest shadows.",
+        "tags": [
+          "stealth",
+          "night",
+          "senses"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌙",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Crystalline Carapace",
+        "description": "Mineral-infused exoskeleton that deflects slashing blows and refracts radiant energies.",
+        "tags": [
+          "defense",
+          "armor",
+          "minerals"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "💎",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  },
+  {
+    "category": "Skills & Mastery",
+    "suitHint": "♠",
+    "items": [
+      {
+        "label": "Master Composite Archery",
+        "description": "Precision volley firing with horn recurve bows capable of piercing plate armor at long range.",
+        "tags": [
+          "ranged",
+          "combat",
+          "archery"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏹",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Unbreakable Phalanx Shieldwall",
+        "description": "Locking heavy tower shields into an impenetrable wall bristling with long thrusting pikes.",
+        "tags": [
+          "tactics",
+          "defense",
+          "infantry"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🛡️",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Thunder Shock Cavalry",
+        "description": "Heavily barded warhorses trained to smash enemy formations with couched lances in wedge charges.",
+        "tags": [
+          "cavalry",
+          "combat",
+          "shock"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐎",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Grand Armada Navigation",
+        "description": "Maneuvering galleys and multi-masted caravels through reef-choked shallows and stormy straits.",
+        "tags": [
+          "naval",
+          "seafaring",
+          "tactics"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "⛵",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Siege Engineering & Sappers",
+        "description": "Designing trebuchets, battering rams, and subterranean saps to bring down curtain walls.",
+        "tags": [
+          "siege",
+          "engineering",
+          "warfare"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🏰",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Beast Taming & Falconry",
+        "description": "Training dire wolves, giant eagles, and hunting hounds to fight and scout alongside handlers.",
+        "tags": [
+          "animals",
+          "beasts",
+          "companions"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🐺",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Spear & Atlatl Throwing",
+        "description": "Propelling flint-tipped javelins with wooden throwing levers for lethal big-game hunting.",
+        "tags": [
+          "hunting",
+          "primitive",
+          "survival"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🎯",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      },
+      {
+        "label": "Herbal Brewing & Medicine",
+        "description": "Extracting antiseptics, febrifuges, and sleeping tinctures from rare mountain barks and fungi.",
+        "tags": [
+          "healing",
+          "medicine",
+          "alchemy"
+        ],
+        "graphic": {
+          "assetId": null,
+          "fallbackAssetId": null,
+          "glyph": "🌿",
+          "primaryColor": null,
+          "secondaryColor": null
+        }
+      }
+    ]
+  }
+]
