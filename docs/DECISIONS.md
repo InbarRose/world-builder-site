@@ -435,3 +435,38 @@ status: active
   - Transforms the worldbuilder from a self-contained archive into a launchpad for campaigns.
   - Eliminates creative friction for players experiencing blank-canvas anxiety.
   - Elevated Domain 3 on the commercial rubric from 7.5 to 18.0 / 20.0 (+10.5 pts), bringing the overall audit score to 73.0 / 100.
+
+
+## ADR-020: 48 Whiteboard Marker Cartographic Tropes & Vector Symbol Engine for Genesis Phase
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - During the Genesis Phase of worldbuilding, tabletop players lay down the primordial foundation of the physical world (Earth, Water, Plant, and Feature).
+  - Previously, players only had a generic single preset for each category, restricting visual variety and narrative imagination.
+  - The user explicitly directed: *"we should have much more than 4 things. we should strive for as many simple things as we can for each of the genesis phase items. tropes, standards, stuff you see on a world map. stuff you can draw with a marker on a whiteboard."*
+  - The visual language of tabletop world maps (Tolkien, D&D, dry-erase whiteboards, battle mats) relies on iconic, high-contrast, universally recognizable silhouettes that can be sketched in seconds with a marker.
+- **Decision**:
+  1. **Built `cartographicSymbolEngine.tsx`**:
+     - Defined a comprehensive catalog of **48 whiteboard marker cartographic tropes** categorized across the 4 Genesis suits:
+       - **♠ Earth (12 Tropes)**: Mountain Peak, Twin Horns, Jagged Needle Spire, Snow Massif, Mountain Range Spine, Rolling Low Hills, Flat Mesa Plateau, Deep Canyon Gorge, Active Volcano, Caldera Basin, Wind-Blown Sand Dunes, Badland Buttes.
+       - **♥ Water (12 Tropes)**: Meandering River, Braided River Delta, Roaring Cataract Waterfall, Natural Spring Headwaters, Crescent Oxbow Lake, Coastal Estuary Bay, Glacial Sheer Fjord, Coral Reef Atoll, Abyssal Sunken Trench, Geothermal Hot Spring, Glacier Crevasse, Maelstrom Whirlpool.
+       - **♣ Plant (12 Tropes)**: Broadleaf Deciduous Forest, Pine & Fir Taiga, Colossal Redwood Grove, Mangrove Swamp, Peat Moss Bog, Desert Palm Oasis, Acacia Thorn Savanna, Giant Fungal Mycelium, Flowering Meadow, Steppe Grassland, Ironwood Briar Thicket, Whispering Bamboo Grove.
+       - **♦ Feature (12 Tropes)**: Subterranean Cave Maw, Megalith Stone Ring, Obelisk Spires, Meteor Impact Crater, Petrified Ancient Wood, Whispering Sacred Grove, Forgotten Temple Ruins, Colossal Titan Bones, Steaming Geyser Basin, Luminescent Crystal Cavern, Sinkhole Cenote Pool, Ley Line Nexus Convergence.
+     - Implemented `renderCartographicMarkerSVG(symbolId)`: Hand-drawn vector line art with marker aesthetics (`strokeLinecap="round"`, `strokeLinejoin="round"`, `fillOpacity`) tailored for small 48x48 tile grids and hexagonal layouts.
+     - Implemented `resolveCartographicSymbol(tile)`: Fallback mapper ensuring existing maps and tiles automatically display appropriate whiteboard silhouettes without data migrations.
+  2. **Expanded Genesis Action Presets (`presets.ts`)**:
+     - Expanded Genesis presets from 4 to 52 (48 classic tropes + 4 fantastical presets).
+     - Each preset includes an evocative prompt, card suit, narrative description, and `cartographicSymbol` binding for immediate 1-click turn drafting and map stamping.
+  3. **Interactive Whiteboard Palette & Tile Inspector (`MapCanvas.tsx`)**:
+     - Added dedicated "🖌️ Whiteboard Marker Tropes (48 Genesis Symbols)" drawer section with instant category pills (♠ Earth, ♥ Water, ♣ Flora, ♦ Feature) and live SVG previews.
+     - Supported brush painting, fill, and erase for `cartographicSymbol`.
+     - Integrated trope selection into the Tile Inspector modal.
+     - Added symbol rendering into the standalone SVG export pipeline (`mapEngine.ts`).
+  4. **Validation & Testing**:
+     - Added `frontend/src/test/cartographicSymbolEngine.test.ts` with 12 tests verifying catalog integrity, SVG element generation, fallback mapping, and export fidelity.
+     - All 18 test suites passing (133 / 133 tests). Zero production build warnings.
+- **Consequences**:
+  - Eliminates creative bottleneck during the Genesis stage.
+  - Gives world maps the authentic, charming feel of a dry-erase campaign map sketched around a gaming table.
+  - Lays the foundation for expanding Settlement and Civilization whiteboard tropes in subsequent phases.

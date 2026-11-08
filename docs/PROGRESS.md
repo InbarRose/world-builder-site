@@ -145,11 +145,22 @@ status: active
   - [x] Discrete 8-layer stacking panel (`MapCanvas.tsx`) with toggles for Terrain, Relief, Watershed, Roads, Territories, Slots, Labels, and Fog
   - [x] Continuous inter-tile spline ribbons for rivers and roads in both canvas and vector SVG export
   - [x] Automated test suite in `watershedPathEngine.test.ts` and `MapCanvas.test.tsx` (112/112 tests passing across 15 suites)
-- [ ] **Phase 20: Recursive Causal Saga Graph & Emergent Lore Engine** *(Target: 68.0 / 100)*
-  - [ ] Directed Acyclic Causal Graph (`causalGraphEngine.ts`) where events link causes and consequences across turns
-  - [ ] Dynamic procedural fantasy prose generator that references antecedent events, ancient ruins, and heroic lineages
-  - [ ] Visual Event Dependency Graph view in `TimelinePanel.tsx`
-  - [ ] Automated test suite in `causalGraphEngine.test.ts`
+- [x] **Phase 20: Tabletop Campaign Bridge, Session Zero Primer & Collaborative Conclave Handoff** *(Score: 73.0 / 100 via ADR-019)*
+  - [x] Actionable D&D 5e / OSR / Pathfinder Adventure Hook & Rumor Tables (`campaignBridgeEngine.ts`, `CampaignHooksModal.tsx`) with quest archetypes, tier filtering, and map coordinate jump links
+  - [x] Publication-ready Session Zero 1-Page Campaign Primer handout (`SessionZeroPrimerModal.tsx`) with `@media print` layout and markdown export
+  - [x] Tabletop Conclave Turn Handoff banner in `Play.tsx` honoring player seat colors and role identities
+  - [x] "💡 Spark Inspiration" interactive prompts in the turn drafting workshop to overcome blank-canvas block
+  - [x] Automated test suite in `campaignBridgeEngine.test.ts`, `CampaignBridgeUI.test.tsx`, and `PlayStudio.test.tsx` (121/121 tests passing across 17 suites)
+- [x] **Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase** *(ADR-020)*
+  - [x] Hand-drawn vector SVG whiteboard marker engine (`cartographicSymbolEngine.tsx`) with 48 classic tropes (12 Earth, 12 Water, 12 Plant, 12 Feature)
+  - [x] Expanded Genesis presets in `presets.ts` from 4 to 52 presets (48 tropes + 4 fantastical options) with direct tile symbol stamping
+  - [x] Dedicated "🖌️ Whiteboard Marker Tropes" drawer in `MapCanvas.tsx` with instant category filter pills and live SVG previews
+  - [x] Tile Inspector trope selector and standalone SVG export integration in `mapEngine.ts`
+  - [x] Automated unit test suite in `cartographicSymbolEngine.test.ts` (133/133 tests passing across 18 suites)
+- [ ] **Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics** *(Target: 78.0 / 100)*
+  - [ ] WebRTC / BroadcastChannel zero-server room sync where GM and players see card flips and map stamps in real-time
+  - [ ] Tablet touch ergonomics (pinch-to-zoom, two-finger pan, 48px touch targets)
+  - [ ] Automated test suite in `peerSyncEngine.test.ts`
 
 ---
 
@@ -174,6 +185,8 @@ status: active
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
 - [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
 - [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Score: 62.5 / 100).
-- [ ] Implement Phase 20: Recursive Causal Saga Graph & Emergent Lore Engine (Target: 68.0 / 100).
+- [x] Implement Phase 20: Tabletop Campaign Bridge, Session Zero Primer & Collaborative Conclave Handoff (Score: 73.0 / 100).
+- [x] Implement Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase (ADR-020).
+- [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
 
 
