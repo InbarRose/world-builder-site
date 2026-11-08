@@ -526,3 +526,60 @@ status: active
 - **Consequences**:
   - Completely satisfies the user's requirement for all foundational terrain elements and multi-tile options.
   - Dramatically improves map aesthetics and worldbuilding diversity on the canvas.
+
+---
+
+## ADR-022: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes, and Codex Icon System
+
+- **Status**: Accepted
+- **Context**:
+  Following the successful expansion of the Genesis stage (ADR-021), the user directed that all remaining stages (Primal, Civilization, Intrigue) receive equivalent depth and variety:
+  > "for the rest of the phases we should do similar work. matching the examples and ideas already in the rules. thinking what tropes are common, simple, and easy, what can be put on a whiteboard, and variety of tiles, visuals, etc. different races, intrigue events, etc. might not have tile icons, but they can have icons in the wiki/archive. an icon to represent a militaristic tradition, or a religion, etc. can help the game. these are important presets for the automode and bot players, diversity. etc."
+- **Decision**:
+  1. **Whiteboard Marker Tropes for Settlements & Constructions**:
+     - Expanded `cartographicSymbolEngine.tsx` with two new categories: `'settlement'` and `'construction'`.
+     - Added 7 hand-drawn dry-erase marker vector silhouettes for Settlements (Primal ♠):
+       - Thatched Hearth-Hamlet (`settle-hamlet` - 🏕️)
+       - Timber Palisade Village (`settle-village` - 🛖)
+       - Crossroads Market Town (`settle-town` - 🏘️)
+       - Nomadic Felt Yurt Camp (`settle-nomad` - 🎪)
+       - Cliffside Canyon Pueblo (`settle-cliff` - 🏜️)
+       - Coastal Stilt Fishing Village (`settle-stilt` - 🛶)
+       - Frontier Stockade Outpost (`settle-outpost` - 🛡️)
+     - Added 9 hand-drawn vector silhouettes for Constructions & Monuments (Civilization ♠):
+       - Feudal Castle Keep (`const-castle` - 🏰)
+       - Mountain Citadel Fortress (`const-citadel` - 🏯)
+       - Deepwater Harbor & Port (`const-port` - ⚓)
+       - Arched Stone Bridge (`const-bridge` - 🌉)
+       - Great Border Wall (`const-wall` - 🧱)
+       - Wonder Step-Pyramid (`const-monument` - 🏛️)
+       - Domed Academy University (`const-university` - 📜)
+       - Arched Stone Aqueduct (`const-aqueduct` - 🚰)
+       - Coastal Beacon Lighthouse (`const-lighthouse` - 🗼)
+     - Total whiteboard trope catalog increased from 97 to **113** handcrafted SVG symbols.
+  2. **Multi-Stage Action Presets & Codex Icon Diversity (`presets.ts`)**:
+     - Expanded `STAGE_ACTION_PRESETS` from minimal 2 presets per suit to 8+ rich presets per suit across all remaining stages (97 total multi-stage presets):
+       - **Primal (Stage 2 - 32 Presets)**:
+         - Settlements (♠): 7 whiteboard marker habitation tropes + 1 fantastical sanctuary.
+         - Traditions (♥): 8 cultural traditions with wiki/codex icons (Solar Cult ☀️, Lunar Divination 🌙, Shieldwall Warrior Code 🛡️, Ancestor Worship 🪦, Skaldic Oral Saga 📜, Sacred Hospitality 🏺, Harvest Feast 🌾, Starlight Communion ✨).
+         - Resources (♣): 8 domesticated flora/fauna & minerals (Warhorses 🐎, Heavy Oxen 🐂, Golden Wheat 🌾, Terraced Paddy Rice 🍚, Bog Iron ⛏️, Vein Silver 🪙, Hardwood Timber 🪵, Starfall Ether Ore 🌟).
+         - Skills (♦): 8 species evolutionary skills (Composite Bow Archery 🏹, Wilderness Tracking 🐾, Cliff Free-Climbing 🧗, Open-Sea Outrigger Navigation ⛵, Pattern-Welded Metallurgy 🔨, Cyclopean Stone Masonry 🧱, Herbal Apothecary 🌿, Resonant Elemental Singing 🎶).
+       - **Civilization (Stage 3 - 33 Presets)**:
+         - Constructions (♠): 9 whiteboard marker construction tropes + 1 fantastical sky-spire.
+         - Enlightenment (♥): 8 philosophical and political advances (Parliamentary Republic ⚖️, Written Legal Code 📜, Guild Mercantilism 🪙, Hydraulic Deep-Shaft Mining ⛏️, Astrolabe & Nautical Navigation 🧭, Antiseptic Medicine 🧪, Master Sculpting & Fresco Arts 🎨, Celestial Orrery Chronometry 🔭).
+         - Expansion (♣): 8 provincial expansion strategies (Frontier Colony 🏕️, Imperial Naval Armada ⛵, River Basin Granary 🌾, Mountain Pass Fortress 🏰, Caravan Trading Post 🐫, Cultural Assimilation 🤝, Conquest Annexation ⚔️, Ley-Line Skyships 🛸).
+         - Diplomacy (♦): 8 statecraft accords and treaties (Dynastic Royal Marriage 💍, Mutual Defense League 🛡️, Free Trade Pact 📜, Armistice Peace Accord 🕊️, Demilitarized Frontier Border 🚧, Scholar Exchange Embassy 📚, Sovereign Legation 🏛️, Concord of the Prismatic Vow 🕊️).
+       - **Intrigue (Stage 4 - 32 Presets)**:
+         - Conflict (♠): 8 military conflicts (Continental War ⚔️, Protracted Citadel Siege 🏰, Popular Peasant Rebellion 🚩, Dynastic Civil War 👑, Zealot Inquisitorial Purge 🕯️, Coastal Naval Blockade ⚓, Borderland Raids 🏹, Eldritch Abyssal Incursion 👹).
+         - Cooperation (♥): 8 diplomatic partnerships (Grand Defensive Coalition 🛡️, Joint Famine Relief Convoy 🌾, Post-War Reconstruction Pact 🏗️, Shared Frontier Border Patrol 🐎, Royal Cartographic Survey 🗺️, Holy League Sanctuary ⛪, Epidemic Quarantine Alliance 🧪, Astral Shield Convergence 🌌).
+         - Scheme (♣): 8 covert court plots (Royal Heir Assassination 🗡️, Smugglers' Shadow Network 🗝️, Courtly Cabal Intrigue 👥, Forged Succession Treaty 📜, Spy Network Espionage 👁️, Military Coup d'État ⚔️, Blackmail of High Chancellor 🗃️, Eldritch Usurpation Ritual 🔮).
+         - Myth & Mystery (♦): 8 epic legends and campaign hooks (Awakening of the Slumbering Dragon 🐉, Rise of the Undead Archlich 💀, Sunken Sunken Metropolis 🌊, Discovery of the Sovereign Blade 🗡️, Unsealing of the Abyssal Rift 👹, Desecration of the Barrow Mounds 🪦, Awakening of the Stone Titan 🗿, Ascension of the Star-God ✨).
+  3. **Canvas & Inspector Integration (`MapCanvas.tsx`)**:
+     - Added `🏘️ Towns` and `🏰 Monuments` category selector tabs to the Whiteboard Marker Palette drawer.
+     - Updated Tile Inspector dropdown optgroups with settlement and construction concepts and counts.
+  4. **Auto-Play Bot Storytelling Elevation**:
+     - `getPresetsForCard()` now samples from 8+ rich presets per suit, eliminating repetitive auto-play bot loops and maximizing variety during simulated or solo play.
+- **Consequences**:
+  - Delivers complete parity across all 4 stages of the game.
+  - Empowers both human tabletop groups (brainstorming prompts, narrative flavor) and autonomous bot players with diverse worldbuilding decisions.
+

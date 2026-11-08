@@ -15,16 +15,22 @@ import { exportMapToSvgString, createDefaultTile } from '../engine/mapEngine'
 import { MapState } from '../engine/types'
 
 describe('cartographicSymbolEngine - Whiteboard Cartography Tropes & Tile Variants', () => {
-  it('defines an expanded catalog with at least 80 whiteboard marker tropes across 4 categories', () => {
-    expect(CARTOGRAPHIC_SYMBOLS.length).toBeGreaterThanOrEqual(80)
+  it('defines an expanded catalog with at least 110 whiteboard marker tropes across 6 categories', () => {
+    expect(CARTOGRAPHIC_SYMBOLS.length).toBeGreaterThanOrEqual(110)
   })
 
-  it('contains at least 15 whiteboard tropes for each Genesis category', () => {
-    const categories: CartographicCategory[] = ['earth', 'water', 'plant', 'feature']
-    for (const cat of categories) {
+  it('contains at least 15 whiteboard tropes for Genesis categories, and comprehensive settlement and construction tropes', () => {
+    const genesisCategories: CartographicCategory[] = ['earth', 'water', 'plant', 'feature']
+    for (const cat of genesisCategories) {
       const symbols = getSymbolsByCategory(cat)
       expect(symbols.length).toBeGreaterThanOrEqual(15)
     }
+
+    const settlements = getSymbolsByCategory('settlement')
+    expect(settlements.length).toBeGreaterThanOrEqual(7)
+
+    const constructions = getSymbolsByCategory('construction')
+    expect(constructions.length).toBeGreaterThanOrEqual(9)
   })
 
   it('ensures all symbols have valid non-empty metadata fields including concept and variantName', () => {
@@ -171,6 +177,11 @@ describe('cartographicSymbolEngine - Whiteboard Cartography Tropes & Tile Varian
       expect(resolveCartographicSymbol({ overlay: 'cave' })).toBe('cave-maw')
       expect(resolveCartographicSymbol({ overlay: 'ruins' })).toBe('megalith-ring')
       expect(resolveCartographicSymbol({ overlay: 'myth' })).toBe('sacred-grove')
+      expect(resolveCartographicSymbol({ overlay: 'settlement' })).toBe('settle-village')
+      expect(resolveCartographicSymbol({ overlay: 'town' })).toBe('settle-town')
+      expect(resolveCartographicSymbol({ overlay: 'city' })).toBe('settle-town')
+      expect(resolveCartographicSymbol({ overlay: 'castle' })).toBe('const-castle')
+      expect(resolveCartographicSymbol({ overlay: 'monument' })).toBe('const-monument')
     })
 
     it('returns null when tile is a plain featureless background tile', () => {
@@ -179,17 +190,82 @@ describe('cartographicSymbolEngine - Whiteboard Cartography Tropes & Tile Varian
     })
   })
 
-  describe('Genesis Phase Preset Integration', () => {
+  describe('Multi-Stage Preset Diversity & Codex Icon Integration', () => {
     it('has expanded genesis presets covering all concepts and variants', () => {
       const genesisPresets = STAGE_ACTION_PRESETS.filter((p) => p.stage === 'genesis')
       expect(genesisPresets).toBeDefined()
       expect(genesisPresets.length).toBeGreaterThanOrEqual(80)
 
-      // Verify each preset that specifies a cartographicSymbol references a valid symbol
       for (const preset of genesisPresets) {
         if (preset.cartographicSymbol) {
           const sym = findSymbolById(preset.cartographicSymbol)
-          expect(sym, `Preset ${preset.id} references invalid symbol ${preset.cartographicSymbol}`).toBeDefined()
+          expect(sym, `Genesis preset ${preset.id} references invalid symbol ${preset.cartographicSymbol}`).toBeDefined()
+        }
+      }
+    })
+
+    it('has at least 30 rich presets for Primal stage with at least 8 per suit', () => {
+      const primalPresets = STAGE_ACTION_PRESETS.filter((p) => p.stage === 'primal' && !p.isDisaster)
+      expect(primalPresets.length).toBeGreaterThanOrEqual(30)
+
+      const suits = ['♠', '♥', '♣', '♦'] as const
+      for (const suit of suits) {
+        const suitPresets = primalPresets.filter((p) => p.suit === suit)
+        expect(suitPresets.length, `Primal suit ${suit} must have >= 8 presets`).toBeGreaterThanOrEqual(8)
+      }
+
+      for (const p of primalPresets) {
+        expect(p.name).toBeTruthy()
+        expect(p.icon).toBeTruthy()
+        expect(p.description).toBeTruthy()
+        expect(p.creativePrompt).toBeTruthy()
+        expect(p.exampleNarrative).toBeTruthy()
+        if (p.cartographicSymbol) {
+          expect(findSymbolById(p.cartographicSymbol), `Primal preset ${p.id} references invalid symbol ${p.cartographicSymbol}`).toBeDefined()
+        }
+      }
+    })
+
+    it('has at least 30 rich presets for Civilization stage with at least 8 per suit', () => {
+      const civPresets = STAGE_ACTION_PRESETS.filter((p) => p.stage === 'civilization' && !p.isDisaster)
+      expect(civPresets.length).toBeGreaterThanOrEqual(30)
+
+      const suits = ['♠', '♥', '♣', '♦'] as const
+      for (const suit of suits) {
+        const suitPresets = civPresets.filter((p) => p.suit === suit)
+        expect(suitPresets.length, `Civilization suit ${suit} must have >= 8 presets`).toBeGreaterThanOrEqual(8)
+      }
+
+      for (const p of civPresets) {
+        expect(p.name).toBeTruthy()
+        expect(p.icon).toBeTruthy()
+        expect(p.description).toBeTruthy()
+        expect(p.creativePrompt).toBeTruthy()
+        expect(p.exampleNarrative).toBeTruthy()
+        if (p.cartographicSymbol) {
+          expect(findSymbolById(p.cartographicSymbol), `Civilization preset ${p.id} references invalid symbol ${p.cartographicSymbol}`).toBeDefined()
+        }
+      }
+    })
+
+    it('has at least 30 rich presets for Intrigue stage with at least 8 per suit', () => {
+      const intriguePresets = STAGE_ACTION_PRESETS.filter((p) => p.stage === 'intrigue' && !p.isDisaster)
+      expect(intriguePresets.length).toBeGreaterThanOrEqual(30)
+
+      const suits = ['♠', '♥', '♣', '♦'] as const
+      for (const suit of suits) {
+        const suitPresets = intriguePresets.filter((p) => p.suit === suit)
+        expect(suitPresets.length, `Intrigue suit ${suit} must have >= 8 presets`).toBeGreaterThanOrEqual(8)
+      }
+
+      for (const p of intriguePresets) {
+        expect(p.name).toBeTruthy()
+        expect(p.icon).toBeTruthy()
+        expect(p.description).toBeTruthy()
+        expect(p.creativePrompt).toBeTruthy()
+        expect(p.exampleNarrative).toBeTruthy()
+        if (p.cartographicSymbol) {
+          expect(findSymbolById(p.cartographicSymbol), `Intrigue preset ${p.id} references invalid symbol ${p.cartographicSymbol}`).toBeDefined()
         }
       }
     })

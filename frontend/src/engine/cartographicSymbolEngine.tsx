@@ -1,6 +1,6 @@
 import React from 'react'
 
-export type CartographicCategory = 'earth' | 'water' | 'plant' | 'feature'
+export type CartographicCategory = 'earth' | 'water' | 'plant' | 'feature' | 'settlement' | 'construction'
 
 export interface CartographicSymbolMeta {
   id: string
@@ -1082,6 +1082,182 @@ export const CARTOGRAPHIC_SYMBOLS: CartographicSymbolMeta[] = [
     description: "Intersection of planetary telluric energy channels radiating magic.",
     tags: ["ley","nexus","magic","energy","arcane"],
   },
+  {
+    id: 'settle-hamlet',
+    name: 'Thatched Hearth Hamlet',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Thatched Hamlet',
+    category: 'settlement',
+    icon: '🛖',
+    description: "Cluster of rustic thatched roundhouses with rising woodsmoke.",
+    tags: ["settlement","hamlet","huts","rural","village"],
+  },
+  {
+    id: 'settle-village',
+    name: 'Timber Palisade Village',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Palisade Village',
+    category: 'settlement',
+    icon: '🏡',
+    description: "Fortified wooden stockade village protected by log ramparts.",
+    tags: ["settlement","village","palisade","stockade","timber"],
+  },
+  {
+    id: 'settle-town',
+    name: 'Walled Market Town',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Walled Town',
+    category: 'settlement',
+    icon: '🏘️',
+    description: "Bustling medieval market town with cobblestone square and belltower.",
+    tags: ["settlement","town","market","walled","civic"],
+  },
+  {
+    id: 'settle-nomad',
+    name: 'Nomadic Felt Yurt Camp',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Yurt Camp',
+    category: 'settlement',
+    icon: '⛺',
+    description: "Circle of portable felt yurts gathered around a central communal fire.",
+    tags: ["settlement","nomad","yurt","camp","tents"],
+  },
+  {
+    id: 'settle-cliff',
+    name: 'Stepped Cliffside Pueblo',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Cliffside Pueblo',
+    category: 'settlement',
+    icon: '🧗🏘️',
+    description: "Multi-tiered adobe dwellings carved into a protected canyon rock wall.",
+    tags: ["settlement","cliff","pueblo","adobe","canyon"],
+  },
+  {
+    id: 'settle-stilt',
+    name: 'Coastal Stilt Water Village',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Stilt Water Village',
+    category: 'settlement',
+    icon: '🛶🛖',
+    description: "Raised wooden platform dwellings elevated above tidal waters and marshes.",
+    tags: ["settlement","stilt","water","marsh","coastal"],
+  },
+  {
+    id: 'settle-outpost',
+    name: 'Frontier Stockade Outpost',
+    concept: 'settlement',
+    conceptLabel: 'Settlements',
+    variantName: 'Frontier Outpost',
+    category: 'settlement',
+    icon: '🚩🪵',
+    description: "Remote military stockade and supply depot watching the wilderness frontier.",
+    tags: ["settlement","outpost","frontier","fort","border"],
+  },
+  {
+    id: 'const-castle',
+    name: 'Feudal Castle Keep',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Castle Keep',
+    category: 'construction',
+    icon: '🏰',
+    description: "Imposing stone fortress keep with crenellated battlements and iron portcullis.",
+    tags: ["construction","castle","keep","fortress","bastion"],
+  },
+  {
+    id: 'const-citadel',
+    name: 'Mountain Peak Citadel',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Mountain Citadel',
+    category: 'construction',
+    icon: '⛰️🏰',
+    description: "Impregnable mountain redoubt crowning a sheer granite pinnacle.",
+    tags: ["construction","citadel","mountain","redoubt","bastion"],
+  },
+  {
+    id: 'const-port',
+    name: 'Deepwater Harbor & Port',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Harbor & Port',
+    category: 'construction',
+    icon: '⚓🏙️',
+    description: "Stone quays, drydocks, and deepwater piers sheltering naval fleets.",
+    tags: ["construction","port","harbor","naval","quays"],
+  },
+  {
+    id: 'const-bridge',
+    name: 'Arched Stone Bridge',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Stone Bridge',
+    category: 'construction',
+    icon: '🌉',
+    description: "Monumental masonry bridge spanning a canyon gorge or great river.",
+    tags: ["construction","bridge","river","crossing","arch"],
+  },
+  {
+    id: 'const-wall',
+    name: 'Great Border Wall',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Great Border Wall',
+    category: 'construction',
+    icon: '🧱🛡️',
+    description: "Continental fortification wall with crenellations, ditch, and watch garrisons.",
+    tags: ["construction","wall","border","rampart","defense"],
+  },
+  {
+    id: 'const-monument',
+    name: 'Monumental Stone Pyramid',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Monumental Pyramid',
+    category: 'construction',
+    icon: '🏛️🔺',
+    description: "Gigantic stepped wonder dedicated to the gods or celestial sovereigns.",
+    tags: ["construction","monument","pyramid","wonder","temple"],
+  },
+  {
+    id: 'const-university',
+    name: 'Grand Domed Academy',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Grand Academy',
+    category: 'construction',
+    icon: '🏛️📚',
+    description: "Collegiate library and domed academy housing the realm's scholars and scrolls.",
+    tags: ["construction","academy","university","library","dome"],
+  },
+  {
+    id: 'const-aqueduct',
+    name: 'Stone Water Aqueduct',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Stone Aqueduct',
+    category: 'construction',
+    icon: '🏛️💧',
+    description: "Elevated stone arcade channeling mountain spring water into cities.",
+    tags: ["construction","aqueduct","water","arches","civic"],
+  },
+  {
+    id: 'const-lighthouse',
+    name: 'Grand Coastal Beacon Lighthouse',
+    concept: 'construction',
+    conceptLabel: 'Constructions',
+    variantName: 'Lighthouse Beacon',
+    category: 'construction',
+    icon: '🗼💡',
+    description: "Towering stone lighthouse guiding ships safely past treacherous reefs.",
+    tags: ["construction","lighthouse","beacon","coast","tower"],
+  },
 ]
 
 export function getSymbolsByCategory(category: CartographicCategory): CartographicSymbolMeta[] {
@@ -1814,6 +1990,118 @@ export function renderCartographicMarkerSVG(
         </g>
       )
 
+    case 'settle-hamlet':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="14,14 8,24 20,24" fill={stroke} fillOpacity={fillOpacity * 1.8} /><rect x="10" y="24" width="8" height="12" fill={stroke} fillOpacity={fillOpacity} /><polygon points="30,12 22,22 38,22" fill={stroke} fillOpacity={fillOpacity * 1.8} /><rect x="25" y="22" width="10" height="14" fill={stroke} fillOpacity={fillOpacity} /><path d="M 14 12 Q 12 6, 16 2" strokeWidth={strokeWidth * 0.8} fill="none" /><line x1="6" y1="38" x2="42" y2="38" strokeWidth={strokeWidth * 1.1} />
+        </g>
+      )
+
+    case 'settle-village':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="10" y="20" width="28" height="18" fill={stroke} fillOpacity={fillOpacity} strokeWidth={strokeWidth * 1.3} /><polygon points="12,20 18,12 24,20" fill={stroke} /><polygon points="24,20 30,12 36,20" fill={stroke} /><rect x="22" y="28" width="4" height="10" fill={stroke} /><line x1="6" y1="38" x2="42" y2="38" strokeWidth={strokeWidth * 1.2} />
+        </g>
+      )
+
+    case 'settle-town':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="8" y="22" width="14" height="16" fill={stroke} fillOpacity={fillOpacity} /><polygon points="8,22 15,14 22,22" fill={stroke} fillOpacity={fillOpacity * 1.5} /><rect x="24" y="16" width="16" height="22" fill={stroke} fillOpacity={fillOpacity} /><polygon points="24,16 32,8 40,16" fill={stroke} fillOpacity={fillOpacity * 1.5} /><rect x="26" y="8" width="12" height="4" fill={stroke} /><line x1="4" y1="40" x2="44" y2="40" strokeWidth={strokeWidth * 1.3} />
+        </g>
+      )
+
+    case 'settle-nomad':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M 8 36 L 16 20 L 24 36 Z" fill={stroke} fillOpacity={fillOpacity * 1.5} /><line x1="16" y1="20" x2="16" y2="36" strokeWidth={strokeWidth * 0.8} /><path d="M 24 36 L 32 18 L 40 36 Z" fill={stroke} fillOpacity={fillOpacity * 1.5} /><line x1="32" y1="18" x2="32" y2="36" strokeWidth={strokeWidth * 0.8} /><circle cx="24" cy="38" r="1.5" fill={stroke} />
+        </g>
+      )
+
+    case 'settle-cliff':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M 4 8 L 40 8 L 44 42" strokeWidth={strokeWidth * 1.3} /><rect x="10" y="28" width="14" height="12" fill={stroke} fillOpacity={fillOpacity * 1.6} /><rect x="16" y="18" width="14" height="10" fill={stroke} fillOpacity={fillOpacity * 1.8} /><rect x="22" y="10" width="12" height="8" fill={stroke} fillOpacity={fillOpacity * 2.0} /><line x1="18" y1="18" x2="18" y2="28" strokeWidth={strokeWidth * 0.9} />
+        </g>
+      )
+
+    case 'settle-stilt':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="10,18 20,10 30,18" fill={stroke} fillOpacity={fillOpacity * 1.6} /><rect x="12" y="18" width="16" height="10" fill={stroke} fillOpacity={fillOpacity} /><line x1="14" y1="28" x2="14" y2="42" strokeWidth={strokeWidth * 1.4} /><line x1="26" y1="28" x2="26" y2="42" strokeWidth={strokeWidth * 1.4} /><path d="M 6 36 Q 24 32, 42 36" strokeWidth={strokeWidth * 1.1} /><path d="M 4 42 Q 24 38, 44 42" strokeWidth={strokeWidth * 1.1} />
+        </g>
+      )
+
+    case 'settle-outpost':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="14" y="18" width="20" height="20" fill={stroke} fillOpacity={fillOpacity * 1.3} strokeWidth={strokeWidth * 1.3} /><line x1="24" y1="18" x2="24" y2="6" strokeWidth={strokeWidth * 1.3} /><polygon points="24,6 32,9 24,12" fill={stroke} /><line x1="8" y1="38" x2="40" y2="38" strokeWidth={strokeWidth * 1.3} />
+        </g>
+      )
+
+    case 'const-castle':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="10" y="16" width="8" height="24" fill={stroke} fillOpacity={fillOpacity * 1.5} /><polygon points="9,16 14,10 19,16" fill={stroke} /><rect x="30" y="16" width="8" height="24" fill={stroke} fillOpacity={fillOpacity * 1.5} /><polygon points="29,16 34,10 39,16" fill={stroke} /><rect x="16" y="22" width="16" height="18" fill={stroke} fillOpacity={fillOpacity} /><path d="M 21 40 L 21 32 Q 24 28, 27 32 L 27 40" fill="#000" /><line x1="6" y1="40" x2="42" y2="40" strokeWidth={strokeWidth * 1.3} />
+        </g>
+      )
+
+    case 'const-citadel':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="6,42 24,16 42,42" fill={stroke} fillOpacity={fillOpacity} /><rect x="20" y="10" width="8" height="10" fill={stroke} fillOpacity={fillOpacity * 2} /><polygon points="19,10 24,4 29,10" fill={stroke} /><line x1="20" y1="10" x2="28" y2="10" strokeWidth={strokeWidth * 1.2} />
+        </g>
+      )
+
+    case 'const-port':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="6" y="26" width="22" height="14" fill={stroke} fillOpacity={fillOpacity} strokeWidth={strokeWidth * 1.2} /><path d="M 30 28 L 44 28 L 41 38 L 33 38 Z" fill={stroke} fillOpacity={fillOpacity * 1.8} /><line x1="37" y1="28" x2="37" y2="14" strokeWidth={strokeWidth * 1.2} /><polygon points="37,14 43,18 37,22" fill={stroke} fillOpacity={fillOpacity} /><path d="M 4 42 Q 24 38, 44 42" strokeWidth={strokeWidth * 1.1} />
+        </g>
+      )
+
+    case 'const-bridge':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="22" x2="44" y2="22" strokeWidth={strokeWidth * 1.6} /><path d="M 8 40 L 8 22 M 24 40 L 24 22 M 40 40 L 40 22" strokeWidth={strokeWidth * 1.4} /><path d="M 8 26 Q 16 26, 16 38" strokeWidth={strokeWidth * 1.1} fill="none" /><path d="M 24 26 Q 32 26, 32 38" strokeWidth={strokeWidth * 1.1} fill="none" /><path d="M 4 40 Q 24 36, 44 40" strokeWidth={strokeWidth * 0.9} strokeDasharray="3 2" />
+        </g>
+      )
+
+    case 'const-wall':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="20" x2="44" y2="20" strokeWidth={strokeWidth * 1.6} /><rect x="6" y="14" width="6" height="12" fill={stroke} fillOpacity={fillOpacity * 1.5} /><rect x="21" y="14" width="6" height="12" fill={stroke} fillOpacity={fillOpacity * 1.5} /><rect x="36" y="14" width="6" height="12" fill={stroke} fillOpacity={fillOpacity * 1.5} /><line x1="4" y1="36" x2="44" y2="36" strokeWidth={strokeWidth * 1.3} /><rect x="4" y="20" width="40" height="16" fill={stroke} fillOpacity={fillOpacity * 0.8} />
+        </g>
+      )
+
+    case 'const-monument':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="24,6 4,40 44,40" fill={stroke} fillOpacity={fillOpacity * 1.4} strokeWidth={strokeWidth * 1.3} /><path d="M 24 6 L 24 40" strokeWidth={strokeWidth * 1.2} /><line x1="16" y1="20" x2="32" y2="20" strokeWidth={strokeWidth * 0.8} /><line x1="10" y1="30" x2="38" y2="30" strokeWidth={strokeWidth * 0.8} />
+        </g>
+      )
+
+    case 'const-university':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M 12 18 Q 24 6, 36 18 Z" fill={stroke} fillOpacity={fillOpacity * 1.6} /><rect x="10" y="18" width="28" height="20" fill={stroke} fillOpacity={fillOpacity} strokeWidth={strokeWidth * 1.3} /><line x1="16" y1="18" x2="16" y2="38" strokeWidth={strokeWidth * 1.1} /><line x1="24" y1="18" x2="24" y2="38" strokeWidth={strokeWidth * 1.1} /><line x1="32" y1="18" x2="32" y2="38" strokeWidth={strokeWidth * 1.1} /><line x1="6" y1="40" x2="42" y2="40" strokeWidth={strokeWidth * 1.4} />
+        </g>
+      )
+
+    case 'const-aqueduct':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="16" x2="44" y2="16" strokeWidth={strokeWidth * 1.6} /><path d="M 8 16 Q 14 16, 14 30 L 14 42" strokeWidth={strokeWidth * 1.2} fill="none" /><path d="M 20 16 Q 26 16, 26 30 L 26 42" strokeWidth={strokeWidth * 1.2} fill="none" /><path d="M 32 16 Q 38 16, 38 30 L 38 42" strokeWidth={strokeWidth * 1.2} fill="none" /><line x1="4" y1="42" x2="44" y2="42" strokeWidth={strokeWidth * 1.2} />
+        </g>
+      )
+
+    case 'const-lighthouse':
+      return (
+        <g stroke={stroke} strokeWidth={strokeWidth} fill="none" opacity={opacity} strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="20,14 16,40 32,40 28,14" fill={stroke} fillOpacity={fillOpacity * 1.5} strokeWidth={strokeWidth * 1.3} /><rect x="18" y="8" width="12" height="6" fill={stroke} /><polygon points="18,8 24,2 30,8" fill={stroke} /><line x1="16" y1="10" x2="6" y2="6" strokeWidth={strokeWidth * 1.2} strokeDasharray="3 2" /><line x1="32" y1="10" x2="42" y2="6" strokeWidth={strokeWidth * 1.2} strokeDasharray="3 2" /><line x1="10" y1="40" x2="38" y2="40" strokeWidth={strokeWidth * 1.4} />
+        </g>
+      )
+
     default:
       return null
   }
@@ -1846,6 +2134,12 @@ export function resolveCartographicSymbol(tile: {
   if (tile.overlay === 'cave') return 'cave-maw'
   if (tile.overlay === 'ruins') return 'megalith-ring'
   if (tile.overlay === 'myth') return 'sacred-grove'
+  if (tile.overlay === 'settlement') return 'settle-village'
+  if (tile.overlay === 'town') return 'settle-town'
+  if (tile.overlay === 'city') return 'settle-town'
+  if (tile.overlay === 'capital') return 'const-castle'
+  if (tile.overlay === 'castle') return 'const-castle'
+  if (tile.overlay === 'monument') return 'const-monument'
   if (tile.terrain === 'mountain') return 'mountain-peak'
   if (tile.terrain === 'desert') return 'desert-dunes'
   if (tile.terrain === 'swamp') return 'swamp-mangrove'
