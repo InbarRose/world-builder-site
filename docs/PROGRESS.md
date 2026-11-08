@@ -157,6 +157,17 @@ status: active
   - [x] Dedicated "🖌️ Whiteboard Marker Tropes" drawer in `MapCanvas.tsx` with instant category filter pills and live SVG previews
   - [x] Tile Inspector trope selector and standalone SVG export integration in `mapEngine.ts`
   - [x] Automated unit test suite in `cartographicSymbolEngine.test.ts` (133/133 tests passing across 18 suites)
+- [x] **Phase 20.6: Comprehensive Genesis Variants Catalog & Multi-Tile Concepts** *(ADR-021)*
+  - [x] Expanded catalog to 97 hand-drawn Genesis whiteboard tropes across Earth (24), Water (24), Plant (20), and Features (29)
+  - [x] Multi-tile options for mountains (5), hills (4), canyons (4), deserts (4), caves (3), rivers (5), waterfalls (3), lakes (4), swamps (4), tidal pools (5), glaciers (3), maelstroms (2), forests (5), jungles (5), grasslands (4), marshes (4), geysers (4), craters (3), lava flows (3), salt flats (3), winds (3), currents (2), and resources (5)
+  - [x] Concept sub-filter bar in `MapCanvas.tsx` and grouped Tile Inspector optgroups
+  - [x] 101 Genesis presets in `presets.ts` with direct symbol mappings and creative prompts
+- [x] **Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System** *(ADR-022)*
+  - [x] Added 7 Settlement tropes (`settle-hamlet`, `settle-village`, `settle-town`, `settle-nomad`, `settle-cliff`, `settle-stilt`, `settle-outpost`) and 9 Construction tropes (`const-castle`, `const-citadel`, `const-port`, `const-bridge`, `const-wall`, `const-monument`, `const-university`, `const-aqueduct`, `const-lighthouse`) bringing catalog to 113 whiteboard tropes
+  - [x] Added `Towns` and `Monuments` tabs and inspector categories in `MapCanvas.tsx`
+  - [x] Expanded Primal (Stage 2), Civilization (Stage 3), and Intrigue (Stage 4) to 8+ rich presets per suit (97 multi-stage presets total)
+  - [x] Codex/archive icons, narrative examples, creative prompts, and abilities for all cultural traditions, resources, evolutionary skills, enlightenment, expansion, treaties, conflicts, schemes, and myths
+  - [x] Automated test suite in `cartographicSymbolEngine.test.ts` (138/138 tests passing across 18 suites)
 - [ ] **Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics** *(Target: 78.0 / 100)*
   - [ ] WebRTC / BroadcastChannel zero-server room sync where GM and players see card flips and map stamps in real-time
   - [ ] Tablet touch ergonomics (pinch-to-zoom, two-finger pan, 48px touch targets)
@@ -187,6 +198,8 @@ status: active
 - [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Score: 62.5 / 100).
 - [x] Implement Phase 20: Tabletop Campaign Bridge, Session Zero Primer & Collaborative Conclave Handoff (Score: 73.0 / 100).
 - [x] Implement Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase (ADR-020).
+- [x] Implement Phase 20.6: Comprehensive Genesis Variants Catalog & Multi-Tile Concepts (ADR-021).
+- [x] Implement Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System (ADR-022).
 - [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
 
 

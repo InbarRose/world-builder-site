@@ -2020,7 +2020,7 @@ export function MapCanvas({
                 </button>
               </div>
 
-              {/* Category Filter Pills: Earth, Water, Plant, Feature */}
+              {/* Category Filter Pills: Earth, Water, Plant, Feature, Settlement, Construction */}
               <div className="flex flex-wrap items-center gap-1.5">
                 {(
                   [
@@ -2028,6 +2028,8 @@ export function MapCanvas({
                     { id: 'water' as CartographicCategory, label: `♥ Water (${getSymbolsByCategory('water').length})` },
                     { id: 'plant' as CartographicCategory, label: `♣ Flora (${getSymbolsByCategory('plant').length})` },
                     { id: 'feature' as CartographicCategory, label: `♦ Feature (${getSymbolsByCategory('feature').length})` },
+                    { id: 'settlement' as CartographicCategory, label: `🏘️ Towns (${getSymbolsByCategory('settlement').length})` },
+                    { id: 'construction' as CartographicCategory, label: `🏰 Monuments (${getSymbolsByCategory('construction').length})` },
                   ]
                 ).map((cat) => (
                   <button
@@ -2880,13 +2882,13 @@ export function MapCanvas({
                       className="input w-full text-xs py-1 h-8"
                     >
                       <option value="">Auto (from relief/flora)</option>
-                      {(['earth', 'water', 'plant', 'feature'] as CartographicCategory[]).map(
+                      {(['earth', 'water', 'plant', 'feature', 'settlement', 'construction'] as CartographicCategory[]).map(
                         (cat) => (
                           <React.Fragment key={cat}>
                             {getConceptsByCategory(cat).map((concept) => (
                               <optgroup
                                 key={concept.id}
-                                label={`${cat === 'earth' ? '♠' : cat === 'water' ? '♥' : cat === 'plant' ? '♣' : '♦'} ${concept.label}`}
+                                label={`${cat === 'earth' ? '♠' : cat === 'water' ? '♥' : cat === 'plant' ? '♣' : cat === 'feature' ? '♦' : cat === 'settlement' ? '🏘️' : '🏰'} ${concept.label}`}
                               >
                                 {getSymbolsByConcept(concept.id).map((s) => (
                                   <option key={s.id} value={s.id}>
