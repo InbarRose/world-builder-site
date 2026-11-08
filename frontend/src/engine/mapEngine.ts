@@ -11,6 +11,7 @@ import {
   TileSlot,
   WorldEntity,
 } from './types'
+import { findSymbolById } from './cartographicSymbolEngine'
 import {
   computeTileNeighborContext,
   generateOrganicShadingSvgString,
@@ -698,6 +699,11 @@ export function exportMapToSvgString(
         } else if (slots.length >= 2) {
           rects += `<text x="${center.x - 7}" y="${center.y + 5}" font-size="15" text-anchor="middle">${slots[0].icon}</text>`
           rects += `<text x="${center.x + 9}" y="${center.y + 8}" font-size="12" text-anchor="middle">${slots[1].icon}</text>`
+        } else if (tile.cartographicSymbol) {
+          const sym = findSymbolById(tile.cartographicSymbol)
+          if (sym) {
+            rects += `<text x="${center.x}" y="${center.y + 6}" font-size="16" text-anchor="middle" opacity="0.85">${sym.icon}</text>`
+          }
         }
 
         if (tile.label) {
@@ -762,6 +768,11 @@ export function exportMapToSvgString(
           if (slots.length > 2) {
             rects += `<circle cx="${x + tileSize - 8}" cy="${y + 8}" r="6" fill="#1e293b" opacity="0.85" />`
             rects += `<text x="${x + tileSize - 8}" y="${y + 11}" font-size="7" fill="#ffffff" text-anchor="middle">+${slots.length - 2}</text>`
+          }
+        } else if (tile.cartographicSymbol) {
+          const sym = findSymbolById(tile.cartographicSymbol)
+          if (sym) {
+            rects += `<text x="${x + tileSize / 2}" y="${y + tileSize / 2 + 6}" font-size="16" text-anchor="middle" opacity="0.85">${sym.icon}</text>`
           }
         }
 
