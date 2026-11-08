@@ -826,6 +826,7 @@ export function Play() {
           if (selectedPreset.reliefChange) updated.relief = selectedPreset.reliefChange
           if (selectedPreset.floraChange) updated.flora = selectedPreset.floraChange
           if (selectedPreset.overlayChange) updated.overlay = selectedPreset.overlayChange
+          if (selectedPreset.cartographicSymbol) updated.cartographicSymbol = selectedPreset.cartographicSymbol
           if (selectedPreset.hasRiver) updated.hasRiver = true
           if (selectedPreset.hasRoad) updated.hasRoad = true
 

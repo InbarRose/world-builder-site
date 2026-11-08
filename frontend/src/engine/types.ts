@@ -210,6 +210,7 @@ export interface MapTile {
   }
   slots?: TileSlot[]
   overlay: TileOverlay
+  cartographicSymbol?: string
   hasRiver?: boolean
   hasRoad?: boolean
   isUnexplored?: boolean

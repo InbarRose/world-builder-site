@@ -78,6 +78,12 @@ import {
   generateConnectedPathD,
 } from '../engine/watershedPathEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
+import {
+  renderCartographicMarkerSVG,
+  resolveCartographicSymbol,
+  getSymbolsByCategory,
+  CartographicCategory,
+} from '../engine/cartographicSymbolEngine'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
 export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog' | 'ruler'
@@ -139,6 +145,8 @@ function TileCartographySvg({
   showRoads = true,
   riverAdjacencies = [],
   roadAdjacencies = [],
+  cartographicSymbol,
+  overlay,
 }: {
   col: number
   row: number
@@ -156,6 +164,8 @@ function TileCartographySvg({
   showRoads?: boolean
   riverAdjacencies?: OffsetCoord[]
   roadAdjacencies?: OffsetCoord[]
+  cartographicSymbol?: string
+  overlay?: TileOverlay
 }) {
   const v = getTileVariantSeed(col, row)
   const effectiveRelief = !showRelief
@@ -182,6 +192,18 @@ function TileCartographySvg({
       : 'none'
 
   const showOrganic = !simpleMode && enableOrganicShading
+
+  const effectiveCartoSymbol =
+    showRelief && !simpleMode
+      ? cartographicSymbol ||
+        resolveCartographicSymbol({
+          cartographicSymbol,
+          relief: effectiveRelief,
+          flora: effectiveFlora,
+          terrain,
+          overlay,
+        })
+      : null
 
   return (
     <svg
@@ -301,8 +323,15 @@ function TileCartographySvg({
         </g>
       )}
 
-      {/* Hand-Drawn Engraved Mountain / Hill / Volcano Silhouettes (4 Distinct Variants) */}
-      {!simpleMode && effectiveRelief === 'mountain' && (
+      {/* Hand-Drawn Whiteboard Cartographic Marker Symbol */}
+      {effectiveCartoSymbol && (
+        <g className="cartographic-marker-symbol">
+          {renderCartographicMarkerSVG(effectiveCartoSymbol)}
+        </g>
+      )}
+
+      {/* Hand-Drawn Engraved Mountain / Hill / Volcano Silhouettes (Legacy Fallbacks) */}
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'mountain' && (
         <g opacity="0.48">
           {v === 0 && (
             <>
@@ -337,7 +366,7 @@ function TileCartographySvg({
         </g>
       )}
 
-      {!simpleMode && effectiveRelief === 'hills' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'hills' && (
         <g stroke="#57534e" strokeWidth="1.4" fill="#a8a29e" fillOpacity="0.32">
           {v % 2 === 0 ? (
             <>
@@ -350,7 +379,7 @@ function TileCartographySvg({
         </g>
       )}
 
-      {!simpleMode && effectiveRelief === 'volcano' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'volcano' && (
         <g opacity="0.58">
           <polygon points="8,39 20,14 28,14 40,39" fill="#451a03" />
           <polygon points="20,14 28,14 25,22 22,20" fill="#ef4444" />
@@ -358,7 +387,7 @@ function TileCartographySvg({
       )}
 
       {/* Glacial Horns & Ice Massif Relief Silhouette */}
-      {!simpleMode && effectiveRelief === 'mountain-snow' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'mountain-snow' && (
         <g opacity="0.55">
           <polygon points="8,39 24,9 40,39" fill="#0f172a" />
           <polygon points="24,9 24,39 8,39" fill="#334155" />
@@ -369,7 +398,7 @@ function TileCartographySvg({
       )}
 
       {/* Continuous Triple-Peak Mountain Range Spine */}
-      {!simpleMode && effectiveRelief === 'mountain-range' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'mountain-range' && (
         <g opacity="0.52">
           <polygon points="2,39 14,14 26,39" fill="#44403c" />
           <polygon points="18,39 30,10 42,39" fill="#292524" />
@@ -381,7 +410,7 @@ function TileCartographySvg({
       )}
 
       {/* Stepped Flat-Topped Mesa & Tableland */}
-      {!simpleMode && effectiveRelief === 'mesa' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'mesa' && (
         <g opacity="0.6">
           <polygon points="6,39 12,18 36,18 42,39" fill="#78350f" />
           <polygon points="12,18 36,18 34,22 14,22" fill="#d97706" />
@@ -391,7 +420,7 @@ function TileCartographySvg({
       )}
 
       {/* Obsidian Crags & Needle Spires */}
-      {!simpleMode && effectiveRelief === 'crag' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'crag' && (
         <g opacity="0.55">
           <polygon points="6,39 12,12 16,39" fill="#1c1917" />
           <polygon points="18,39 25,8 29,39" fill="#292524" />
@@ -401,7 +430,7 @@ function TileCartographySvg({
       )}
 
       {/* Deep Canyon Rift Silhouette */}
-      {!simpleMode && effectiveRelief === 'canyon' && (
+      {!simpleMode && !effectiveCartoSymbol && effectiveRelief === 'canyon' && (
         <g opacity="0.55">
           <path d="M 14 0 Q 22 18, 18 30 T 28 48 L 34 48 Q 24 30, 28 18 T 20 0 Z" fill="#451a03" />
           <path d="M 16 0 Q 24 18, 20 30 T 30 48" stroke="#f59e0b" strokeWidth="0.8" fill="none" opacity="0.6" />
@@ -409,7 +438,7 @@ function TileCartographySvg({
       )}
 
       {/* Varied Organic Forest / Canopy Silhouette Clusters */}
-      {!simpleMode && (effectiveFlora === 'forest' || effectiveFlora === 'jungle') && (
+      {!simpleMode && !effectiveCartoSymbol && (effectiveFlora === 'forest' || effectiveFlora === 'jungle') && (
         <g fill={effectiveFlora === 'jungle' ? '#14532d' : '#166534'} opacity="0.38">
           {v === 0 && (
             <>
@@ -578,6 +607,8 @@ export function MapCanvas({
   const [selectedColoringMode, setSelectedColoringMode] =
     useState<TileColoringMode>('fill')
   const [selectedOverlay, setSelectedOverlay] = useState<TileOverlay>('none')
+  const [selectedCartographicSymbol, setSelectedCartographicSymbol] = useState<string | null>(null)
+  const [activeMarkerCategory, setActiveMarkerCategory] = useState<CartographicCategory>('earth')
   const [paintRiver, setPaintRiver] = useState(false)
   const [paintRoad, setPaintRoad] = useState(false)
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('')
@@ -899,6 +930,7 @@ export function MapCanvas({
           hasRoad: false,
           territoryId: undefined,
           label: undefined,
+          cartographicSymbol: undefined,
         }
       }
       onChange({ ...map, tiles: nextTiles })
@@ -953,6 +985,10 @@ export function MapCanvas({
           hasRiver: paintRiver ? true : existing.hasRiver,
           hasRoad: paintRoad ? true : existing.hasRoad,
           territoryId: selectedTerritoryId || existing.territoryId,
+          cartographicSymbol:
+            selectedCartographicSymbol !== null
+              ? selectedCartographicSymbol || undefined
+              : existing.cartographicSymbol,
         }
       }
       onChange({ ...map, tiles: nextTiles })
@@ -1954,6 +1990,95 @@ export function MapCanvas({
                 </select>
               </div>
             )}
+
+            {/* Whiteboard Marker Tropes (48 Tabletop Cartography Symbols) */}
+            <div className="pt-2.5 border-t border-border/70 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <span>🖌️</span>
+                    <span>Whiteboard Marker Tropes (48 Genesis Symbols)</span>
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Tabletop hand-drawn cartography silhouettes
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCartographicSymbol(null)}
+                  className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
+                    selectedCartographicSymbol === null
+                      ? 'bg-primary text-primary-foreground border-primary font-medium'
+                      : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                  title="Revert to automatic relief & flora silhouettes"
+                >
+                  Auto / None
+                </button>
+              </div>
+
+              {/* Category Filter Pills: Earth, Water, Plant, Feature */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(
+                  [
+                    { id: 'earth' as CartographicCategory, label: '♠ Earth (12)' },
+                    { id: 'water' as CartographicCategory, label: '♥ Water (12)' },
+                    { id: 'plant' as CartographicCategory, label: '♣ Flora (12)' },
+                    { id: 'feature' as CartographicCategory, label: '♦ Feature (12)' },
+                  ]
+                ).map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setActiveMarkerCategory(cat.id)}
+                    className={`text-[11px] px-2.5 py-0.5 rounded-full border transition-all ${
+                      activeMarkerCategory === cat.id
+                        ? 'bg-primary/20 border-primary text-primary font-semibold'
+                        : 'border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* 12 Tropes for Active Category */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 max-h-52 overflow-y-auto p-1 bg-muted/20 rounded border border-border/50">
+                {getSymbolsByCategory(activeMarkerCategory).map((sym) => {
+                  const isSelected = selectedCartographicSymbol === sym.id
+                  return (
+                    <button
+                      key={sym.id}
+                      type="button"
+                      onClick={() =>
+                        setSelectedCartographicSymbol(isSelected ? null : sym.id)
+                      }
+                      className={`p-1.5 rounded-lg border text-left flex items-center gap-2 transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/20 ring-2 ring-primary text-foreground font-semibold shadow-sm'
+                          : 'border-border/80 bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground'
+                      }`}
+                      title={`${sym.name} (${sym.icon}): ${sym.description}`}
+                    >
+                      <svg
+                        viewBox="0 0 48 48"
+                        className="w-7 h-7 shrink-0 rounded bg-muted/50 p-0.5 border border-border/40"
+                      >
+                        {renderCartographicMarkerSVG(sym.id)}
+                      </svg>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[11px] truncate leading-tight font-medium">
+                          {sym.name}
+                        </div>
+                        <div className="text-[9px] text-muted-foreground truncate">
+                          {sym.icon}
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -2174,6 +2299,8 @@ export function MapCanvas({
                             showRoads={visibleLayers.roads}
                             riverAdjacencies={getConnectedRiverAdjacencies(map, col, row)}
                             roadAdjacencies={getConnectedRoadAdjacencies(map, col, row)}
+                            cartographicSymbol={tile.cartographicSymbol}
+                            overlay={tile.overlay}
                           />
 
                           {/* Crisp Hexagonal Polygon Stroke Outline */}
@@ -2639,7 +2766,7 @@ export function MapCanvas({
             {!isViewOnly && (
               <>
                 {/* Base Terrain, Coloring Style & Custom Colors */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground block mb-1">
                       Base Biome
@@ -2682,22 +2809,66 @@ export function MapCanvas({
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Coloring Mode
+                      Flora Slot
                     </label>
                     <select
-                      value={inspectedTile.coloringMode || 'fill'}
+                      value={inspectedTile.flora || 'none'}
                       onChange={(e) =>
                         handleUpdateInspectedTile({
-                          coloringMode: e.target.value as TileColoringMode,
+                          flora: e.target.value as FloraType,
                         })
                       }
                       className="input w-full text-xs py-1 h-8"
                     >
-                      {COLORING_MODES.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.label}
+                      {Object.values(FLORA_PALETTE).map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.symbol ? `${f.symbol} ${f.label}` : 'None'}
                         </option>
                       ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Cartographic Trope
+                    </label>
+                    <select
+                      value={inspectedTile.cartographicSymbol || ''}
+                      onChange={(e) =>
+                        handleUpdateInspectedTile({
+                          cartographicSymbol: e.target.value || undefined,
+                        })
+                      }
+                      className="input w-full text-xs py-1 h-8"
+                    >
+                      <option value="">Auto (from relief/flora)</option>
+                      <optgroup label="♠ Earth Tropes (12)">
+                        {getSymbolsByCategory('earth').map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.icon} {s.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="♥ Water Tropes (12)">
+                        {getSymbolsByCategory('water').map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.icon} {s.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="♣ Flora Tropes (12)">
+                        {getSymbolsByCategory('plant').map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.icon} {s.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="♦ Feature Tropes (12)">
+                        {getSymbolsByCategory('feature').map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.icon} {s.name}
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
                 </div>
