@@ -14,6 +14,7 @@ import {
   Shield,
   Palette,
   Scroll,
+  Radio,
 } from 'lucide-react'
 import { GameMode, WorldState } from '../engine/types'
 
@@ -46,6 +47,7 @@ interface CommandPaletteProps {
   onOpenCampaignHooksModal?: () => void
   onOpenSessionZeroPrimerModal?: () => void
   onOpenCompendiumModal?: () => void
+  onOpenTableSyncModal?: () => void
   onOpenCodexEntity?: (entityId: string) => void
   onReturnToLauncher: () => void
   onOpenShortcutsModal: () => void
@@ -70,6 +72,7 @@ export function CommandPalette({
   onOpenCampaignHooksModal,
   onOpenSessionZeroPrimerModal,
   onOpenCompendiumModal,
+  onOpenTableSyncModal,
   onOpenCodexEntity,
   onReturnToLauncher,
   onOpenShortcutsModal,
@@ -213,6 +216,17 @@ export function CommandPalette({
         onSelect: () => {
           onClose()
           onOpenSessionZeroPrimerModal?.()
+        },
+      },
+      {
+        id: 'action_table_peer_sync',
+        title: '📡 Real-Time Table & Second-Screen Sync',
+        category: 'Tabletop Actions',
+        description: 'Synchronize card draws, map stamps, and turns across second screens or peers',
+        icon: <Radio className="h-4 w-4 text-emerald-500" />,
+        onSelect: () => {
+          onClose()
+          onOpenTableSyncModal?.()
         },
       },
       {

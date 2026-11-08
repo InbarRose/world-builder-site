@@ -33,8 +33,12 @@ import {
   Search,
   Keyboard,
   X,
+  Radio,
+  Sliders,
 } from 'lucide-react'
 import {
+  BotPersonalityId,
+  BotPersonalityWeights,
   Card,
   DrawRecord,
   GameMode,
@@ -84,6 +88,7 @@ import {
   PLAYER_COLORS,
   StageActionPreset,
   getActionPresetsForDraw,
+  getEffectiveBotWeights,
 } from '../engine/presets'
 import {
   StudioConceptGroup,
@@ -115,6 +120,14 @@ import { KeyboardShortcutsModal } from '../components/KeyboardShortcutsModal'
 import { CampaignHooksModal } from '../components/CampaignHooksModal'
 import { PresetCompendiumModal } from '../components/PresetCompendiumModal'
 import { SessionZeroPrimerModal } from '../components/SessionZeroPrimerModal'
+import { TableSyncModal } from '../components/TableSyncModal'
+import {
+  TablePeerSession,
+  PeerNodeInfo,
+  PeerRole,
+  generateRoomCode,
+  shouldAcceptIncomingWorldSync,
+} from '../engine/peerSyncEngine'
 import {
   getRandomCreativeSpark,
   CreativeSpark,
@@ -217,6 +230,29 @@ export function Play() {
   const [showCampaignHooksModal, setShowCampaignHooksModal] = useState(false)
   const [showSessionZeroPrimerModal, setShowSessionZeroPrimerModal] = useState(false)
   const [showCompendiumModal, setShowCompendiumModal] = useState(false)
+  const [showTableSyncModal, setShowTableSyncModal] = useState(false)
+  const [showInlineBotWeightTuner, setShowInlineBotWeightTuner] = useState(false)
+  const [isSyncActive, setIsSyncActive] = useState(false)
+  const [syncRoomCode, setSyncRoomCode] = useState<string>(() => {
+    const paramRoom = searchParams.get('syncRoom')
+    return paramRoom || generateRoomCode(world.id)
+  })
+  const [syncPeerRole, setSyncPeerRole] = useState<PeerRole>(() => {
+    const paramRole = searchParams.get('syncRole')
+    if (paramRole === 'host' || paramRole === 'co-creator' || paramRole === 'spectator') {
+      return paramRole
+    }
+    return 'host'
+  })
+  const [syncDisplayName, setSyncDisplayName] = useState('Tabletop Facilitator')
+  const [syncClaimedSeatId, setSyncClaimedSeatId] = useState<string | undefined>(undefined)
+  const [connectedPeers, setConnectedPeers] = useState<PeerNodeInfo[]>([])
+  const [syncStats, setSyncStats] = useState({
+    packetsSent: 0,
+    packetsReceived: 0,
+    revision: 1,
+  })
+  const peerSessionRef = useRef<TablePeerSession | null>(null)
   const [activeCreativeSpark, setActiveCreativeSpark] = useState<CreativeSpark | null>(null)
   const [conclaveHandoff, setConclaveHandoff] = useState<{
     active: boolean
@@ -244,7 +280,7 @@ export function Play() {
     const view = searchParams.get('view')
     const menu = searchParams.get('menu')
     if (view === 'launcher' || menu === 'true') return true
-    if (searchParams.get('world')) return false
+    if (searchParams.get('world') || searchParams.get('syncRoom')) return false
     return true
   })
 
@@ -271,8 +307,117 @@ export function Play() {
       const next = saveWorld(updater(prev))
       saveWorldAsync(next).catch(() => {})
       setSavedWorlds(listSavedWorlds())
+      if (peerSessionRef.current && peerSessionRef.current.getRole() !== 'spectator') {
+        peerSessionRef.current.broadcastWorldState(next)
+        setSyncStats(peerSessionRef.current.getStats())
+      }
       return next
     })
+  }, [])
+
+  const handleStartTableSync = useCallback(
+    (options: {
+      roomCode: string
+      role: PeerRole
+      displayName: string
+      claimedSeatId?: string
+    }) => {
+      if (peerSessionRef.current) {
+        peerSessionRef.current.stop()
+      }
+      const session = new TablePeerSession({
+        roomCode: options.roomCode,
+        displayName: options.displayName,
+        role: options.role,
+        claimedSeatId: options.claimedSeatId,
+        callbacks: {
+          onWorldSync: (incomingWorld, envelope) => {
+            setWorld((prev) => {
+              const localRev = peerSessionRef.current?.getRevision() ?? 1
+              if (
+                shouldAcceptIncomingWorldSync(
+                  prev,
+                  incomingWorld,
+                  envelope.revision,
+                  localRev - 1
+                )
+              ) {
+                const saved = saveWorld(incomingWorld)
+                saveWorldAsync(saved).catch(() => {})
+                setSavedWorlds(listSavedWorlds())
+                return saved
+              }
+              return prev
+            })
+            if (peerSessionRef.current) {
+              setSyncStats(peerSessionRef.current.getStats())
+            }
+          },
+          onCardDrawn: (card) => {
+            if (card !== undefined) {
+              setDrawnCard(card)
+              playCardFlipSound()
+            }
+          },
+          onTileSpotlight: (tileId) => {
+            setSelectedTileId(tileId)
+          },
+          onPeersChanged: (peers) => {
+            setConnectedPeers(peers)
+            if (peerSessionRef.current) {
+              setSyncStats(peerSessionRef.current.getStats())
+            }
+          },
+          onRequestSync: () => {
+            if (peerSessionRef.current && peerSessionRef.current.getRole() === 'host') {
+              peerSessionRef.current.broadcastWorldState(world, drawnCard, powerData?.power)
+              setSyncStats(peerSessionRef.current.getStats())
+            }
+          },
+        },
+      })
+      peerSessionRef.current = session
+      session.start()
+      setSyncRoomCode(session.roomCode)
+      setSyncPeerRole(options.role)
+      setSyncDisplayName(options.displayName)
+      setSyncClaimedSeatId(options.claimedSeatId)
+      setIsSyncActive(true)
+      setSyncStats(session.getStats())
+    },
+    [world, drawnCard, powerData]
+  )
+
+  const handleStopTableSync = useCallback(() => {
+    if (peerSessionRef.current) {
+      peerSessionRef.current.stop()
+      peerSessionRef.current = null
+    }
+    setIsSyncActive(false)
+    setConnectedPeers([])
+  }, [])
+
+  useEffect(() => {
+    const paramRoom = searchParams.get('syncRoom')
+    const paramRole = searchParams.get('syncRole') as PeerRole | null
+    if (paramRoom && !peerSessionRef.current) {
+      handleStartTableSync({
+        roomCode: paramRoom,
+        role:
+          paramRole === 'spectator' || paramRole === 'co-creator'
+            ? paramRole
+            : 'spectator',
+        displayName:
+          paramRole === 'spectator' ? 'Tabletop TV Display' : 'Co-Creator Screen',
+      })
+    }
+    return () => {
+      if (peerSessionRef.current) {
+        peerSessionRef.current.stop()
+        peerSessionRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Sync URL ?mode= param if navigated from Home Launchpad
@@ -1444,6 +1589,22 @@ export function Play() {
               <FileText className="h-3.5 w-3.5" />
               <span className="hidden lg:inline">Primer</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setShowTableSyncModal(true)}
+              aria-label="Real-Time Table Peer Synchronization"
+              className={`btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${
+                isSyncActive
+                  ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/40 bg-emerald-500/10'
+                  : 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10'
+              }`}
+              title="Real-Time Table Peer & Second-Screen TV Sync"
+            >
+              <Radio className={`h-3.5 w-3.5 ${isSyncActive ? 'animate-pulse' : ''}`} />
+              <span className="hidden lg:inline">
+                {isSyncActive ? `Sync (${connectedPeers.length + 1})` : 'Table Sync'}
+              </span>
+            </button>
 
             {/* Share & Export Popover */}
             <div className="relative">
@@ -1497,6 +1658,17 @@ export function Play() {
                   >
                     <FileText className="h-3.5 w-3.5" />
                     <span>📜 Session Zero Primer Handout</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowTableSyncModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-400"
+                  >
+                    <Radio className="h-3.5 w-3.5" />
+                    <span>📡 Live Table &amp; TV Sync</span>
                   </button>
                   <div className="border-t border-border my-1" />
                   <button
@@ -2665,14 +2837,136 @@ export function Play() {
                                   >
                                     {showAffinityDetails ? 'Hide Rationale' : 'Why this Pick?'}
                                   </button>
+                                  {!world.isLocked && activePlayer && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowInlineBotWeightTuner((prev) => !prev)}
+                                      className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 ${
+                                        showInlineBotWeightTuner
+                                          ? 'bg-primary text-primary-foreground border-primary'
+                                          : 'bg-background border-border hover:bg-muted'
+                                      }`}
+                                      title="Live-adjust active seat bot personality & decision weights"
+                                    >
+                                      <Sliders className="h-3 w-3" />
+                                      <span>Tune Weights</span>
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => setShowPlayersModal(true)}
                                     className="p-1 rounded-lg hover:bg-muted text-muted-foreground"
-                                    title="Configure bot decision weights & personality"
+                                    title="Configure full player council & bot roster"
                                   >
                                     <Settings className="h-3.5 w-3.5" />
                                   </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Inline Live Bot Personality & Weight Tuner (Editable Mid-Session) */}
+                            {showInlineBotWeightTuner && !world.isLocked && activePlayer && (
+                              <div
+                                data-testid="inline-bot-weight-tuner"
+                                className="p-3.5 rounded-xl bg-card border border-primary/40 text-xs space-y-3 animate-in fade-in duration-150"
+                              >
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2">
+                                  <div className="font-bold flex items-center gap-1.5">
+                                    <Sliders className="h-3.5 w-3.5 text-primary" />
+                                    <span>
+                                      Live Bot Weight Tuner: {activePlayer.name} ({activePlayer.role})
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <label
+                                      htmlFor="inline-bot-personality-select"
+                                      className="text-[10px] font-semibold text-muted-foreground"
+                                    >
+                                      Archetype:
+                                    </label>
+                                    <select
+                                      id="inline-bot-personality-select"
+                                      value={activePlayer.personality}
+                                      onChange={(e) => {
+                                        const nextPersonality = e.target.value as BotPersonalityId
+                                        persistWorldUpdate((prev) => ({
+                                          ...prev,
+                                          players: prev.players.map((p) =>
+                                            p.id === activePlayer.id
+                                              ? {
+                                                  ...p,
+                                                  personality: nextPersonality,
+                                                  customWeights: undefined,
+                                                }
+                                              : p
+                                          ),
+                                        }))
+                                      }}
+                                      className="input h-7 text-xs py-0 px-2"
+                                    >
+                                      {Object.values(BOT_PERSONALITIES).map((bp) => (
+                                        <option key={bp.id} value={bp.id}>
+                                          {bp.icon} {bp.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                                  {(
+                                    [
+                                      { key: 'geography', label: 'Geography', icon: '🏔️' },
+                                      { key: 'ecology', label: 'Ecology', icon: '🌿' },
+                                      { key: 'civilization', label: 'Civilization', icon: '🏛️' },
+                                      { key: 'diplomacy', label: 'Diplomacy', icon: '📜' },
+                                      { key: 'conflict', label: 'Conflict', icon: '⚔️' },
+                                      { key: 'myth', label: 'Myth & Magic', icon: '✨' },
+                                    ] as { key: keyof BotPersonalityWeights; label: string; icon: string }[]
+                                  ).map((w) => {
+                                    const currentWeights = getEffectiveBotWeights(activePlayer)
+                                    return (
+                                      <div
+                                        key={w.key}
+                                        className="p-2 rounded-lg bg-muted/30 border border-border/60 space-y-1"
+                                      >
+                                        <div className="flex items-center justify-between text-[11px]">
+                                          <span className="font-medium">
+                                            {w.icon} {w.label}
+                                          </span>
+                                          <span className="font-mono font-bold text-primary">
+                                            {currentWeights[w.key]}%
+                                          </span>
+                                        </div>
+                                        <input
+                                          type="range"
+                                          aria-label={`Tune ${w.label} weight`}
+                                          min="0"
+                                          max="100"
+                                          step="5"
+                                          value={currentWeights[w.key]}
+                                          onChange={(e) => {
+                                            const val = parseInt(e.target.value, 10)
+                                            persistWorldUpdate((prev) => ({
+                                              ...prev,
+                                              players: prev.players.map((p) =>
+                                                p.id === activePlayer.id
+                                                  ? {
+                                                      ...p,
+                                                      customWeights: {
+                                                        ...currentWeights,
+                                                        [w.key]: val,
+                                                      },
+                                                    }
+                                                  : p
+                                              ),
+                                            }))
+                                          }}
+                                          className="w-full h-1.5"
+                                        />
+                                      </div>
+                                    )
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -3627,6 +3921,43 @@ export function Play() {
         currentStage={currentStage}
       />
 
+      {/* Real-Time Table Peer & Second-Screen Sync Modal */}
+      <TableSyncModal
+        isOpen={showTableSyncModal}
+        onClose={() => setShowTableSyncModal(false)}
+        isSyncActive={isSyncActive}
+        roomCode={syncRoomCode}
+        peerRole={syncPeerRole}
+        displayName={syncDisplayName}
+        claimedSeatId={syncClaimedSeatId}
+        connectedPeers={connectedPeers}
+        syncStats={syncStats}
+        players={players}
+        onStartSync={handleStartTableSync}
+        onStopSync={handleStopTableSync}
+        onPushManualSync={() => {
+          if (peerSessionRef.current) {
+            peerSessionRef.current.broadcastWorldState(world, drawnCard, powerData?.power)
+            setSyncStats(peerSessionRef.current.getStats())
+          }
+        }}
+        onCreateWebRtcOffer={
+          peerSessionRef.current
+            ? () => peerSessionRef.current!.createWebRtcOfferToken()
+            : undefined
+        }
+        onAcceptWebRtcOffer={
+          peerSessionRef.current
+            ? (token) => peerSessionRef.current!.acceptWebRtcOfferAndCreateAnswer(token)
+            : undefined
+        }
+        onAcceptWebRtcAnswer={
+          peerSessionRef.current
+            ? (token) => peerSessionRef.current!.acceptWebRtcAnswerToken(token)
+            : undefined
+        }
+      />
+
       {/* Global Spotlight Command Palette (Ctrl+K) */}
       <CommandPalette
         isOpen={showCommandPalette}
@@ -3647,6 +3978,7 @@ export function Play() {
         onOpenCampaignHooksModal={() => setShowCampaignHooksModal(true)}
         onOpenSessionZeroPrimerModal={() => setShowSessionZeroPrimerModal(true)}
         onOpenCompendiumModal={() => setShowCompendiumModal(true)}
+        onOpenTableSyncModal={() => setShowTableSyncModal(true)}
         onOpenCodexEntity={(eid) => setFlyoutEntityId(eid)}
         onReturnToLauncher={handleReturnToLauncher}
         onOpenShortcutsModal={() => setShowShortcutsModal(true)}

@@ -87,6 +87,13 @@ import {
   CartographicCategory,
 } from '../engine/cartographicSymbolEngine'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
+import {
+  TouchPoint,
+  getTouchDistance,
+  getTouchMidpoint,
+  computePinchZoomDelta,
+  computeTwoFingerPanDelta,
+} from '../engine/peerSyncEngine'
 
 export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog' | 'ruler'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
@@ -715,6 +722,92 @@ export function MapCanvas({
     if (isPanning) {
       setIsPanning(false)
       panStartRef.current = null
+    }
+  }
+
+  // Multi-Touch Pinch-to-Zoom & Two-Finger Pan State for Tablet Session Zero (M4.2)
+  const touchGestureRef = useRef<{
+    mode: 'single-pan' | 'pinch-pan'
+    startX: number
+    startY: number
+    camX: number
+    camY: number
+    prevDistance: number
+    prevMidpoint: TouchPoint
+  } | null>(null)
+
+  const handleViewportTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const p1: TouchPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      const p2: TouchPoint = { x: e.touches[1].clientX, y: e.touches[1].clientY }
+      setIsPanning(true)
+      touchGestureRef.current = {
+        mode: 'pinch-pan',
+        startX: 0,
+        startY: 0,
+        camX: camera.x,
+        camY: camera.y,
+        prevDistance: getTouchDistance(p1, p2),
+        prevMidpoint: getTouchMidpoint(p1, p2),
+      }
+    } else if (e.touches.length === 1 && (activeTool === 'pan' || isViewOnly)) {
+      const t = e.touches[0]
+      setIsPanning(true)
+      touchGestureRef.current = {
+        mode: 'single-pan',
+        startX: t.clientX,
+        startY: t.clientY,
+        camX: camera.x,
+        camY: camera.y,
+        prevDistance: 0,
+        prevMidpoint: { x: t.clientX, y: t.clientY },
+      }
+    }
+  }
+
+  const handleViewportTouchMove = (e: React.TouchEvent) => {
+    if (!touchGestureRef.current) return
+    if (e.touches.length === 2 && touchGestureRef.current.mode === 'pinch-pan') {
+      const p1: TouchPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      const p2: TouchPoint = { x: e.touches[1].clientX, y: e.touches[1].clientY }
+      const nextDist = getTouchDistance(p1, p2)
+      const nextMid = getTouchMidpoint(p1, p2)
+      const prevDist = touchGestureRef.current.prevDistance
+      const prevMid = touchGestureRef.current.prevMidpoint
+
+      setCamera((prev) => {
+        const panned = computeTwoFingerPanDelta(prevMid, nextMid, {
+          x: prev.x,
+          y: prev.y,
+        })
+        const nextZoom = computePinchZoomDelta(prevDist, nextDist, prev.zoom, 0.4, 2.5)
+        return {
+          x: panned.x,
+          y: panned.y,
+          zoom: nextZoom,
+        }
+      })
+
+      touchGestureRef.current.prevDistance = nextDist
+      touchGestureRef.current.prevMidpoint = nextMid
+    } else if (e.touches.length === 1 && touchGestureRef.current.mode === 'single-pan') {
+      const t = e.touches[0]
+      const dx = t.clientX - touchGestureRef.current.startX
+      const dy = t.clientY - touchGestureRef.current.startY
+      if (Math.hypot(dx, dy) > 4) {
+        setCamera((prev) => ({
+          ...prev,
+          x: touchGestureRef.current!.camX + dx,
+          y: touchGestureRef.current!.camY + dy,
+        }))
+      }
+    }
+  }
+
+  const handleViewportTouchEnd = () => {
+    if (touchGestureRef.current) {
+      touchGestureRef.current = null
+      setIsPanning(false)
     }
   }
 
@@ -2170,11 +2263,16 @@ export function MapCanvas({
           {/* 60fps Smooth Camera Viewport Container */}
           <div
             ref={viewportContainerRef}
-            className="relative overflow-hidden rounded-xl border border-border/80 bg-stone-900/5 dark:bg-black/30 select-none min-h-[460px] flex items-center justify-center p-4"
+            data-testid="atlas-viewport-container"
+            className="relative overflow-hidden rounded-xl border border-border/80 bg-stone-900/5 dark:bg-black/30 select-none min-h-[460px] flex items-center justify-center p-4 touch-none"
             onMouseDown={handleViewportMouseDown}
             onMouseMove={handleViewportMouseMove}
             onMouseUp={handleViewportMouseUp}
             onMouseLeave={handleViewportMouseUp}
+            onTouchStart={handleViewportTouchStart}
+            onTouchMove={handleViewportTouchMove}
+            onTouchEnd={handleViewportTouchEnd}
+            onTouchCancel={handleViewportTouchEnd}
             style={{
               cursor: isPanning
                 ? 'grabbing'

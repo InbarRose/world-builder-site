@@ -403,5 +403,31 @@ describe('MapCanvas Component', () => {
     const settlementTile = screen.getByTestId('map-tile-1-4')
     expect(settlementTile).toBeInTheDocument()
   })
+
+  it('supports tablet two-finger pinch-to-zoom and touch pan gestures on the viewport', () => {
+    const map = createInitialMap(8, 8)
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={() => {}} />)
+
+    const viewport = screen.getByTestId('atlas-viewport-container')
+    expect(viewport).toBeInTheDocument()
+
+    // Simulate two-finger touch start at (100,100) and (200,100) -> distance 100
+    fireEvent.touchStart(viewport, {
+      touches: [
+        { clientX: 100, clientY: 100 },
+        { clientX: 200, clientY: 100 },
+      ],
+    })
+
+    // Simulate two-finger spread to (80,120) and (240,120) -> distance 160 & pan down +20px
+    fireEvent.touchMove(viewport, {
+      touches: [
+        { clientX: 80, clientY: 120 },
+        { clientX: 240, clientY: 120 },
+      ],
+    })
+
+    fireEvent.touchEnd(viewport, { touches: [] })
+  })
 })
 
