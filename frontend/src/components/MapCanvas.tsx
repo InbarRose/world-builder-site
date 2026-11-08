@@ -82,6 +82,8 @@ import {
   renderCartographicMarkerSVG,
   resolveCartographicSymbol,
   getSymbolsByCategory,
+  getSymbolsByConcept,
+  getConceptsByCategory,
   CartographicCategory,
 } from '../engine/cartographicSymbolEngine'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
@@ -609,6 +611,7 @@ export function MapCanvas({
   const [selectedOverlay, setSelectedOverlay] = useState<TileOverlay>('none')
   const [selectedCartographicSymbol, setSelectedCartographicSymbol] = useState<string | null>(null)
   const [activeMarkerCategory, setActiveMarkerCategory] = useState<CartographicCategory>('earth')
+  const [activeMarkerConcept, setActiveMarkerConcept] = useState<string>('all')
   const [paintRiver, setPaintRiver] = useState(false)
   const [paintRoad, setPaintRoad] = useState(false)
   const [selectedTerritoryId, setSelectedTerritoryId] = useState<string>('')
@@ -2021,16 +2024,19 @@ export function MapCanvas({
               <div className="flex flex-wrap items-center gap-1.5">
                 {(
                   [
-                    { id: 'earth' as CartographicCategory, label: '♠ Earth (12)' },
-                    { id: 'water' as CartographicCategory, label: '♥ Water (12)' },
-                    { id: 'plant' as CartographicCategory, label: '♣ Flora (12)' },
-                    { id: 'feature' as CartographicCategory, label: '♦ Feature (12)' },
+                    { id: 'earth' as CartographicCategory, label: `♠ Earth (${getSymbolsByCategory('earth').length})` },
+                    { id: 'water' as CartographicCategory, label: `♥ Water (${getSymbolsByCategory('water').length})` },
+                    { id: 'plant' as CartographicCategory, label: `♣ Flora (${getSymbolsByCategory('plant').length})` },
+                    { id: 'feature' as CartographicCategory, label: `♦ Feature (${getSymbolsByCategory('feature').length})` },
                   ]
                 ).map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setActiveMarkerCategory(cat.id)}
+                    onClick={() => {
+                      setActiveMarkerCategory(cat.id)
+                      setActiveMarkerConcept('all')
+                    }}
                     className={`text-[11px] px-2.5 py-0.5 rounded-full border transition-all ${
                       activeMarkerCategory === cat.id
                         ? 'bg-primary/20 border-primary text-primary font-semibold'
@@ -2042,9 +2048,41 @@ export function MapCanvas({
                 ))}
               </div>
 
-              {/* 12 Tropes for Active Category */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 max-h-52 overflow-y-auto p-1 bg-muted/20 rounded border border-border/50">
-                {getSymbolsByCategory(activeMarkerCategory).map((sym) => {
+              {/* Concept Sub-Filter Pills (e.g. Mountains, Hills, Canyons & Cliffs, Deserts, Caves) */}
+              <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveMarkerConcept('all')}
+                  className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                    activeMarkerConcept === 'all'
+                      ? 'bg-secondary text-secondary-foreground font-semibold border-secondary'
+                      : 'border-border/60 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  All ({getSymbolsByCategory(activeMarkerCategory).length})
+                </button>
+                {getConceptsByCategory(activeMarkerCategory).map((concept) => (
+                  <button
+                    key={concept.id}
+                    type="button"
+                    onClick={() => setActiveMarkerConcept(concept.id)}
+                    className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                      activeMarkerConcept === concept.id
+                        ? 'bg-secondary text-secondary-foreground font-semibold border-secondary'
+                        : 'border-border/60 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {concept.label} ({concept.count})
+                  </button>
+                ))}
+              </div>
+
+              {/* Tropes for Active Category & Concept */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 max-h-56 overflow-y-auto p-1 bg-muted/20 rounded border border-border/50">
+                {(activeMarkerConcept === 'all'
+                  ? getSymbolsByCategory(activeMarkerCategory)
+                  : getSymbolsByConcept(activeMarkerConcept)
+                ).map((sym) => {
                   const isSelected = selectedCartographicSymbol === sym.id
                   return (
                     <button
@@ -2058,7 +2096,7 @@ export function MapCanvas({
                           ? 'border-primary bg-primary/20 ring-2 ring-primary text-foreground font-semibold shadow-sm'
                           : 'border-border/80 bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground'
                       }`}
-                      title={`${sym.name} (${sym.icon}): ${sym.description}`}
+                      title={`${sym.name} [${sym.variantName}] (${sym.icon}): ${sym.description}`}
                     >
                       <svg
                         viewBox="0 0 48 48"
@@ -2070,8 +2108,9 @@ export function MapCanvas({
                         <div className="text-[11px] truncate leading-tight font-medium">
                           {sym.name}
                         </div>
-                        <div className="text-[9px] text-muted-foreground truncate">
-                          {sym.icon}
+                        <div className="text-[9px] text-muted-foreground truncate flex items-center gap-1">
+                          <span>{sym.icon}</span>
+                          <span className="opacity-80">· {sym.variantName}</span>
                         </div>
                       </div>
                     </button>
@@ -2841,34 +2880,24 @@ export function MapCanvas({
                       className="input w-full text-xs py-1 h-8"
                     >
                       <option value="">Auto (from relief/flora)</option>
-                      <optgroup label="♠ Earth Tropes (12)">
-                        {getSymbolsByCategory('earth').map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.icon} {s.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="♥ Water Tropes (12)">
-                        {getSymbolsByCategory('water').map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.icon} {s.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="♣ Flora Tropes (12)">
-                        {getSymbolsByCategory('plant').map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.icon} {s.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="♦ Feature Tropes (12)">
-                        {getSymbolsByCategory('feature').map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.icon} {s.name}
-                          </option>
-                        ))}
-                      </optgroup>
+                      {(['earth', 'water', 'plant', 'feature'] as CartographicCategory[]).map(
+                        (cat) => (
+                          <React.Fragment key={cat}>
+                            {getConceptsByCategory(cat).map((concept) => (
+                              <optgroup
+                                key={concept.id}
+                                label={`${cat === 'earth' ? '♠' : cat === 'water' ? '♥' : cat === 'plant' ? '♣' : '♦'} ${concept.label}`}
+                              >
+                                {getSymbolsByConcept(concept.id).map((s) => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.icon} {s.name} — {s.variantName}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </React.Fragment>
+                        )
+                      )}
                     </select>
                   </div>
                 </div>
