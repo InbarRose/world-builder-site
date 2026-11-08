@@ -659,5 +659,38 @@ status: active
   - Provides players and GMs with an exhaustive, instantly accessible tabletop reference encyclopedia.
   - Eliminates mechanical obscurity by providing clear lore explanations and tabletop prompts for every trait and ability.
 
+---
+
+## ADR-025: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  As the worldbuilding catalog grew beyond 200+ items, `presets.ts` had grown to 5,175 lines of hardcoded TypeScript arrays and `cartographicSymbolEngine.tsx` had grown to 2,147 lines. The user established a clear architectural mandate for long-term human maintainability:
+  > "make sure to track and record these decisions, and design philosophy. because i want to be able to continuously expand and add more things. also, it should be easy to go add these things in the code without needing generative AI. We need a proper structure, taxonomy, file structure, easy to make small additions by adding a few lines to files. each category, phase, etc. should have a directory, each directory should have manifest files and json files for all entities, with groupings and subdirs, etc, as needed to manage file sprawl effectively. please consider proper repo structure and design for this. if i want to add a new preset to genesis earth called 'meteor crater' i should only need to make a small amount of surgical additions, and the site should pick that up and render automatically. if i do not provide a graphic for it, i should be able to select another existing one."
+- **Decision**:
+  1. **Hierarchical Directory & JSON Catalog Taxonomy (`frontend/src/data/catalog/`)**:
+     - Replaced monolithic hardcoded TypeScript arrays with a structured, domain-grouped JSON directory hierarchy:
+       - `manifest.json`: Root catalog index and schema version.
+       - `README.md`: Step-by-step Human Authoring Guide with copy-pasteable JSON examples (no AI required).
+       - `stages/`: Subdirectories per worldbuilding stage (`genesis/`, `primal/`, `civilization/`, `intrigue/`), each containing a `manifest.json` and 4 suit-specific JSON files (`earth.json`, `water.json`, `plant.json`, `feature.json`, `settlements.json`, `traditions.json`, `resources.json`, `skills.json`, `constructions.json`, `enlightenment.json`, `expansion.json`, `diplomacy.json`, `conflict.json`, `cooperation.json`, `scheme.json`, `myth.json`) plus `disasters.json`.
+       - `codex/`: `manifest.json`, `species.json`, `societies.json`, `myths.json`, `relationships.json`, `traits.json`, `abilities.json`, and `palettes.json`.
+       - `symbols/`: `manifest.json` (with `conceptFallbacks`) and category files (`earth.json`, `water.json`, `plant.json`, `feature.json`, `settlement.json`, `construction.json`).
+       - `bots/`: `manifest.json` and `personalities.json`.
+  2. **Smart Context Normalization (`catalogLoader.ts`)**:
+     - Implemented `normalizeStagePreset()` so human authors adding an item to `stages/<stage>/<suit>.json` only need to specify core fields (`id`, `name`, `icon`, `description`, and optional terrain/narrative fields).
+     - Contextual properties (`stage`, `suit`, `isFantastical`, `isDisaster`, `slotCategory`, `slotPriority`) are automatically inherited from the directory and suit file if omitted.
+  3. **Explicit & Automatic Graphic Fallback Resolution (`graphicFallback`)**:
+     - Added `graphicFallback` support to both `RawStageActionPreset` and `RawCartographicSymbol`.
+     - If an author adds a new preset (such as `"gen_earth_meteor_crater"` in `stages/genesis/earth.json`) without creating new SVG art, they can either set `"graphicFallback": "crater-impact"` to reuse any existing graphic, or omit it and let `inferDefaultGraphicForPreset()` automatically select a matching graphic by keyword/relief/terrain.
+     - Updated `renderCartographicMarkerSVG()` in `cartographicSymbolEngine.tsx` to resolve `resolveSymbolGraphicFallback()` in its `default` branch, falling back via `graphicFallback` -> `symbols/manifest.json#conceptFallbacks` -> category default.
+  4. **Concrete Surgical Validation (`Meteor Crater` + `catalogExtensibility.test.ts`)**:
+     - Added `"gen_earth_meteor_crater"` ("Meteor Crater") to `stages/genesis/earth.json` using minimal surgical fields and `"graphicFallback": "crater-impact"`.
+     - Added `catalogExtensibility.test.ts` verifying that surgical JSON entries automatically hydrate and appear in the Studio Turn Workshop, Bot Affinity/Auto-Play engine, Tabletop Compendium, and Map SVG Renderer.
+- **Consequences**:
+  - Reduced `presets.ts` from 5,175 lines to 192 lines and `cartographicSymbolEngine.tsx` from 2,147 lines to 909 lines.
+  - Empowers any human developer or tabletop designer to add new presets, tropes, traits, or species in seconds by editing small, self-contained JSON files without touching engine code or needing generative AI.
+
+
 
 

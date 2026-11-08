@@ -1,0 +1,12 @@
+{
+  "description": "Codex entities, modular Lego trait/ability blocks, diplomatic relationships, and visual palettes.",
+  "files": {
+    "species": "./species.json",
+    "societies": "./societies.json",
+    "myths": "./myths.json",
+    "relationships": "./relationships.json",
+    "traits": "./traits.json",
+    "abilities": "./abilities.json",
+    "palettes": "./palettes.json"
+  }
+}

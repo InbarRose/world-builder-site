@@ -1,0 +1,34 @@
+{
+  "stage": "primal",
+  "title": "2. Primal Stage — Dawn of Races, Settlements & Traditions",
+  "suits": [
+    {
+      "suit": "♠",
+      "file": "settlements.json",
+      "name": "Settlements",
+      "defaultSlotCategory": "settlement",
+      "defaultPriority": 92
+    },
+    {
+      "suit": "♥",
+      "file": "traditions.json",
+      "name": "Traditions",
+      "defaultSlotCategory": "myth",
+      "defaultPriority": 60
+    },
+    {
+      "suit": "♣",
+      "file": "resources.json",
+      "name": "Resources",
+      "defaultSlotCategory": "resource",
+      "defaultPriority": 58
+    },
+    {
+      "suit": "♦",
+      "file": "skills.json",
+      "name": "Skills",
+      "defaultSlotCategory": "structure",
+      "defaultPriority": 62
+    }
+  ]
+}

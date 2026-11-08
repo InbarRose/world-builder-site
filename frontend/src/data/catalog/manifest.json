@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "title": "World Builder Tabletop Content Catalog",
+  "description": "Hierarchical, human-editable JSON catalog of stage action presets, whiteboard cartographic symbols, codex entities, modular traits/abilities, and bot personalities.",
+  "directories": {
+    "stages": "./stages/manifest.json",
+    "codex": "./codex/manifest.json",
+    "symbols": "./symbols/manifest.json",
+    "bots": "./bots/manifest.json"
+  }
+}

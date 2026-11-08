@@ -1,0 +1,6 @@
+{
+  "description": "Simulated tabletop player bot personalities and affinity decision weights.",
+  "files": {
+    "personalities": "./personalities.json"
+  }
+}

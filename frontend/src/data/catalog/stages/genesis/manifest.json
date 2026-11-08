@@ -1,0 +1,34 @@
+{
+  "stage": "genesis",
+  "title": "1. Genesis Stage — Primordial Geography & Biomes",
+  "suits": [
+    {
+      "suit": "♠",
+      "file": "earth.json",
+      "name": "Earth",
+      "defaultSlotCategory": "elevation",
+      "defaultPriority": 70
+    },
+    {
+      "suit": "♥",
+      "file": "water.json",
+      "name": "Water",
+      "defaultSlotCategory": "hydrology",
+      "defaultPriority": 66
+    },
+    {
+      "suit": "♣",
+      "file": "plant.json",
+      "name": "Plant",
+      "defaultSlotCategory": "vegetation",
+      "defaultPriority": 64
+    },
+    {
+      "suit": "♦",
+      "file": "feature.json",
+      "name": "Feature",
+      "defaultSlotCategory": "resource",
+      "defaultPriority": 68
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+[
+  {
+    "id": "river-meander",
+    "name": "Meandering River Channel",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "Meandering River",
+    "category": "water",
+    "icon": "🌊",
+    "description": "Winding, natural S-curve river channel traversing lowlands.",
+    "tags": [
+      "river",
+      "water",
+      "meander",
+      "flow"
+    ]
+  },
+  {
+    "id": "river-braided",
+    "name": "Braided Gravel River",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "Braided River",
+    "category": "water",
+    "icon": "🔀",
+    "description": "Network of interweaving alluvial river channels weaving between gravel bars.",
+    "tags": [
+      "river",
+      "braided",
+      "gravel",
+      "alluvial"
+    ]
+  },
+  {
+    "id": "river-delta",
+    "name": "Braided River Delta",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "River Delta",
+    "category": "water",
+    "icon": "🔱",
+    "description": "Branching distributary fan depositing silt into the sea.",
+    "tags": [
+      "river",
+      "delta",
+      "estuary",
+      "mouth"
+    ]
+  },
+  {
+    "id": "river-rapids",
+    "name": "Whitewater River Rapids",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "River Rapids",
+    "category": "water",
+    "icon": "⚡🌊",
+    "description": "Turbulent mountain torrent churning through boulder chutes.",
+    "tags": [
+      "river",
+      "rapids",
+      "whitewater",
+      "torrent"
+    ]
+  },
+  {
+    "id": "waterfall-cataract",
+    "name": "Roaring Cataract Waterfall",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "High Cataract",
+    "category": "water",
+    "icon": "💧",
+    "description": "Sheer cliff plunge where river cascades into a mist-shrouded gorge.",
+    "tags": [
+      "waterfall",
+      "cataract",
+      "plunge",
+      "cliff"
+    ]
+  },
+  {
+    "id": "waterfall-cascades",
+    "name": "Stepped Tiered Cascades",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "Tiered Cascades",
+    "category": "water",
+    "icon": "🪜💧",
+    "description": "Series of descending rock steps and natural stone shelves.",
+    "tags": [
+      "waterfall",
+      "cascades",
+      "stepped",
+      "shelves"
+    ]
+  },
+  {
+    "id": "waterfall-gorge",
+    "name": "Canyon Plunge Waterfall",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "Canyon Plunge",
+    "category": "water",
+    "icon": "🏞️💧",
+    "description": "Massive plume of water trapped between high rock canyon cliffs.",
+    "tags": [
+      "waterfall",
+      "canyon",
+      "gorge",
+      "plunge"
+    ]
+  },
+  {
+    "id": "lake-basin",
+    "name": "Freshwater Lake Basin",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Lake Basin",
+    "category": "water",
+    "icon": "🏞️",
+    "description": "Broad inland freshwater body cradled by surrounding shores.",
+    "tags": [
+      "lake",
+      "basin",
+      "freshwater",
+      "inland"
+    ]
+  },
+  {
+    "id": "lake-tarn",
+    "name": "Alpine Mountain Tarn",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Alpine Tarn",
+    "category": "water",
+    "icon": "🏔️💧",
+    "description": "High-altitude crystalline glacial tarn nested below mountain peaks.",
+    "tags": [
+      "lake",
+      "tarn",
+      "alpine",
+      "glacial",
+      "mountain"
+    ]
+  },
+  {
+    "id": "lake-oxbow",
+    "name": "Crescent Oxbow Lake",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Oxbow Lake",
+    "category": "water",
+    "icon": "🌙",
+    "description": "Curving u-shaped lake formed when a river meander loop is cut off.",
+    "tags": [
+      "lake",
+      "oxbow",
+      "crescent",
+      "river"
+    ]
+  },
+  {
+    "id": "lake-crater",
+    "name": "Volcanic Crater Lake",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Crater Lake",
+    "category": "water",
+    "icon": "🌋💧",
+    "description": "Round, fathomless deep sapphire lake resting inside an extinct caldera.",
+    "tags": [
+      "lake",
+      "crater",
+      "caldera",
+      "deep"
+    ]
+  },
+  {
+    "id": "swamp-mangrove",
+    "name": "Mangrove Stilt Swamp",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Mangrove Swamp",
+    "category": "water",
+    "icon": "🌿",
+    "description": "Tangled network of aerial stilt roots rising from brackish coastal waters.",
+    "tags": [
+      "swamp",
+      "mangrove",
+      "brackish",
+      "roots"
+    ]
+  },
+  {
+    "id": "swamp-peat",
+    "name": "Peat Moss Bog",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Peat Bog",
+    "category": "water",
+    "icon": "🪵",
+    "description": "Waterlogged, acidic wetland formed of decaying moss hummocks.",
+    "tags": [
+      "bog",
+      "peat",
+      "wetland",
+      "mire",
+      "moss"
+    ]
+  },
+  {
+    "id": "marsh-reeds",
+    "name": "Reed & Cattail Marsh",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Reed Marsh",
+    "category": "water",
+    "icon": "🌾",
+    "description": "Flooded riparian marshland bristling with tall reed stalks and cattails.",
+    "tags": [
+      "marsh",
+      "reeds",
+      "cattails",
+      "riparian"
+    ]
+  },
+  {
+    "id": "marsh-fen",
+    "name": "Flooded Grassy Fen",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Grassy Fen",
+    "category": "water",
+    "icon": "🌱💧",
+    "description": "Alkaline mineral-rich wetland covered in sedges, rushes, and slow streams.",
+    "tags": [
+      "marsh",
+      "fen",
+      "sedges",
+      "wetland"
+    ]
+  },
+  {
+    "id": "tidal-pools",
+    "name": "Rocky Shore Tidal Pools",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Tidal Pools",
+    "category": "water",
+    "icon": "🦀",
+    "description": "Intertidal marine basins carved into coastal granite rock ledges.",
+    "tags": [
+      "tidal",
+      "pools",
+      "intertidal",
+      "coast",
+      "marine"
+    ]
+  },
+  {
+    "id": "estuary-bay",
+    "name": "Coastal Estuary Bay",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Estuary Bay",
+    "category": "water",
+    "icon": "⚓",
+    "description": "Sheltered coastal bay where ocean tides merge with river outflows.",
+    "tags": [
+      "estuary",
+      "bay",
+      "coast",
+      "harbor"
+    ]
+  },
+  {
+    "id": "atoll-reef",
+    "name": "Coral Reef Atoll",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Coral Atoll",
+    "category": "water",
+    "icon": "🪸",
+    "description": "Circular ring of living coral surrounding a central turquoise lagoon.",
+    "tags": [
+      "atoll",
+      "coral",
+      "reef",
+      "lagoon",
+      "island"
+    ]
+  },
+  {
+    "id": "fjord-sheer",
+    "name": "Glacial Sheer Fjord",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Glacial Fjord",
+    "category": "water",
+    "icon": "🛶",
+    "description": "Narrow, fathomless sea inlet framed by immense vertical mountain cliffs.",
+    "tags": [
+      "fjord",
+      "glacial",
+      "inlet",
+      "cliffs"
+    ]
+  },
+  {
+    "id": "glacier-valley",
+    "name": "Alpine Valley Glacier",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Valley Glacier",
+    "category": "water",
+    "icon": "🧊🏔️",
+    "description": "Massive frozen river of ice grinding downward through an alpine cirque.",
+    "tags": [
+      "glacier",
+      "ice",
+      "valley",
+      "cirque",
+      "alpine"
+    ]
+  },
+  {
+    "id": "glacier-crevasse",
+    "name": "Crevassed Icefield",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Crevassed Icefield",
+    "category": "water",
+    "icon": "🧊",
+    "description": "Vast polar ice sheet split by treacherous deep crevasses.",
+    "tags": [
+      "glacier",
+      "crevasse",
+      "ice",
+      "polar"
+    ]
+  },
+  {
+    "id": "glacier-shelf",
+    "name": "Coastal Ice Shelf",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Ice Shelf",
+    "category": "water",
+    "icon": "🧊🌊",
+    "description": "Floating permanent ice barrier calving icebergs into the sea.",
+    "tags": [
+      "glacier",
+      "shelf",
+      "iceberg",
+      "polar",
+      "coast"
+    ]
+  },
+  {
+    "id": "maelstrom-whirlpool",
+    "name": "Oceanic Maelstrom Vortex",
+    "concept": "maelstrom",
+    "conceptLabel": "Maelstroms & Currents",
+    "variantName": "Oceanic Maelstrom",
+    "category": "water",
+    "icon": "🌀",
+    "description": "Terrifying oceanic whirlpool swallowing currents into the sea.",
+    "tags": [
+      "maelstrom",
+      "whirlpool",
+      "vortex",
+      "ocean"
+    ]
+  },
+  {
+    "id": "tidal-rip",
+    "name": "Coastal Rip Tide & Breakers",
+    "concept": "maelstrom",
+    "conceptLabel": "Maelstroms & Currents",
+    "variantName": "Rip Tide & Breakers",
+    "category": "water",
+    "icon": "🌊🌀",
+    "description": "Treacherous offshore surge currents dragging waters outward.",
+    "tags": [
+      "tide",
+      "rip",
+      "current",
+      "breakers"
+    ]
+  },
+  {
+    "id": "spring-headwater",
+    "name": "Natural Spring Headwaters",
+    "concept": "river",
+    "conceptLabel": "Rivers & Springs",
+    "variantName": "Headwater Spring",
+    "category": "water",
+    "icon": "⛲",
+    "description": "Pure subterranean aquifer bubbling to the surface at the foot of mountain slopes.",
+    "tags": [
+      "spring",
+      "headwater",
+      "aquifer",
+      "pure"
+    ]
+  },
+  {
+    "id": "hotspring-geothermal",
+    "name": "Geothermal Mineral Hot Spring",
+    "concept": "geyser",
+    "conceptLabel": "Geysers & Thermal",
+    "variantName": "Mineral Hot Spring",
+    "category": "water",
+    "icon": "♨️",
+    "description": "Steaming mineral-rich volcanic pool heated by subterranean magma chambers.",
+    "tags": [
+      "hotspring",
+      "geothermal",
+      "steam",
+      "volcanic"
+    ]
+  },
+  {
+    "id": "trench-abyssal",
+    "name": "Abyssal Sunken Trench",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Abyssal Trench",
+    "category": "water",
+    "icon": "🕳️🌊",
+    "description": "Dark, fathomless underwater canyon plunging miles below the ocean floor.",
+    "tags": [
+      "trench",
+      "abyss",
+      "deep",
+      "ocean",
+      "trench"
+    ]
+  }
+]

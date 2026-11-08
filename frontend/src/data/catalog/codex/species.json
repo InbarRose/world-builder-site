@@ -1,0 +1,298 @@
+[
+  {
+    "id": "preset_sylvan_elves",
+    "name": "Sylvan Star-Elves",
+    "category": "species",
+    "icon": "🧝",
+    "color": "#10b981",
+    "secondaryColor": "#fef3c7",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "forest",
+      "jungle"
+    ],
+    "settlementIcons": {
+      "camp": "🍃",
+      "village": "🌳",
+      "town": "🎋",
+      "city": "🗼",
+      "metropolis": "🌟",
+      "architectureStyle": "Living Canopy Spires"
+    }
+  },
+  {
+    "id": "preset_iron_dwarves",
+    "name": "Ironpeak Delvers",
+    "category": "species",
+    "icon": "⛏️",
+    "color": "#f59e0b",
+    "secondaryColor": "#78350f",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "mountain",
+      "earth",
+      "volcano"
+    ],
+    "settlementIcons": {
+      "camp": "⛺",
+      "village": "🪨",
+      "town": "⚒️",
+      "city": "🏰",
+      "metropolis": "🏔️",
+      "architectureStyle": "Carved Granite Holds"
+    }
+  },
+  {
+    "id": "preset_dawnwatch_humans",
+    "name": "Dawnwatch Humans",
+    "category": "species",
+    "icon": "🛡️",
+    "color": "#2563eb",
+    "secondaryColor": "#dbeafe",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "earth",
+      "water"
+    ],
+    "settlementIcons": {
+      "camp": "⛺",
+      "village": "🏡",
+      "town": "🏘️",
+      "city": "🏰",
+      "metropolis": "👑",
+      "architectureStyle": "Timber & Stone Walled Keeps"
+    }
+  },
+  {
+    "id": "preset_steppe_orcs",
+    "name": "Thunder-Steppe Orcs",
+    "category": "species",
+    "icon": "🐺",
+    "color": "#dc2626",
+    "secondaryColor": "#fde68a",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "earth",
+      "canyon"
+    ],
+    "settlementIcons": {
+      "camp": "⛺",
+      "village": "🔥",
+      "town": "🛡️",
+      "city": "⚔️",
+      "metropolis": "🚩",
+      "architectureStyle": "Great Horned War-Camps & Citadels"
+    }
+  },
+  {
+    "id": "preset_meadow_halflings",
+    "name": "Riverbend Halflings",
+    "category": "species",
+    "icon": "🌾",
+    "color": "#84cc16",
+    "secondaryColor": "#fef9c3",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "plains",
+      "water"
+    ],
+    "settlementIcons": {
+      "camp": "🏕️",
+      "village": "🌻",
+      "town": "🏡",
+      "city": "🏛️",
+      "metropolis": "🎡",
+      "architectureStyle": "Hillside Burrows & Mill-Towns"
+    }
+  },
+  {
+    "id": "preset_sunscale_draconids",
+    "name": "Sun-Scale Saurians",
+    "category": "species",
+    "icon": "🦎",
+    "color": "#eab308",
+    "secondaryColor": "#991b1b",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "desert",
+      "canyon",
+      "jungle"
+    ],
+    "settlementIcons": {
+      "camp": "☀️",
+      "village": "🏜️",
+      "town": "🛕",
+      "city": "🏛️",
+      "metropolis": "🌞",
+      "architectureStyle": "Golden Stepped Ziggurats"
+    }
+  },
+  {
+    "id": "preset_tideborn",
+    "name": "Tideborn Pelagians",
+    "category": "species",
+    "icon": "🔱",
+    "color": "#06b6d4",
+    "secondaryColor": "#cffafe",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "water",
+      "ocean"
+    ],
+    "settlementIcons": {
+      "camp": "🐚",
+      "village": "⚓",
+      "town": "⛵",
+      "city": "🔱",
+      "metropolis": "🌊",
+      "architectureStyle": "Coral Spires & Floating Atolls"
+    }
+  },
+  {
+    "id": "preset_clockwork_automata",
+    "name": "Aether-Forged Collective",
+    "category": "species",
+    "icon": "⚙️",
+    "color": "#6366f1",
+    "secondaryColor": "#fcd34d",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "earth",
+      "mountain",
+      "canyon"
+    ],
+    "settlementIcons": {
+      "camp": "🔩",
+      "village": "⚙️",
+      "town": "🏭",
+      "city": "⚡",
+      "metropolis": "🔮",
+      "architectureStyle": "Clockwork Foundry-Towers"
+    }
+  },
+  {
+    "id": "preset_frost_giants",
+    "name": "Rime-Kin Goliath Clans",
+    "category": "species",
+    "icon": "❄️",
+    "color": "#38bdf8",
+    "secondaryColor": "#e0f2fe",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "tundra",
+      "mountain"
+    ],
+    "settlementIcons": {
+      "camp": "❄️",
+      "village": "🧊",
+      "town": "🗿",
+      "city": "🏔️",
+      "metropolis": "👑",
+      "architectureStyle": "Glacial Megalith Halls"
+    }
+  },
+  {
+    "id": "preset_fen_myconids",
+    "name": "Gloom-Spore Myconids",
+    "category": "species",
+    "icon": "🍄",
+    "color": "#a855f7",
+    "secondaryColor": "#86efac",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "swamp",
+      "forest",
+      "jungle"
+    ],
+    "settlementIcons": {
+      "camp": "🍄",
+      "village": "🌿",
+      "town": "🔮",
+      "city": "🌺",
+      "metropolis": "✨",
+      "architectureStyle": "Bioluminescent Fungal Domes"
+    }
+  },
+  {
+    "id": "preset_twilight_fae",
+    "name": "Twilight Court Sidhe",
+    "category": "species",
+    "icon": "🦋",
+    "color": "#ec4899",
+    "secondaryColor": "#f3e8ff",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "forest",
+      "plains",
+      "swamp"
+    ],
+    "settlementIcons": {
+      "camp": "🦋",
+      "village": "🌸",
+      "town": "🌙",
+      "city": "🏰",
+      "metropolis": "✨",
+      "architectureStyle": "Gossamer & Moonstone Pavilions"
+    }
+  },
+  {
+    "id": "preset_crystal_lithids",
+    "name": "Prism-Core Lithids",
+    "category": "species",
+    "icon": "💎",
+    "color": "#14b8a6",
+    "secondaryColor": "#f0fdfa",
+    "archetype": "",
+    "description": "",
+    "traits": [],
+    "abilities": [],
+    "preferredTerrains": [
+      "canyon",
+      "mountain",
+      "desert"
+    ],
+    "settlementIcons": {
+      "camp": "🔹",
+      "village": "💎",
+      "town": "🔷",
+      "city": "🏛️",
+      "metropolis": "💠",
+      "architectureStyle": "Refractive Crystal Spires"
+    }
+  }
+]
