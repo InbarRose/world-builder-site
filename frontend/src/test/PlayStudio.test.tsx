@@ -352,4 +352,70 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Draw Card \(54\)/i })).toBeInTheDocument()
   })
+
+  it('supports TTRPG Campaign Bridge, Adventure Hooks, Session Zero Primer, and Creative Sparks', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume into live studio session
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Open Adventure Hooks modal from header
+    const hooksBtn = screen.getByRole('button', { name: /Tabletop Campaign Adventure Hooks/i })
+    await act(async () => {
+      fireEvent.click(hooksBtn)
+    })
+    expect(screen.getByText(/Tabletop Campaign Hooks & Rumor Tables/i)).toBeInTheDocument()
+
+    // Close Hooks modal
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close Campaign Hooks Dialog/i }))
+    })
+
+    // Open Session Zero Primer modal from header
+    const primerBtn = screen.getByRole('button', { name: /Session Zero 1-Page Campaign Primer/i })
+    await act(async () => {
+      fireEvent.click(primerBtn)
+    })
+    expect(screen.getByText(/Session Zero Campaign Primer/i)).toBeInTheDocument()
+    expect(screen.getByText(/1-Page Player Handout/i)).toBeInTheDocument()
+
+    // Close Primer modal
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close Session Zero Primer Dialog/i }))
+    })
+
+    // Draw a card in Studio mode
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+
+    // Click "💡 Spark Inspiration"
+    const sparkBtn = screen.getByRole('button', { name: /Spark Inspiration/i })
+    await act(async () => {
+      fireEvent.click(sparkBtn)
+    })
+
+    // Verify creative spark box is revealed
+    expect(screen.getByText(/Creative Spark:/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Use as Note/i })).toBeInTheDocument()
+
+    // Click "Use as Note"
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Use as Note/i }))
+    })
+
+    // Complete turn
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Complete & Pass Turn/i }))
+    })
+
+    // Turn is complete and deck is at 53
+    expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
+  })
 })

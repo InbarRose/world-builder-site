@@ -13,6 +13,7 @@ import {
   BookOpen,
   Shield,
   Palette,
+  Scroll,
 } from 'lucide-react'
 import { GameMode, WorldState } from '../engine/types'
 
@@ -42,6 +43,8 @@ interface CommandPaletteProps {
   isSoundMuted: boolean
   onOpenExportModal: () => void
   onOpenShareModal: () => void
+  onOpenCampaignHooksModal?: () => void
+  onOpenSessionZeroPrimerModal?: () => void
   onOpenCodexEntity?: (entityId: string) => void
   onReturnToLauncher: () => void
   onOpenShortcutsModal: () => void
@@ -63,6 +66,8 @@ export function CommandPalette({
   isSoundMuted,
   onOpenExportModal,
   onOpenShareModal,
+  onOpenCampaignHooksModal,
+  onOpenSessionZeroPrimerModal,
   onOpenCodexEntity,
   onReturnToLauncher,
   onOpenShortcutsModal,
@@ -173,6 +178,28 @@ export function CommandPalette({
         onSelect: () => {
           onClose()
           onOpenExportModal()
+        },
+      },
+      {
+        id: 'action_campaign_hooks',
+        title: '⚔️ TTRPG Campaign Hooks & Rumors',
+        category: 'Tabletop Actions',
+        description: 'Synthesized adventure hooks, dungeon sites, and tavern rumors',
+        icon: <Compass className="h-4 w-4 text-amber-500" />,
+        onSelect: () => {
+          onClose()
+          onOpenCampaignHooksModal?.()
+        },
+      },
+      {
+        id: 'action_session_zero_primer',
+        title: '📜 Session Zero Campaign Primer (Handout)',
+        category: 'Tabletop Actions',
+        description: '1-page printable player orientation handout for Session Zero',
+        icon: <Scroll className="h-4 w-4 text-primary" />,
+        onSelect: () => {
+          onClose()
+          onOpenSessionZeroPrimerModal?.()
         },
       },
       {
