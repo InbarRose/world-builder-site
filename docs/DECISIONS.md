@@ -780,7 +780,33 @@ status: active
      - Added ±4% pitch jitter (`computePitchJitterMultiplier`) to prevent listener fatigue and procedural stingers for Ace Cataclysms (`playAceCataclysmStinger`) and Fantastical Wonders (`playJokerWonderStinger`).
 - **Consequences**:
   - Eliminates tab-switching friction for the single-PC laptop driver.
-  - Advances Domain 1 to `14.0 / 20.0`, Domain 4 to `14.0 / 15.0`, and the overall verified Core AAA Score to **83.0 / 100** (169/169 tests passing across 24 suites).
+  - Advances Domain 1 to `14.0 / 20.0`, Domain 4 to `14.0 / 15.0`, and the overall verified Core AAA Score to **83.0 / 100** (170/170 tests passing across 24 suites).
+
+---
+
+## ADR-029: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  The user highlighted a core Studio gameplay requirement:
+  > "remember tha when playing the basic studio mode, once drawin a card, i should be able to record that event/action in the record. if i select presets and put them on a map, that should populate, and still allow me to edit, if i do custom, it should still be easy and fun and fast to do."
+  Previously, clicking a preset in Studio mode only stored `selectedPreset` in React state without immediately populating an editable Event/Action Title, Icon/Terrain customizer, or syncing to the active `DrawRecord` in the Chronicle; placing on the map only happened at turn end (`handleConfirmTurnChronicle`); and custom actions had no dedicated 1-click icon/terrain/category workbench.
+- **Decision**:
+  1. **Unified Turn Event & Map Stamp Workbench (`turnWorkbenchEngine.ts`, `Play.tsx`)**:
+     - Created `TurnActionDraft` and pure workbench helpers (`createDraftFromPreset`, `createCustomTurnDraft`, `generateDraftChronicleNote`, `stampDraftOnMapTile`, `syncDraftToDrawRecord`).
+     - Selecting any preset immediately populates all editable fields of the Workbench (`data-testid="turn-event-workbench"`): **Event / Action Title** (`workbench-action-title-input`), **Evocative Name / Map Label** (`workbench-feature-name-input`), **Map Token / Icon**, **Terrain & Slot Category overrides**, and **Chronicle Note**—and immediately synchronizes them into the active `DrawRecord` in `world.drawHistory`.
+  2. **Live In-Place Map Placement & Post-Placement Editing (`📍 Place on Map` & `⚡ Stamp on Click`)**:
+     - Clicking **`📍 Place on Map (col,row)`** (`place-on-map-btn`) or clicking tiles on the Inline Mini-Map with **`⚡ Stamp on Click`** enabled immediately stamps the preset or custom feature onto the map tile and updates the Chronicle Record **without ending the turn**.
+     - `stampDraftOnMapTile()` tags placed slots with `linkedEventId: record.id` and updates existing slots in-place when the player edits the Feature Name, Action Title, Icon, or Terrain after placement—preventing duplicate slots and keeping map labels and Chronicle records 100% synchronized.
+  3. **Fast, Fun 1-Click Custom Event & Stamp Mode (`✨ Custom Event / Stamp`)**:
+     - Clicking **`✨ Custom Event / Stamp`** (`switch-to-custom-workbench-btn`) or **`🎨 Icon & Terrain`** (`toggle-stamp-customizer-btn`) opens a tactile 1-click palette of 18 whiteboard icons (`WORKBENCH_QUICK_ICONS`), 11 terrain overrides (`WORKBENCH_TERRAIN_OPTIONS`), and 7 slot categories (`WORKBENCH_SLOT_CATEGORIES`), plus `🎲 Re-roll` and `✍️ Sync to Note` that work seamlessly for 100% custom creations.
+  4. **Explicit `💾 Save to Record` & Editable Chronicle `actionTitle` (`TimelinePanel.tsx`)**:
+     - Added **`💾 Save to Record`** (`save-turn-record-btn`) so the player can explicitly save/update the turn record at any point while continuing to edit.
+     - Added an inline editable **Event / Action Title** input for unlocked turns in `TimelinePanel.tsx`.
+- **Consequences**:
+  - Makes both Preset-driven and Custom freeform turns in Studio Mode fast, tactile, live-populated, and non-destructively editable before and after map placement.
+  - Advances the verified Core AAA Score from **83.0 -> 85.0 / 100** across 25 test suites (174/174 tests passing).
 
 
 

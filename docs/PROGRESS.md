@@ -195,7 +195,13 @@ status: active
   - [x] Complete Card Freedom controls (`🔄 Redraw` mulligan and `🎴 Pick Card` Suit/Value popover `specific-card-picker`)
   - [x] Zero-ping-pong in-turn interactivity: `🎲 Auto-Pick Tile` (`pickSmartTargetTileForPreset`), Inline Mini-Map Coordinate Picker (`inline-minimap-picker`), and Inline Quick-Forge Codex Entity (`inline-quick-forge-entity`)
   - [x] 3D cursor-following card tilt (`computeCardTiltTransform`), visual deck stack thickness (`computeDeckStackLayers`), ±4% pitch jitter, and Ace/Joker audio stingers (`soundEngine.ts`)
-  - [x] Automated test suite in `cardPhysicsEngine.test.ts`, `soundEngine.test.ts`, and `PlayStudio.test.tsx` (169/169 tests passing across 24 suites)
+  - [x] Automated test suite in `cardPhysicsEngine.test.ts`, `soundEngine.test.ts`, and `PlayStudio.test.tsx` (170/170 tests passing across 24 suites)
+- [x] **Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow** *(Score: 85.0 / 100 via ADR-029)*
+  - [x] Unified Turn Event & Map Stamp Workbench (`turnWorkbenchEngine.ts`, `turn-event-workbench` in `Play.tsx`) that immediately populates editable Event/Action Title, Feature Name, Icon, Terrain/Category overrides, and Chronicle Note when any preset is selected
+  - [x] Live in-place map stamping (`📍 Place on Map (col,row)` and `⚡ Stamp on Click` on the inline mini-map) that places presets or custom features onto the map and populates the Chronicle Record while keeping all fields 100% editable in-place (`stampDraftOnMapTile`)
+  - [x] Fast, tactile 1-click Custom Event & Stamp mode (`✨ Custom Event / Stamp` and `🎨 Icon & Terrain`) with 18 quick icons, 11 terrain overrides, 7 slot categories, combinatorial name re-rolls, and auto-prose synthesis
+  - [x] Explicit `💾 Save to Record` button (`save-turn-record-btn`) and inline editable Event/Action Title in `TimelinePanel.tsx`
+  - [x] Automated test suite in `turnWorkbenchEngine.test.ts` and `PlayStudio.test.tsx` (174/174 tests passing across 25 suites)
 
 ---
 
@@ -230,6 +236,7 @@ status: active
 - [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
 - [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
 - [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
-- [ ] Implement Phase 23: Interactive Codex Relationship Graph, Bulk Turn Inspector & Studio UX Polish (Target: 87.5 / 100).
+- [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
+- [ ] Implement Phase 24: Direct On-Map Radial Context Menus, Interactive Codex Relationship Graph & Living Chronicle Scrubber (Target: 88.5 / 100).
 
 

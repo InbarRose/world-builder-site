@@ -604,4 +604,71 @@ describe('Play Studio & Rules Integration', () => {
     // Newly forged entity chip appears in the Turn Activity Recorded basket!
     expect(screen.getAllByText(/Ironbeard Clan/i).length).toBeGreaterThan(0)
   })
+
+  it('populates Turn Event & Map Stamp Workbench when selecting a preset, places on map while staying editable, and supports fast Custom Event creation', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Draw a card in Studio Mode
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+
+    // Workbench is immediately available
+    const workbench = screen.getByTestId('turn-event-workbench')
+    expect(workbench).toBeInTheDocument()
+
+    // Select a preset via "Apply Bot Pick"
+    const botPickBtn = screen.getByRole('button', { name: /Apply Bot Pick/i })
+    await act(async () => {
+      fireEvent.click(botPickBtn)
+    })
+
+    // Verify Action Title and Feature Name populated into editable inputs
+    const titleInput = screen.getByTestId('workbench-action-title-input') as HTMLInputElement
+    const featureInput = screen.getByTestId('workbench-feature-name-input') as HTMLInputElement
+    expect(titleInput.value.length).toBeGreaterThan(0)
+    expect(featureInput.value.length).toBeGreaterThan(0)
+
+    // Place the preset on the map via "📍 Place on Map"
+    const placeBtn = screen.getByTestId('place-on-map-btn')
+    await act(async () => {
+      fireEvent.click(placeBtn)
+    })
+
+    // Verify badge shows it is placed on map AND still editable
+    expect(screen.getByTestId('workbench-placed-tiles-badge')).toHaveTextContent(/On Map/i)
+
+    // Edit the Feature Name and Action Title AFTER placing on map
+    await act(async () => {
+      fireEvent.change(featureInput, { target: { value: 'Dragonspine Summit' } })
+      fireEvent.change(titleInput, { target: { value: 'Rising of Dragonspine' } })
+    })
+    expect(featureInput.value).toBe('Dragonspine Summit')
+    expect(titleInput.value).toBe('Rising of Dragonspine')
+
+    // Switch to Custom Event / Stamp mode and customize icon & terrain
+    const customBtn = screen.getByTestId('switch-to-custom-workbench-btn')
+    await act(async () => {
+      fireEvent.click(customBtn)
+    })
+    expect(screen.getByTestId('workbench-stamp-customizer')).toBeInTheDocument()
+
+    // Save to Record while keeping turn open for further edits
+    const saveRecordBtn = screen.getByTestId('save-turn-record-btn')
+    await act(async () => {
+      fireEvent.click(saveRecordBtn)
+    })
+    expect(screen.getByTestId('workbench-feedback-banner')).toHaveTextContent(
+      /Saved to Turn #1 Record/i
+    )
+  })
 })

@@ -81,10 +81,11 @@ export function TimelinePanel({
         const q = searchQuery.toLowerCase()
         const matchNote = rec.note?.toLowerCase().includes(q)
         const matchPower = rec.power?.toLowerCase().includes(q)
+        const matchActionTitle = rec.actionTitle?.toLowerCase().includes(q)
         const matchEpoch = rec.epochYear?.toLowerCase().includes(q)
         const matchPlayer = rec.playerName?.toLowerCase().includes(q)
         const matchTile = rec.linkedTileIds?.some((t) => t.toLowerCase().includes(q))
-        if (!matchNote && !matchPower && !matchEpoch && !matchPlayer && !matchTile) {
+        if (!matchNote && !matchPower && !matchActionTitle && !matchEpoch && !matchPlayer && !matchTile) {
           return false
         }
       }
@@ -613,8 +614,26 @@ export function TimelinePanel({
                   </div>
                 )}
 
-                {/* Narrative Note (Read-Only for past turns unless unlocked!) */}
-                <div>
+                {/* Narrative Title & Note (Read-Only for past turns unless unlocked!) */}
+                <div className="space-y-1.5">
+                  {isUnlocked && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-muted-foreground shrink-0">
+                        Event / Action Title:
+                      </span>
+                      <input
+                        type="text"
+                        aria-label={`Edit Turn #${record.moveId} Action Title`}
+                        value={record.actionTitle || ''}
+                        onChange={(e) => {
+                          if (!isUnlocked) return
+                          onUpdateRecord(record.id, { actionTitle: e.target.value })
+                        }}
+                        placeholder="Event or preset title (e.g., Jagged Mountain Range, Treaty of Ash)..."
+                        className="input h-7 text-xs flex-1"
+                      />
+                    </div>
+                  )}
                   <textarea
                     value={record.note || ''}
                     readOnly={!isUnlocked}
