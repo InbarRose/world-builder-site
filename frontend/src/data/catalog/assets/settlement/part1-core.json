@@ -1,0 +1,205 @@
+[
+  {
+    "id": "settle-hamlet",
+    "name": "Thatched Hearth Hamlet",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Thatched Hamlet",
+    "category": "settlement",
+    "description": "Cluster of rustic thatched roundhouses with rising woodsmoke.",
+    "tags": [
+      "settlement",
+      "hamlet",
+      "huts",
+      "rural",
+      "village"
+    ],
+    "graphic": {
+      "assetId": "settle-hamlet",
+      "fallbackAssetId": null,
+      "glyph": "🛖",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-village",
+    "name": "Timber Palisade Village",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Palisade Village",
+    "category": "settlement",
+    "description": "Fortified wooden stockade village protected by log ramparts.",
+    "tags": [
+      "settlement",
+      "village",
+      "palisade",
+      "stockade",
+      "timber"
+    ],
+    "graphic": {
+      "assetId": "settle-village",
+      "fallbackAssetId": null,
+      "glyph": "🏡",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-town",
+    "name": "Walled Market Town",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Walled Town",
+    "category": "settlement",
+    "description": "Bustling medieval market town with cobblestone square and belltower.",
+    "tags": [
+      "settlement",
+      "town",
+      "market",
+      "walled",
+      "civic"
+    ],
+    "graphic": {
+      "assetId": "settle-town",
+      "fallbackAssetId": null,
+      "glyph": "🏘️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-nomad",
+    "name": "Nomadic Felt Yurt Camp",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Yurt Camp",
+    "category": "settlement",
+    "description": "Circle of portable felt yurts gathered around a central communal fire.",
+    "tags": [
+      "settlement",
+      "nomad",
+      "yurt",
+      "camp",
+      "tents"
+    ],
+    "graphic": {
+      "assetId": "settle-nomad",
+      "fallbackAssetId": null,
+      "glyph": "⛺",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-cliff",
+    "name": "Stepped Cliffside Pueblo",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Cliffside Pueblo",
+    "category": "settlement",
+    "description": "Multi-tiered adobe dwellings carved into a protected canyon rock wall.",
+    "tags": [
+      "settlement",
+      "cliff",
+      "pueblo",
+      "adobe",
+      "canyon"
+    ],
+    "graphic": {
+      "assetId": "settle-cliff",
+      "fallbackAssetId": null,
+      "glyph": "🧗🏘️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-stilt",
+    "name": "Coastal Stilt Water Village",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Stilt Water Village",
+    "category": "settlement",
+    "description": "Raised wooden platform dwellings elevated above tidal waters and marshes.",
+    "tags": [
+      "settlement",
+      "stilt",
+      "water",
+      "marsh",
+      "coastal"
+    ],
+    "graphic": {
+      "assetId": "settle-stilt",
+      "fallbackAssetId": null,
+      "glyph": "🛶🛖",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "settle-outpost",
+    "name": "Frontier Stockade Outpost",
+    "concept": "settlement",
+    "conceptLabel": "Settlements",
+    "variantName": "Frontier Outpost",
+    "category": "settlement",
+    "description": "Remote military stockade and supply depot watching the wilderness frontier.",
+    "tags": [
+      "settlement",
+      "outpost",
+      "frontier",
+      "fort",
+      "border"
+    ],
+    "graphic": {
+      "assetId": "settle-outpost",
+      "fallbackAssetId": null,
+      "glyph": "🚩🪵",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  }
+]

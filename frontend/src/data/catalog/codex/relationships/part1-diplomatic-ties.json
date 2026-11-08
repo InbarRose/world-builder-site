@@ -1,0 +1,98 @@
+[
+  {
+    "type": "alliance",
+    "label": "Mutual Defense Alliance",
+    "description": "Sworn military and civic allies who stand together in times of crisis.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🤝",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "royal_marriage",
+    "label": "Dynastic Royal Marriage",
+    "description": "Two noble houses or realms united by bloodline and shared succession.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "💍",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "trade_pact",
+    "label": "Chartered Trade League",
+    "description": "Open caravan roads, shared coinage, and flourishing merchant ports.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚖️",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "cultural_exchange",
+    "label": "Scholarly & Cultural Concord",
+    "description": "Shared academies, festivals, and traveling artisans between peoples.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "📜",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "shared_faith",
+    "label": "Sacred Covenant",
+    "description": "Bound by a common pantheon, pilgrimage route, or spiritual philosophy.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕯️",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "vassalage",
+    "label": "Tributary & Protectorate",
+    "description": "One realm pays tribute in exchange for imperial protection and autonomy.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "👑",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "rivalry",
+    "label": "Bitter Border Rivalry",
+    "description": "Competing claims over resources, prestige, and frontier fortresses.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚡",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  },
+  {
+    "type": "war",
+    "label": "Open Conflict & Siege",
+    "description": "Active hostilities, contested territories, and marshaled armies.",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚔️",
+      "primaryColor": null,
+      "secondaryColor": null
+    }
+  }
+]

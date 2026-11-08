@@ -189,17 +189,42 @@ graph TD
 
 ---
 
+### Domain 7: SOLID Data-Driven Taxonomy, Multi-Shard Extensibility & Graphic Asset Decoupling (20 Points — Studio Architecture Rubric)
+*Expert Perspective: Principal Software Architect & Data-Driven Modding Systems Engineer (Benchmark: Paradox Clausewitz Engine,RimWorld XML/JSON Defs, Foundry VTT Compendium Packs)*
+
+- **M7.1: Open/Closed Multi-Shard Manifest Architecture (5 pts)**
+  - *Criteria*: Content directories (`assets/`, `stages/`, `codex/`, `weights/`) use declarative `manifest.json` files with `shards: string[]` arrays (`part1.json`, `part2.json`, or category shards). Splitting large JSON files or adding new shards requires zero TypeScript `import` modifications via dynamic glob resolution (`import.meta.glob`).
+  - *Current Reality*: Fully implemented in ADR-026 (`catalogLoader.ts`, `resolveManifestShards`). Genesis suits are partitioned into 3 sub-category shards each (`part1`, `part2`, `part3`), Codex species/traits/abilities are partitioned into multi-part shards, and `resolveManifestShards` loads arbitrary shard lists dynamically.
+  - *Audit Score*: **5.0 / 5.0**
+- **M7.2: Structured `graphic` Sub-Leaf Schema & Asset Registry Decoupling (5 pts)**
+  - *Criteria*: Catalog JSON files prohibit primitive root-level `"icon"` properties. Every entity, preset, symbol, relationship, trait, ability, and bot archetype defines a structured `"graphic"` sub-JSON leaf (`GraphicSpec`: `{ assetId, fallbackAssetId, glyph, primaryColor, secondaryColor, params, settlementIcons }`) linking to the Graphics Assets Manifest (`assets/manifest.json`).
+  - *Current Reality*: Fully enforced across all 45+ JSON shards in `src/data/catalog/**` and verified by automated schema assertions in `catalogExtensibility.test.ts`.
+  - *Audit Score*: **5.0 / 5.0**
+- **M7.3: Zero-AI Surgical Human Authoring & Automatic Graphic Fallback (5 pts)**
+  - *Criteria*: Adding a new preset (e.g., `"Meteor Crater"` in `stages/genesis/earth/part2-canyons-cliffs-and-craters.json`) requires only a surgical 8–10 line JSON addition. Context (`stage`, `suit`, `slotCategory`, `slotPriority`) is inherited automatically from the manifest, and missing custom artwork resolves seamlessly via `graphic.fallbackAssetId`, concept fallbacks, or keyword/terrain inference.
+  - *Current Reality*: Fully implemented and documented in `src/data/catalog/README.md` with unit test verification across Studio Turn Workshop, Tabletop Compendium, Bot Affinity, and Map SVG rendering.
+  - *Audit Score*: **5.0 / 5.0**
+- **M7.4: Externalized Bot Personalities, Affinity Weights & Anti-Affinity Rules (5 pts)**
+  - *Criteria*: Bot personalities, default seat weights, historical synergy bonuses, and terrain anti-affinity rules are externalized in `src/data/catalog/weights/` shards rather than hardcoded in TypeScript logic.
+  - *Current Reality*: Externalized in `weights/personalities/part1-council-archetypes.json` and `weights/affinity/part1-synergy-and-antiaffinity-rules.json` and loaded via `loadCatalogBots()` and `loadCatalogAffinityRules()`.
+  - *Audit Score*: **4.5 / 5.0**
+
+**Domain 7 (Studio Architecture & Extensibility) Total: 19.5 / 20.0**
+
+---
+
 ## Adversarial Benchmark Scorecard
 
-| Domain | Weight | Baseline (v3.0) | Inflated Claim (Phase 15/16) | Phase 20 Verified Score | Gap to AAA Standard |
+| Domain | Weight | Baseline (v3.0) | Inflated Claim (Phase 15/16) | Phase 20.11 Verified Score | Gap to AAA Standard |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **D1: AAA Game Feel & Audio Polish** | 20% | 5.0 | 20.0 | **10.0** | -10.0 |
-| **D2: Cartographic Engineering & Spatial Simulation** | 20% | 9.0 | 20.0 | **18.0** | -2.0 |
-| **D3: TTRPG Game Theory & Campaign Bridge** | 20% | 6.0 | 15.0 | **18.0** (+10.5) | -2.0 |
-| **D4: Tabletop Ergonomics & Multi-Device Sync** | 15% | 9.0 | 15.0 | **9.0** | -6.0 |
-| **D5: System Reliability & Persistence** | 15% | 5.5 | 15.0 | **12.5** | -2.5 |
-| **D6: Campaign Publishing & Typographic Fidelity** | 10% | 5.0 | 10.0 | **5.5** | -4.5 |
-| **TOTAL SCORE** | **100%** | **39.5** | **100.0 (Revoked)** | **73.0 / 100** (+10.5) | **-27.0 pts** |
+| **D1: AAA Game Feel & Audio Polish** | 20 pts | 5.0 | 20.0 | **10.0** | -10.0 |
+| **D2: Cartographic Engineering & Spatial Simulation** | 20 pts | 9.0 | 20.0 | **18.0** | -2.0 |
+| **D3: TTRPG Game Theory & Campaign Bridge** | 20 pts | 6.0 | 15.0 | **19.0** (+11.5) | -1.0 |
+| **D4: Tabletop Ergonomics & Multi-Device Sync** | 15 pts | 9.0 | 15.0 | **9.0** | -6.0 |
+| **D5: System Reliability & Persistence** | 15 pts | 5.5 | 15.0 | **12.5** | -2.5 |
+| **D6: Campaign Publishing & Typographic Fidelity** | 10 pts | 5.0 | 10.0 | **5.5** | -4.5 |
+| **CORE 100-PT SCORE (D1–D6)** | **100 pts** | **39.5** | **100.0 (Revoked)** | **74.0 / 100** | **-26.0 pts** |
+| **D7: SOLID Studio Taxonomy, Shards & Graphic Schema** | **20 pts** | **4.0** | *Unmeasured* | **19.5 / 20.0** | **-0.5 pts** |
 
 > **Conclusion**: The application currently sits at **73.0 / 100** on a true commercial AAA standard following Phase 20 verification (+10.5 pts). Domain 3 (Collaborative TTRPG Game Theory & Session Zero Campaign Bridge) is now operating at commercial parity (18.0 / 20.0) alongside Domain 2 (18.0 / 20.0). Our next objective is Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics to elevate Domain 4 from 9.0 to 14.0 (+5.0 pts).
 

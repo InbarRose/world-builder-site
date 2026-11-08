@@ -4,31 +4,39 @@
   "suits": [
     {
       "suit": "♠",
-      "file": "conflict.json",
       "name": "Conflict",
       "defaultSlotCategory": "myth",
-      "defaultPriority": 88
+      "defaultPriority": 88,
+      "shards": [
+        "./conflict/part1-wars-and-upheavals.json"
+      ]
     },
     {
       "suit": "♥",
-      "file": "cooperation.json",
       "name": "Cooperation",
       "defaultSlotCategory": "structure",
-      "defaultPriority": 80
+      "defaultPriority": 80,
+      "shards": [
+        "./cooperation/part1-alliances-and-aid.json"
+      ]
     },
     {
       "suit": "♣",
-      "file": "scheme.json",
       "name": "Scheme",
       "defaultSlotCategory": "myth",
-      "defaultPriority": 86
+      "defaultPriority": 86,
+      "shards": [
+        "./scheme/part1-plots-and-cabals.json"
+      ]
     },
     {
       "suit": "♦",
-      "file": "myth.json",
       "name": "Myth & Mystery",
       "defaultSlotCategory": "myth",
-      "defaultPriority": 95
+      "defaultPriority": 95,
+      "shards": [
+        "./myth/part1-legends-and-awakenings.json"
+      ]
     }
   ]
 }

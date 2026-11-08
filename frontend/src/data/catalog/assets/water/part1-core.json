@@ -1,0 +1,765 @@
+[
+  {
+    "id": "river-meander",
+    "name": "Meandering River Channel",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "Meandering River",
+    "category": "water",
+    "description": "Winding, natural S-curve river channel traversing lowlands.",
+    "tags": [
+      "river",
+      "water",
+      "meander",
+      "flow"
+    ],
+    "graphic": {
+      "assetId": "river-meander",
+      "fallbackAssetId": null,
+      "glyph": "🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "river-braided",
+    "name": "Braided Gravel River",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "Braided River",
+    "category": "water",
+    "description": "Network of interweaving alluvial river channels weaving between gravel bars.",
+    "tags": [
+      "river",
+      "braided",
+      "gravel",
+      "alluvial"
+    ],
+    "graphic": {
+      "assetId": "river-braided",
+      "fallbackAssetId": null,
+      "glyph": "🔀",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "river-delta",
+    "name": "Braided River Delta",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "River Delta",
+    "category": "water",
+    "description": "Branching distributary fan depositing silt into the sea.",
+    "tags": [
+      "river",
+      "delta",
+      "estuary",
+      "mouth"
+    ],
+    "graphic": {
+      "assetId": "river-delta",
+      "fallbackAssetId": null,
+      "glyph": "🔱",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "river-rapids",
+    "name": "Whitewater River Rapids",
+    "concept": "river",
+    "conceptLabel": "Rivers",
+    "variantName": "River Rapids",
+    "category": "water",
+    "description": "Turbulent mountain torrent churning through boulder chutes.",
+    "tags": [
+      "river",
+      "rapids",
+      "whitewater",
+      "torrent"
+    ],
+    "graphic": {
+      "assetId": "river-rapids",
+      "fallbackAssetId": null,
+      "glyph": "⚡🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "waterfall-cataract",
+    "name": "Roaring Cataract Waterfall",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "High Cataract",
+    "category": "water",
+    "description": "Sheer cliff plunge where river cascades into a mist-shrouded gorge.",
+    "tags": [
+      "waterfall",
+      "cataract",
+      "plunge",
+      "cliff"
+    ],
+    "graphic": {
+      "assetId": "waterfall-cataract",
+      "fallbackAssetId": null,
+      "glyph": "💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "waterfall-cascades",
+    "name": "Stepped Tiered Cascades",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "Tiered Cascades",
+    "category": "water",
+    "description": "Series of descending rock steps and natural stone shelves.",
+    "tags": [
+      "waterfall",
+      "cascades",
+      "stepped",
+      "shelves"
+    ],
+    "graphic": {
+      "assetId": "waterfall-cascades",
+      "fallbackAssetId": null,
+      "glyph": "🪜💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "waterfall-gorge",
+    "name": "Canyon Plunge Waterfall",
+    "concept": "waterfall",
+    "conceptLabel": "Waterfalls",
+    "variantName": "Canyon Plunge",
+    "category": "water",
+    "description": "Massive plume of water trapped between high rock canyon cliffs.",
+    "tags": [
+      "waterfall",
+      "canyon",
+      "gorge",
+      "plunge"
+    ],
+    "graphic": {
+      "assetId": "waterfall-gorge",
+      "fallbackAssetId": null,
+      "glyph": "🏞️💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lake-basin",
+    "name": "Freshwater Lake Basin",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Lake Basin",
+    "category": "water",
+    "description": "Broad inland freshwater body cradled by surrounding shores.",
+    "tags": [
+      "lake",
+      "basin",
+      "freshwater",
+      "inland"
+    ],
+    "graphic": {
+      "assetId": "lake-basin",
+      "fallbackAssetId": null,
+      "glyph": "🏞️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lake-tarn",
+    "name": "Alpine Mountain Tarn",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Alpine Tarn",
+    "category": "water",
+    "description": "High-altitude crystalline glacial tarn nested below mountain peaks.",
+    "tags": [
+      "lake",
+      "tarn",
+      "alpine",
+      "glacial",
+      "mountain"
+    ],
+    "graphic": {
+      "assetId": "lake-tarn",
+      "fallbackAssetId": null,
+      "glyph": "🏔️💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lake-oxbow",
+    "name": "Crescent Oxbow Lake",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Oxbow Lake",
+    "category": "water",
+    "description": "Curving u-shaped lake formed when a river meander loop is cut off.",
+    "tags": [
+      "lake",
+      "oxbow",
+      "crescent",
+      "river"
+    ],
+    "graphic": {
+      "assetId": "lake-oxbow",
+      "fallbackAssetId": null,
+      "glyph": "🌙",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lake-crater",
+    "name": "Volcanic Crater Lake",
+    "concept": "lake",
+    "conceptLabel": "Lakes",
+    "variantName": "Crater Lake",
+    "category": "water",
+    "description": "Round, fathomless deep sapphire lake resting inside an extinct caldera.",
+    "tags": [
+      "lake",
+      "crater",
+      "caldera",
+      "deep"
+    ],
+    "graphic": {
+      "assetId": "lake-crater",
+      "fallbackAssetId": null,
+      "glyph": "🌋💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "swamp-mangrove",
+    "name": "Mangrove Stilt Swamp",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Mangrove Swamp",
+    "category": "water",
+    "description": "Tangled network of aerial stilt roots rising from brackish coastal waters.",
+    "tags": [
+      "swamp",
+      "mangrove",
+      "brackish",
+      "roots"
+    ],
+    "graphic": {
+      "assetId": "swamp-mangrove",
+      "fallbackAssetId": null,
+      "glyph": "🌿",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "swamp-peat",
+    "name": "Peat Moss Bog",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Peat Bog",
+    "category": "water",
+    "description": "Waterlogged, acidic wetland formed of decaying moss hummocks.",
+    "tags": [
+      "bog",
+      "peat",
+      "wetland",
+      "mire",
+      "moss"
+    ],
+    "graphic": {
+      "assetId": "swamp-peat",
+      "fallbackAssetId": null,
+      "glyph": "🪵",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "marsh-reeds",
+    "name": "Reed & Cattail Marsh",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Reed Marsh",
+    "category": "water",
+    "description": "Flooded riparian marshland bristling with tall reed stalks and cattails.",
+    "tags": [
+      "marsh",
+      "reeds",
+      "cattails",
+      "riparian"
+    ],
+    "graphic": {
+      "assetId": "marsh-reeds",
+      "fallbackAssetId": null,
+      "glyph": "🌾",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "marsh-fen",
+    "name": "Flooded Grassy Fen",
+    "concept": "swamp",
+    "conceptLabel": "Swamps & Marshes",
+    "variantName": "Grassy Fen",
+    "category": "water",
+    "description": "Alkaline mineral-rich wetland covered in sedges, rushes, and slow streams.",
+    "tags": [
+      "marsh",
+      "fen",
+      "sedges",
+      "wetland"
+    ],
+    "graphic": {
+      "assetId": "marsh-fen",
+      "fallbackAssetId": null,
+      "glyph": "🌱💧",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "tidal-pools",
+    "name": "Rocky Shore Tidal Pools",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Tidal Pools",
+    "category": "water",
+    "description": "Intertidal marine basins carved into coastal granite rock ledges.",
+    "tags": [
+      "tidal",
+      "pools",
+      "intertidal",
+      "coast",
+      "marine"
+    ],
+    "graphic": {
+      "assetId": "tidal-pools",
+      "fallbackAssetId": null,
+      "glyph": "🦀",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "estuary-bay",
+    "name": "Coastal Estuary Bay",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Estuary Bay",
+    "category": "water",
+    "description": "Sheltered coastal bay where ocean tides merge with river outflows.",
+    "tags": [
+      "estuary",
+      "bay",
+      "coast",
+      "harbor"
+    ],
+    "graphic": {
+      "assetId": "estuary-bay",
+      "fallbackAssetId": null,
+      "glyph": "⚓",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "atoll-reef",
+    "name": "Coral Reef Atoll",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Coral Atoll",
+    "category": "water",
+    "description": "Circular ring of living coral surrounding a central turquoise lagoon.",
+    "tags": [
+      "atoll",
+      "coral",
+      "reef",
+      "lagoon",
+      "island"
+    ],
+    "graphic": {
+      "assetId": "atoll-reef",
+      "fallbackAssetId": null,
+      "glyph": "🪸",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "fjord-sheer",
+    "name": "Glacial Sheer Fjord",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Glacial Fjord",
+    "category": "water",
+    "description": "Narrow, fathomless sea inlet framed by immense vertical mountain cliffs.",
+    "tags": [
+      "fjord",
+      "glacial",
+      "inlet",
+      "cliffs"
+    ],
+    "graphic": {
+      "assetId": "fjord-sheer",
+      "fallbackAssetId": null,
+      "glyph": "🛶",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "glacier-valley",
+    "name": "Alpine Valley Glacier",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Valley Glacier",
+    "category": "water",
+    "description": "Massive frozen river of ice grinding downward through an alpine cirque.",
+    "tags": [
+      "glacier",
+      "ice",
+      "valley",
+      "cirque",
+      "alpine"
+    ],
+    "graphic": {
+      "assetId": "glacier-valley",
+      "fallbackAssetId": null,
+      "glyph": "🧊🏔️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "glacier-crevasse",
+    "name": "Crevassed Icefield",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Crevassed Icefield",
+    "category": "water",
+    "description": "Vast polar ice sheet split by treacherous deep crevasses.",
+    "tags": [
+      "glacier",
+      "crevasse",
+      "ice",
+      "polar"
+    ],
+    "graphic": {
+      "assetId": "glacier-crevasse",
+      "fallbackAssetId": null,
+      "glyph": "🧊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "glacier-shelf",
+    "name": "Coastal Ice Shelf",
+    "concept": "glacier",
+    "conceptLabel": "Glaciers & Ice",
+    "variantName": "Ice Shelf",
+    "category": "water",
+    "description": "Floating permanent ice barrier calving icebergs into the sea.",
+    "tags": [
+      "glacier",
+      "shelf",
+      "iceberg",
+      "polar",
+      "coast"
+    ],
+    "graphic": {
+      "assetId": "glacier-shelf",
+      "fallbackAssetId": null,
+      "glyph": "🧊🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "maelstrom-whirlpool",
+    "name": "Oceanic Maelstrom Vortex",
+    "concept": "maelstrom",
+    "conceptLabel": "Maelstroms & Currents",
+    "variantName": "Oceanic Maelstrom",
+    "category": "water",
+    "description": "Terrifying oceanic whirlpool swallowing currents into the sea.",
+    "tags": [
+      "maelstrom",
+      "whirlpool",
+      "vortex",
+      "ocean"
+    ],
+    "graphic": {
+      "assetId": "maelstrom-whirlpool",
+      "fallbackAssetId": null,
+      "glyph": "🌀",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "tidal-rip",
+    "name": "Coastal Rip Tide & Breakers",
+    "concept": "maelstrom",
+    "conceptLabel": "Maelstroms & Currents",
+    "variantName": "Rip Tide & Breakers",
+    "category": "water",
+    "description": "Treacherous offshore surge currents dragging waters outward.",
+    "tags": [
+      "tide",
+      "rip",
+      "current",
+      "breakers"
+    ],
+    "graphic": {
+      "assetId": "tidal-rip",
+      "fallbackAssetId": null,
+      "glyph": "🌊🌀",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "spring-headwater",
+    "name": "Natural Spring Headwaters",
+    "concept": "river",
+    "conceptLabel": "Rivers & Springs",
+    "variantName": "Headwater Spring",
+    "category": "water",
+    "description": "Pure subterranean aquifer bubbling to the surface at the foot of mountain slopes.",
+    "tags": [
+      "spring",
+      "headwater",
+      "aquifer",
+      "pure"
+    ],
+    "graphic": {
+      "assetId": "spring-headwater",
+      "fallbackAssetId": null,
+      "glyph": "⛲",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "hotspring-geothermal",
+    "name": "Geothermal Mineral Hot Spring",
+    "concept": "geyser",
+    "conceptLabel": "Geysers & Thermal",
+    "variantName": "Mineral Hot Spring",
+    "category": "water",
+    "description": "Steaming mineral-rich volcanic pool heated by subterranean magma chambers.",
+    "tags": [
+      "hotspring",
+      "geothermal",
+      "steam",
+      "volcanic"
+    ],
+    "graphic": {
+      "assetId": "hotspring-geothermal",
+      "fallbackAssetId": null,
+      "glyph": "♨️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "trench-abyssal",
+    "name": "Abyssal Sunken Trench",
+    "concept": "tidal-pool",
+    "conceptLabel": "Tidal Pools & Coast",
+    "variantName": "Abyssal Trench",
+    "category": "water",
+    "description": "Dark, fathomless underwater canyon plunging miles below the ocean floor.",
+    "tags": [
+      "trench",
+      "abyss",
+      "deep",
+      "ocean",
+      "trench"
+    ],
+    "graphic": {
+      "assetId": "trench-abyssal",
+      "fallbackAssetId": null,
+      "glyph": "🕳️🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  }
+]

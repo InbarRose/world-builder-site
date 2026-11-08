@@ -1,12 +1,25 @@
 {
-  "description": "Codex entities, modular Lego trait/ability blocks, diplomatic relationships, and visual palettes.",
-  "files": {
-    "species": "./species.json",
-    "societies": "./societies.json",
-    "myths": "./myths.json",
-    "relationships": "./relationships.json",
-    "traits": "./traits.json",
-    "abilities": "./abilities.json",
-    "palettes": "./palettes.json"
-  }
+  "schemaVersion": "2.0.0",
+  "description": "Codex entities and modular traits/abilities with multi-shard support and graphic sub-leaves.",
+  "speciesShards": [
+    "./species/part1-core-ancestries.json",
+    "./species/part2-elemental-and-fey.json"
+  ],
+  "societiesShards": [
+    "./societies/part1-realms-and-leagues.json"
+  ],
+  "mythsShards": [
+    "./myths/part1-calamities-and-legends.json"
+  ],
+  "relationshipsShards": [
+    "./relationships/part1-diplomatic-ties.json"
+  ],
+  "traitsShards": [
+    "./traits/part1-traditions-and-governance.json",
+    "./traits/part2-economy-and-craft.json"
+  ],
+  "abilitiesShards": [
+    "./abilities/part1-magic-and-adaptations.json",
+    "./abilities/part2-warfare-and-mastery.json"
+  ]
 }

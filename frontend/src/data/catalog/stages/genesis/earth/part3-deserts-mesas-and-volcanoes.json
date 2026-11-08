@@ -1,0 +1,245 @@
+[
+  {
+    "id": "gen_earth_mesa_plateau",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Flat-Topped Mesa Bluff (Flat Mesa Bluff)",
+    "description": "Elevated flat tableland flanked by steep, stepped rock slopes.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "mesa-plateau",
+      "fallbackAssetId": null,
+      "glyph": "🟫",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "mesa",
+    "creativePrompt": "How does this flat-topped mesa bluff shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The flat-topped mesa bluff was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_badland_buttes",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Stepped Badland Buttes (Badland Buttes)",
+    "description": "Arid, wind-carved sedimentary towers, chimneys, and coulees.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "badland-buttes",
+      "fallbackAssetId": null,
+      "glyph": "🏜️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "canyon",
+    "creativePrompt": "How does this stepped badland buttes shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The stepped badland buttes was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_desert_dunes",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Crescent Sand Dunes (Crescent Dunes)",
+    "description": "Sweeping barchan crescent dunes sculpted by desert trade winds.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "desert-dunes",
+      "fallbackAssetId": null,
+      "glyph": "🐪",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "desert",
+    "reliefChange": "none",
+    "creativePrompt": "How does this crescent sand dunes shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The crescent sand dunes was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_desert_erg",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rippling Sand Sea Erg (Sand Sea Erg)",
+    "description": "Endless horizon of overlapping wave-like sand ripple crests.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "desert-erg",
+      "fallbackAssetId": null,
+      "glyph": "⏳",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "desert",
+    "reliefChange": "none",
+    "creativePrompt": "How does this rippling sand sea erg shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rippling sand sea erg was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_desert_rocky",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rocky Reg Pavement (Rocky Reg Pavement)",
+    "description": "Stoney desert pavement studded with wind-polished ventifacts.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "desert-rocky",
+      "fallbackAssetId": null,
+      "glyph": "🪨🏜️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "desert",
+    "reliefChange": "none",
+    "creativePrompt": "How does this rocky reg pavement shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rocky reg pavement was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_desert_cracked",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Sun-Cracked Arid Flats (Sun-Cracked Flats)",
+    "description": "Parched, desiccated clay pan etched with polygonal fissure fractures.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "desert-cracked",
+      "fallbackAssetId": null,
+      "glyph": "☀️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "desert",
+    "reliefChange": "none",
+    "creativePrompt": "How does this sun-cracked arid flats shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The sun-cracked arid flats was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_volcano_active",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Active Erupting Volcano (Active Erupting)",
+    "description": "Steep volcanic cone venting ash plumes and molten lava bombs.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "volcano-active",
+      "fallbackAssetId": null,
+      "glyph": "🌋",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "volcano",
+    "creativePrompt": "How does this active erupting volcano shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The active erupting volcano was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_volcano_caldera",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Collapsed Volcanic Caldera (Collapsed Caldera)",
+    "description": "Ancient mega-caldera crater rim cradling a sunken steaming caldera floor.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "volcano-caldera",
+      "fallbackAssetId": null,
+      "glyph": "🌋⭕",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "volcano",
+    "creativePrompt": "How does this collapsed volcanic caldera shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The collapsed volcanic caldera was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_earth_titan_spine",
+    "stage": "genesis",
+    "suit": "♠",
+    "isFantastical": true,
+    "isDisaster": false,
+    "name": "Petrified Titan Spine Massif",
+    "description": "Thrust up a continental mountain divide formed from the petrified vertebrae of a sleeping cosmic earth-titan.",
+    "slotCategory": "elevation",
+    "slotPriority": 85,
+    "graphic": {
+      "assetId": "mountain-range",
+      "fallbackAssetId": null,
+      "glyph": "✨⛰️",
+      "primaryColor": "#451a03",
+      "secondaryColor": "#fef08a",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "mountain",
+    "reliefChange": "mountain-range",
+    "creativePrompt": "Which slumbering titan formed this range? What happens if they ever awaken from their millennial slumber?",
+    "exampleNarrative": "The mountains shuddered into being, their ridge forming the unmistakable calcified spine of a slumbering cosmic colossus."
+  }
+]

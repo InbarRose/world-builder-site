@@ -4,31 +4,47 @@
   "suits": [
     {
       "suit": "♠",
-      "file": "earth.json",
       "name": "Earth",
       "defaultSlotCategory": "elevation",
-      "defaultPriority": 70
+      "defaultPriority": 70,
+      "shards": [
+        "./earth/part1-mountains-and-hills.json",
+        "./earth/part2-canyons-cliffs-and-craters.json",
+        "./earth/part3-deserts-mesas-and-volcanoes.json"
+      ]
     },
     {
       "suit": "♥",
-      "file": "water.json",
       "name": "Water",
       "defaultSlotCategory": "hydrology",
-      "defaultPriority": 66
+      "defaultPriority": 66,
+      "shards": [
+        "./water/part1-rivers-and-waterfalls.json",
+        "./water/part2-lakes-swamps-and-marshes.json",
+        "./water/part3-coastal-glaciers-and-currents.json"
+      ]
     },
     {
       "suit": "♣",
-      "file": "plant.json",
       "name": "Plant",
       "defaultSlotCategory": "vegetation",
-      "defaultPriority": 64
+      "defaultPriority": 64,
+      "shards": [
+        "./plant/part1-forests-and-taiga.json",
+        "./plant/part2-jungles-and-groves.json",
+        "./plant/part3-grasslands-and-wetlands.json"
+      ]
     },
     {
       "suit": "♦",
-      "file": "feature.json",
       "name": "Feature",
       "defaultSlotCategory": "resource",
-      "defaultPriority": 68
+      "defaultPriority": 68,
+      "shards": [
+        "./feature/part1-geothermal-craters-and-lava.json",
+        "./feature/part2-winds-and-resources.json",
+        "./feature/part3-landmarks-and-wonders.json"
+      ]
     }
   ]
 }

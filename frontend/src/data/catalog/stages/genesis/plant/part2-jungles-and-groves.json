@@ -1,0 +1,194 @@
+[
+  {
+    "id": "gen_plant_jungle_palms",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Tropical Palm Cluster (Palm Cluster)",
+    "description": "Slender curving palm trunks capped with radiant frond crowns.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "jungle-palms",
+      "fallbackAssetId": null,
+      "glyph": "🏝️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "jungle",
+    "reliefChange": "none",
+    "floraChange": "jungle",
+    "creativePrompt": "How does this tropical palm cluster shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The tropical palm cluster was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_jungle_cloud",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Misty Cloud Forest (Cloud Forest)",
+    "description": "High-elevation mountain forest drenched in perpetual mist and moss.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "jungle-cloud",
+      "fallbackAssetId": null,
+      "glyph": "☁️🌴",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "jungle",
+    "reliefChange": "none",
+    "floraChange": "jungle",
+    "creativePrompt": "How does this misty cloud forest shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The misty cloud forest was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_rainforest_vines",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Tangled Lianas & Vines (Tangled Lianas)",
+    "description": "Curtain of hanging woody liana vines looping through the understory.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "rainforest-vines",
+      "fallbackAssetId": null,
+      "glyph": "🌿🧗",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "jungle",
+    "reliefChange": "none",
+    "floraChange": "jungle",
+    "creativePrompt": "How does this tangled lianas & vines shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The tangled lianas & vines was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_grass_steppe",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Open Steppe Grassland (Open Steppe)",
+    "description": "Vast, windswept temperate prairie of hardy perennial grasses.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "grass-steppe",
+      "fallbackAssetId": null,
+      "glyph": "🌾",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "none",
+    "creativePrompt": "How does this open steppe grassland shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The open steppe grassland was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_grass_tall",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Tall Wild Grass Tufts (Tall Grass Tufts)",
+    "description": "Chest-high wild grasses waving rhythmically in the breeze.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "grass-tall",
+      "fallbackAssetId": null,
+      "glyph": "🌾🌾",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "none",
+    "creativePrompt": "How does this tall wild grass tufts shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The tall wild grass tufts was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_savanna_acacia",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Acacia Thorn Savanna (Acacia Savanna)",
+    "description": "Expansive tropical grassland dotted with flat-topped acacia umbrellas.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "savanna-acacia",
+      "fallbackAssetId": null,
+      "glyph": "🦒",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "none",
+    "creativePrompt": "How does this acacia thorn savanna shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The acacia thorn savanna was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_plant_meadow_wildflower",
+    "stage": "genesis",
+    "suit": "♣",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Wildflower Bloom Meadow (Wildflower Meadow)",
+    "description": "Vibrant carpet of flowering meadows humming with pollinators.",
+    "slotCategory": "vegetation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "meadow-wildflower",
+      "fallbackAssetId": null,
+      "glyph": "🌸",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "reliefChange": "none",
+    "creativePrompt": "How does this wildflower bloom meadow shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The wildflower bloom meadow was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

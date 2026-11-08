@@ -1,0 +1,1032 @@
+{
+  "slotIconPalette": [
+    {
+      "category": "settlement",
+      "label": "Settlements & Habitations",
+      "defaultPriority": 95,
+      "items": [
+        {
+          "name": "Nomad Camp",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⛺",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Hearth Village",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏡",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Market Town",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏘️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Walled City",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏰",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Royal Metropolis",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "👑",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Citadel Hold",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏯",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "structure",
+      "label": "Landmarks & Fortifications",
+      "defaultPriority": 82,
+      "items": [
+        {
+          "name": "Border Keep",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🛡️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Grand Monument",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏛️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Watchtower / Spire",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🗼",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Sea Harbor",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚓",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Battleground",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚔️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Ancient Ruins",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏚️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "myth",
+      "label": "Myths, Relics & Anomalies",
+      "defaultPriority": 90,
+      "items": [
+        {
+          "name": "Dragon Lair",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🐉",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Ley-Line Nexus",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "✨",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Arcane Sanctum",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🔮",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Necropolis",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "💀",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Maelstrom / Portal",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌀",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "elevation",
+      "label": "Elevation & Landforms",
+      "defaultPriority": 74,
+      "items": [
+        {
+          "name": "High Peaks",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏔️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Active Volcano",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌋",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Highland Hills",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⛰️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Deep Canyon",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏜️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Monolith Cliffs",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🗿",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "vegetation",
+      "label": "Flora & Groves",
+      "defaultPriority": 64,
+      "items": [
+        {
+          "name": "Pine Timberland",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌲",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Ancient Woods",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌳",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Tropical Jungle",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌴",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Bioluminescent Grove",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🍄",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Golden Fields",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌾",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "hydrology",
+      "label": "Lakes, Islands & Springs",
+      "defaultPriority": 66,
+      "items": [
+        {
+          "name": "Inland Lake",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "💧",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Sea Island / Atoll",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏝️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Great Cataract",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌊",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Thermal Springs",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "♨️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "resource",
+      "label": "Natural Resources",
+      "defaultPriority": 58,
+      "items": [
+        {
+          "name": "Iron & Silver Mine",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⛏️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Gemstone Cavern",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "💎",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Steppe Pastures",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🐎",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "name": "Rare Herb Grotto",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌿",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    }
+  ],
+  "colorSwatchPalettes": [
+    {
+      "id": "emerald-star",
+      "name": "Emerald & Starlight",
+      "primary": "#10b981",
+      "secondary": "#fef3c7"
+    },
+    {
+      "id": "amber-iron",
+      "name": "Amber & Deep Bronze",
+      "primary": "#f59e0b",
+      "secondary": "#78350f"
+    },
+    {
+      "id": "azure-dawn",
+      "name": "Royal Azure & Sky",
+      "primary": "#2563eb",
+      "secondary": "#dbeafe"
+    },
+    {
+      "id": "crimson-gold",
+      "name": "Crimson & Imperial Gold",
+      "primary": "#dc2626",
+      "secondary": "#fde047"
+    },
+    {
+      "id": "meadow-sun",
+      "name": "Meadow & Harvest",
+      "primary": "#84cc16",
+      "secondary": "#fef9c3"
+    },
+    {
+      "id": "solar-terracotta",
+      "name": "Solar Gold & Terracotta",
+      "primary": "#eab308",
+      "secondary": "#991b1b"
+    },
+    {
+      "id": "tidal-pearl",
+      "name": "Tidal Cyan & Pearl",
+      "primary": "#06b6d4",
+      "secondary": "#cffafe"
+    },
+    {
+      "id": "aether-brass",
+      "name": "Aether Indigo & Brass",
+      "primary": "#6366f1",
+      "secondary": "#fcd34d"
+    },
+    {
+      "id": "frost-aurora",
+      "name": "Glacial Frost & Ice",
+      "primary": "#38bdf8",
+      "secondary": "#e0f2fe"
+    },
+    {
+      "id": "spore-jade",
+      "name": "Amethyst & Biolume Jade",
+      "primary": "#a855f7",
+      "secondary": "#86efac"
+    },
+    {
+      "id": "twilight-rose",
+      "name": "Twilight Rose & Moon",
+      "primary": "#ec4899",
+      "secondary": "#f3e8ff"
+    },
+    {
+      "id": "prism-teal",
+      "name": "Prism Teal & Quartz",
+      "primary": "#14b8a6",
+      "secondary": "#f0fdfa"
+    }
+  ],
+  "entityIconGallery": [
+    {
+      "category": "Ancestries & Folk",
+      "items": [
+        {
+          "label": "Elven / Sylvan",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🧝",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Delver / Dwarf",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⛏️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Warden / Human",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🛡️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Wolf-Clan / Steppe",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🐺",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Halfling / Agrarian",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌾",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Saurian / Scaled",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🦎",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Tideborn / Aquatic",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🔱",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Automata / Clockwork",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚙️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Frost-Kin / Giant",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "❄️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Myconid / Spore",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🍄",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Fae / Sidhe",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🦋",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Lithid / Crystal",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "💎",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Avian / Sky-Folk",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🦅",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Kitsune / Fox-Folk",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🦊",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Leonin / Pride",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🦁",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Tortle / Shell-Kin",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🐢",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "Kingdoms & Banners",
+      "items": [
+        {
+          "label": "Royal Crown",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "👑",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Grand Citadel",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏰",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Senate / Republic",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏛️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Maritime League",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⛵",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Martial Order",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚔️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Merchant Syndicate",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚖️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Scholar Conclave",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "📜",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Khaganate Banner",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🚩",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "High Spire",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🗼",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Forge Guild",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "⚒️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Sacred Covenant",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🕯️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Shadow Court",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🎭",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    },
+    {
+      "category": "Myths, Beasts & Relics",
+      "items": [
+        {
+          "label": "Elder Dragon",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🐉",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Necropolis / Lich",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "💀",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Arcane Orb",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🔮",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Astral Wonder",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "✨",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Primordial Titan",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌋",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Abyssal Leviathan",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌊",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "World-Tree",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌳",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Fallen Star",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "☄️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "All-Seeing Cabal",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "👁️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Cursed Blade",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🗡️",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "First-Age Relic",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🏺",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        },
+        {
+          "label": "Planar Rift",
+          "graphic": {
+            "assetId": null,
+            "fallbackAssetId": null,
+            "glyph": "🌀",
+            "primaryColor": null,
+            "secondaryColor": null
+          }
+        }
+      ]
+    }
+  ],
+  "settlementIconSets": [
+    {
+      "id": "set_canopy",
+      "name": "Canopy Spires",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🗼",
+        "settlementIcons": {
+          "camp": "🍃",
+          "village": "🌳",
+          "town": "🎋",
+          "city": "🗼",
+          "metropolis": "🌟",
+          "architectureStyle": "Living Canopy Spires"
+        }
+      }
+    },
+    {
+      "id": "set_granite",
+      "name": "Mountain Holds",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🏰",
+        "settlementIcons": {
+          "camp": "⛺",
+          "village": "🪨",
+          "town": "⚒️",
+          "city": "🏰",
+          "metropolis": "🏔️",
+          "architectureStyle": "Carved Granite Holds"
+        }
+      }
+    },
+    {
+      "id": "set_feudal",
+      "name": "Walled Keeps",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🏰",
+        "settlementIcons": {
+          "camp": "⛺",
+          "village": "🏡",
+          "town": "🏘️",
+          "city": "🏰",
+          "metropolis": "👑",
+          "architectureStyle": "Timber & Stone Walled Keeps"
+        }
+      }
+    },
+    {
+      "id": "set_steppe",
+      "name": "Steppe War-Camps",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "⚔️",
+        "settlementIcons": {
+          "camp": "⛺",
+          "village": "🔥",
+          "town": "🛡️",
+          "city": "⚔️",
+          "metropolis": "🚩",
+          "architectureStyle": "Great Horned War-Camps"
+        }
+      }
+    },
+    {
+      "id": "set_ziggurat",
+      "name": "Sun Ziggurats",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🏛️",
+        "settlementIcons": {
+          "camp": "☀️",
+          "village": "🏜️",
+          "town": "🛕",
+          "city": "🏛️",
+          "metropolis": "🌞",
+          "architectureStyle": "Golden Stepped Ziggurats"
+        }
+      }
+    },
+    {
+      "id": "set_atoll",
+      "name": "Coral Atolls",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🔱",
+        "settlementIcons": {
+          "camp": "🐚",
+          "village": "⚓",
+          "town": "⛵",
+          "city": "🔱",
+          "metropolis": "🌊",
+          "architectureStyle": "Coral Spires & Floating Atolls"
+        }
+      }
+    },
+    {
+      "id": "set_clockwork",
+      "name": "Clockwork Towers",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "⚡",
+        "settlementIcons": {
+          "camp": "🔩",
+          "village": "⚙️",
+          "town": "🏭",
+          "city": "⚡",
+          "metropolis": "🔮",
+          "architectureStyle": "Clockwork Foundry-Towers"
+        }
+      }
+    },
+    {
+      "id": "set_biolume",
+      "name": "Fungal & Fey Domes",
+      "graphic": {
+        "assetId": "settle-town",
+        "fallbackAssetId": "settle-hamlet",
+        "glyph": "🌺",
+        "settlementIcons": {
+          "camp": "🍄",
+          "village": "🌿",
+          "town": "🌙",
+          "city": "🌺",
+          "metropolis": "✨",
+          "architectureStyle": "Bioluminescent Domes & Glades"
+        }
+      }
+    }
+  ]
+}

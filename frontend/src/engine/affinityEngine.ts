@@ -6,7 +6,10 @@
  */
 
 import { StageActionPreset, getEffectiveBotWeights, BOT_PERSONALITIES } from './presets'
+import { loadCatalogAffinityRules } from './catalogLoader'
 import { WorldState, PlayerSeat } from './types'
+
+export const CATALOG_AFFINITY_RULES = loadCatalogAffinityRules()
 
 export type StudioConceptGroup =
   | 'all'

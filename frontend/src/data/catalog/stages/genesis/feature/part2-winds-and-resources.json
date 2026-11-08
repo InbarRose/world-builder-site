@@ -1,0 +1,245 @@
+[
+  {
+    "id": "gen_feature_salt_hexagons",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Hexagonal Salt Crust Lakebed (Hexagonal Crust)",
+    "description": "Desiccated endorheic lakebed crystallized into geometric salt polygon ridges.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "salt-hexagons",
+      "fallbackAssetId": null,
+      "glyph": "🧂",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this hexagonal salt crust lakebed shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The hexagonal salt crust lakebed was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_salt_pan",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Reflective White Alkali Pan (White Alkali Pan)",
+    "description": "Blinding white, glass-flat expanse of ancient evaporite mineral salts.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "salt-pan",
+      "fallbackAssetId": null,
+      "glyph": "⬜",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this reflective white alkali pan shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The reflective white alkali pan was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_salt_pillars",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Evaporite Salt Spires (Salt Spires)",
+    "description": "Ghostly towers and pinnacles of wind-sculpted rock salt.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "salt-pillars",
+      "fallbackAssetId": null,
+      "glyph": "🧂🗡️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this evaporite salt spires shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The evaporite salt spires was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_wind_gale",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Prevailing Gale Wind Vectors (Gale Wind Vectors)",
+    "description": "Fierce perpetual trade wind currents sweeping unimpeded across the realm.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "wind-gale",
+      "fallbackAssetId": null,
+      "glyph": "💨🌬️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this prevailing gale wind vectors shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The prevailing gale wind vectors was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_wind_vortex",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Cyclone / Dust Devil Vortex (Cyclone Vortex)",
+    "description": "Violent rotating funnel of winds spiraling over land or sea.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "wind-vortex",
+      "fallbackAssetId": null,
+      "glyph": "🌪️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this cyclone / dust devil vortex shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The cyclone / dust devil vortex was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_wind_storm",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Thunderstorm Cloud Front (Thunderstorm Cloud)",
+    "description": "Towering cumulonimbus anvil discharging sheets of rain and lightning.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "wind-storm",
+      "fallbackAssetId": null,
+      "glyph": "⛈️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this thunderstorm cloud front shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The thunderstorm cloud front was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_water_currents",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Ocean Surface Currents (Surface Currents)",
+    "description": "Major warm and cold oceanic conveyor rivers steering naval transit.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "water-currents",
+      "fallbackAssetId": null,
+      "glyph": "🌊➡️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this ocean surface currents shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The ocean surface currents was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_current_gyre",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Oceanic Circulating Gyre (Oceanic Gyre)",
+    "description": "Massive circular ocean current system rotating around a calm central sea.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "current-gyre",
+      "fallbackAssetId": null,
+      "glyph": "🔄🌊",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this oceanic circulating gyre shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The oceanic circulating gyre was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  },
+  {
+    "id": "gen_feature_resource_mineral",
+    "stage": "genesis",
+    "suit": "♦",
+    "isFantastical": false,
+    "isDisaster": false,
+    "name": "Rich Mineral & Ore Vein (Mineral Ore Vein)",
+    "description": "Subterranean strike of precious iron, copper, or silver minerals.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "resource-mineral",
+      "fallbackAssetId": null,
+      "glyph": "⛏️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#f5f5f4",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "plains",
+    "overlayChange": "myth",
+    "creativePrompt": "How does this rich mineral & ore vein shape the surrounding land? What myths or weather patterns are tied to this place?",
+    "exampleNarrative": "The rich mineral & ore vein was etched onto the primordial canvas, casting long shadows across the nascent realm."
+  }
+]

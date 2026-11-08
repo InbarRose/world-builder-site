@@ -1,0 +1,828 @@
+[
+  {
+    "id": "geyser-basin",
+    "name": "Steaming Geyser Basin",
+    "concept": "geyser",
+    "conceptLabel": "Geysers & Thermal",
+    "variantName": "Steaming Basin",
+    "category": "feature",
+    "description": "Pressurized hydrothermal vents releasing periodic superheated water plumes.",
+    "tags": [
+      "geyser",
+      "steam",
+      "vent",
+      "thermal"
+    ],
+    "graphic": {
+      "assetId": "geyser-basin",
+      "fallbackAssetId": null,
+      "glyph": "💨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "geyser-eruption",
+    "name": "Superheated Geyser Fountain",
+    "concept": "geyser",
+    "conceptLabel": "Geysers & Thermal",
+    "variantName": "Geyser Fountain",
+    "category": "feature",
+    "description": "High vertical steam and scalding water fountain blasting skyward.",
+    "tags": [
+      "geyser",
+      "eruption",
+      "fountain",
+      "thermal"
+    ],
+    "graphic": {
+      "assetId": "geyser-eruption",
+      "fallbackAssetId": null,
+      "glyph": "⛲💨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "thermal-mudpot",
+    "name": "Boiling Mudpot Basin",
+    "concept": "geyser",
+    "conceptLabel": "Geysers & Thermal",
+    "variantName": "Boiling Mudpot",
+    "category": "feature",
+    "description": "Viscous acidic mud bubbling and popping with sulfurous fumes.",
+    "tags": [
+      "thermal",
+      "mudpot",
+      "sulfur",
+      "boiling"
+    ],
+    "graphic": {
+      "assetId": "thermal-mudpot",
+      "fallbackAssetId": null,
+      "glyph": "🫧🟤",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "crater-impact",
+    "name": "Meteor Impact Crater",
+    "concept": "crater",
+    "conceptLabel": "Craters",
+    "variantName": "Meteor Impact",
+    "category": "feature",
+    "description": "Violent starfall depression surrounded by a raised shatter-rim.",
+    "tags": [
+      "crater",
+      "meteor",
+      "impact",
+      "shatter"
+    ],
+    "graphic": {
+      "assetId": "crater-impact",
+      "fallbackAssetId": null,
+      "glyph": "☄️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "crater-caldera",
+    "name": "Sunken Caldera Crater",
+    "concept": "crater",
+    "conceptLabel": "Craters",
+    "variantName": "Sunken Caldera",
+    "category": "feature",
+    "description": "Steep amphitheater depression left by a collapsed primordial summit.",
+    "tags": [
+      "crater",
+      "caldera",
+      "sunken",
+      "rim"
+    ],
+    "graphic": {
+      "assetId": "crater-caldera",
+      "fallbackAssetId": null,
+      "glyph": "⭕🪨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "crater-pit",
+    "name": "Abyssal Chasm Pit",
+    "concept": "crater",
+    "conceptLabel": "Craters",
+    "variantName": "Abyssal Pit",
+    "category": "feature",
+    "description": "Bottomless sheer circular pit plunging into the molten mantle.",
+    "tags": [
+      "crater",
+      "pit",
+      "abyss",
+      "chasm"
+    ],
+    "graphic": {
+      "assetId": "crater-pit",
+      "fallbackAssetId": null,
+      "glyph": "🕳️⭐",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lava-fissure",
+    "name": "Molten Magma Fissure",
+    "concept": "lava-flow",
+    "conceptLabel": "Lava Flows",
+    "variantName": "Magma Fissure",
+    "category": "feature",
+    "description": "Tectonic fracture bleeding incandescent molten rock across the crust.",
+    "tags": [
+      "lava",
+      "fissure",
+      "magma",
+      "volcanic"
+    ],
+    "graphic": {
+      "assetId": "lava-fissure",
+      "fallbackAssetId": null,
+      "glyph": "🌋🔥",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lava-river",
+    "name": "Winding Basalt Lava Stream",
+    "concept": "lava-flow",
+    "conceptLabel": "Lava Flows",
+    "variantName": "Basalt Lava Stream",
+    "category": "feature",
+    "description": "Sluggish river of glowing molten basalt cutting through volcanic ash.",
+    "tags": [
+      "lava",
+      "stream",
+      "river",
+      "basalt"
+    ],
+    "graphic": {
+      "assetId": "lava-river",
+      "fallbackAssetId": null,
+      "glyph": "🔥🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "lava-field",
+    "name": "Obsidian Crust Lava Field",
+    "concept": "lava-flow",
+    "conceptLabel": "Lava Flows",
+    "variantName": "Obsidian Lava Field",
+    "category": "feature",
+    "description": "Twisted field of ropy pahoehoe lava cooled into black volcanic glass.",
+    "tags": [
+      "lava",
+      "obsidian",
+      "pahoehoe",
+      "crust"
+    ],
+    "graphic": {
+      "assetId": "lava-field",
+      "fallbackAssetId": null,
+      "glyph": "🖤🪨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "salt-hexagons",
+    "name": "Hexagonal Salt Crust Lakebed",
+    "concept": "salt-flat",
+    "conceptLabel": "Salt Flats",
+    "variantName": "Hexagonal Crust",
+    "category": "feature",
+    "description": "Desiccated endorheic lakebed crystallized into geometric salt polygon ridges.",
+    "tags": [
+      "salt",
+      "flats",
+      "hexagons",
+      "crust",
+      "alkali"
+    ],
+    "graphic": {
+      "assetId": "salt-hexagons",
+      "fallbackAssetId": null,
+      "glyph": "🧂",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "salt-pan",
+    "name": "Reflective White Alkali Pan",
+    "concept": "salt-flat",
+    "conceptLabel": "Salt Flats",
+    "variantName": "White Alkali Pan",
+    "category": "feature",
+    "description": "Blinding white, glass-flat expanse of ancient evaporite mineral salts.",
+    "tags": [
+      "salt",
+      "pan",
+      "alkali",
+      "evaporite",
+      "white"
+    ],
+    "graphic": {
+      "assetId": "salt-pan",
+      "fallbackAssetId": null,
+      "glyph": "⬜",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "salt-pillars",
+    "name": "Evaporite Salt Spires",
+    "concept": "salt-flat",
+    "conceptLabel": "Salt Flats",
+    "variantName": "Salt Spires",
+    "category": "feature",
+    "description": "Ghostly towers and pinnacles of wind-sculpted rock salt.",
+    "tags": [
+      "salt",
+      "spires",
+      "pillars",
+      "evaporite"
+    ],
+    "graphic": {
+      "assetId": "salt-pillars",
+      "fallbackAssetId": null,
+      "glyph": "🧂🗡️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "wind-gale",
+    "name": "Prevailing Gale Wind Vectors",
+    "concept": "wind",
+    "conceptLabel": "Strong Winds & Weather",
+    "variantName": "Gale Wind Vectors",
+    "category": "feature",
+    "description": "Fierce perpetual trade wind currents sweeping unimpeded across the realm.",
+    "tags": [
+      "wind",
+      "gale",
+      "vectors",
+      "weather",
+      "storm"
+    ],
+    "graphic": {
+      "assetId": "wind-gale",
+      "fallbackAssetId": null,
+      "glyph": "💨🌬️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "wind-vortex",
+    "name": "Cyclone / Dust Devil Vortex",
+    "concept": "wind",
+    "conceptLabel": "Strong Winds & Weather",
+    "variantName": "Cyclone Vortex",
+    "category": "feature",
+    "description": "Violent rotating funnel of winds spiraling over land or sea.",
+    "tags": [
+      "cyclone",
+      "vortex",
+      "tornado",
+      "dustdevil",
+      "wind"
+    ],
+    "graphic": {
+      "assetId": "wind-vortex",
+      "fallbackAssetId": null,
+      "glyph": "🌪️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "wind-storm",
+    "name": "Thunderstorm Cloud Front",
+    "concept": "wind",
+    "conceptLabel": "Strong Winds & Weather",
+    "variantName": "Thunderstorm Cloud",
+    "category": "feature",
+    "description": "Towering cumulonimbus anvil discharging sheets of rain and lightning.",
+    "tags": [
+      "storm",
+      "thunder",
+      "lightning",
+      "cloud",
+      "weather"
+    ],
+    "graphic": {
+      "assetId": "wind-storm",
+      "fallbackAssetId": null,
+      "glyph": "⛈️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "water-currents",
+    "name": "Ocean Surface Currents",
+    "concept": "current",
+    "conceptLabel": "Currents & Tides",
+    "variantName": "Surface Currents",
+    "category": "feature",
+    "description": "Major warm and cold oceanic conveyor rivers steering naval transit.",
+    "tags": [
+      "currents",
+      "ocean",
+      "tides",
+      "drift"
+    ],
+    "graphic": {
+      "assetId": "water-currents",
+      "fallbackAssetId": null,
+      "glyph": "🌊➡️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "current-gyre",
+    "name": "Oceanic Circulating Gyre",
+    "concept": "current",
+    "conceptLabel": "Currents & Tides",
+    "variantName": "Oceanic Gyre",
+    "category": "feature",
+    "description": "Massive circular ocean current system rotating around a calm central sea.",
+    "tags": [
+      "gyre",
+      "currents",
+      "rotation",
+      "ocean"
+    ],
+    "graphic": {
+      "assetId": "current-gyre",
+      "fallbackAssetId": null,
+      "glyph": "🔄🌊",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "resource-mineral",
+    "name": "Rich Mineral & Ore Vein",
+    "concept": "resource",
+    "conceptLabel": "Natural Resources",
+    "variantName": "Mineral Ore Vein",
+    "category": "feature",
+    "description": "Subterranean strike of precious iron, copper, or silver minerals.",
+    "tags": [
+      "resource",
+      "ore",
+      "mineral",
+      "iron",
+      "mine"
+    ],
+    "graphic": {
+      "assetId": "resource-mineral",
+      "fallbackAssetId": null,
+      "glyph": "⛏️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "resource-gem",
+    "name": "Crystalline Gem Geode",
+    "concept": "resource",
+    "conceptLabel": "Natural Resources",
+    "variantName": "Gemstone Geode",
+    "category": "feature",
+    "description": "Cluster of prism gemstones and arcane crystal clusters embedded in stone.",
+    "tags": [
+      "resource",
+      "gem",
+      "crystal",
+      "geode",
+      "jewels"
+    ],
+    "graphic": {
+      "assetId": "resource-gem",
+      "fallbackAssetId": null,
+      "glyph": "💎",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "crystal-cavern",
+    "name": "Luminescent Crystal Cavern",
+    "concept": "resource",
+    "conceptLabel": "Natural Resources",
+    "variantName": "Crystal Cavern",
+    "category": "feature",
+    "description": "Subterranean geode chamber bristling with glowing resonance crystals.",
+    "tags": [
+      "crystal",
+      "cavern",
+      "gem",
+      "geode",
+      "resonance"
+    ],
+    "graphic": {
+      "assetId": "crystal-cavern",
+      "fallbackAssetId": null,
+      "glyph": "🔮💎",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "resource-quarry",
+    "name": "High-Grade Stone Quarry Strata",
+    "concept": "resource",
+    "conceptLabel": "Natural Resources",
+    "variantName": "Stone Quarry Strata",
+    "category": "feature",
+    "description": "Stepped layers of prime dimensional granite or marble building stone.",
+    "tags": [
+      "resource",
+      "quarry",
+      "stone",
+      "marble",
+      "granite"
+    ],
+    "graphic": {
+      "assetId": "resource-quarry",
+      "fallbackAssetId": null,
+      "glyph": "🧱",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "titan-bones",
+    "name": "Colossal Titan Bones",
+    "concept": "resource",
+    "conceptLabel": "Natural Resources",
+    "variantName": "Titan Bone Bed",
+    "category": "feature",
+    "description": "Towering ribcage bones of an ancient pre-primordial titan fossil.",
+    "tags": [
+      "bones",
+      "titan",
+      "fossil",
+      "colossal",
+      "remains"
+    ],
+    "graphic": {
+      "assetId": "titan-bones",
+      "fallbackAssetId": null,
+      "glyph": "🦴",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "megalith-ring",
+    "name": "Megalith Stone Ring",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Megalith Ring",
+    "category": "feature",
+    "description": "Primordial stone trilithons aligned with solstices and celestial spheres.",
+    "tags": [
+      "megalith",
+      "stonehenge",
+      "monolith",
+      "ancient"
+    ],
+    "graphic": {
+      "assetId": "megalith-ring",
+      "fallbackAssetId": null,
+      "glyph": "🗿",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "obelisk-spires",
+    "name": "Ancient Obelisk Spires",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Obelisk Spires",
+    "category": "feature",
+    "description": "Slender carved granite pillars etched with precursor inscriptions.",
+    "tags": [
+      "obelisk",
+      "spire",
+      "pillar",
+      "precursor"
+    ],
+    "graphic": {
+      "assetId": "obelisk-spires",
+      "fallbackAssetId": null,
+      "glyph": "🗼",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "landmark-arch",
+    "name": "Natural Weathered Stone Arch",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Natural Stone Arch",
+    "category": "feature",
+    "description": "Monumental rock arch span carved through a plateau by centuries of wind.",
+    "tags": [
+      "arch",
+      "natural",
+      "rock",
+      "landmark",
+      "monument"
+    ],
+    "graphic": {
+      "assetId": "landmark-arch",
+      "fallbackAssetId": null,
+      "glyph": "🪨🌉",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "ruins-temple",
+    "name": "Forgotten Temple Ruins",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Temple Ruins",
+    "category": "feature",
+    "description": "Crumbling classical colonnade and fractured pediment of a lost order.",
+    "tags": [
+      "ruins",
+      "temple",
+      "columns",
+      "civilization"
+    ],
+    "graphic": {
+      "assetId": "ruins-temple",
+      "fallbackAssetId": null,
+      "glyph": "🏛️",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "petrified-wood",
+    "name": "Petrified Ancient Wood",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Petrified Wood",
+    "category": "feature",
+    "description": "Silicified tree trunks turned to agate and jasper stone over aeons.",
+    "tags": [
+      "petrified",
+      "wood",
+      "fossils",
+      "agate",
+      "stone"
+    ],
+    "graphic": {
+      "assetId": "petrified-wood",
+      "fallbackAssetId": null,
+      "glyph": "🪵✨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "sacred-grove",
+    "name": "Whispering Sacred Grove",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Sacred Grove",
+    "category": "feature",
+    "description": "Locus of enchanted white trees where ley currents rise to the surface.",
+    "tags": [
+      "grove",
+      "sacred",
+      "ley",
+      "enchanted",
+      "fairy"
+    ],
+    "graphic": {
+      "assetId": "sacred-grove",
+      "fallbackAssetId": null,
+      "glyph": "✨🌳",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  },
+  {
+    "id": "ley-nexus",
+    "name": "Ley Line Nexus Convergence",
+    "concept": "landmark",
+    "conceptLabel": "Landmarks",
+    "variantName": "Ley Line Nexus",
+    "category": "feature",
+    "description": "Intersection of planetary telluric energy channels radiating magic.",
+    "tags": [
+      "ley",
+      "nexus",
+      "magic",
+      "energy",
+      "arcane"
+    ],
+    "graphic": {
+      "assetId": "ley-nexus",
+      "fallbackAssetId": null,
+      "glyph": "🌀✨",
+      "primaryColor": "#262626",
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "opacity": 0.85,
+        "viewBox": "0 0 48 48"
+      }
+    }
+  }
+]

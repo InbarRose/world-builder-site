@@ -1,0 +1,101 @@
+[
+  {
+    "id": "dis_genesis_volcano",
+    "stage": "genesis",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "Cataclysmic Volcanic Eruption",
+    "description": "Tectonic fury raises a smoking caldera and blankets surrounding valleys in ash.",
+    "slotCategory": "elevation",
+    "slotPriority": 90,
+    "graphic": {
+      "assetId": "volcano-active",
+      "fallbackAssetId": null,
+      "glyph": "🌋",
+      "primaryColor": "#b91c1c",
+      "secondaryColor": "#fca5a5",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "volcano",
+    "reliefChange": "volcano"
+  },
+  {
+    "id": "dis_primal_deluge",
+    "stage": "primal",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "The Great Deluge & Sundering",
+    "description": "A generational flood or meteor strike forces early species to migrate and adapt.",
+    "slotCategory": "hydrology",
+    "slotPriority": 88,
+    "graphic": {
+      "assetId": "swamp-mangrove",
+      "fallbackAssetId": null,
+      "glyph": "🌊",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "terrainChange": "swamp",
+    "floraChange": "marsh",
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "dis_civ_fall",
+    "stage": "civilization",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "Earthquake & Doom of the Old Capital",
+    "description": "A great tremor or plague shatters a proud city, leaving storied ruins in its wake.",
+    "slotCategory": "structure",
+    "slotPriority": 90,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "☄️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "dis_int_cataclysm",
+    "stage": "intrigue",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "name": "The Red Comet & Arcane Reckoning",
+    "description": "A prophetic omen splits the sky, triggering upheaval across every kingdom.",
+    "slotCategory": "myth",
+    "slotPriority": 94,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "☄️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins"
+  }
+]

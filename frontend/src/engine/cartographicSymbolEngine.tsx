@@ -1,5 +1,5 @@
 import React from 'react'
-import { loadCatalogSymbols, resolveSymbolGraphicFallback } from './catalogLoader'
+import { GraphicSpec, loadCatalogSymbols, resolveSymbolGraphicFallback } from './catalogLoader'
 
 export type CartographicCategory = 'earth' | 'water' | 'plant' | 'feature' | 'settlement' | 'construction'
 
@@ -14,6 +14,7 @@ export interface CartographicSymbolMeta {
   description: string
   tags: string[]
   graphicFallback?: string
+  graphic?: GraphicSpec
 }
 
 export const CARTOGRAPHIC_SYMBOLS: CartographicSymbolMeta[] = loadCatalogSymbols()

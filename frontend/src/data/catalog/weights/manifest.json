@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2.0.0",
+  "description": "Bot personalities, seat decision weights, and affinity/anti-affinity scoring matrices.",
+  "personalitiesShards": [
+    "./personalities/part1-council-archetypes.json"
+  ],
+  "affinityRulesShards": [
+    "./affinity/part1-synergy-and-antiaffinity-rules.json"
+  ]
+}

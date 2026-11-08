@@ -1,129 +1,145 @@
-# World Builder Content Catalog — Human Authoring Guide
+# World Builder Studio Catalog — SOLID Multi-Shard & Graphic Sub-Leaf Guide
 
-This directory (`frontend/src/data/catalog/`) is the **Data-Driven Content Taxonomy** for the World Builder Studio (ADR-025).
+This directory (`frontend/src/data/catalog/`) is the **SOLID Data-Driven Content, Asset & Weights Taxonomy (v2.0.0)** for the World Builder Studio (ADR-026).
 
-All stage action presets, whiteboard cartographic symbols, playable species, civilizations, myths, modular traits/abilities, and bot personalities live in small, focused JSON files organized by domain and stage. **You do not need generative AI or complex TypeScript edits to add new content.**
+> **Note**: This catalog governs the **World Studio, Codex, Map Assets, and Bot Weights** (`frontend/src/data/catalog/`). It intentionally leaves the canonical rulebook data in `frontend/public/data/*.json` untouched.
 
 ---
 
-## 1. Directory & File Taxonomy
+## 1. Core Design Philosophy (SOLID & Zero-AI Surgical Authoring)
+
+1. **No Primitive `"icon"` Field in JSON — Structured `"graphic"` Sub-Leaf**:
+   Every entity, preset, symbol, relationship, trait, ability, and bot personality defines a rich **`"graphic"` sub-JSON leaf** referencing the **Graphics Assets Manifest (`assets/manifest.json`)** along with visual rendering parameters:
+   ```json
+   "graphic": {
+     "assetId": "mountain-peak",
+     "fallbackAssetId": "crater-impact",
+     "glyph": "☄️",
+     "primaryColor": "#78716c",
+     "secondaryColor": "#fef08a",
+     "params": {
+       "strokeWidth": 1.3,
+       "fillOpacity": 0.15,
+       "scale": 1.0
+     }
+   }
+   ```
+2. **Multi-Shard Partitioning (`shards: string[]`) — Open/Closed Principle**:
+   Every directory has a `manifest.json` whose entries declare a `shards: string[]` array (e.g., `./earth/part1-mountains-and-hills.json`, `./earth/part2-canyons-cliffs-and-craters.json`, `./earth/part3-deserts-mesas-and-volcanoes.json`).
+   - Because `catalogLoader.ts` uses `import.meta.glob('../data/catalog/**/*.json', { eager: true })`, you can split any file into `part1.json`, `part2.json`, `part3.json` or add new category shard files Simply by adding the filename to `manifest.json`—**zero TypeScript imports or engine edits required**.
+
+---
+
+## 2. Directory & Shard Taxonomy
 
 ```text
 frontend/src/data/catalog/
-├── manifest.json                         # Root catalog manifest & schema version
-├── README.md                             # This Human Authoring Guide
-├── stages/
-│   ├── manifest.json                     # Index of all 4 stages & disaster file
-│   ├── disasters.json                    # Stage / universal disaster & upheaval presets
+├── manifest.json                                           # Root v2.0.0 catalog manifest
+├── README.md                                               # This Human Authoring Guide
+├── assets/                                                 # Graphics Assets Registry & Visual Palettes
+│   ├── manifest.json                                       # Asset categories, shards & conceptFallbacks
+│   ├── earth/part1-core.json                               # Earth vector asset definitions
+│   ├── water/part1-core.json                               # Water vector asset definitions
+│   ├── plant/part1-core.json                               # Plant vector asset definitions
+│   ├── feature/part1-core.json                             # Feature vector asset definitions
+│   ├── settlement/part1-core.json                          # Settlement vector asset definitions
+│   ├── construction/part1-core.json                        # Construction vector asset definitions
+│   └── palettes/visual-palettes.json                       # Color swatches, slot palettes & icon sets
+├── stages/                                                 # Multi-Shard Stage Action Presets
+│   ├── manifest.json                                       # Index of stages & disaster shards
+│   ├── disasters/part1-cataclysms.json                     # Stage / universal upheaval presets
 │   ├── genesis/
-│   │   ├── manifest.json                 # 1. Genesis Stage manifest
-│   │   ├── earth.json                    # ♠ Earth presets (Mountains, Canyons, Meteor Crater, etc.)
-│   │   ├── water.json                    # ♥ Water presets (Rivers, Lakes, Waterfalls, Glaciers, etc.)
-│   │   ├── plant.json                    # ♣ Plant presets (Forests, Jungles, Grasslands, Marshes, etc.)
-│   │   └── feature.json                  # ♦ Feature presets (Geysers, Craters, Winds, Lava, Landmarks)
+│   │   ├── manifest.json                                   # 1. Genesis Stage multi-shard manifest
+│   │   ├── earth/
+│   │   │   ├── part1-mountains-and-hills.json              # ♠ Earth Part 1: Mountains, Ranges, Hills
+│   │   │   ├── part2-canyons-cliffs-and-craters.json       # ♠ Earth Part 2: Canyons, Cliffs, Caves, Meteor Crater
+│   │   │   └── part3-deserts-mesas-and-volcanoes.json      # ♠ Earth Part 3: Deserts, Mesas, Volcanoes
+│   │   ├── water/
+│   │   │   ├── part1-rivers-and-waterfalls.json            # ♥ Water Part 1: Rivers, Deltas, Waterfalls
+│   │   │   ├── part2-lakes-swamps-and-marshes.json         # ♥ Water Part 2: Lakes, Tarns, Swamps, Marshes
+│   │   │   └── part3-coastal-glaciers-and-currents.json    # ♥ Water Part 3: Fjords, Glaciers, Maelstroms
+│   │   ├── plant/
+│   │   │   ├── part1-forests-and-taiga.json                # ♣ Plant Part 1: Deciduous, Taiga, Redwoods
+│   │   │   ├── part2-jungles-and-groves.json               # ♣ Plant Part 2: Jungles, Bamboo, Fungal
+│   │   │   └── part3-grasslands-and-wetlands.json          # ♣ Plant Part 3: Steppes, Savannas, Meadows
+│   │   └── feature/
+│   │       ├── part1-geothermal-craters-and-lava.json      # ♦ Feature Part 1: Geysers, Craters, Lava
+│   │       ├── part2-winds-and-resources.json              # ♦ Feature Part 2: Gales, Minerals, Gems
+│   │       └── part3-landmarks-and-wonders.json            # ♦ Feature Part 3: Megaliths, Ruins, Ley-Lines
 │   ├── primal/
-│   │   ├── manifest.json                 # 2. Primal Stage manifest
-│   │   ├── settlements.json              # ♠ Settlements (Camps, Hamlets, Longhouses, Keeps)
-│   │   ├── traditions.json               # ♥ Cultural Traditions (Solar Cult, Shieldwall, etc.)
-│   │   ├── resources.json                # ♣ Resources (Warhorses, Wheat, Bog Iron, Timber)
-│   │   └── skills.json                   # ♦ Species Skills (Archery, Tracking, Navigation, Masonry)
+│   │   ├── manifest.json
+│   │   ├── settlements/part1-habitations.json              # ♠ Settlements
+│   │   ├── traditions/part1-customs.json                   # ♥ Traditions
+│   │   ├── resources/part1-flora-fauna-minerals.json       # ♣ Resources
+│   │   └── skills/part1-masteries.json                     # ♦ Skills
 │   ├── civilization/
-│   │   ├── manifest.json                 # 3. Civilization Stage manifest
-│   │   ├── constructions.json            # ♠ Constructions (Castles, Citadels, Bridges, Aqueducts)
-│   │   ├── enlightenment.json            # ♥ Enlightenment (Republics, Legal Codes, Medicine)
-│   │   ├── expansion.json                # ♣ Expansion (Colonies, Armadas, Granaries)
-│   │   └── diplomacy.json                # ♦ Diplomacy (Royal Marriages, Defense Leagues, Trade Pacts)
+│   │   ├── manifest.json
+│   │   ├── constructions/part1-monuments-and-infra.json    # ♠ Constructions
+│   │   ├── enlightenment/part1-civic-and-science.json      # ♥ Enlightenment
+│   │   ├── expansion/part1-colonies-and-routes.json        # ♣ Expansion
+│   │   └── diplomacy/part1-treaties-and-pacts.json         # ♦ Diplomacy
 │   └── intrigue/
-│       ├── manifest.json                 # 4. Intrigue Stage manifest
-│       ├── conflict.json                 # ♠ Conflict (Wars, Sieges, Rebellions, Blockades)
-│       ├── cooperation.json              # ♥ Cooperation (Coalitions, Famine Relief, Leagues)
-│       ├── scheme.json                   # ♣ Scheme (Assassinations, Cabals, Espionage, Coups)
-│       └── myth.json                     # ♦ Myth & Mystery (Dragons, Archliches, Sunken Cities)
-├── codex/
-│   ├── manifest.json                     # Codex entities & modular traits index
-│   ├── species.json                      # Playable races & ancestries
-│   ├── societies.json                    # Civilizations, nations & realms
-│   ├── myths.json                        # Calamities, schemes & legends
-│   ├── relationships.json                # Diplomatic & historical relationship archetypes
-│   ├── traits.json                       # Modular cultural tradition & trait blocks
-│   ├── abilities.json                    # Modular power & skill blocks
-│   └── palettes.json                     # Color swatches, icon galleries & settlement icon sets
-├── symbols/
-│   ├── manifest.json                     # Whiteboard cartographic symbol index & concept fallbacks
-│   ├── earth.json                        # Earth cartographic symbols
-│   ├── water.json                        # Water cartographic symbols
-│   ├── plant.json                        # Plant cartographic symbols
-│   ├── feature.json                      # Feature cartographic symbols
-│   ├── settlement.json                   # Settlement cartographic symbols
-│   └── construction.json                 # Construction cartographic symbols
-└── bots/
-    ├── manifest.json                     # Bot personalities & affinity profiles index
-    └── personalities.json                # Bot personalities & default affinity weights
+│       ├── manifest.json
+│       ├── conflict/part1-wars-and-upheavals.json          # ♠ Conflict
+│       ├── cooperation/part1-alliances-and-aid.json        # ♥ Cooperation
+│       ├── scheme/part1-plots-and-cabals.json              # ♣ Scheme
+│       └── myth/part1-legends-and-awakenings.json          # ♦ Myth & Mystery
+├── codex/                                                  # Multi-Shard Codex Entities & Modular Blocks
+│   ├── manifest.json
+│   ├── species/
+│   │   ├── part1-core-ancestries.json                      # Core playable ancestries
+│   │   └── part2-elemental-and-fey.json                    # Elemental, fey & exotic folk
+│   ├── societies/part1-realms-and-leagues.json
+│   ├── myths/part1-calamities-and-legends.json
+│   ├── relationships/part1-diplomatic-ties.json
+│   ├── traits/
+│   │   ├── part1-traditions-and-governance.json
+│   │   └── part2-economy-and-craft.json
+│   └── abilities/
+│       ├── part1-magic-and-adaptations.json
+│       └── part2-warfare-and-mastery.json
+└── weights/                                                # Externalized Bot Personalities & Affinity Matrix
+    ├── manifest.json
+    ├── personalities/part1-council-archetypes.json
+    └── affinity/part1-synergy-and-antiaffinity-rules.json
 ```
 
 ---
 
-## 2. How to Add a New Stage Preset (Surgical Example: `"Meteor Crater"`)
+## 3. Surgical Example: Adding `"Meteor Crater"` to Genesis Earth
 
-Suppose you want to add a new preset to **Genesis -> Earth (`♠`)** called **"Meteor Crater"**.
-
-1. Open `frontend/src/data/catalog/stages/genesis/earth.json`.
-2. Append a small JSON object to the array:
+Open `frontend/src/data/catalog/stages/genesis/earth/part2-canyons-cliffs-and-craters.json` and append:
 
 ```json
   {
     "id": "gen_earth_meteor_crater",
     "name": "Meteor Crater",
-    "icon": "☄️",
     "description": "Colossal impact basin scarred into the bedrock with a shattered rim and central meteorite peak.",
     "terrainChange": "canyon",
     "reliefChange": "crag",
-    "graphicFallback": "crater-impact",
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": "crater-impact",
+      "glyph": "☄️",
+      "primaryColor": "#78716c",
+      "secondaryColor": "#fef08a",
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
     "creativePrompt": "Did this ancient meteor impact leave behind star-metal ore or awaken something slumbering beneath the crust?",
     "exampleNarrative": "The Starfall Meteor Crater spans five leagues across, its vitrified stone rim encircling a central spire of sky-iron."
   }
 ```
 
-### What Happens Automatically?
-- **Context Inheritance**: Because you placed it inside `stages/genesis/earth.json`, the loader (`catalogLoader.ts`) automatically sets `stage: "genesis"`, `suit: "♠"`, `isFantastical: false`, `isDisaster: false`, `slotCategory: "elevation"`, and `slotPriority: 70` (you can override any of these if you wish).
-- **Graphic Reuse (`graphicFallback`)**: You did not need to draw a new SVG graphic! Setting `"graphicFallback": "crater-impact"` (or `"cartographicSymbol": "crater-impact"`) tells the map canvas, tile inspector, and SVG exporter to render the existing `"crater-impact"` whiteboard vector graphic.
-- **Zero-Config Graphic Inference**: Even if you omit both `cartographicSymbol` and `graphicFallback`, `inferDefaultGraphicForPreset()` inspects the preset's keywords/terrain/relief and selects a matching existing graphic automatically.
-- **Automatic Studio, Bot & Compendium Integration**:
-  - Appears immediately in the **Studio Turn Drafting Workshop** under Genesis -> Earth (`♠`).
-  - Automatically indexed in the **Tabletop Presets & Tropes Compendium (`📖 Compendium`)** with search and filters.
-  - Automatically scored by the **Bot Affinity Engine** (`affinityEngine.ts`) and available for **Auto-Play Bots** (`autoPlayEngine.ts`).
-
----
-
-## 3. How to Add a New Whiteboard Symbol (With or Without New SVG Art)
-
-Open the appropriate category file in `frontend/src/data/catalog/symbols/<category>.json` (e.g., `symbols/earth.json`) and append an entry:
-
-```json
-  {
-    "id": "earth-meteor-basin",
-    "name": "Starfall Meteor Basin",
-    "concept": "crater",
-    "conceptLabel": "Craters & Calderas",
-    "variantName": "Meteor Basin",
-    "icon": "☄️",
-    "description": "Shattered impact ring with central meteorite spire.",
-    "graphicFallback": "crater-impact",
-    "tags": ["crater", "meteor", "earth", "impact"]
-  }
-```
-
-- If you do **not** write custom SVG code in `cartographicSymbolEngine.tsx`, the engine automatically checks:
-  1. `"graphicFallback"` on your symbol JSON (e.g. `"crater-impact"`),
-  2. `conceptFallbacks` in `symbols/manifest.json` (e.g. `"crater"` -> `"crater-impact"`),
-  3. Category-level fallback.
-
----
-
-## 4. How to Add Codex Species, Societies, Myths, Traditions, or Skills
-
-- **New Playable Race / Species**: Add an entry to `codex/species.json`.
-- **New Civilization / Realm**: Add an entry to `codex/societies.json`.
-- **New Myth / Calamity**: Add an entry to `codex/myths.json`.
-- **New Cultural Tradition / Trait**: Add `{ "label": "...", "icon": "...", "description": "..." }` to a category group in `codex/traits.json`.
-- **New Skill / Ability**: Add `{ "label": "...", "icon": "...", "description": "..." }` to a category group in `codex/abilities.json`.
+### How the `graphic` Sub-Leaf & Context Inheritance Work:
+1. **`graphic.assetId` vs `graphic.fallbackAssetId`**:
+   - If you have a dedicated graphic in `assets/manifest.json`, set `"assetId": "<asset-id>"`.
+   - If you do **not** have a dedicated graphic for your new preset, set `"assetId": null` and set `"fallbackAssetId": "crater-impact"` (or any existing asset ID in `assets/`).
+   - Even if both `assetId` and `fallbackAssetId` are `null`, `inferDefaultGraphicForPreset()` inspects your preset's terrain/relief/keywords and selects an existing graphic automatically.
+2. **Visual Parameters (`primaryColor`, `secondaryColor`, `params`)**:
+   - Customize colors, stroke width, fill opacity, and scale directly inside the `graphic` sub-leaf.
+3. **Automatic Shard & Context Inheritance**:
+   - Because the file is listed under `♠` Earth in `stages/genesis/manifest.json`, `stage: "genesis"`, `suit: "♠"`, `slotCategory: "elevation"`, and `slotPriority: 70` are inherited automatically.
