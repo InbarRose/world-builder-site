@@ -418,4 +418,64 @@ describe('Play Studio & Rules Integration', () => {
     // Turn is complete and deck is at 53
     expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
   })
+
+  it('supports Studio Preset Categories, Search Filter, Bot Pick Recommendations, and Evocative Name Rerolls', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Draw card
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+
+    // Verify search input and category pills exist
+    const searchInput = screen.getByPlaceholderText(/Filter presets.../i)
+    expect(searchInput).toBeInTheDocument()
+
+    // Test text filtering
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'Peak' } })
+    })
+
+    // Verify Bot Pick recommendation button is present
+    const botPickBtn = screen.getByRole('button', { name: /Apply Bot Pick/i })
+    expect(botPickBtn).toBeInTheDocument()
+
+    // Click "Why this Pick?" to verify affinity rationale breakdown
+    const whyPickBtn = screen.getByRole('button', { name: /Why this Pick\?/i })
+    await act(async () => {
+      fireEvent.click(whyPickBtn)
+    })
+    expect(screen.getByText(/Affinity Breakdown for/i)).toBeInTheDocument()
+
+    // Click Apply Bot Pick
+    await act(async () => {
+      fireEvent.click(botPickBtn)
+    })
+
+    // Verify evocative name generator input and re-roll button appear
+    expect(screen.getByText(/Evocative Name \/ Map Label:/i)).toBeInTheDocument()
+    const rerollBtn = screen.getByRole('button', { name: /Re-roll/i })
+    expect(rerollBtn).toBeInTheDocument()
+
+    // Re-roll name
+    await act(async () => {
+      fireEvent.click(rerollBtn)
+    })
+
+    // Complete turn
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Complete & Pass Turn/i }))
+    })
+
+    expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
+  })
 })
