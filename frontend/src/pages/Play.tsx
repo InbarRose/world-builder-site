@@ -49,6 +49,8 @@ import {
   PowerData,
   StageId,
   Suit,
+  TerrainType,
+  TileSlotCategory,
   TurnPhase,
   WorldEntity,
   WorldState,
@@ -116,6 +118,17 @@ import {
   pickSmartTargetTileForPreset,
   buildQuickCodexEntity,
 } from '../engine/cardPhysicsEngine'
+import {
+  TurnActionDraft,
+  WORKBENCH_QUICK_ICONS,
+  WORKBENCH_SLOT_CATEGORIES,
+  WORKBENCH_TERRAIN_OPTIONS,
+  createCustomTurnDraft,
+  createDraftFromPreset,
+  generateDraftChronicleNote,
+  stampDraftOnMapTile,
+  syncDraftToDrawRecord,
+} from '../engine/turnWorkbenchEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
@@ -255,9 +268,15 @@ export function Play() {
   const [pickerSuit, setPickerSuit] = useState<Suit>('♠')
   const [pickerValue, setPickerValue] = useState<string>('10')
   const [showInlineMiniMap, setShowInlineMiniMap] = useState(false)
+  const [miniMapStampOnClick, setMiniMapStampOnClick] = useState(false)
   const [showQuickForgeEntity, setShowQuickForgeEntity] = useState(false)
   const [quickForgeCategory, setQuickForgeCategory] = useState<EntityCategory>('society')
   const [quickForgeName, setQuickForgeName] = useState('')
+  const [turnDraft, setTurnDraft] = useState<TurnActionDraft>(() =>
+    createCustomTurnDraft('genesis')
+  )
+  const [showCustomStampControls, setShowCustomStampControls] = useState(false)
+  const [recordSavedFeedback, setRecordSavedFeedback] = useState<string | null>(null)
   const [isSyncActive, setIsSyncActive] = useState(false)
   const [syncRoomCode, setSyncRoomCode] = useState<string>(() => {
     const paramRoom = searchParams.get('syncRoom')
@@ -853,6 +872,14 @@ export function Play() {
     setPendingNote('')
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
+    setRecordSavedFeedback(null)
+    setTurnDraft({
+      ...createCustomTurnDraft(currentStage, undefined, selectedTileId),
+      actionTitle: '',
+      featureName: '',
+      note: '',
+      placedTileIds: [],
+    })
     setCompanionNote('')
     setCompanionTileTag('')
     setCompanionEntityTag('')
@@ -1138,6 +1165,160 @@ export function Play() {
     setCompanionEntityTag('')
   }
 
+  // Live-sync TurnActionDraft into the active DrawRecord and any placed map tiles for this turn
+  const applyLiveTurnDraftUpdate = (
+    nextDraft: TurnActionDraft,
+    stampCoord?: string
+  ) => {
+    const mergedPlacedTiles = stampCoord
+      ? Array.from(new Set([...nextDraft.placedTileIds, stampCoord]))
+      : nextDraft.placedTileIds
+    const finalizedDraft: TurnActionDraft = {
+      ...nextDraft,
+      placedTileIds: mergedPlacedTiles,
+    }
+
+    setTurnDraft(finalizedDraft)
+    setGeneratedFeatureName(finalizedDraft.featureName)
+    setPendingNote(finalizedDraft.note)
+    if (stampCoord && !turnModifiedTiles.includes(stampCoord)) {
+      setTurnModifiedTiles((prev) => [...prev, stampCoord])
+    }
+
+    if (gameMode === 'studio') {
+      persistWorldUpdate((prev) => {
+        const lastIdx = prev.drawHistory.length - 1
+        if (lastIdx < 0) return prev
+        const record = { ...prev.drawHistory[lastIdx] }
+        const nextTiles = { ...prev.map.tiles }
+
+        for (const tid of mergedPlacedTiles) {
+          const [cStr, rStr] = tid.split(',')
+          const c = parseInt(cStr, 10) || 0
+          const r = parseInt(rStr, 10) || 0
+          const existingTile = nextTiles[tid] || createDefaultTile(c, r)
+          const { updatedTile } = stampDraftOnMapTile(
+            existingTile,
+            finalizedDraft,
+            record.id,
+            record.moveId
+          )
+          nextTiles[tid] = updatedTile
+        }
+
+        const syncedRecord = syncDraftToDrawRecord(
+          record,
+          finalizedDraft,
+          turnModifiedTiles,
+          turnModifiedEntities
+        )
+        const nextHistory = [...prev.drawHistory]
+        nextHistory[lastIdx] = syncedRecord
+
+        return {
+          ...prev,
+          map: { ...prev.map, tiles: nextTiles },
+          drawHistory: nextHistory,
+        }
+      })
+    }
+  }
+
+  // Place / Stamp current Preset or Custom Draft onto a map coordinate while keeping turn editable
+  const handlePlaceDraftOnMap = (targetCoord = selectedTileId) => {
+    if (world.isLocked) return
+    playTokenPlaceSound()
+    let activeDraft = { ...turnDraft }
+    if (!activeDraft.featureName.trim() && !activeDraft.actionTitle.trim()) {
+      const generated = createCustomTurnDraft(
+        currentStage,
+        powerData?.power,
+        targetCoord
+      )
+      activeDraft = {
+        ...activeDraft,
+        actionTitle: generated.actionTitle,
+        featureName: generated.featureName,
+      }
+    }
+    if (!activeDraft.note.trim()) {
+      activeDraft.note = generateDraftChronicleNote(
+        activeDraft,
+        currentStage,
+        targetCoord,
+        powerData?.power,
+        selectedPreset
+      )
+    }
+    applyLiveTurnDraftUpdate(activeDraft, targetCoord)
+    setRecordSavedFeedback(
+      `Placed "${activeDraft.featureName || activeDraft.actionTitle}" on (${targetCoord}) & recorded — still editable!`
+    )
+  }
+
+  // Switch to or initialize Custom Event / Map Stamp mode in 1 click
+  const handleSwitchToCustomDraft = () => {
+    playTokenPlaceSound()
+    setSelectedPreset(null)
+    setShowCustomStampControls(true)
+    const baseCustom = createCustomTurnDraft(
+      currentStage,
+      powerData?.power,
+      selectedTileId,
+      Date.now(),
+      turnDraft.placedTileIds
+    )
+    const nextDraft: TurnActionDraft = {
+      ...baseCustom,
+      actionTitle: turnDraft.actionTitle.trim() || baseCustom.actionTitle,
+      featureName: turnDraft.featureName.trim() || baseCustom.featureName,
+      icon: turnDraft.icon || baseCustom.icon,
+      note:
+        pendingNote.trim() ||
+        generateDraftChronicleNote(
+          {
+            ...baseCustom,
+            actionTitle: turnDraft.actionTitle.trim() || baseCustom.actionTitle,
+            featureName: turnDraft.featureName.trim() || baseCustom.featureName,
+          },
+          currentStage,
+          selectedTileId,
+          powerData?.power,
+          null
+        ),
+    }
+    applyLiveTurnDraftUpdate(nextDraft)
+    setRecordSavedFeedback('Custom Event & Map Stamp ready — edit fields or place on map!')
+  }
+
+  // Explicitly save current turn event/action into the Chronicle Record without ending the turn
+  const handleSaveTurnToRecord = () => {
+    if (world.isLocked || drawHistory.length === 0) return
+    playTokenPlaceSound()
+    const nextDraft: TurnActionDraft = {
+      ...turnDraft,
+      actionTitle:
+        turnDraft.actionTitle.trim() ||
+        selectedPreset?.name ||
+        powerData?.power ||
+        'World Event',
+      featureName: generatedFeatureName.trim() || turnDraft.featureName,
+      note:
+        pendingNote.trim() ||
+        generateDraftChronicleNote(
+          turnDraft,
+          currentStage,
+          selectedTileId,
+          powerData?.power,
+          selectedPreset
+        ),
+    }
+    applyLiveTurnDraftUpdate(nextDraft)
+    setRecordSavedFeedback(
+      `Saved to Turn #${drawHistory.length} Record — you can keep editing or pass turn!`
+    )
+  }
+
   // Confirm and Chronicle Turn in Studio Mode
   const handleConfirmTurnChronicle = () => {
     if (!drawnCard || world.isLocked) return
@@ -1147,21 +1328,56 @@ export function Play() {
       const lastIndex = prev.drawHistory.length - 1
       if (lastIndex < 0) return prev
 
-      const record: DrawRecord = { ...prev.drawHistory[lastIndex] }
-      if (pendingNote.trim()) {
-        record.note = pendingNote.trim()
-      }
-      if (selectedPreset) {
-        record.actionTitle = selectedPreset.name
-        record.presetId = selectedPreset.id
-        record.power = record.power || selectedPreset.name
-      }
-
+      let record: DrawRecord = { ...prev.drawHistory[lastIndex] }
       const nextTiles = { ...prev.map.tiles }
       const nextEntities = [...prev.entities]
 
-      // Apply preset to selected/inspected land tile if selected
-      if (selectedPreset) {
+      const effectiveDraft: TurnActionDraft = {
+        ...turnDraft,
+        source: selectedPreset ? 'preset' : turnDraft.source,
+        presetId: selectedPreset?.id || turnDraft.presetId,
+        actionTitle:
+          turnDraft.actionTitle.trim() ||
+          selectedPreset?.name ||
+          record.actionTitle ||
+          record.power ||
+          'World Event',
+        featureName:
+          generatedFeatureName.trim() ||
+          turnDraft.featureName.trim() ||
+          selectedPreset?.name ||
+          '',
+        icon: turnDraft.icon || selectedPreset?.icon || '✨',
+        slotCategory:
+          turnDraft.slotCategory || selectedPreset?.slotCategory || 'elevation',
+        slotPriority:
+          turnDraft.slotPriority || selectedPreset?.slotPriority || 60,
+        terrainChange:
+          turnDraft.terrainChange ?? selectedPreset?.terrainChange,
+        reliefChange:
+          turnDraft.reliefChange ?? selectedPreset?.reliefChange,
+        floraChange:
+          turnDraft.floraChange ?? selectedPreset?.floraChange,
+        overlayChange:
+          turnDraft.overlayChange ?? selectedPreset?.overlayChange,
+        cartographicSymbol:
+          turnDraft.cartographicSymbol ?? selectedPreset?.cartographicSymbol,
+        hasRiver: turnDraft.hasRiver ?? selectedPreset?.hasRiver,
+        hasRoad: turnDraft.hasRoad ?? selectedPreset?.hasRoad,
+        note: pendingNote.trim() || turnDraft.note.trim() || record.note || '',
+        placedTileIds: [...turnDraft.placedTileIds],
+      }
+
+      // If preset or custom map feature was configured and not yet placed on any tile, stamp onto selectedTileId
+      const shouldAutoStamp =
+        effectiveDraft.placedTileIds.length === 0 &&
+        Boolean(
+          selectedPreset ||
+            effectiveDraft.terrainChange ||
+            effectiveDraft.featureName.trim()
+        )
+
+      if (shouldAutoStamp) {
         let coordStr = selectedTileId
         if (!nextTiles[coordStr] || nextTiles[coordStr].terrain === 'ocean') {
           const candidates: { col: number; row: number }[] = []
@@ -1180,44 +1396,29 @@ export function Play() {
           }
           coordStr = getTileId(target.col, target.row)
         }
-
-        const existingTile = nextTiles[coordStr]
-        if (existingTile) {
-          let updated = { ...existingTile }
-          if (selectedPreset.terrainChange) updated.terrain = selectedPreset.terrainChange
-          if (selectedPreset.reliefChange) updated.relief = selectedPreset.reliefChange
-          if (selectedPreset.floraChange) updated.flora = selectedPreset.floraChange
-          if (selectedPreset.overlayChange) updated.overlay = selectedPreset.overlayChange
-          if (selectedPreset.cartographicSymbol) updated.cartographicSymbol = selectedPreset.cartographicSymbol
-          if (selectedPreset.hasRiver) updated.hasRiver = true
-          if (selectedPreset.hasRoad) updated.hasRoad = true
-          if (generatedFeatureName) updated.label = generatedFeatureName
-
-          updated = addSlotToTile(updated, {
-            category: selectedPreset.slotCategory,
-            type: selectedPreset.id,
-            name: generatedFeatureName || selectedPreset.name,
-            icon: selectedPreset.icon,
-            priority: selectedPreset.slotPriority,
-            linkedEventId: record.id,
-            moveId: record.moveId,
-          })
-          nextTiles[coordStr] = updated
-          record.linkedTileIds = Array.from(
-            new Set([...(record.linkedTileIds || []), coordStr, ...turnModifiedTiles])
-          )
-        }
-      } else if (turnModifiedTiles.length > 0) {
-        record.linkedTileIds = Array.from(
-          new Set([...(record.linkedTileIds || []), ...turnModifiedTiles])
-        )
+        effectiveDraft.placedTileIds = [coordStr]
       }
 
-      if (turnModifiedEntities.length > 0) {
-        record.linkedEntityIds = Array.from(
-          new Set([...(record.linkedEntityIds || []), ...turnModifiedEntities])
+      for (const coordStr of effectiveDraft.placedTileIds) {
+        const [cStr, rStr] = coordStr.split(',')
+        const c = parseInt(cStr, 10) || 0
+        const r = parseInt(rStr, 10) || 0
+        const existingTile = nextTiles[coordStr] || createDefaultTile(c, r)
+        const { updatedTile } = stampDraftOnMapTile(
+          existingTile,
+          effectiveDraft,
+          record.id,
+          record.moveId
         )
+        nextTiles[coordStr] = updatedTile
       }
+
+      record = syncDraftToDrawRecord(
+        record,
+        effectiveDraft,
+        turnModifiedTiles,
+        turnModifiedEntities
+      )
 
       const nextPlayerIdx =
         prev.players.length > 0 ? (prev.currentPlayerIndex + 1) % prev.players.length : 0
@@ -1248,6 +1449,14 @@ export function Play() {
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
     setActiveCreativeSpark(null)
+    setRecordSavedFeedback(null)
+    setTurnDraft({
+      ...createCustomTurnDraft(currentStage, undefined, selectedTileId),
+      actionTitle: '',
+      featureName: '',
+      note: '',
+      placedTileIds: [],
+    })
 
     if (players.length > 1) {
       const nextIdx = (currentPlayerIndex + 1) % players.length
@@ -1478,21 +1687,70 @@ export function Play() {
   const handleSelectPreset = (preset: StageActionPreset | null) => {
     if (!preset) {
       setSelectedPreset(null)
+      setTurnDraft((prev) => ({
+        ...prev,
+        source: 'custom',
+        presetId: undefined,
+      }))
       return
     }
     setSelectedPreset(preset)
-    const newName = generateFeatureName(preset.slotCategory, preset.cartographicSymbol || preset.name)
-    setGeneratedFeatureName(newName)
-    if (!pendingNote.trim()) {
-      setPendingNote(generateLedgerProse(preset, newName, undefined, selectedTileId))
-    }
+    const draft = createDraftFromPreset(
+      preset,
+      selectedTileId,
+      Date.now() + Math.random(),
+      turnDraft.placedTileIds
+    )
+    applyLiveTurnDraftUpdate(draft)
+    setRecordSavedFeedback(
+      `Preset "${preset.name}" populated into Turn #${drawHistory.length} — edit freely or place on map!`
+    )
   }
 
   const handleRerollFeatureName = () => {
-    if (!selectedPreset) return
-    const newName = generateFeatureName(selectedPreset.slotCategory, selectedPreset.cartographicSymbol || selectedPreset.name)
-    setGeneratedFeatureName(newName)
-    setPendingNote(generateLedgerProse(selectedPreset, newName, undefined, selectedTileId))
+    if (selectedPreset) {
+      const newName = generateFeatureName(
+        `${selectedPreset.name} ${selectedPreset.slotCategory}`,
+        selectedPreset.cartographicSymbol || selectedPreset.name,
+        Date.now() + Math.random()
+      )
+      const nextNote = generateLedgerProse(
+        selectedPreset,
+        newName,
+        undefined,
+        selectedTileId
+      )
+      const nextDraft: TurnActionDraft = {
+        ...turnDraft,
+        featureName: newName,
+        note: nextNote,
+      }
+      applyLiveTurnDraftUpdate(nextDraft)
+      return
+    }
+
+    const conceptHint =
+      turnDraft.terrainChange ||
+      turnDraft.actionTitle ||
+      turnDraft.slotCategory ||
+      currentStage
+    const newName = generateFeatureName(
+      conceptHint,
+      'general',
+      Date.now() + Math.random()
+    )
+    const nextDraft: TurnActionDraft = {
+      ...turnDraft,
+      featureName: newName,
+      note: generateDraftChronicleNote(
+        { ...turnDraft, featureName: newName },
+        currentStage,
+        selectedTileId,
+        powerData?.power,
+        null
+      ),
+    }
+    applyLiveTurnDraftUpdate(nextDraft)
   }
 
   const { color, bgColor } = drawnCard
@@ -3472,73 +3730,333 @@ export function Play() {
                           </div>
                         )}
 
-                        {/* Selected Preset Evocative Name Generator & Creative Prompt */}
-                        {selectedPreset && (
-                          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-3 animate-in fade-in duration-150">
-                            {/* Evocative Name Customizer & Re-roll */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-background/80 p-2.5 rounded-lg border border-amber-500/30">
-                              <div className="flex-1 w-full">
-                                <label className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block mb-1">
-                                  Evocative Name / Map Label:
-                                </label>
-                                <div className="flex items-center gap-2">
+                        {/* Unified Turn Event & Map Stamp Workbench (Preset-Populated OR Custom Freeform — Always Editable!) */}
+                        <div
+                          data-testid="turn-event-workbench"
+                          className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-3 animate-in fade-in duration-150"
+                        >
+                          {/* Workbench Header: Mode Badge + Custom Mode Switcher + Place on Map Button */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-amber-500/20">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-200 font-bold text-[11px] flex items-center gap-1">
+                                <span>{turnDraft.icon || selectedPreset?.icon || '✨'}</span>
+                                <span>
+                                  {selectedPreset
+                                    ? `Preset Populated: ${selectedPreset.name} (Editable)`
+                                    : 'Custom Event & Map Stamp (Editable)'}
+                                </span>
+                              </span>
+                              {turnDraft.placedTileIds.length > 0 && (
+                                <span
+                                  data-testid="workbench-placed-tiles-badge"
+                                  className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]"
+                                >
+                                  ✓ On Map ({turnDraft.placedTileIds.join('; ')}) — Editable
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <button
+                                type="button"
+                                data-testid="switch-to-custom-workbench-btn"
+                                onClick={handleSwitchToCustomDraft}
+                                className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all flex items-center gap-1 ${
+                                  !selectedPreset && showCustomStampControls
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'bg-background/90 border-border hover:border-primary/50 text-foreground'
+                                }`}
+                                title="Create or customize a freeform event and map stamp without needing a preset"
+                              >
+                                <Wand2 className="h-3 w-3 text-primary" />
+                                <span>✨ Custom Event / Stamp</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                data-testid="toggle-stamp-customizer-btn"
+                                onClick={() => setShowCustomStampControls((prev) => !prev)}
+                                className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all flex items-center gap-1 ${
+                                  showCustomStampControls
+                                    ? 'bg-amber-500 text-stone-950 border-amber-400'
+                                    : 'bg-background/90 border-border hover:border-amber-500/50 text-foreground'
+                                }`}
+                                title="Customize icon, terrain override, or slot category for this preset or custom stamp"
+                              >
+                                <span>🎨 Icon &amp; Terrain</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                data-testid="place-on-map-btn"
+                                onClick={() => handlePlaceDraftOnMap(selectedTileId)}
+                                className="px-3 py-1 rounded-lg bg-primary text-primary-foreground font-bold text-[11px] hover:bg-primary/90 transition-all shadow-2xs flex items-center gap-1"
+                                title="Stamp this preset or custom feature onto the selected map coordinate and populate the turn record while keeping all fields editable"
+                              >
+                                <span>📍 Place on Map ({selectedTileId})</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Live Feedback Toast inside Workbench */}
+                          {recordSavedFeedback && (
+                            <div
+                              data-testid="workbench-feedback-banner"
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-[11px] font-medium flex items-center justify-between gap-2"
+                            >
+                              <span>✓ {recordSavedFeedback}</span>
+                              <button
+                                type="button"
+                                onClick={() => setRecordSavedFeedback(null)}
+                                className="text-[10px] underline opacity-75 hover:opacity-100"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Editable Action Title & Evocative Name / Map Label Row */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 bg-background/80 p-2.5 rounded-lg border border-amber-500/30">
+                            <div>
+                              <label
+                                htmlFor="workbench-action-title-input"
+                                className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block mb-1"
+                              >
+                                Event / Action Title (In Record):
+                              </label>
+                              <input
+                                id="workbench-action-title-input"
+                                data-testid="workbench-action-title-input"
+                                type="text"
+                                value={turnDraft.actionTitle}
+                                onChange={(e) => {
+                                  const nextTitle = e.target.value
+                                  const nextDraft: TurnActionDraft = {
+                                    ...turnDraft,
+                                    actionTitle: nextTitle,
+                                  }
+                                  applyLiveTurnDraftUpdate(nextDraft)
+                                }}
+                                className="w-full px-2.5 py-1 rounded bg-background border border-border text-xs font-semibold focus:ring-1 focus:ring-amber-500 outline-none"
+                                placeholder="e.g., Jagged Mountain Range, Founding of Ironkeep..."
+                              />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="workbench-feature-name-input"
+                                className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block mb-1"
+                              >
+                                Evocative Name / Map Label:
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  id="workbench-feature-name-input"
+                                  data-testid="workbench-feature-name-input"
+                                  type="text"
+                                  value={generatedFeatureName}
+                                  onChange={(e) => {
+                                    const nextName = e.target.value
+                                    const nextNote = selectedPreset
+                                      ? generateLedgerProse(
+                                          selectedPreset,
+                                          nextName,
+                                          undefined,
+                                          selectedTileId
+                                        )
+                                      : generateDraftChronicleNote(
+                                          { ...turnDraft, featureName: nextName },
+                                          currentStage,
+                                          selectedTileId,
+                                          powerData?.power,
+                                          null
+                                        )
+                                    applyLiveTurnDraftUpdate({
+                                      ...turnDraft,
+                                      featureName: nextName,
+                                      note: nextNote,
+                                    })
+                                  }}
+                                  className="flex-1 px-2.5 py-1 rounded bg-background border border-border text-xs font-semibold focus:ring-1 focus:ring-amber-500 outline-none"
+                                  placeholder="Enter or generate feature name..."
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleRerollFeatureName}
+                                  className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-semibold transition-all flex items-center gap-1 shrink-0"
+                                  title="Re-roll an evocative combinatorial fantasy name"
+                                >
+                                  <span>🎲 Re-roll</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Expandable 1-Click Icon, Terrain & Category Customizer (For both Presets and Custom!) */}
+                          {showCustomStampControls && (
+                            <div
+                              data-testid="workbench-stamp-customizer"
+                              className="p-2.5 rounded-lg bg-background/90 border border-border space-y-2.5 animate-in fade-in duration-150"
+                            >
+                              {/* 1-Click Icon Picker */}
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                    Map Token / Icon:
+                                  </span>
                                   <input
                                     type="text"
-                                    value={generatedFeatureName}
-                                    onChange={(e) => {
-                                      setGeneratedFeatureName(e.target.value)
-                                      setPendingNote(generateLedgerProse(selectedPreset, e.target.value, undefined, selectedTileId))
-                                    }}
-                                    className="flex-1 px-2.5 py-1 rounded bg-background border border-border text-xs font-semibold focus:ring-1 focus:ring-amber-500 outline-none"
-                                    placeholder="Enter or generate feature name..."
+                                    aria-label="Custom Icon Symbol"
+                                    value={turnDraft.icon}
+                                    onChange={(e) =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        icon: e.target.value || '✨',
+                                      })
+                                    }
+                                    className="input h-6 w-14 text-center text-xs px-1"
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={handleRerollFeatureName}
-                                    className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-semibold transition-all flex items-center gap-1 shrink-0"
-                                    title="Re-roll an evocative combinatorial fantasy name"
-                                  >
-                                    <span>🎲 Re-roll</span>
-                                  </button>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {WORKBENCH_QUICK_ICONS.map((item) => (
+                                    <button
+                                      key={item.icon}
+                                      type="button"
+                                      onClick={() =>
+                                        applyLiveTurnDraftUpdate({
+                                          ...turnDraft,
+                                          icon: item.icon,
+                                        })
+                                      }
+                                      className={`px-2 py-0.5 rounded border text-sm transition-all ${
+                                        turnDraft.icon === item.icon
+                                          ? 'bg-primary/20 border-primary scale-110 shadow-2xs'
+                                          : 'bg-background border-border hover:border-primary/50'
+                                      }`}
+                                      title={item.label}
+                                    >
+                                      {item.icon}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* 1-Click Terrain Override Pills */}
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                  Terrain Stamp Override:
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {WORKBENCH_TERRAIN_OPTIONS.map((tOpt) => {
+                                    const isAct = (turnDraft.terrainChange || '') === tOpt.id
+                                    return (
+                                      <button
+                                        key={tOpt.label}
+                                        type="button"
+                                        onClick={() =>
+                                          applyLiveTurnDraftUpdate({
+                                            ...turnDraft,
+                                            terrainChange: (tOpt.id || undefined) as
+                                              | TerrainType
+                                              | undefined,
+                                          })
+                                        }
+                                        className={`px-2 py-0.5 rounded-full border text-[11px] font-medium flex items-center gap-1 transition-all ${
+                                          isAct
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                        }`}
+                                      >
+                                        <span>{tOpt.icon}</span>
+                                        <span>{tOpt.label}</span>
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* 1-Click Slot Category Pills */}
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                  Feature Category:
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {WORKBENCH_SLOT_CATEGORIES.map((catOpt) => {
+                                    const isAct = turnDraft.slotCategory === catOpt.id
+                                    return (
+                                      <button
+                                        key={catOpt.id}
+                                        type="button"
+                                        onClick={() =>
+                                          applyLiveTurnDraftUpdate({
+                                            ...turnDraft,
+                                            slotCategory: catOpt.id as TileSlotCategory,
+                                          })
+                                        }
+                                        className={`px-2 py-0.5 rounded-full border text-[11px] font-medium flex items-center gap-1 transition-all ${
+                                          isAct
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                        }`}
+                                      >
+                                        <span>{catOpt.icon}</span>
+                                        <span>{catOpt.label}</span>
+                                      </button>
+                                    )
+                                  })}
                                 </div>
                               </div>
                             </div>
+                          )}
 
-                            {selectedPreset.creativePrompt && (
-                              <div className="text-amber-900 dark:text-amber-200 leading-relaxed">
-                                <strong className="font-bold text-amber-700 dark:text-amber-400">
-                                  💡 Creative Prompt:{' '}
-                                </strong>
-                                <span>{selectedPreset.creativePrompt}</span>
-                              </div>
-                            )}
+                          {selectedPreset?.creativePrompt && (
+                            <div className="text-amber-900 dark:text-amber-200 leading-relaxed">
+                              <strong className="font-bold text-amber-700 dark:text-amber-400">
+                                💡 Creative Prompt:{' '}
+                              </strong>
+                              <span>{selectedPreset.creativePrompt}</span>
+                            </div>
+                          )}
 
-                            {selectedPreset.exampleNarrative && (
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1.5 border-t border-amber-500/20">
-                                <div className="text-muted-foreground italic text-[11px] leading-relaxed border-l-2 border-amber-500/50 pl-2">
-                                  &ldquo;{selectedPreset.exampleNarrative}&rdquo;
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setPendingNote(
-                                      generateLedgerProse(
-                                        selectedPreset,
-                                        generatedFeatureName || selectedPreset.name,
-                                        undefined,
-                                        selectedTileId
-                                      )
-                                    )
-                                  }
-                                  className="shrink-0 px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-semibold transition-colors flex items-center gap-1"
-                                  title="Copy this example prose directly into your turn chronicle note"
-                                >
-                                  <span>✍️ Sync to Note</span>
-                                </button>
-                              </div>
-                            )}
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1.5 border-t border-amber-500/20">
+                            <div className="text-muted-foreground italic text-[11px] leading-relaxed border-l-2 border-amber-500/50 pl-2">
+                              {selectedPreset?.exampleNarrative ? (
+                                <>&ldquo;{selectedPreset.exampleNarrative}&rdquo;</>
+                              ) : (
+                                <span>
+                                  Tip: Select any preset above to auto-populate, or type a custom title/name and click Place on Map or Save to Record.
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const prose = generateDraftChronicleNote(
+                                  {
+                                    ...turnDraft,
+                                    featureName:
+                                      generatedFeatureName ||
+                                      turnDraft.featureName ||
+                                      selectedPreset?.name ||
+                                      '',
+                                  },
+                                  currentStage,
+                                  selectedTileId,
+                                  powerData?.power,
+                                  selectedPreset
+                                )
+                                applyLiveTurnDraftUpdate({
+                                  ...turnDraft,
+                                  note: prose,
+                                })
+                              }}
+                              className="shrink-0 px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-semibold transition-colors flex items-center gap-1"
+                              title="Generate or refresh the chronicle note from your current title, feature name, and coordinate"
+                            >
+                              <span>✍️ Sync to Note</span>
+                            </button>
                           </div>
-                        )}
+                        </div>
 
                         {/* Live Turn Activity Basket (Shows Map Tiles & Codex Entries touched this turn) */}
                         <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 space-y-2.5 text-xs">
@@ -3638,7 +4156,7 @@ export function Play() {
                               data-testid="inline-minimap-picker"
                               className="p-3 rounded-xl bg-background border border-primary/40 space-y-2 animate-in fade-in duration-150"
                             >
-                              <div className="flex items-center justify-between text-[11px]">
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
                                 <span className="font-bold text-primary">
                                   🎯 Click any coordinate to target Turn #{drawHistory.length} (@{' '}
                                   {selectedTileId} —{' '}
@@ -3648,13 +4166,35 @@ export function Play() {
                                   ]?.label || 'Ocean'}
                                   ):
                                 </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setShowInlineMiniMap(false)}
-                                  className="text-muted-foreground hover:text-foreground text-[10px] underline"
-                                >
-                                  Hide Mini-Map
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    data-testid="minimap-stamp-on-click-toggle"
+                                    onClick={() => setMiniMapStampOnClick((prev) => !prev)}
+                                    className={`px-2 py-0.5 rounded border text-[10px] font-semibold transition-all ${
+                                      miniMapStampOnClick
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-muted/60 border-border text-muted-foreground hover:text-foreground'
+                                    }`}
+                                    title="When enabled, clicking any mini-map tile immediately places your current preset or custom feature onto that tile"
+                                  >
+                                    ⚡ Stamp on Click: {miniMapStampOnClick ? 'ON' : 'OFF'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePlaceDraftOnMap(selectedTileId)}
+                                    className="px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 text-[10px] font-bold hover:bg-primary/25"
+                                  >
+                                    📍 Place on ({selectedTileId})
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowInlineMiniMap(false)}
+                                    className="text-muted-foreground hover:text-foreground text-[10px] underline"
+                                  >
+                                    Hide Mini-Map
+                                  </button>
+                                </div>
                               </div>
                               <div
                                 className="inline-grid gap-0.5 p-1.5 rounded-lg bg-stone-900/20 border border-border max-w-full overflow-x-auto"
@@ -3668,6 +4208,7 @@ export function Play() {
                                     const t = world.map.tiles[tid] || createDefaultTile(c, r)
                                     const meta = TERRAIN_PALETTE[t.terrain] || TERRAIN_PALETTE.ocean
                                     const isTarget = selectedTileId === tid
+                                    const isPlacedThisTurn = turnDraft.placedTileIds.includes(tid)
                                     return (
                                       <button
                                         key={tid}
@@ -3675,12 +4216,18 @@ export function Play() {
                                         data-testid={`minimap-tile-${c}-${r}`}
                                         onClick={() => {
                                           setSelectedTileId(tid)
-                                          playTokenPlaceSound()
+                                          if (miniMapStampOnClick) {
+                                            handlePlaceDraftOnMap(tid)
+                                          } else {
+                                            playTokenPlaceSound()
+                                          }
                                         }}
                                         style={{ backgroundColor: meta.color }}
                                         className={`h-5 rounded-2xs text-[9px] flex items-center justify-center transition-transform ${
                                           isTarget
                                             ? 'ring-2 ring-white scale-125 z-10 font-bold shadow'
+                                            : isPlacedThisTurn
+                                            ? 'ring-1 ring-amber-300 z-10 font-bold'
                                             : 'opacity-85 hover:opacity-100'
                                         }`}
                                         title={`Target (${c}, ${r}) — ${meta.label} [${getTileDomain(t)}]`}
@@ -3878,7 +4425,12 @@ export function Play() {
                                 <span className="text-[11px]">Example: {activeCreativeSpark.exampleIdea}</span>
                                 <button
                                   type="button"
-                                  onClick={() => setPendingNote(activeCreativeSpark.exampleIdea)}
+                                  onClick={() =>
+                                    applyLiveTurnDraftUpdate({
+                                      ...turnDraft,
+                                      note: activeCreativeSpark.exampleIdea,
+                                    })
+                                  }
                                   className="shrink-0 text-[10px] px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 font-semibold transition-colors"
                                 >
                                   Use as Note
@@ -3891,10 +4443,26 @@ export function Play() {
                             <input
                               type="text"
                               value={pendingNote}
-                              onChange={(e) => setPendingNote(e.target.value)}
+                              onChange={(e) => {
+                                const nextNote = e.target.value
+                                applyLiveTurnDraftUpdate({
+                                  ...turnDraft,
+                                  note: nextNote,
+                                })
+                              }}
                               placeholder="Describe what occurred in the world on this turn..."
                               className="input flex-1 text-xs h-9 min-w-[200px]"
                             />
+                            <button
+                              type="button"
+                              data-testid="save-turn-record-btn"
+                              onClick={handleSaveTurnToRecord}
+                              className="btn-outline px-3 h-9 text-xs font-semibold shrink-0 flex items-center gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                              title="Save or update this turn event in the Chronicle Record while staying on this turn to keep editing"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              <span>Save to Record</span>
+                            </button>
                             <button
                               type="button"
                               onClick={handleConfirmTurnChronicle}
