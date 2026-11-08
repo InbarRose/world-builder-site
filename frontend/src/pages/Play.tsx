@@ -32,6 +32,7 @@ import {
   ChevronDown,
   Search,
   Keyboard,
+  X,
 } from 'lucide-react'
 import {
   Card,
@@ -102,6 +103,12 @@ import { NewGameCeremonyModal } from '../components/NewGameCeremonyModal'
 import { EpochCeremonyModal } from '../components/EpochCeremonyModal'
 import { CommandPalette } from '../components/CommandPalette'
 import { KeyboardShortcutsModal } from '../components/KeyboardShortcutsModal'
+import { CampaignHooksModal } from '../components/CampaignHooksModal'
+import { SessionZeroPrimerModal } from '../components/SessionZeroPrimerModal'
+import {
+  getRandomCreativeSpark,
+  CreativeSpark,
+} from '../engine/campaignBridgeEngine'
 import { saveWorldAsync } from '../engine/storageIndexedDb'
 import {
   decodeWorldFromCompressedHash,
@@ -193,6 +200,14 @@ export function Play() {
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showShortcutsModal, setShowShortcutsModal] = useState(false)
   const [isDraftingWorkshop, setIsDraftingWorkshop] = useState(false)
+  const [showCampaignHooksModal, setShowCampaignHooksModal] = useState(false)
+  const [showSessionZeroPrimerModal, setShowSessionZeroPrimerModal] = useState(false)
+  const [activeCreativeSpark, setActiveCreativeSpark] = useState<CreativeSpark | null>(null)
+  const [conclaveHandoff, setConclaveHandoff] = useState<{
+    active: boolean
+    player: PlayerSeat
+    previousPlayerName: string
+  } | null>(null)
 
   useEffect(() => {
     const handleGlobalShortcuts = (e: KeyboardEvent) => {
@@ -697,6 +712,18 @@ export function Play() {
         updated.snapshots = [...(updated.snapshots || []), snap]
         return updated
       })
+      if (players.length > 1) {
+        const nextIdx = (currentPlayerIndex + 1) % players.length
+        const nextSeat = players[nextIdx]
+        if (nextSeat) {
+          setConclaveHandoff({
+            active: true,
+            player: nextSeat,
+            previousPlayerName: players[currentPlayerIndex % players.length]?.name || 'Player',
+          })
+        }
+      }
+      playTurnPassSound()
       setTurnPhase('await_draw')
       if (newDeck.length === 0) setShowDeckEmptyDialog(true)
       return
@@ -852,6 +879,20 @@ export function Play() {
     setPendingNote('')
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
+    setActiveCreativeSpark(null)
+
+    if (players.length > 1) {
+      const nextIdx = (currentPlayerIndex + 1) % players.length
+      const nextSeat = players[nextIdx]
+      if (nextSeat) {
+        setConclaveHandoff({
+          active: true,
+          player: nextSeat,
+          previousPlayerName: players[currentPlayerIndex % players.length]?.name || 'Player',
+        })
+      }
+    }
+    playTurnPassSound()
 
     if (deck.length === 0) {
       setShowDeckEmptyDialog(true)
@@ -1304,6 +1345,28 @@ export function Play() {
               </span>
             </button>
 
+            {/* TTRPG Campaign Quick Launchers */}
+            <button
+              type="button"
+              onClick={() => setShowCampaignHooksModal(true)}
+              aria-label="Tabletop Campaign Adventure Hooks"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+              title="Tabletop Campaign Adventure Hooks & Rumor Tables (D&D / OSR)"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Hooks</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSessionZeroPrimerModal(true)}
+              aria-label="Session Zero 1-Page Campaign Primer"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
+              title="Session Zero 1-Page Campaign Primer Handout"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Primer</span>
+            </button>
+
             {/* Share & Export Popover */}
             <div className="relative">
               <button
@@ -1323,7 +1386,30 @@ export function Play() {
               </button>
 
               {showShareMenu && (
-                <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCampaignHooksModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
+                  >
+                    <Compass className="h-3.5 w-3.5" />
+                    <span>⚔️ Campaign Hooks & Rumors</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSessionZeroPrimerModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-primary"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    <span>📜 Session Zero Primer Handout</span>
+                  </button>
+                  <div className="border-t border-border my-1" />
                   <button
                     type="button"
                     onClick={() => {
@@ -1642,6 +1728,48 @@ export function Play() {
               Dawn of a New Era: {stageCelebration.stageName}
             </span>
             <span className="text-lg">🌟</span>
+          </div>
+        </div>
+      )}
+
+      {/* Tabletop Conclave Turn Handoff Ritual Toast */}
+      {conclaveHandoff && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-x-0 top-16 z-50 flex items-center justify-center p-3 animate-in fade-in slide-in-from-top-2 duration-300 pointer-events-auto"
+        >
+          <div
+            className="card max-w-lg w-full p-4 rounded-2xl shadow-2xl border-2 flex items-center justify-between gap-3.5 bg-card/95 backdrop-blur-md"
+            style={{ borderColor: conclaveHandoff.player.color }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 shadow-sm"
+                style={{ backgroundColor: conclaveHandoff.player.color }}
+              >
+                {conclaveHandoff.player.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <span>Tabletop Conclave Handoff</span>
+                  <span className="text-primary font-mono">• {conclaveHandoff.player.role}</span>
+                </div>
+                <div className="text-sm font-black text-foreground">
+                  {conclaveHandoff.player.name}, the realm awaits your hand
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Passed from {conclaveHandoff.previousPlayerName}. Draw a card or sculpt the map.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setConclaveHandoff(null)}
+              className="btn-primary text-xs px-3.5 py-1.5 shrink-0 shadow-sm font-semibold"
+            >
+              Ready
+            </button>
           </div>
         </div>
       )}
@@ -2611,9 +2739,63 @@ export function Play() {
 
                         {/* Turn Note & Chronicle Action */}
                         <div className="space-y-2 pt-2 border-t border-border">
-                          <label className="text-xs font-semibold text-muted-foreground block">
-                            Turn #{drawHistory.length} Event Chronicle Note:
-                          </label>
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-muted-foreground block">
+                              Turn #{drawHistory.length} Event Chronicle Note:
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setActiveCreativeSpark(getRandomCreativeSpark(currentStage))}
+                              className="text-[11px] text-amber-600 dark:text-amber-400 hover:text-amber-500 font-semibold flex items-center gap-1 transition-colors"
+                              title="Stuck? Roll a provocative worldbuilding question and story spark"
+                            >
+                              <Sparkles className="h-3 w-3" />
+                              <span>💡 Spark Inspiration</span>
+                            </button>
+                          </div>
+
+                          {/* Creative Spark Callout Box */}
+                          {activeCreativeSpark && (
+                            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-2 animate-in fade-in">
+                              <div className="flex items-center justify-between">
+                                <div className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                  <span>Creative Spark: {activeCreativeSpark.category}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveCreativeSpark(getRandomCreativeSpark(currentStage))}
+                                    className="text-[10px] text-muted-foreground hover:text-foreground px-2 py-0.5 rounded bg-muted/60 transition-colors"
+                                  >
+                                    Roll Another
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveCreativeSpark(null)}
+                                    className="text-muted-foreground hover:text-foreground p-0.5 rounded transition-colors"
+                                    aria-label="Dismiss creative spark"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                              <p className="font-semibold text-foreground/90 italic">
+                                &ldquo;{activeCreativeSpark.question}&rdquo;
+                              </p>
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1 border-t border-amber-500/20 text-muted-foreground">
+                                <span className="text-[11px]">Example: {activeCreativeSpark.exampleIdea}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setPendingNote(activeCreativeSpark.exampleIdea)}
+                                  className="shrink-0 text-[10px] px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 dark:text-amber-200 font-semibold transition-colors"
+                                >
+                                  Use as Note
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="flex flex-wrap gap-2">
                             <input
                               type="text"
@@ -3148,6 +3330,23 @@ export function Play() {
         onNavigateToEntity={handleNavigateToEntity}
       />
 
+      {/* Tabletop Campaign Adventure Hooks & Rumor Tables Modal */}
+      <CampaignHooksModal
+        isOpen={showCampaignHooksModal}
+        onClose={() => setShowCampaignHooksModal(false)}
+        world={world}
+        onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
+        onSelectEntity={(eid) => setFlyoutEntityId(eid)}
+      />
+
+      {/* Session Zero 1-Page Campaign Primer Modal */}
+      <SessionZeroPrimerModal
+        isOpen={showSessionZeroPrimerModal}
+        onClose={() => setShowSessionZeroPrimerModal(false)}
+        world={world}
+        onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
+      />
+
       {/* Global Spotlight Command Palette (Ctrl+K) */}
       <CommandPalette
         isOpen={showCommandPalette}
@@ -3165,6 +3364,8 @@ export function Play() {
         isSoundMuted={isSoundMuted}
         onOpenExportModal={() => setShowExportModal(true)}
         onOpenShareModal={() => setShowShareModal(true)}
+        onOpenCampaignHooksModal={() => setShowCampaignHooksModal(true)}
+        onOpenSessionZeroPrimerModal={() => setShowSessionZeroPrimerModal(true)}
         onOpenCodexEntity={(eid) => setFlyoutEntityId(eid)}
         onReturnToLauncher={handleReturnToLauncher}
         onOpenShortcutsModal={() => setShowShortcutsModal(true)}

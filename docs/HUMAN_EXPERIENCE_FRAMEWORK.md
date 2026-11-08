@@ -74,8 +74,18 @@ The tabletop canvas must never present 3,000 pixels of vertically stacked contro
 
 ### Tenet 5: Tabletop Respect & Frictionless Collaboration
 Whether around a physical kitchen table with dice and cards or playing remotely over voice chat:
-- Sharing must take seconds via compact QR code or instant URL, requiring **zero server logins, zero account creation, and zero paywalls**.
+- Sharing must take seconds via lightweight setup seeds or portable `.world.json` files, requiring **zero server logins, zero account creation, and zero paywalls**.
 - Offline capability must be total—a GM in a cabin with no Wi-Fi can run an entire 4-age campaign seamlessly.
+
+### Tenet 6: The TTRPG Campaign Bridge & Platform for Continued Play
+This application is not an isolated CAD map tool or a detached simulation. Its primary reason for being is to serve as a **Session Zero co-creation ceremony for tabletop roleplaying groups (D&D, Pathfinder, etc.)** sitting down for a few hours before their campaign starts.
+- Every co-created mountain, civilization, fallen ruin, and political treaty must actively seed **playable tabletop adventures, rumors, quest hooks, and local mysteries**.
+- The map and chronicles serve as the live **interactive campaign bible** that the group carries directly into Session 1.
+
+### Tenet 7: Catalytic Diversity Over Restrictive Rules (Zero Win/Loss)
+There are no winners, no losers, and no victory points. Worldbuilding is pure shared creativity.
+- The cards, suits, and powers are **creative diversity engines** designed to vanquish the blank-canvas terror and inspire unexpected story mashups.
+- Players possess **absolute creative sovereignty**: complete freedom to override card suggestions, edit any tile, invent custom lore, bypass phases, or draw freeform. The software serves the creators' imaginations, never dictating limits.
 
 ---
 
