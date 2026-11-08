@@ -76,6 +76,15 @@ export function triggerHapticFeedback(pattern: HapticPattern = 'light'): void {
 }
 
 /**
+ * Computes a subtle pitch jitter multiplier (±4%, roughly ±50 cents) so repeated
+ * card draws, flips, and token placements never cause listener fatigue.
+ */
+export function computePitchJitterMultiplier(seed?: number): number {
+  const rand = seed !== undefined ? Math.abs(Math.sin(seed * 9973)) : Math.random()
+  return Number((0.96 + rand * 0.08).toFixed(4))
+}
+
+/**
  * Crisp paper card slide/flick sound.
  */
 export function playCardDrawSound(): void {
@@ -86,6 +95,7 @@ export function playCardDrawSound(): void {
 
   try {
     const now = ctx.currentTime
+    const jitter = computePitchJitterMultiplier()
     const bufferSize = ctx.sampleRate * 0.08 // 80ms buffer
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
     const data = buffer.getChannelData(0)
@@ -99,7 +109,7 @@ export function playCardDrawSound(): void {
 
     const filter = ctx.createBiquadFilter()
     filter.type = 'bandpass'
-    filter.frequency.setValueAtTime(1400, now)
+    filter.frequency.setValueAtTime(1400 * jitter, now)
     filter.Q.setValueAtTime(1.8, now)
 
     const gain = ctx.createGain()
@@ -127,12 +137,13 @@ export function playCardFlipSound(): void {
 
   try {
     const now = ctx.currentTime
+    const jitter = computePitchJitterMultiplier()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
 
     osc.type = 'triangle'
-    osc.frequency.setValueAtTime(320, now)
-    osc.frequency.exponentialRampToValueAtTime(680, now + 0.06)
+    osc.frequency.setValueAtTime(320 * jitter, now)
+    osc.frequency.exponentialRampToValueAtTime(680 * jitter, now + 0.06)
 
     gain.gain.setValueAtTime(0.15, now)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07)
@@ -142,6 +153,66 @@ export function playCardFlipSound(): void {
 
     osc.start(now)
     osc.stop(now + 0.07)
+  } catch {
+    // Fail silently
+  }
+}
+
+/**
+ * Dramatic low-end seismic rumble & brass-like minor stinger when an Ace Cataclysm is drawn.
+ */
+export function playAceCataclysmStinger(): void {
+  if (!isSoundEnabled()) return
+  triggerHapticFeedback('heavy')
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  try {
+    const now = ctx.currentTime
+    const notes = [110.0, 130.81, 164.81] // A2 minor triad rumble
+    notes.forEach((freq) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sawtooth'
+      osc.frequency.setValueAtTime(freq, now)
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.92, now + 0.38)
+      gain.gain.setValueAtTime(0.09, now)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(now)
+      osc.stop(now + 0.4)
+    })
+  } catch {
+    // Fail silently
+  }
+}
+
+/**
+ * Shimmering celestial arpeggio stinger when a Fantastical Joker or Face Card Wonder is drawn.
+ */
+export function playJokerWonderStinger(): void {
+  if (!isSoundEnabled()) return
+  triggerHapticFeedback('celebration')
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  try {
+    const now = ctx.currentTime
+    const notes = [523.25, 659.25, 783.99, 1046.5] // C5, E5, G5, C6 shimmer
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      const start = now + idx * 0.05
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, start)
+      gain.gain.setValueAtTime(0.1, start)
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(start)
+      osc.stop(start + 0.35)
+    })
   } catch {
     // Fail silently
   }

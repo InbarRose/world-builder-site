@@ -755,6 +755,34 @@ status: active
 - **Consequences**:
   - Elevates Domain 4 (Tabletop Ergonomics & Multi-Device Sync) from `9.0 / 15.0` to `13.5 / 15.0` and advances the overall Core AAA Verified Score to **78.5 / 100** (with **19.5 / 20.0** on Domain 7 SOLID Studio Taxonomy).
 
+---
+
+## ADR-028: Single-PC Tabletop Driver UX Priority, Zero-Ping-Pong Turn Flow, Speaker Chime-In Attribution & Kinetic Card Tactility
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  The user established a clear product priority for all ongoing and future phases:
+  > "lets prioritize for the main use-case of running on a single pc with one player managing the laptop, other players chiming in from the side. no more effort on projectors, second screens, multi-player, etc. dont break or drop what you did already, but dont keep working on it for now. focus on functionality. focus on core. focus on UX, UI, menus, interactivity, flow. etc. iterate to next phase."
+- **Decision**:
+  1. **Single-PC Tabletop Speaker & Chime-In Attribution Bar (`tabletop-speaker-bar` in `Play.tsx`)**:
+     - Added a persistent, zero-clutter speaker bar right inside the Studio Turn Controller card showing all players/bots as clickable pills plus a 1-click `+ Add Seat` button.
+     - Clicking any player pill switches the active speaker and, if a turn is currently being drafted (`turnPhase === 'action_select'`), immediately attributes the active `DrawRecord` to that speaker so anyone chiming in from the side gets credit in the Chronicle without opening modals.
+  2. **Complete Card Freedom Controls (`🔄 Redraw` & `🎴 Pick Card`)**:
+     - Added a 1-click **Redraw (Mulligan)** button during active turns so the table can swap out an uninspiring draw without penalty.
+     - Added an interactive **Choose Specific Card** popover (`specific-card-picker`) allowing the laptop driver to select any `Suit` (`♠ ♥ ♣ ♦`) and `Value` (`2..10, J, Q, K, A, 🃏 Joker`) for physical card decks or creative overrides.
+  3. **Zero-Ping-Pong In-Turn Map & Codex Interactivity (`cardPhysicsEngine.ts`, `Play.tsx`)**:
+     - **Smart Auto-Pick Tile (`🎲 Auto-Pick Tile`)**: Uses `pickSmartTargetTileForPreset()` to score and select an ideal map coordinate matching the chosen preset's domain (water vs land, mountain, forest, low slot congestion).
+     - **Inline Mini-Map Coordinate Picker (`🎯 Target (col,row)`)**: Expands an interactive mini-map grid (`inline-minimap-picker`) directly inside the Turn Workshop so the laptop driver can click any coordinate on the map without switching tabs.
+     - **Inline Quick-Forge Codex Entity (`➕ Quick-Forge Lore`)**: Expands a 1-row entity creator (`inline-quick-forge-entity`) inside the Turn Workshop (`buildQuickCodexEntity`) that creates a new Species, Society, Character, Religion, Artifact, or Landmark and links it to both the target tile and the current turn record in one click.
+  4. **3D Kinetic Card Tactility, Deck Stack Depth & Acoustic Stingers (`cardPhysicsEngine.ts`, `soundEngine.ts`)**:
+     - Added cursor-responsive 3D perspective card tilt (`computeCardTiltTransform`) and a visual Deck Stack layer progress indicator (`computeDeckStackLayers`).
+     - Added ±4% pitch jitter (`computePitchJitterMultiplier`) to prevent listener fatigue and procedural stingers for Ace Cataclysms (`playAceCataclysmStinger`) and Fantastical Wonders (`playJokerWonderStinger`).
+- **Consequences**:
+  - Eliminates tab-switching friction for the single-PC laptop driver.
+  - Advances Domain 1 to `14.0 / 20.0`, Domain 4 to `14.0 / 15.0`, and the overall verified Core AAA Score to **83.0 / 100** (169/169 tests passing across 24 suites).
+
+
 
 
 

@@ -35,16 +35,20 @@ import {
   X,
   Radio,
   Sliders,
+  Plus,
+  RefreshCw,
 } from 'lucide-react'
 import {
   BotPersonalityId,
   BotPersonalityWeights,
   Card,
   DrawRecord,
+  EntityCategory,
   GameMode,
   PlayerSeat,
   PowerData,
   StageId,
+  Suit,
   TurnPhase,
   WorldEntity,
   WorldState,
@@ -99,7 +103,19 @@ import {
   generateFeatureName,
   generateLedgerProse,
 } from '../engine/flavorNameEngine'
-import { addSlotToTile, createDefaultTile, getTileId } from '../engine/mapEngine'
+import {
+  TERRAIN_PALETTE,
+  addSlotToTile,
+  createDefaultTile,
+  getTileDomain,
+  getTileId,
+} from '../engine/mapEngine'
+import {
+  computeCardTiltTransform,
+  computeDeckStackLayers,
+  pickSmartTargetTileForPreset,
+  buildQuickCodexEntity,
+} from '../engine/cardPhysicsEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
@@ -140,6 +156,8 @@ import {
 import {
   playCardDrawSound,
   playCardFlipSound,
+  playAceCataclysmStinger,
+  playJokerWonderStinger,
   playTurnPassSound,
   playStageAdvanceSound,
   playUndoSound,
@@ -232,6 +250,14 @@ export function Play() {
   const [showCompendiumModal, setShowCompendiumModal] = useState(false)
   const [showTableSyncModal, setShowTableSyncModal] = useState(false)
   const [showInlineBotWeightTuner, setShowInlineBotWeightTuner] = useState(false)
+  const [cardTiltTransform, setCardTiltTransform] = useState<string | null>(null)
+  const [showCardPickerPopover, setShowCardPickerPopover] = useState(false)
+  const [pickerSuit, setPickerSuit] = useState<Suit>('♠')
+  const [pickerValue, setPickerValue] = useState<string>('10')
+  const [showInlineMiniMap, setShowInlineMiniMap] = useState(false)
+  const [showQuickForgeEntity, setShowQuickForgeEntity] = useState(false)
+  const [quickForgeCategory, setQuickForgeCategory] = useState<EntityCategory>('society')
+  const [quickForgeName, setQuickForgeName] = useState('')
   const [isSyncActive, setIsSyncActive] = useState(false)
   const [syncRoomCode, setSyncRoomCode] = useState<string>(() => {
     const paramRoom = searchParams.get('syncRoom')
@@ -814,6 +840,11 @@ export function Play() {
     const card = newDeck.pop()!
     setDeck(newDeck)
     setDrawnCard(card)
+    if (card.value === 'A') {
+      playAceCataclysmStinger()
+    } else if (card.value === JOKER || isFantasticalCard(card)) {
+      playJokerWonderStinger()
+    }
     setSelectedPreset(null)
     setGeneratedFeatureName('')
     setPresetCategory('all')
@@ -905,6 +936,173 @@ export function Play() {
     })
     setTurnPhase('action_select')
     if (newDeck.length === 0) setShowDeckEmptyDialog(true)
+  }
+
+  // Single-PC Driver: Switch Active Tabletop Speaker / Chime-In Attribution in 1 Click
+  const handleSelectActiveSpeaker = (seatIdx: number) => {
+    const targetSeat = players[seatIdx]
+    if (!targetSeat) return
+    playTokenPlaceSound()
+    persistWorldUpdate((prev) => {
+      const nextHistory = [...prev.drawHistory]
+      // If a turn is currently active in Studio mode, attribute the active turn record to this speaker!
+      if (
+        gameMode === 'studio' &&
+        turnPhase === 'action_select' &&
+        nextHistory.length > 0
+      ) {
+        const lastIdx = nextHistory.length - 1
+        nextHistory[lastIdx] = {
+          ...nextHistory[lastIdx],
+          playerId: targetSeat.id,
+          playerName: targetSeat.name,
+          playerColor: targetSeat.color,
+        }
+      }
+      return {
+        ...prev,
+        currentPlayerIndex: seatIdx,
+        drawHistory: nextHistory,
+      }
+    })
+  }
+
+  // Single-PC Driver: Mulligan / Redraw current active card without losing turn
+  const handleRedrawCurrentCard = async () => {
+    if (world.isLocked || deck.length === 0) return
+    playCardDrawSound()
+    const nextDeck = [...deck]
+    const nextCard = nextDeck.pop()!
+    if (drawnCard) {
+      nextDeck.unshift(drawnCard)
+    }
+    setDeck(nextDeck)
+    setDrawnCard(nextCard)
+    setSelectedPreset(null)
+    setGeneratedFeatureName('')
+
+    let power: string | undefined = undefined
+    if (deckConfig.stagesEnabled) {
+      const data = await loadPowerData(currentStage, nextCard)
+      power = data?.power
+    }
+
+    persistWorldUpdate((prev) => {
+      const nextHistory = [...prev.drawHistory]
+      if (turnPhase === 'action_select' && nextHistory.length > 0) {
+        const lastIdx = nextHistory.length - 1
+        nextHistory[lastIdx] = {
+          ...nextHistory[lastIdx],
+          card: nextCard,
+          power,
+        }
+      }
+      return {
+        ...prev,
+        drawHistory: nextHistory,
+      }
+    })
+  }
+
+  // Single-PC Driver: Choose Specific Card (for physical decks or creative override)
+  const handlePickSpecificCard = async (suit: Suit, value: string) => {
+    if (world.isLocked) return
+    playCardFlipSound()
+    const customCard: Card = {
+      id: `custom_${suit}_${value}_${Date.now()}`,
+      suit,
+      value,
+    }
+    setDrawnCard(customCard)
+    setSelectedPreset(null)
+    setGeneratedFeatureName('')
+    setShowCardPickerPopover(false)
+
+    let power: string | undefined = undefined
+    if (deckConfig.stagesEnabled) {
+      const data = await loadPowerData(currentStage, customCard)
+      power = data?.power
+    }
+
+    if (turnPhase === 'action_select' && drawHistory.length > 0) {
+      persistWorldUpdate((prev) => {
+        const nextHistory = [...prev.drawHistory]
+        const lastIdx = nextHistory.length - 1
+        nextHistory[lastIdx] = {
+          ...nextHistory[lastIdx],
+          card: customCard,
+          power,
+        }
+        return {
+          ...prev,
+          drawHistory: nextHistory,
+        }
+      })
+    } else {
+      const moveId = drawHistory.length + 1
+      const record: DrawRecord = {
+        id: `draw_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        moveId,
+        card: customCard,
+        timestamp: new Date().toISOString(),
+        stage: deckConfig.stagesEnabled ? currentStage : undefined,
+        power,
+        note: '',
+        linkedTileIds: [],
+        linkedEntityIds: [],
+        epochYear: calculateEpochYear(
+          deckConfig.stagesEnabled ? currentStage : undefined,
+          moveId
+        ),
+        playerId: activePlayer?.id,
+        playerName: activePlayer?.name,
+        playerColor: activePlayer?.color,
+        isAutoPlayed: false,
+      }
+      persistWorldUpdate((prev) => {
+        const updated: WorldState = {
+          ...prev,
+          drawHistory: [...prev.drawHistory, record],
+        }
+        const snap = recordTurnSnapshot(updated, moveId)
+        updated.snapshots = [...(updated.snapshots || []), snap]
+        return updated
+      })
+      setTurnPhase('action_select')
+    }
+  }
+
+  // Single-PC Driver: Smart Auto-Pick Best Tile for the current preset
+  const handleAutoPickSmartTile = () => {
+    const nextCoord = pickSmartTargetTileForPreset(
+      world.map,
+      selectedPreset,
+      selectedTileId
+    )
+    setSelectedTileId(nextCoord)
+    playTokenPlaceSound()
+  }
+
+  // Single-PC Driver: Inline Quick-Forge Codex Entity right inside the Turn Workshop
+  const handleQuickForgeEntity = () => {
+    const fallbackName =
+      quickForgeName.trim() ||
+      generateFeatureName(
+        selectedPreset?.name || quickForgeCategory,
+        'general',
+        Date.now()
+      )
+    const created = buildQuickCodexEntity({
+      name: fallbackName,
+      category: quickForgeCategory,
+      stage: currentStage,
+      tileId: selectedTileId,
+      preset: selectedPreset,
+    })
+    playTokenPlaceSound()
+    handleWorkspaceEntitiesChange([...world.entities, created])
+    setQuickForgeName('')
+    setShowQuickForgeEntity(false)
   }
 
   // Save Optional Note / Connections to Current Companion Turn
@@ -2588,94 +2786,239 @@ export function Play() {
               <section
                 className={activeTab === 'split' ? 'lg:col-span-5 space-y-4' : 'space-y-4'}
               >
-                {/* Studio Turn Flow & Bot Auto-Play Controller Bar */}
-                <div className="card p-4 flex flex-wrap items-center justify-between gap-3 bg-card border-border/80">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleDrawCard}
-                      disabled={
-                        deck.length === 0 ||
-                        world.isLocked ||
-                        (gameMode === 'studio' && turnPhase === 'action_select')
-                      }
-                      className="btn-primary flex items-center space-x-2 px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50"
-                    >
-                      <PlayIcon className="h-4 w-4" />
-                      <span>Draw Card ({deck.length})</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleAutoStepOneTurn}
-                      disabled={world.isLocked}
-                      className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
-                      title="Simulate 1 Bot Turn automatically"
-                    >
-                      <Bot className="h-3.5 w-3.5 text-primary" />
-                      <span>Auto-Step Turn</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleAutoPlayCurrentStage}
-                      disabled={world.isLocked}
-                      className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
-                      title="Auto-Play remaining turns in current Stage"
-                    >
-                      <FastForward className="h-3.5 w-3.5 text-primary" />
-                      <span className="hidden sm:inline">Auto-Stage</span>
-                    </button>
-
-                    {drawHistory.length > 0 && (
+                {/* Studio Turn Flow, Speaker Chime-In Bar & Card Freedom Controls */}
+                <div className="card p-4 space-y-3 bg-card border-border/80">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={handleUndoLastTurn}
-                        disabled={world.isLocked}
-                        className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
-                        title="Undo the last turn and restore previous state"
+                        onClick={handleDrawCard}
+                        disabled={
+                          deck.length === 0 ||
+                          world.isLocked ||
+                          (gameMode === 'studio' && turnPhase === 'action_select')
+                        }
+                        className="btn-primary flex items-center space-x-2 px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50"
                       >
-                        <Undo2 className="h-3.5 w-3.5" />
-                        <span>Undo</span>
+                        <PlayIcon className="h-4 w-4" />
+                        <span>Draw Card ({deck.length})</span>
                       </button>
-                    )}
 
-                    <button
-                      type="button"
-                      onClick={handleReshuffleDeck}
-                      className="btn-outline flex items-center space-x-1.5 px-2.5 py-2 text-xs"
-                      title="Reshuffle Deck"
-                    >
-                      <Shuffle className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Reset Deck</span>
-                    </button>
+                      {turnPhase === 'action_select' && deck.length > 0 && !world.isLocked && (
+                        <button
+                          type="button"
+                          onClick={handleRedrawCurrentCard}
+                          className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                          title="Mulligan: shuffle this card back and draw a fresh card for this turn"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          <span>Redraw</span>
+                        </button>
+                      )}
+
+                      {!world.isLocked && (
+                        <button
+                          type="button"
+                          onClick={() => setShowCardPickerPopover((prev) => !prev)}
+                          className={`btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold ${
+                            showCardPickerPopover
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : ''
+                          }`}
+                          title="Pick a specific card (for physical decks or creative freedom)"
+                        >
+                          <span>🎴</span>
+                          <span>Pick Card</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleAutoStepOneTurn}
+                        disabled={world.isLocked}
+                        className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
+                        title="Simulate 1 Bot Turn automatically"
+                      >
+                        <Bot className="h-3.5 w-3.5 text-primary" />
+                        <span>Auto-Step Turn</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleAutoPlayCurrentStage}
+                        disabled={world.isLocked}
+                        className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
+                        title="Auto-Play remaining turns in current Stage"
+                      >
+                        <FastForward className="h-3.5 w-3.5 text-primary" />
+                        <span className="hidden sm:inline">Auto-Stage</span>
+                      </button>
+
+                      {drawHistory.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleUndoLastTurn}
+                          disabled={world.isLocked}
+                          className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                          title="Undo the last turn and restore previous state"
+                        >
+                          <Undo2 className="h-3.5 w-3.5" />
+                          <span>Undo</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleReshuffleDeck}
+                        className="btn-outline flex items-center space-x-1.5 px-2.5 py-2 text-xs"
+                        title="Reshuffle Deck"
+                      >
+                        <Shuffle className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Reset Deck</span>
+                      </button>
+                    </div>
+
+                    {/* Studio Phase Tracker */}
+                    <div className="flex items-center gap-2 text-xs font-medium bg-muted/50 px-3 py-1.5 rounded-xl border border-border">
+                      <span
+                        className={`px-2 py-0.5 rounded font-bold ${
+                          turnPhase === 'await_draw'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        1. Draw
+                      </span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                      <span
+                        className={`px-2 py-0.5 rounded font-bold ${
+                          turnPhase === 'action_select'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        2. Act & Record
+                      </span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                      <span className="px-2 py-0.5 rounded text-muted-foreground font-bold">
+                        3. Pass Turn
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Studio Phase Tracker */}
-                  <div className="flex items-center gap-2 text-xs font-medium bg-muted/50 px-3 py-1.5 rounded-xl border border-border">
-                    <span
-                      className={`px-2 py-0.5 rounded font-bold ${
-                        turnPhase === 'await_draw'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground'
-                      }`}
+                  {/* Popover: Choose Specific Card (Physical Deck / Creative Override) */}
+                  {showCardPickerPopover && (
+                    <div
+                      data-testid="specific-card-picker"
+                      className="p-3 rounded-xl bg-muted/40 border border-primary/30 space-y-2.5 text-xs animate-in fade-in duration-150"
                     >
-                      1. Draw
-                    </span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                    <span
-                      className={`px-2 py-0.5 rounded font-bold ${
-                        turnPhase === 'action_select'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground'
-                      }`}
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-bold text-primary flex items-center gap-1.5">
+                          <span>🎴</span>
+                          <span>Choose Specific Card (Physical Deck / Custom Prompt):</span>
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {(['♠', '♥', '♣', '♦'] as Suit[]).map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setPickerSuit(s)}
+                              className={`px-2.5 py-1 rounded-lg font-bold text-sm border transition-all ${
+                                pickerSuit === s
+                                  ? 'bg-primary text-primary-foreground border-primary shadow-2xs'
+                                  : 'bg-background border-border hover:bg-muted'
+                              }`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', JOKER].map(
+                          (val) => (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => {
+                                setPickerValue(val)
+                                handlePickSpecificCard(pickerSuit, val)
+                              }}
+                              className={`px-2.5 py-1 rounded-lg font-mono font-bold border transition-all ${
+                                pickerValue === val
+                                  ? 'bg-primary/20 border-primary text-primary'
+                                  : 'bg-background border-border hover:border-primary/50'
+                              }`}
+                            >
+                              {val === JOKER ? '🃏 Joker' : `${val}${pickerSuit}`}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Single-PC Tabletop Speaker & Chime-In Attribution Bar */}
+                  <div
+                    data-testid="tabletop-speaker-bar"
+                    className="pt-2.5 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mr-1">
+                        🗣️ Active Speaker / Chime-In:
+                      </span>
+                      {players.map((seat, idx) => {
+                        const isCurrent = idx === currentPlayerIndex % players.length
+                        return (
+                          <button
+                            key={seat.id}
+                            type="button"
+                            onClick={() => handleSelectActiveSpeaker(idx)}
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                              isCurrent
+                                ? 'ring-2 ring-primary font-bold shadow-2xs bg-primary/10 text-foreground'
+                                : 'opacity-75 hover:opacity-100 bg-background'
+                            }`}
+                            style={{ borderColor: seat.color }}
+                            title={
+                              turnPhase === 'action_select'
+                                ? `Click to attribute this turn to ${seat.name} (${seat.role})`
+                                : `Switch active turn seat to ${seat.name} (${seat.role})`
+                            }
+                          >
+                            <span
+                              className="w-2 h-2 rounded-full inline-block"
+                              style={{ backgroundColor: seat.color }}
+                            />
+                            <span>
+                              {seat.isBot ? '🤖' : '👤'} {seat.name}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              ({seat.role})
+                            </span>
+                          </button>
+                        )
+                      })}
+                      {players.length < 6 && !world.isLocked && (
+                        <button
+                          type="button"
+                          onClick={handleAddPlayerSeat}
+                          className="px-2 py-1 rounded-full border border-dashed border-border hover:border-primary text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                          title="Add another player or bot seat at the table"
+                        >
+                          <Plus className="h-3 w-3" />
+                          <span>Add Seat</span>
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPlayersModal(true)}
+                      className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
                     >
-                      2. Act & Record
-                    </span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                    <span className="px-2 py-0.5 rounded text-muted-foreground font-bold">
-                      3. Pass Turn
-                    </span>
+                      <Users className="h-3.5 w-3.5" />
+                      <span>Council Roster ({players.length})</span>
+                    </button>
                   </div>
                 </div>
 
@@ -2687,16 +3030,37 @@ export function Play() {
                       : 'grid grid-cols-1 lg:grid-cols-12 gap-4'
                   }
                 >
-                  {/* Card Visual with 3D Flip Physics */}
+                  {/* Card Visual with 3D Kinetic Perspective Tilt & Deck Stack Depth */}
                   <div
                     className={`${
                       activeTab === 'split' ? '' : 'lg:col-span-4'
-                    } card p-6 flex flex-col items-center justify-center min-h-[240px] perspective-1000`}
+                    } card p-6 flex flex-col items-center justify-center min-h-[240px] perspective-1000 space-y-3`}
                   >
                     {drawnCard ? (
                       <div
                         key={`${drawnCard.id}_${drawHistory.length}`}
-                        className={`w-full max-w-[180px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-xl flex flex-col items-center justify-center p-5 relative select-none animate-card-deal animate-card-flip`}
+                        data-testid="kinetic-drawn-card"
+                        onMouseMove={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect()
+                          const tilt = computeCardTiltTransform(
+                            e.clientX,
+                            e.clientY,
+                            rect
+                          )
+                          setCardTiltTransform(tilt.transformStyle)
+                        }}
+                        onMouseLeave={() => setCardTiltTransform(null)}
+                        style={
+                          cardTiltTransform
+                            ? {
+                                transform: cardTiltTransform,
+                                transition: 'transform 60ms ease-out',
+                              }
+                            : {
+                                transition: 'transform 220ms ease-out',
+                              }
+                        }
+                        className={`w-full max-w-[180px] aspect-[5/7] ${bgColor} rounded-xl border-4 border-gray-300 dark:border-gray-600 shadow-2xl flex flex-col items-center justify-center p-5 relative select-none animate-card-deal animate-card-flip cursor-grab`}
                       >
                         {drawnCard.value !== JOKER && (
                           <>
@@ -2726,6 +3090,28 @@ export function Play() {
                         </p>
                       </div>
                     )}
+
+                    {/* Physical Deck Stack Depth Progress Bar */}
+                    {(() => {
+                      const stackMetrics = computeDeckStackLayers(deck.length, 54)
+                      return (
+                        <div
+                          className="w-full max-w-[180px] space-y-1 text-[10px] text-muted-foreground"
+                          title={`${deck.length} cards remaining (${stackMetrics.visibleLayers} deck layers)`}
+                        >
+                          <div className="flex items-center justify-between font-mono">
+                            <span>Deck Stack ({stackMetrics.visibleLayers}L)</span>
+                            <span>{deck.length} left</span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden border border-border/50">
+                            <div
+                              className="h-full bg-primary transition-all duration-300"
+                              style={{ width: `${stackMetrics.progressPercent}%` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Power Prompt, Turn Activity Basket & Event Resolution */}
@@ -3202,24 +3588,165 @@ export function Play() {
                                 )}
                             </div>
                             {activeTab !== 'split' && (
-                              <div className="flex items-center gap-1.5 shrink-0">
+                              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={handleAutoPickSmartTile}
+                                  className="btn-outline px-2.5 py-1 text-[11px] font-semibold text-primary border-primary/30 hover:bg-primary/10"
+                                  title="Automatically pick an ideal coordinate on the map matching this preset"
+                                >
+                                  🎲 Auto-Pick Tile
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowInlineMiniMap((prev) => !prev)}
+                                  className={`btn-outline px-2.5 py-1 text-[11px] font-semibold ${
+                                    showInlineMiniMap
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : ''
+                                  }`}
+                                  title="Pick target coordinate directly on an inline mini-map without leaving this turn"
+                                >
+                                  🎯 Target ({selectedTileId})
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowQuickForgeEntity((prev) => !prev)}
+                                  className={`btn-outline px-2.5 py-1 text-[11px] font-semibold ${
+                                    showQuickForgeEntity
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : ''
+                                  }`}
+                                  title="Quick-create a Codex species, faction, character, or landmark right inside this turn"
+                                >
+                                  ➕ Quick-Forge Lore
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => setActiveTab('map')}
                                   className="btn-outline px-2.5 py-1 text-[11px]"
                                 >
-                                  🗺️ Edit Map
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveTab('entities')}
-                                  className="btn-outline px-2.5 py-1 text-[11px]"
-                                >
-                                  📚 Add Codex
+                                  🗺️ Full Map
                                 </button>
                               </div>
                             )}
                           </div>
+
+                          {/* Inline Interactive Mini-Map Target Coordinate Picker (Zero Tab Switching!) */}
+                          {showInlineMiniMap && (
+                            <div
+                              data-testid="inline-minimap-picker"
+                              className="p-3 rounded-xl bg-background border border-primary/40 space-y-2 animate-in fade-in duration-150"
+                            >
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="font-bold text-primary">
+                                  🎯 Click any coordinate to target Turn #{drawHistory.length} (@{' '}
+                                  {selectedTileId} —{' '}
+                                  {TERRAIN_PALETTE[
+                                    (world.map.tiles[selectedTileId] || createDefaultTile(0, 0))
+                                      .terrain
+                                  ]?.label || 'Ocean'}
+                                  ):
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowInlineMiniMap(false)}
+                                  className="text-muted-foreground hover:text-foreground text-[10px] underline"
+                                >
+                                  Hide Mini-Map
+                                </button>
+                              </div>
+                              <div
+                                className="inline-grid gap-0.5 p-1.5 rounded-lg bg-stone-900/20 border border-border max-w-full overflow-x-auto"
+                                style={{
+                                  gridTemplateColumns: `repeat(${world.map.width}, minmax(18px, 22px))`,
+                                }}
+                              >
+                                {Array.from({ length: world.map.height }).map((_, r) =>
+                                  Array.from({ length: world.map.width }).map((__, c) => {
+                                    const tid = getTileId(c, r)
+                                    const t = world.map.tiles[tid] || createDefaultTile(c, r)
+                                    const meta = TERRAIN_PALETTE[t.terrain] || TERRAIN_PALETTE.ocean
+                                    const isTarget = selectedTileId === tid
+                                    return (
+                                      <button
+                                        key={tid}
+                                        type="button"
+                                        data-testid={`minimap-tile-${c}-${r}`}
+                                        onClick={() => {
+                                          setSelectedTileId(tid)
+                                          playTokenPlaceSound()
+                                        }}
+                                        style={{ backgroundColor: meta.color }}
+                                        className={`h-5 rounded-2xs text-[9px] flex items-center justify-center transition-transform ${
+                                          isTarget
+                                            ? 'ring-2 ring-white scale-125 z-10 font-bold shadow'
+                                            : 'opacity-85 hover:opacity-100'
+                                        }`}
+                                        title={`Target (${c}, ${r}) — ${meta.label} [${getTileDomain(t)}]`}
+                                      >
+                                        {t.slots && t.slots.length > 0
+                                          ? t.slots[0].icon
+                                          : isTarget
+                                          ? '🎯'
+                                          : ''}
+                                      </button>
+                                    )
+                                  })
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Inline Quick-Forge Codex Entity Drawer (Zero Tab Switching!) */}
+                          {showQuickForgeEntity && (
+                            <div
+                              data-testid="inline-quick-forge-entity"
+                              className="p-3 rounded-xl bg-background border border-primary/40 space-y-2 animate-in fade-in duration-150"
+                            >
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="font-bold text-primary">
+                                  ➕ Quick-Forge Codex Entity for Turn #{drawHistory.length} (@{' '}
+                                  {selectedTileId}):
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowQuickForgeEntity(false)}
+                                  className="text-muted-foreground hover:text-foreground text-[10px] underline"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <select
+                                  aria-label="Quick-Forge Entity Category"
+                                  value={quickForgeCategory}
+                                  onChange={(e) =>
+                                    setQuickForgeCategory(e.target.value as EntityCategory)
+                                  }
+                                  className="input h-8 text-xs py-0 px-2 sm:w-40"
+                                >
+                                  <option value="society">🏛️ Society / Faction / Realm</option>
+                                  <option value="species">🧬 Species / Ancestry</option>
+                                  <option value="myth">🗿 Myth / Landmark / Legend</option>
+                                </select>
+                                <input
+                                  type="text"
+                                  value={quickForgeName}
+                                  onChange={(e) => setQuickForgeName(e.target.value)}
+                                  placeholder="Enter name (or leave blank to auto-name)..."
+                                  className="input h-8 text-xs px-2.5 flex-1"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleQuickForgeEntity}
+                                  className="btn-primary h-8 px-3 text-xs font-bold shrink-0"
+                                >
+                                  Forge &amp; Link to Turn
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
                           {/* 1-Click Tabletop Quick Actions on selected coordinate */}
                           <div className="pt-2 border-t border-border/40 flex flex-wrap items-center justify-between gap-2">
