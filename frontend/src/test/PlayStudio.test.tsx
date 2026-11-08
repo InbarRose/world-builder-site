@@ -478,4 +478,57 @@ describe('Play Studio & Rules Integration', () => {
 
     expect(screen.getByRole('button', { name: /Draw Card \(53\)/i })).toBeInTheDocument()
   })
+
+  it('supports Real-Time Table Peer Sync Modal and Inline Live Bot Weight Tuner', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Open Real-Time Table Peer Sync Modal
+    const syncBtn = screen.getByRole('button', { name: /Real-Time Table Peer Synchronization/i })
+    await act(async () => {
+      fireEvent.click(syncBtn)
+    })
+    expect(screen.getByText(/Real-Time Table & Second-Screen Sync/i)).toBeInTheDocument()
+
+    // Start Live Table Sync
+    const startSyncBtn = screen.getByRole('button', { name: /Start Live Table Sync/i })
+    await act(async () => {
+      fireEvent.click(startSyncBtn)
+    })
+    expect(screen.getByRole('button', { name: /Broadcast World Now/i })).toBeInTheDocument()
+
+    // Close Table Sync Modal
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close Table Sync Modal/i }))
+    })
+
+    // Draw card to enter Studio Turn Workshop
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+
+    // Open Inline Bot Weight Tuner right inside the Studio Turn Workshop
+    const tuneWeightsBtn = screen.getByRole('button', { name: /Tune Weights/i })
+    await act(async () => {
+      fireEvent.click(tuneWeightsBtn)
+    })
+
+    const tunerBox = screen.getByTestId('inline-bot-weight-tuner')
+    expect(tunerBox).toBeInTheDocument()
+
+    // Adjust Geography weight slider live
+    const geoSlider = screen.getByRole('slider', { name: /Tune Geography weight/i })
+    await act(async () => {
+      fireEvent.change(geoSlider, { target: { value: '95' } })
+    })
+    expect(tunerBox).toHaveTextContent('95%')
+  })
 })

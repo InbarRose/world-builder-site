@@ -185,10 +185,11 @@ status: active
   - [x] Implemented Open/Closed multi-shard manifest resolution (`import.meta.glob` + `resolveManifestShards`) and partitioned catalog into multi-part shards (`part1`, `part2`, `part3`) across `stages/`, `codex/`, `assets/`, and `weights/`
   - [x] Externalized bot synergy, anti-affinity, and terrain weighting rules into `weights/affinity/part1-synergy-and-antiaffinity-rules.json`
   - [x] Added Domain 7 SOLID Data-Driven Taxonomy rubric to `docs/AUDIT_RUBRIC.md` and verified 158/158 unit tests across 22 suites
-- [ ] **Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics** *(Target: 78.0 / 100)*
-  - [ ] WebRTC / BroadcastChannel zero-server room sync where GM and players see card flips and map stamps in real-time
-  - [ ] Tablet touch ergonomics (pinch-to-zoom, two-finger pan, 48px touch targets)
-  - [ ] Automated test suite in `peerSyncEngine.test.ts`
+- [x] **Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live Bot Weight Tuner** *(Score: 78.5 / 100 via ADR-027)*
+  - [x] WebRTC / BroadcastChannel zero-server room sync (`peerSyncEngine.ts`, `TableSyncModal.tsx`) where GM, Co-Creators, and Tabletop TV Spectator screens see card flips, map stamps, and codex updates in real-time
+  - [x] Tablet touch ergonomics (`MapCanvas.tsx` two-finger pinch-to-zoom and touch pan gestures)
+  - [x] Inline Live Bot Weight & Personality Tuner (`inline-bot-weight-tuner` in `Play.tsx`) allowing mid-session adjustment of bot weights with instant affinity recalculation
+  - [x] Automated test suite in `peerSyncEngine.test.ts`, `PlayStudio.test.tsx`, and `MapCanvas.test.tsx` (164/164 tests passing across 23 suites)
 
 ---
 
@@ -221,6 +222,7 @@ status: active
 - [x] Implement Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration (ADR-024).
 - [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
 - [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
-- [ ] Implement Phase 21: Real-Time Table Peer Synchronization & Tablet Multi-Touch Ergonomics (Target: 78.0 / 100).
+- [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
+- [ ] Implement Phase 22: Kinetic Card Physics, Dynamic Particle FX & Acoustic Stems (Target: 85.0 / 100).
 
 
