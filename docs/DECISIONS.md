@@ -470,3 +470,59 @@ status: active
   - Eliminates creative bottleneck during the Genesis stage.
   - Gives world maps the authentic, charming feel of a dry-erase campaign map sketched around a gaming table.
   - Lays the foundation for expanding Settlement and Civilization whiteboard tropes in subsequent phases.
+
+
+## ADR-021: Comprehensive Genesis Concepts & Multi-Tile Whiteboard Variants
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - Following ADR-020, the user reviewed the Genesis whiteboard symbols and noted the absence of key basic concepts explicitly defined in the original design documentation (`docs/world_building_original_docs.md`):
+    - **Earth**: mountains, hills, canyons, deserts, cliffs, caves, volcanoes.
+    - **Water**: rivers, lakes, swamps, waterfalls, tidal pools, maelstroms, glaciers, marshes.
+    - **Plant**: forests, jungles, grasslands, rainforests, marshes, wetlands.
+    - **Features**: geysers, craters, strong winds, currents, salt flats, landmarks, lava flows, natural resources.
+  - Crucially, the user required **multiple tile options / visual variants** for each concept (e.g. "hill" has multiple tiles for hill, same for mountain, trees, rivers, etc.), allowing creators to express diverse topography without repetitive visual stamping.
+- **Decision**:
+  1. **Expanded Catalog to 97 Whiteboard Marker Tropes (`cartographicSymbolEngine.tsx`)**:
+     - Engineered multiple visual variants for every single required concept:
+       - **♠ Earth (24 Variants)**:
+         - Mountains: Single Peak (`mountain-peak`), Twin Horns (`mountain-twin`), Needle Spires (`mountain-spire`), Snow Massif (`mountain-snow`), Continuous Spine (`mountain-range`).
+         - Hills: Rolling Low Hills (`hill-rolling`), Triple Knolls (`hill-knolls`), Rocky Scree (`hill-rocky`), Low Mounds (`hill-low`).
+         - Canyons & Cliffs: Canyon Gorge (`canyon-gorge`), Sheer Escarpment (`cliff-sheer`), Coastal Cliffs (`cliff-coastal`), Flat Mesa Bluff (`mesa-plateau`), Badland Buttes (`badland-buttes`).
+         - Deserts: Crescent Dunes (`desert-dunes`), Sand Sea Erg (`desert-erg`), Rocky Reg Pavement (`desert-rocky`), Sun-Cracked Flats (`desert-cracked`).
+         - Caves: Cavern Maw (`cave-maw`), Cliff Grotto (`cave-cliff`), Pit Cenote (`cave-sinkhole`).
+         - Volcanoes: Active Erupting (`volcano-active`), Collapsed Caldera (`volcano-caldera`).
+       - **♥ Water (24 Variants)**:
+         - Rivers & Springs: Meandering River (`river-meander`), Braided River (`river-braided`), River Delta (`river-delta`), River Rapids (`river-rapids`), Headwater Spring (`spring-headwater`).
+         - Waterfalls: High Cataract (`waterfall-cataract`), Tiered Cascades (`waterfall-cascades`), Canyon Plunge (`waterfall-gorge`).
+         - Lakes: Lake Basin (`lake-basin`), Alpine Tarn (`lake-tarn`), Oxbow Lake (`lake-oxbow`), Crater Lake (`lake-crater`).
+         - Swamps & Marshes: Mangrove Swamp (`swamp-mangrove`), Peat Bog (`swamp-peat`), Reed Marsh (`marsh-reeds`), Grassy Fen (`marsh-fen`).
+         - Tidal Pools & Coast: Tidal Pools (`tidal-pools`), Estuary Bay (`estuary-bay`), Coral Atoll (`atoll-reef`), Glacial Fjord (`fjord-sheer`), Abyssal Trench (`trench-abyssal`).
+         - Glaciers & Ice: Valley Glacier (`glacier-valley`), Crevassed Icefield (`glacier-crevasse`), Ice Shelf (`glacier-shelf`).
+         - Maelstroms & Currents: Oceanic Maelstrom (`maelstrom-whirlpool`), Rip Tide & Breakers (`tidal-rip`).
+       - **♣ Plant (20 Variants)**:
+         - Forests: Broadleaf Deciduous (`forest-deciduous`), Pine & Fir Taiga (`forest-taiga`), Colossal Redwoods (`forest-redwood`), Scattered Woodland (`forest-sparse`), Gnarled Dead Wood (`forest-dead`).
+         - Jungles & Rainforests: Dense Jungle Canopy (`jungle-dense`), Emergent Rainforest (`rainforest-canopy`), Palm Cluster (`jungle-palms`), Cloud Forest (`jungle-cloud`), Tangled Lianas (`rainforest-vines`).
+         - Grasslands & Savannas: Open Steppe (`grass-steppe`), Tall Grass Tufts (`grass-tall`), Acacia Savanna (`savanna-acacia`), Wildflower Meadow (`meadow-wildflower`).
+         - Marshes & Specialized Flora: Lily Pad Wetland (`flora-wetland`), Ironwood Briar Thicket (`thicket-ironwood`), Whispering Bamboo (`bamboo-grove`), Giant Fungal Forest (`fungal-mycelium`).
+       - **♦ Features (29 Variants)**:
+         - Geysers & Thermal: Steaming Basin (`geyser-basin`), Geyser Fountain (`geyser-eruption`), Boiling Mudpot (`thermal-mudpot`), Mineral Hot Spring (`hotspring-geothermal`).
+         - Craters: Meteor Impact (`crater-impact`), Sunken Caldera (`crater-caldera`), Abyssal Pit (`crater-pit`).
+         - Lava Flows: Magma Fissure (`lava-fissure`), Basalt Lava Stream (`lava-river`), Obsidian Lava Field (`lava-field`).
+         - Salt Flats: Hexagonal Crust (`salt-hexagons`), White Alkali Pan (`salt-pan`), Salt Spires (`salt-pillars`).
+         - Strong Winds & Weather: Gale Wind Vectors (`wind-gale`), Cyclone Vortex (`wind-vortex`), Thunderstorm Cloud (`wind-storm`).
+         - Currents & Tides: Surface Currents (`water-currents`), Oceanic Gyre (`current-gyre`).
+         - Natural Resources: Mineral Ore Vein (`resource-mineral`), Gemstone Geode (`resource-gem`), Crystal Cavern (`crystal-cavern`), Stone Quarry Strata (`resource-quarry`), Titan Bone Bed (`titan-bones`).
+         - Landmarks: Megalith Ring (`megalith-ring`), Obelisk Spires (`obelisk-spires`), Natural Stone Arch (`landmark-arch`), Temple Ruins (`ruins-temple`), Petrified Wood (`petrified-wood`), Sacred Grove (`sacred-grove`), Ley Line Nexus (`ley-nexus`).
+  2. **101 Genesis Turn Action Presets (`presets.ts`)**:
+     - Populated all 97 tropes + 4 fantastical options into the Genesis presets, ensuring every tile variant can be immediately drafted with a thematic narrative prompt and mechanics.
+  3. **Concept Sub-Filters & Inspector Grouping (`MapCanvas.tsx`)**:
+     - Added a Concept Sub-Filter Bar below the category pills, enabling creators to view only Mountains (5), Hills (4), Deserts (4), etc., side by side.
+     - Grouped the Tile Inspector Cartographic Trope dropdown into concept optgroups with variant labels.
+  4. **Automated Testing**:
+     - Updated `cartographicSymbolEngine.test.ts` to verify every requested concept has $\ge 2$ variants, counts match, valid SVG elements render, and presets match symbols.
+     - All 18 test suites passing (135 / 135 tests).
+- **Consequences**:
+  - Completely satisfies the user's requirement for all foundational terrain elements and multi-tile options.
+  - Dramatically improves map aesthetics and worldbuilding diversity on the canvas.
