@@ -139,11 +139,17 @@ status: active
   - [x] Multi-radius area brushes (1x1, 3x3, 5x5) stamping terrain, relief, and fog across 1, 7, or 19 tiles
   - [x] Hexagonal vector SVG export integration in `mapEngine.ts`
   - [x] Automated unit test suite in `hexTopologyEngine.test.ts` and `MapCanvas.test.tsx` (103/103 tests passing across 14 suites)
-- [ ] **Phase 19: Vector Watershed Physics & Connected Road Pathfinding** *(Target: 62.5 / 100)*
-  - [ ] Procedural downhill water flow simulation generating connected river branches and estuaries based on elevation
-  - [ ] A* road network pathfinding connecting settlements along optimal terrain contours
-  - [ ] Layer Stacking panel with toggles for Terrain, Political, Exploration, Roads/Rivers, and Annotations
-  - [ ] Automated test suite in `riverRoadEngine.test.ts`
+- [x] **Phase 19: Vector Watershed Physics & Connected Road Pathfinding** *(Score: 62.5 / 100 via ADR-017)*
+  - [x] Procedural downhill water flow simulation (`watershedPathEngine.ts`) generating connected river branches and estuaries based on elevation
+  - [x] A* road network pathfinding connecting settlements along optimal terrain contours
+  - [x] Discrete 8-layer stacking panel (`MapCanvas.tsx`) with toggles for Terrain, Relief, Watershed, Roads, Territories, Slots, Labels, and Fog
+  - [x] Continuous inter-tile spline ribbons for rivers and roads in both canvas and vector SVG export
+  - [x] Automated test suite in `watershedPathEngine.test.ts` and `MapCanvas.test.tsx` (112/112 tests passing across 15 suites)
+- [ ] **Phase 20: Recursive Causal Saga Graph & Emergent Lore Engine** *(Target: 68.0 / 100)*
+  - [ ] Directed Acyclic Causal Graph (`causalGraphEngine.ts`) where events link causes and consequences across turns
+  - [ ] Dynamic procedural fantasy prose generator that references antecedent events, ancient ruins, and heroic lineages
+  - [ ] Visual Event Dependency Graph view in `TimelinePanel.tsx`
+  - [ ] Automated test suite in `causalGraphEngine.test.ts`
 
 ---
 
@@ -167,6 +173,7 @@ status: active
 - [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (`mountain-snow`, `mountain-range`, `mesa`, `crag`, `volcano`).
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
 - [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
-- [ ] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Target: 62.5 / 100).
+- [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Score: 62.5 / 100).
+- [ ] Implement Phase 20: Recursive Causal Saga Graph & Emergent Lore Engine (Target: 68.0 / 100).
 
 
