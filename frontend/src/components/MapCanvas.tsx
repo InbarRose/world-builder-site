@@ -67,6 +67,16 @@ import {
   MeasurementResult,
   OffsetCoord,
 } from '../engine/hexTopologyEngine'
+import {
+  MapLayerId,
+  MAP_LAYERS,
+  DEFAULT_MAP_LAYERS,
+  generateWorldWatersheds,
+  findOptimalRoadPath,
+  getConnectedRoadAdjacencies,
+  getConnectedRiverAdjacencies,
+  generateConnectedPathD,
+} from '../engine/watershedPathEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
 
@@ -124,6 +134,11 @@ function TileCartographySvg({
   simpleMode,
   neighborContext,
   enableOrganicShading = true,
+  showRelief = true,
+  showWatershed = true,
+  showRoads = true,
+  riverAdjacencies = [],
+  roadAdjacencies = [],
 }: {
   col: number
   row: number
@@ -136,18 +151,24 @@ function TileCartographySvg({
   simpleMode: boolean
   neighborContext?: TileNeighborContext
   enableOrganicShading?: boolean
+  showRelief?: boolean
+  showWatershed?: boolean
+  showRoads?: boolean
+  riverAdjacencies?: OffsetCoord[]
+  roadAdjacencies?: OffsetCoord[]
 }) {
   const v = getTileVariantSeed(col, row)
-  const effectiveRelief =
-    relief && relief !== 'none'
-      ? relief
-      : terrain === 'mountain'
-      ? 'mountain'
-      : terrain === 'volcano'
-      ? 'volcano'
-      : terrain === 'canyon'
-      ? 'canyon'
-      : 'none'
+  const effectiveRelief = !showRelief
+    ? 'none'
+    : relief && relief !== 'none'
+    ? relief
+    : terrain === 'mountain'
+    ? 'mountain'
+    : terrain === 'volcano'
+    ? 'volcano'
+    : terrain === 'canyon'
+    ? 'canyon'
+    : 'none'
 
   const effectiveFlora =
     flora && flora !== 'none'
@@ -420,32 +441,27 @@ function TileCartographySvg({
       )}
 
       {/* Rivers & Trade Roads */}
-      {hasRiver && (
+      {showWatershed && hasRiver && (
         <path
-          d={
-            v % 2 === 0
-              ? 'M 0 14 Q 24 32, 48 18'
-              : 'M 14 0 Q 28 24, 34 48'
-          }
+          d={generateConnectedPathD(24, 24, 48, riverAdjacencies, { col, row })}
           stroke="#0284c7"
-          strokeWidth="4.2"
+          strokeWidth="3.8"
           fill="none"
           strokeLinecap="round"
+          strokeLinejoin="round"
           opacity="0.9"
         />
       )}
 
-      {hasRoad && (
+      {showRoads && hasRoad && (
         <path
-          d={
-            v % 2 === 0
-              ? 'M 0 26 Q 24 22, 48 26'
-              : 'M 24 0 L 24 48'
-          }
+          d={generateConnectedPathD(24, 24, 48, roadAdjacencies, { col, row })}
           stroke="#573619"
-          strokeWidth="2.2"
-          strokeDasharray="4 2.5"
+          strokeWidth="2.4"
+          strokeDasharray="4 2"
           fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       )}
     </svg>
@@ -471,6 +487,88 @@ export function MapCanvas({
   const [shadingMode, setShadingMode] = useState<'organic' | 'crisp'>('organic')
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
+  const [showLayersDrawer, setShowLayersDrawer] = useState(false)
+  const [visibleLayers, setVisibleLayers] =
+    useState<Record<MapLayerId, boolean>>(DEFAULT_MAP_LAYERS)
+
+  const handleToggleLayer = (layerId: MapLayerId) => {
+    setVisibleLayers((prev) => ({ ...prev, [layerId]: !prev[layerId] }))
+  }
+
+  const handleSetAllLayers = (visible: boolean) => {
+    setVisibleLayers({
+      terrain: visible,
+      relief: visible,
+      watershed: visible,
+      roads: visible,
+      territories: visible,
+      slots: visible,
+      labels: visible,
+      fog: visible,
+    })
+  }
+
+  const handleSimulateWatersheds = () => {
+    const watershed = generateWorldWatersheds(map)
+    const nextTiles = { ...map.tiles }
+    let riverCount = 0
+
+    for (const key of Object.keys(watershed)) {
+      const existing =
+        nextTiles[key] ||
+        createDefaultTile(watershed[key].coord.col, watershed[key].coord.row)
+      nextTiles[key] = {
+        ...existing,
+        hasRiver: true,
+      }
+      riverCount++
+    }
+
+    if (riverCount > 0) {
+      pushToUndo(map)
+      onChange({ ...map, tiles: nextTiles })
+    }
+  }
+
+  const handleAutoConnectRoads = () => {
+    const settlements: OffsetCoord[] = []
+    for (let r = 0; r < map.height; r++) {
+      for (let c = 0; c < map.width; c++) {
+        const tile = map.tiles[`${c},${r}`]
+        if (!tile) continue
+        const isSettlement =
+          tile.overlay === 'settlement' ||
+          tile.overlay === 'town' ||
+          tile.overlay === 'city' ||
+          tile.overlay === 'capital' ||
+          (tile.slots || []).some((s) => s.category === 'settlement')
+        if (isSettlement) {
+          settlements.push({ col: c, row: r })
+        }
+      }
+    }
+
+    if (settlements.length < 2) return
+
+    pushToUndo(map)
+    const nextTiles = { ...map.tiles }
+
+    for (let i = 0; i < settlements.length - 1; i++) {
+      const roadPath = findOptimalRoadPath(map, settlements[i], settlements[i + 1])
+      if (roadPath) {
+        for (const coord of roadPath) {
+          const key = `${coord.col},${coord.row}`
+          const existing = nextTiles[key] || createDefaultTile(coord.col, coord.row)
+          nextTiles[key] = {
+            ...existing,
+            hasRoad: true,
+          }
+        }
+      }
+    }
+
+    onChange({ ...map, tiles: nextTiles })
+  }
 
   const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('forest')
   const [selectedRelief, setSelectedRelief] = useState<ReliefType>('none')
@@ -1273,6 +1371,23 @@ export function MapCanvas({
                   <Maximize2 className="h-3.5 w-3.5" />
                   <span>Dimensions & Templates</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLayersDrawer((v) => !v)}
+                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+                    showLayersDrawer
+                      ? 'bg-accent border-primary/40 text-foreground'
+                      : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                  title="Layer Stacking & Procedural Cartography"
+                  aria-label="Layer Stacking Drawer"
+                >
+                  <Layers className="h-3.5 w-3.5" />
+                  <span>Layers</span>
+                  <span className="text-[10px] px-1 py-0.2 rounded bg-muted-foreground/15 text-muted-foreground font-mono">
+                    {Object.values(visibleLayers).filter(Boolean).length}/8
+                  </span>
+                </button>
               </>
             )}
           </div>
@@ -1542,6 +1657,80 @@ export function MapCanvas({
                 <RotateCcw className="h-3.5 w-3.5" />
                 <span>Generate New Template</span>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Layer Stacking & Procedural Cartography Drawer */}
+        {!isViewOnly && showLayersDrawer && (
+          <div
+            data-testid="layer-stacking-drawer"
+            className="pt-2 border-t border-border space-y-3 animate-in fade-in slide-in-from-top-1 duration-150"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Map Layers ({Object.values(visibleLayers).filter(Boolean).length} Active):
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleSetAllLayers(true)}
+                  className="text-[10px] text-primary hover:underline font-medium"
+                >
+                  Show All
+                </button>
+                <span className="text-muted-foreground text-xs">·</span>
+                <button
+                  type="button"
+                  onClick={() => handleSetAllLayers(false)}
+                  className="text-[10px] text-muted-foreground hover:underline"
+                >
+                  Hide All
+                </button>
+              </div>
+
+              {/* Procedural Actions */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSimulateWatersheds}
+                  className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 border-blue-500/30"
+                  title="Trace natural rivers downhill from peaks to oceans"
+                >
+                  <span>🌊 Simulate Watersheds</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAutoConnectRoads}
+                  className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1.5 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/30"
+                  title="Route A* trade roads connecting all settlements along terrain contours"
+                >
+                  <span>🛣️ Auto-Connect Roads</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Layer Checkbox Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-1.5">
+              {MAP_LAYERS.map((layer) => {
+                const isActive = visibleLayers[layer.id]
+                return (
+                  <button
+                    key={layer.id}
+                    type="button"
+                    onClick={() => handleToggleLayer(layer.id)}
+                    className={`px-2 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1.5 transition-colors text-left ${
+                      isActive
+                        ? 'bg-accent border-primary/50 text-foreground font-semibold shadow-sm'
+                        : 'border-border/60 text-muted-foreground/60 hover:text-muted-foreground bg-muted/20 opacity-60'
+                    }`}
+                    title={layer.description}
+                  >
+                    <span>{layer.icon}</span>
+                    <span className="truncate">{layer.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
@@ -1980,6 +2169,11 @@ export function MapCanvas({
                             simpleMode={renderStyle === 'simple-schematic'}
                             neighborContext={neighborContext}
                             enableOrganicShading={shadingMode === 'organic'}
+                            showRelief={visibleLayers.relief}
+                            showWatershed={visibleLayers.watershed}
+                            showRoads={visibleLayers.roads}
+                            riverAdjacencies={getConnectedRiverAdjacencies(map, col, row)}
+                            roadAdjacencies={getConnectedRoadAdjacencies(map, col, row)}
                           />
 
                           {/* Crisp Hexagonal Polygon Stroke Outline */}
@@ -2013,7 +2207,7 @@ export function MapCanvas({
                           )}
 
                       {/* Corner Micro-Indicators (Top-Left: Extra Slots or Lake/Island indicator) */}
-                      {extraSlotCount > 0 ? (
+                      {visibleLayers.slots && (extraSlotCount > 0 ? (
                         <span
                           className="absolute top-0.5 left-0.5 px-1 rounded bg-slate-900/85 text-white text-[8px] font-bold leading-tight z-20"
                           title={`${extraSlotCount} additional slot(s) on this tile`}
@@ -2027,7 +2221,7 @@ export function MapCanvas({
                         >
                           💧
                         </span>
-                      ) : null}
+                      ) : null)}
 
                       {/* Top-Right Corner Micro-Indicator: Historic Event Star / Faction Crest */}
                       {hasEvents && (
@@ -2038,7 +2232,7 @@ export function MapCanvas({
                       )}
 
                       {/* Center Priority Slot Display (Zero icon clutter on empty background tiles!) */}
-                      {primarySlot && (
+                      {visibleLayers.slots && primarySlot && (
                         <div
                           className={`relative z-10 flex items-center justify-center leading-none ${
                             renderStyle === 'tilt-25d' ? '-translate-y-0.5' : ''
@@ -2063,14 +2257,14 @@ export function MapCanvas({
                       )}
 
                       {/* Map Label Banner */}
-                      {tile.label && (
+                      {visibleLayers.labels && tile.label && (
                         <span className="relative z-10 text-[8px] font-serif font-bold text-amber-50 bg-stone-950/75 px-1 rounded truncate max-w-[94%] mt-0.5 shadow-sm">
                           {tile.label}
                         </span>
                       )}
 
                       {/* Fog of War / Unexplored Wilderness Shroud */}
-                      {tile.isUnexplored && (
+                      {visibleLayers.fog && tile.isUnexplored && (
                         <div
                           className="absolute inset-0 bg-stone-900/90 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center pointer-events-none select-none"
                           aria-label="Unexplored Fog of War"

@@ -226,7 +226,8 @@ status: active
 - [x] Add ADR-014 documenting Deprecation of QR Codes in favor of Portable JSON World Files and Export/Import.
 - [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience.
 - [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine.
-- [ ] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding.
+- [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding.
+- [ ] Implement Phase 20: Recursive Causal Saga Graph & Emergent Lore Engine.
 
 ---
 
@@ -344,3 +345,31 @@ status: active
   - Elevates cartographic fidelity to commercial VTT and atlas benchmarks (*Wonderdraft, Inkarnate, Foundry VTT*).
   - Enables tactical hex-crawl campaigns while preserving classic square grid mode.
   - Gives GMs instant travel time calculations without needing external rulebooks or calculators.
+
+---
+
+## ADR-017: Vector Watershed Hydrological Simulation and A* Road Network Pathfinding
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**:
+  - In earlier versions, waterways (`hasRiver`) and trade routes (`hasRoad`) were represented by disconnected binary booleans per tile that rendered isolated static squiggles. Adjacent river and road tiles did not connect physically across borders.
+  - Furthermore, worldbuilders had to manually paint every single river step without regard to natural elevation physics, violating Tenet 4 (*Tabletop Verisimilitude & Tactile Realism*).
+  - GMs and players also lacked the ability to selectively hide or isolate cartographic information (such as turning off political borders or labels for immersive printouts, or hiding fog during GM review).
+- **Decision**:
+  1. **Hydrological Watershed Simulation (`watershedPathEngine.ts`)**:
+     - Implement steepest downhill descent tracing (`traceDownhillRiver`) guided by `getTileElevationRank` (0=ocean to 6=alpine peak).
+     - Rivers originate naturally from high relief or springs and terminate in sea basins/estuaries.
+     - Implement tributary flux accumulation where merging river branches increase river volume.
+  2. **A* Road Network Pathfinding**:
+     - Implement lowest-friction A* pathfinder (`findOptimalRoadPath`) connecting settlements along mountain passes and gentle terrain contours, avoiding impassable crags, swamps, and deep oceans.
+     - Provide 1-click **"🛣️ Auto-Connect Roads"** in the Layer Stacking Drawer to instantly weave trade highways between all discovered settlements.
+  3. **Continuous Inter-Tile Spline Ribbons**:
+     - Replace isolated center squiggles with `generateConnectedPathD`, connecting tile centers directly to neighbor tile boundary edges in both square and hex topologies.
+     - Integrated into both interactive canvas rendering and vector SVG export.
+  4. **Discrete 8-Layer Stacking Architecture**:
+     - Implement independent toggles for `terrain`, `relief`, `watershed`, `roads`, `territories`, `slots`, `labels`, and `fog` in `MapCanvas.tsx` with quick "Show All" and "Hide All" actions.
+- **Consequences**:
+  - Rivers and roads now look like authentic published fantasy maps (*Wonderdraft, Inkarnate*).
+  - Worldbuilders can generate natural watersheds with a single button press.
+  - Enables clean player-facing handouts by toggling off labels and GM-only clutter.
