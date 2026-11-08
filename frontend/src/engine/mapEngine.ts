@@ -20,6 +20,11 @@ import {
   getHexPolygonPoints,
   getGridPixelDimensions,
 } from './hexTopologyEngine'
+import {
+  getConnectedRiverAdjacencies,
+  getConnectedRoadAdjacencies,
+  generateConnectedPathD,
+} from './watershedPathEngine'
 
 export const DEFAULT_MAP_WIDTH = 20
 export const DEFAULT_MAP_HEIGHT = 12
@@ -674,6 +679,18 @@ export function exportMapToSvgString(
           rects += `<polygon points="${polyPoints}" fill="${primaryColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />`
         }
 
+        if (tile.hasRiver) {
+          const riverAdjs = getConnectedRiverAdjacencies(map, col, row)
+          const pathD = generateConnectedPathD(center.x, center.y, hexRadius * 2, riverAdjs, { col, row })
+          rects += `<path d="${pathD}" stroke="#2563eb" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />`
+        }
+
+        if (tile.hasRoad) {
+          const roadAdjs = getConnectedRoadAdjacencies(map, col, row)
+          const pathD = generateConnectedPathD(center.x, center.y, hexRadius * 2, roadAdjs, { col, row })
+          rects += `<path d="${pathD}" stroke="#78350f" stroke-width="2.2" stroke-dasharray="4 2" fill="none" stroke-linecap="round" stroke-linejoin="round" />`
+        }
+
         // Render slots centered on hex
         const slots = getEffectiveTileSlots(tile, entities)
         if (slots.length === 1) {
@@ -724,11 +741,15 @@ export function exportMapToSvgString(
         }
 
         if (tile.hasRiver) {
-          rects += `<path d="M ${x} ${y + tileSize * 0.3} Q ${x + tileSize * 0.5} ${y + tileSize * 0.72}, ${x + tileSize} ${y + tileSize * 0.38}" stroke="#2563eb" stroke-width="3.5" fill="none" stroke-linecap="round" />`
+          const riverAdjs = getConnectedRiverAdjacencies(map, col, row)
+          const pathD = generateConnectedPathD(x + tileSize / 2, y + tileSize / 2, tileSize, riverAdjs, { col, row })
+          rects += `<path d="${pathD}" stroke="#2563eb" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />`
         }
 
         if (tile.hasRoad) {
-          rects += `<line x1="${x}" y1="${y + tileSize * 0.5}" x2="${x + tileSize}" y2="${y + tileSize * 0.5}" stroke="#78350f" stroke-width="2" stroke-dasharray="4 2" />`
+          const roadAdjs = getConnectedRoadAdjacencies(map, col, row)
+          const pathD = generateConnectedPathD(x + tileSize / 2, y + tileSize / 2, tileSize, roadAdjs, { col, row })
+          rects += `<path d="${pathD}" stroke="#78350f" stroke-width="2.2" stroke-dasharray="4 2" fill="none" stroke-linecap="round" stroke-linejoin="round" />`
         }
 
         // Render only high-priority slots (Zero noise on empty background tiles!)

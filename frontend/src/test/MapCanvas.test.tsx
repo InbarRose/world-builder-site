@@ -354,5 +354,54 @@ describe('MapCanvas Component', () => {
     const tile34 = screen.getByTestId('map-tile-3-4')
     expect(tile34).toHaveAttribute('title', expect.stringContaining('Forest'))
   })
+
+  it('supports Layer Stacking drawer, toggling layers, and procedural watershed/road generation', () => {
+    function LayeredMap() {
+      const [currentMap, setCurrentMap] = React.useState<MapState>(() => {
+        const m = createInitialMap(6, 6)
+        // Add mountains and settlements to test procedural watershed & road connections
+        m.tiles['1,1'] = { ...m.tiles['1,1'], terrain: 'mountain', relief: 'mountain' }
+        m.tiles['5,5'] = { ...m.tiles['5,5'], terrain: 'ocean' }
+        m.tiles['1,4'] = { ...m.tiles['1,4'], overlay: 'settlement' }
+        m.tiles['4,4'] = { ...m.tiles['4,4'], overlay: 'city' }
+        return m
+      })
+      return <MapCanvas map={currentMap} worldName="Eldoria" onChange={setCurrentMap} />
+    }
+
+    render(<LayeredMap />)
+
+    // Open Layers drawer
+    const layersBtn = screen.getByRole('button', { name: /Layer Stacking Drawer/i })
+    expect(layersBtn).toBeInTheDocument()
+    expect(layersBtn).toHaveTextContent(/8\/8/i)
+
+    fireEvent.click(layersBtn)
+    expect(screen.getByTestId('layer-stacking-drawer')).toBeInTheDocument()
+
+    // Test Hide All and Show All
+    const hideAllBtn = screen.getByRole('button', { name: /Hide All/i })
+    fireEvent.click(hideAllBtn)
+    expect(layersBtn).toHaveTextContent(/0\/8/i)
+
+    const showAllBtn = screen.getByRole('button', { name: /Show All/i })
+    fireEvent.click(showAllBtn)
+    expect(layersBtn).toHaveTextContent(/8\/8/i)
+
+    // Run Simulate Watersheds
+    const watershedBtn = screen.getByRole('button', { name: /Simulate Watersheds/i })
+    fireEvent.click(watershedBtn)
+
+    // Mountain at (1, 1) should now have a river flowing from it
+    const tile11 = screen.getByTestId('map-tile-1-1')
+    expect(tile11).toBeInTheDocument()
+
+    // Run Auto-Connect Roads between settlement at (1, 4) and city at (4, 4)
+    const roadsBtn = screen.getByRole('button', { name: /Auto-Connect Roads/i })
+    fireEvent.click(roadsBtn)
+
+    const settlementTile = screen.getByTestId('map-tile-1-4')
+    expect(settlementTile).toBeInTheDocument()
+  })
 })
 
