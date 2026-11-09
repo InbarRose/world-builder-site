@@ -8,6 +8,8 @@ import {
   X,
   Compass,
   BookOpen,
+  Palette,
+  Sparkles,
 } from 'lucide-react'
 import { SelectiveExportOptions, WorldState } from '../engine/types'
 import {
@@ -19,6 +21,11 @@ import {
 } from '../engine/exportService'
 import { serializeWorld } from '../engine/storageService'
 import { exportMapToSvgString } from '../engine/mapEngine'
+import {
+  CartoucheTheme,
+  generateCartoucheMapSvg,
+  renderCartoucheSvgToPngBlob,
+} from '../engine/cartoucheExportEngine'
 
 interface ExportSuiteModalProps {
   isOpen: boolean
@@ -35,6 +42,20 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
     () => `${world.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().split('T')[0]}`
   )
 
+  // Multi-Theme Sourcebook setting
+  const [sourcebookTheme, setSourcebookTheme] = useState<
+    'parchment' | 'grimdark' | 'royal-gold' | 'modern'
+  >('parchment')
+
+  // Cartouche Poster Settings
+  const [cartoucheTheme, setCartoucheTheme] = useState<CartoucheTheme>('parchment')
+  const [showBorder, setShowBorder] = useState(true)
+  const [showCartouche, setShowCartouche] = useState(true)
+  const [showLegend, setShowLegend] = useState(true)
+  const [showCompass, setShowCompass] = useState(true)
+  const [showScaleBar, setShowScaleBar] = useState(true)
+  const [isExportingPng, setIsExportingPng] = useState(false)
+
   // Selective export checkboxes
   const [selectiveOptions, setSelectiveOptions] = useState<SelectiveExportOptions>({
     includeWorldMetadata: true,
@@ -49,7 +70,10 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
   if (!isOpen) return null
 
   const handleDownloadHtmlSourcebook = () => {
-    const html = exportCampaignSourcebookHtml(world, selectiveOptions)
+    const html = exportCampaignSourcebookHtml(world, {
+      ...selectiveOptions,
+      sourcebookTheme,
+    })
     downloadExportFile(`${baseFileName}-sourcebook.html`, html, 'text/html')
   }
 
@@ -76,6 +100,46 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
   const handleDownloadMapSvg = () => {
     const svgStr = exportMapToSvgString(world.map, world.name)
     downloadExportFile(`${baseFileName}-map.svg`, svgStr, 'image/svg+xml')
+  }
+
+  const handleDownloadCartoucheSvg = () => {
+    const svgStr = generateCartoucheMapSvg(world, {
+      theme: cartoucheTheme,
+      showBorder,
+      showCartouche,
+      showLegend,
+      showCompass,
+      showScaleBar,
+    })
+    downloadExportFile(`${baseFileName}-atlas-cartouche-${cartoucheTheme}.svg`, svgStr, 'image/svg+xml')
+  }
+
+  const handleDownloadCartouchePng = async () => {
+    try {
+      setIsExportingPng(true)
+      const svgStr = generateCartoucheMapSvg(world, {
+        theme: cartoucheTheme,
+        showBorder,
+        showCartouche,
+        showLegend,
+        showCompass,
+        showScaleBar,
+      })
+      const pngBlob = await renderCartoucheSvgToPngBlob(svgStr, 3)
+      const url = URL.createObjectURL(pngBlob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${baseFileName}-atlas-poster-${cartoucheTheme}-300dpi.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('High-DPI PNG export failed, falling back to SVG:', err)
+      handleDownloadCartoucheSvg()
+    } finally {
+      setIsExportingPng(false)
+    }
   }
 
   return (
@@ -177,29 +241,64 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
 
         {/* Tab 1: Whole World Archive */}
         {activeTab === 'whole-world' && (
-          <div className="space-y-3">
-            {/* Featured Hero Card: Campaign Sourcebook */}
-            <div className="p-4 rounded-xl border-2 border-primary/40 bg-primary/5 space-y-3 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <BookOpen className="h-4 w-4" />
-                  <span>Official Campaign Sourcebook (.html / Print PDF)</span>
-                  <span className="text-[10px] uppercase font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                    Publication Ready
-                  </span>
+          <div className="space-y-4">
+            {/* Featured Hero Card: Campaign Sourcebook with Multi-Theme Picker */}
+            <div className="p-4 rounded-xl border-2 border-primary/40 bg-primary/5 space-y-3.5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <BookOpen className="h-4 w-4" />
+                    <span>Official Campaign Sourcebook (.html / Print PDF)</span>
+                    <span className="text-[10px] uppercase font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                      Publication Ready
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+                    Standalone fantasy RPG sourcebook with embedded SVG cartography, two-column lore chapters, drop caps, Codex stat blocks, and 1-click print-to-PDF formatting.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-                  Standalone illustrated fantasy RPG sourcebook with embedded SVG cartography, two-column lore chapters, drop caps, Codex stat blocks, and 1-click print-to-PDF formatting.
-                </p>
+                <button
+                  type="button"
+                  data-testid="export-sourcebook-btn"
+                  onClick={handleDownloadHtmlSourcebook}
+                  className="btn-primary shrink-0 px-4 py-2.5 text-xs font-bold flex items-center gap-2 shadow-sm"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Campaign Book</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadHtmlSourcebook}
-                className="btn-primary shrink-0 px-4 py-2 text-xs font-bold flex items-center gap-2 shadow-sm"
-              >
-                <Download className="h-4 w-4" />
-                <span>Export Campaign Book</span>
-              </button>
+
+              {/* Sourcebook Theme Style Selector */}
+              <div className="pt-2 border-t border-primary/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-semibold text-primary flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5" />
+                  <span>Typesetting Theme:</span>
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(
+                    [
+                      { id: 'parchment', label: '📜 Parchment' },
+                      { id: 'grimdark', label: '⚔️ Grimdark' },
+                      { id: 'royal-gold', label: '👑 Royal Gold' },
+                      { id: 'modern', label: '🌍 Modern Atlas' },
+                    ] as const
+                  ).map((th) => (
+                    <button
+                      key={th.id}
+                      type="button"
+                      data-testid={`sourcebook-theme-${th.id}`}
+                      onClick={() => setSourcebookTheme(th.id)}
+                      className={`px-2.5 py-1 rounded-lg border font-semibold text-[11px] transition-all ${
+                        sourcebookTheme === th.id
+                          ? 'bg-primary text-primary-foreground border-primary shadow-2xs'
+                          : 'bg-background border-border hover:bg-muted text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {th.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -332,45 +431,175 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
 
         {/* Tab 3: Map Graphics & Layer Objects */}
         {activeTab === 'map-assets' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <ImageIcon className="h-4 w-4" />
-                  <span>Vector Map Graphic (SVG)</span>
+          <div className="space-y-4">
+            {/* Featured Hero Card: High-DPI Cartographic Atlas Poster & Cartouche */}
+            <div
+              data-testid="cartouche-export-card"
+              className="p-4 rounded-xl border-2 border-primary/40 bg-primary/5 space-y-3.5"
+            >
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <Sparkles className="h-4 w-4" />
+                    <span>High-DPI Cartographic Atlas Poster &amp; Cartouche</span>
+                    <span className="text-[10px] uppercase font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                      300 DPI Ready
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+                    Print-grade fantasy world map with decorative border margins, corner filigrees, ornate title cartouche, 8-point compass rose, map legend, and distance scale bar.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  High-resolution vector graphic of your world map with all elevation contours, biomes, rivers, roads, and landmark markers.
-                </p>
+
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    data-testid="download-cartouche-svg-btn"
+                    onClick={handleDownloadCartoucheSvg}
+                    className="btn-outline px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Download Vector (.svg)</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="download-cartouche-png-btn"
+                    onClick={handleDownloadCartouchePng}
+                    disabled={isExportingPng}
+                    className="btn-primary px-4 py-2 text-xs font-bold flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>{isExportingPng ? 'Rendering PNG...' : 'Download 300 DPI (.png)'}</span>
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadMapSvg}
-                className="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Download Map SVG</span>
-              </button>
+
+              {/* Cartouche Controls & Theme Selector */}
+              <div className="pt-2 border-t border-primary/20 space-y-2.5 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-semibold text-primary flex items-center gap-1.5">
+                    <Palette className="h-3.5 w-3.5" />
+                    <span>Cartographic Atlas Style:</span>
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(
+                      [
+                        { id: 'parchment', label: '📜 Parchment' },
+                        { id: 'grimdark', label: '⚔️ Grimdark' },
+                        { id: 'royal-gold', label: '👑 Royal Gold' },
+                        { id: 'atlas', label: '🌍 Modern Atlas' },
+                      ] as const
+                    ).map((cth) => (
+                      <button
+                        key={cth.id}
+                        type="button"
+                        data-testid={`cartouche-theme-${cth.id}`}
+                        onClick={() => setCartoucheTheme(cth.id)}
+                        className={`px-2.5 py-1 rounded-lg border font-semibold text-[11px] transition-all ${
+                          cartoucheTheme === cth.id
+                            ? 'bg-primary text-primary-foreground border-primary shadow-2xs'
+                            : 'bg-background border-border hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {cth.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Elements Toggles */}
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground pt-1">
+                  <span className="font-semibold text-foreground">Frame Elements:</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showBorder}
+                      onChange={(e) => setShowBorder(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span>Ornate Filigree Border</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showCartouche}
+                      onChange={(e) => setShowCartouche(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span>Title Cartouche</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showCompass}
+                      onChange={(e) => setShowCompass(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span>Compass Rose</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showLegend}
+                      onChange={(e) => setShowLegend(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span>Map Legend</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showScaleBar}
+                      onChange={(e) => setShowScaleBar(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    <span>Scale Bar</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
-                  <Compass className="h-4 w-4" />
-                  <span>Complex Layered Objects (JSON)</span>
+            {/* Existing Raw SVG & Complex Layer JSON Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Raw Map Vector (SVG)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Unframed raw tile vector graphic without cartouche margins or borders.
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Separate structured arrays for terrain base, elevation relief, hydrology, flora, slots, overlays, and kingdom territory borders.
-                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadMapSvg}
+                  className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download Raw Map SVG</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleDownloadLayeredMapJson}
-                className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Download Map Layers JSON</span>
-              </button>
+
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                    <Compass className="h-4 w-4" />
+                    <span>Complex Layered Objects (JSON)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Structured arrays for terrain base, elevation relief, hydrology, flora, slots, overlays, and kingdom territory borders.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadLayeredMapJson}
+                  className="btn-outline w-full text-xs py-2 flex items-center justify-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download Map Layers JSON</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -734,4 +734,62 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Close 2-Page World Overview/i }))
     })
   })
+
+  it('supports Phase 26 Single-PC Driver Quick-Keys ("2" toggles 2-Pager) and High-DPI Cartouche Atlas Studio in Export Suite', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Test Quick-Key '2' toggling the 2-Page World Overview Modal
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '2' }))
+    })
+    expect(screen.getByTestId('world-two-pager-modal')).toBeInTheDocument()
+
+    // Press '2' again to close
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '2' }))
+    })
+    expect(screen.queryByTestId('world-two-pager-modal')).not.toBeInTheDocument()
+
+    // Open Export Suite modal from header
+    const exportBtn = screen.getByRole('button', { name: /Share & Export/i })
+    await act(async () => {
+      fireEvent.click(exportBtn)
+    })
+    const exportSuiteBtn = screen.getByRole('button', { name: /^Export Suite$/i })
+    await act(async () => {
+      fireEvent.click(exportSuiteBtn)
+    })
+
+    // Verify Multi-Theme Sourcebook studio in Tab 1
+    expect(screen.getByTestId('export-sourcebook-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('sourcebook-theme-grimdark')).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('sourcebook-theme-grimdark'))
+    })
+
+    // Switch to Tab 3 (Map Graphics & Layer Objects)
+    const mapTabBtn = screen.getByRole('button', { name: /Map Graphics & Layer Objects/i })
+    await act(async () => {
+      fireEvent.click(mapTabBtn)
+    })
+
+    // Verify High-DPI Cartographic Atlas Poster & Cartouche studio
+    expect(screen.getByTestId('cartouche-export-card')).toBeInTheDocument()
+    expect(screen.getByTestId('download-cartouche-svg-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('download-cartouche-png-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('cartouche-theme-royal-gold')).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('cartouche-theme-royal-gold'))
+    })
+  })
 })
