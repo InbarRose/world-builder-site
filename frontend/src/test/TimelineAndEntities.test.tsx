@@ -144,7 +144,10 @@ describe('TimelinePanel & EntityRegistry Components', () => {
     )
 
     // Verify Epoch Scrubber buttons
-    expect(screen.getByText(/Interactive Epoch Scrubber/i)).toBeInTheDocument()
+    expect(screen.getByText(/Interactive Epoch/i)).toBeInTheDocument()
+    expect(screen.getByTestId('chronicle-turn-scrubber')).toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('scrubber-first-turn-btn'))
+    expect(screen.getByTestId('scrubber-active-turn-card')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /1\. Genesis/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /3\. Civilization/i })).toBeInTheDocument()
 
@@ -229,5 +232,53 @@ describe('TimelinePanel & EntityRegistry Components', () => {
     expect(screen.getByText(/Historical Feats & Epoch Deeds/i)).toBeInTheDocument()
     expect(screen.getByText('Treaty Forger')).toBeInTheDocument()
     expect(screen.getByText(/Golden Concord/i)).toBeInTheDocument()
+  })
+
+  it('supports Phase 25 Interactive Codex Diplomatic Relationship Matrix cycling', () => {
+    const entities = [
+      {
+        id: 'ent_1',
+        name: 'Sun Elves',
+        icon: '🧝',
+        category: 'species' as const,
+        stageCreated: 'primal' as const,
+        description: 'Luminous society.',
+        traits: ['Solar Magic'],
+        status: 'Flourishing',
+        diplomaticLinks: [],
+      },
+      {
+        id: 'ent_2',
+        name: 'Deep Dwarves',
+        icon: '⛏️',
+        category: 'society' as const,
+        stageCreated: 'civilization' as const,
+        description: 'Cave miners.',
+        traits: ['Stalwart'],
+        status: 'Active',
+        diplomaticLinks: [],
+      },
+    ]
+
+    const handleChange = vi.fn()
+    render(
+      <EntityRegistry
+        entities={entities}
+        currentStage="civilization"
+        drawHistory={[]}
+        onChange={handleChange}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Forge Relationship/i }))
+    expect(screen.getByTestId('codex-relationship-matrix')).toBeInTheDocument()
+
+    const matrixCell = screen.getByTestId('matrix-cell-ent_1-ent_2')
+    fireEvent.click(matrixCell)
+
+    expect(handleChange).toHaveBeenCalledTimes(1)
+    const updatedEntities = handleChange.mock.calls[0][0]
+    expect(updatedEntities[0].diplomaticLinks[0].type).toBe('alliance')
+    expect(updatedEntities[1].diplomaticLinks[0].type).toBe('alliance')
   })
 })

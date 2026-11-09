@@ -350,6 +350,16 @@ export interface LayeredMapExport {
   }[]
 }
 
+export interface TwoPagerCurationConfig {
+  pinnedTileIds?: string[]
+  excludedTileIds?: string[]
+  pinnedEntityIds?: string[]
+  excludedEntityIds?: string[]
+  pinnedEventIds?: string[]
+  excludedEventIds?: string[]
+  customSynopsisOverride?: string
+}
+
 export interface WorldState {
   schemaVersion: number
   id: string
@@ -369,4 +379,5 @@ export interface WorldState {
   companionMode: CompanionViewMode
   generationSettings: GenerationSettings
   snapshots?: TurnSnapshot[]
+  twoPagerConfig?: TwoPagerCurationConfig
 }

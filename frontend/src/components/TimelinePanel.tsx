@@ -34,6 +34,7 @@ interface TimelinePanelProps {
   onClearHistory: () => void
   onRewindToMove?: (moveId: number) => void
   onBranchFromMove?: (moveId: number) => void
+  onTogglePinEvent?: (recordId: string) => void
 }
 
 export function TimelinePanel({
@@ -46,6 +47,7 @@ export function TimelinePanel({
   onClearHistory,
   onRewindToMove,
   onBranchFromMove,
+  onTogglePinEvent,
 }: TimelinePanelProps) {
   const [stageFilter, setStageFilter] = useState<StageId | 'all'>('all')
   const [entityFilter, setEntityFilter] = useState<string>('all')
@@ -57,6 +59,7 @@ export function TimelinePanel({
   const [unlockedRecordIds, setUnlockedRecordIds] = useState<Record<string, boolean>>({})
   const [confirmRewindMoveId, setConfirmRewindMoveId] = useState<number | null>(null)
   const [confirmClearHistory, setConfirmClearHistory] = useState(false)
+  const [scrubbedMoveIndex, setScrubbedMoveIndex] = useState<number | null>(null)
 
   // Freeform Lore Event Adder state
   const [showAddEventForm, setShowAddEventForm] = useState(false)
@@ -383,12 +386,12 @@ export function TimelinePanel({
         </div>
       </div>
 
-      {/* Interactive Epoch Scrubber */}
-      <div className="no-print p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2">
+      {/* Interactive Epoch Scrubber & Turn-by-Turn Replay */}
+      <div className="no-print p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2.5">
         <div className="flex items-center justify-between text-xs font-semibold">
           <span className="flex items-center gap-1.5 text-primary">
             <Compass className="h-3.5 w-3.5" />
-            <span>Interactive Epoch Scrubber</span>
+            <span>Interactive Epoch &amp; Turn Replay Scrubber</span>
           </span>
           <span className="text-[11px] font-mono text-muted-foreground">
             {stageFilter === 'all' ? 'All Eras Visible' : `${stageFilter.toUpperCase()} Focus`}
@@ -415,6 +418,142 @@ export function TimelinePanel({
             )
           })}
         </div>
+
+        {/* Phase 25: Step-by-Step Turn Scrubber & Spotlight Replay */}
+        {world.drawHistory.length > 0 && (
+          <div
+            data-testid="chronicle-turn-scrubber"
+            className="pt-2 border-t border-border/60 space-y-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  data-testid="scrubber-first-turn-btn"
+                  onClick={() => setScrubbedMoveIndex(0)}
+                  className="px-2 py-1 rounded bg-background border border-border hover:bg-muted text-[11px] font-semibold"
+                  title="Jump to Turn #1"
+                >
+                  ⏮️ #1
+                </button>
+                <button
+                  type="button"
+                  data-testid="scrubber-prev-turn-btn"
+                  onClick={() =>
+                    setScrubbedMoveIndex((prev) =>
+                      prev === null
+                        ? Math.max(0, world.drawHistory.length - 1)
+                        : Math.max(0, prev - 1)
+                    )
+                  }
+                  className="px-2 py-1 rounded bg-background border border-border hover:bg-muted text-[11px] font-semibold"
+                >
+                  ◀️ Prev
+                </button>
+                <button
+                  type="button"
+                  data-testid="scrubber-next-turn-btn"
+                  onClick={() =>
+                    setScrubbedMoveIndex((prev) =>
+                      prev === null
+                        ? 0
+                        : Math.min(world.drawHistory.length - 1, prev + 1)
+                    )
+                  }
+                  className="px-2 py-1 rounded bg-background border border-border hover:bg-muted text-[11px] font-semibold"
+                >
+                  Next ▶️
+                </button>
+                {scrubbedMoveIndex !== null && (
+                  <button
+                    type="button"
+                    data-testid="scrubber-clear-btn"
+                    onClick={() => setScrubbedMoveIndex(null)}
+                    className="px-2 py-1 rounded bg-primary/15 text-primary border border-primary/30 text-[11px] font-semibold"
+                  >
+                    ⏭️ Show All ({world.drawHistory.length})
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-1 max-w-xs">
+                <input
+                  type="range"
+                  aria-label="Turn Replay Scrubber"
+                  min={0}
+                  max={Math.max(0, world.drawHistory.length - 1)}
+                  value={
+                    scrubbedMoveIndex !== null
+                      ? scrubbedMoveIndex
+                      : Math.max(0, world.drawHistory.length - 1)
+                  }
+                  onChange={(e) => setScrubbedMoveIndex(parseInt(e.target.value, 10))}
+                  className="w-full accent-primary cursor-pointer"
+                />
+                <span className="text-[11px] font-mono font-bold text-primary shrink-0">
+                  {scrubbedMoveIndex !== null
+                    ? `Turn #${scrubbedMoveIndex + 1}/${world.drawHistory.length}`
+                    : `${world.drawHistory.length} Turns`}
+                </span>
+              </div>
+            </div>
+
+            {scrubbedMoveIndex !== null && world.drawHistory[scrubbedMoveIndex] && (() => {
+              const spot = world.drawHistory[scrubbedMoveIndex]
+              const isPinned = (world.twoPagerConfig?.pinnedEventIds || []).includes(spot.id)
+              return (
+                <div
+                  data-testid="scrubber-active-turn-card"
+                  className="p-3 rounded-xl bg-background border-2 border-primary/40 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs animate-in fade-in duration-150"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-primary text-primary-foreground font-bold text-[11px]">
+                        Spotlight Turn #{spot.moveId}
+                      </span>
+                      <span className="font-bold">
+                        [{spot.card.value}{spot.card.suit}] {spot.actionTitle || spot.power}
+                      </span>
+                      {spot.epochYear && (
+                        <span className="text-[11px] text-muted-foreground font-mono">
+                          ({spot.epochYear})
+                        </span>
+                      )}
+                    </div>
+                    {spot.note && (
+                      <p className="text-foreground/90 text-[11px] leading-snug">{spot.note}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {spot.linkedTileIds?.map((tid) => (
+                      <button
+                        key={tid}
+                        type="button"
+                        onClick={() => onSelectTile?.(tid)}
+                        className="px-2 py-1 rounded bg-primary/10 text-primary font-mono text-[11px] hover:underline"
+                      >
+                        📍 ({tid})
+                      </button>
+                    ))}
+                    {onTogglePinEvent && (
+                      <button
+                        type="button"
+                        onClick={() => onTogglePinEvent(spot.id)}
+                        className={`px-2 py-1 rounded border text-[11px] font-semibold ${
+                          isPinned
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        📌 {isPinned ? 'Pinned to 2-Pager' : 'Pin to 2-Pager'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        )}
       </div>
 
       {/* Event Significance Filter Pills */}
@@ -511,8 +650,29 @@ export function TimelinePanel({
                     </div>
                   </div>
 
-                  {/* Safe Turn Actions: Unlock Edit, Non-Destructive Branch New World, and Guarded Rewind */}
+                  {/* Safe Turn Actions: Pin to 2-Pager, Unlock Edit, Non-Destructive Branch New World, and Guarded Rewind */}
                   <div className="no-print flex flex-wrap items-center gap-1.5">
+                    {onTogglePinEvent && (
+                      <button
+                        type="button"
+                        data-testid={`timeline-pin-event-${record.id}`}
+                        onClick={() => onTogglePinEvent(record.id)}
+                        className={`px-2 py-1 rounded border text-[11px] font-medium flex items-center gap-1 transition-colors ${
+                          (world.twoPagerConfig?.pinnedEventIds || []).includes(record.id)
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Pin this historical turn to Page 2 of the 2-Page World Overview"
+                      >
+                        <span>📌</span>
+                        <span>
+                          {(world.twoPagerConfig?.pinnedEventIds || []).includes(record.id)
+                            ? 'Pinned'
+                            : 'Pin 2-Pager'}
+                        </span>
+                      </button>
+                    )}
+
                     {!world.isLocked && !isLatestTurn && (
                       <button
                         type="button"

@@ -23,7 +23,6 @@ import {
   CompanionSettlementIcons,
   DrawRecord,
   EntityCategory,
-  EntityRelationship,
   MapState,
   RelationshipType,
   StageId,
@@ -44,6 +43,11 @@ import {
 } from '../engine/presets'
 import { findCompendiumTrait } from '../engine/compendiumEngine'
 import { computeEntityAchievements } from '../engine/narrativeEngine'
+import {
+  cyclePairRelationship,
+  getPairRelationship,
+  setPairRelationship,
+} from '../engine/relationshipMatrixEngine'
 
 interface EntityRegistryProps {
   entities: WorldEntity[]
@@ -384,47 +388,8 @@ export function EntityRegistry({
 
   const handleCreateRelationship = () => {
     if (!relSourceId || !relTargetId || relSourceId === relTargetId) return
-    const sourceEnt = entities.find((e) => e.id === relSourceId)
-    const targetEnt = entities.find((e) => e.id === relTargetId)
-    if (!sourceEnt || !targetEnt) return
-
-    const preset =
-      RELATIONSHIP_PRESETS.find((r) => r.type === relType) || RELATIONSHIP_PRESETS[0]
-    const label = relCustomLabel.trim() || preset.label
-
-    const forwardLink: EntityRelationship = {
-      id: `rel_${Date.now()}_f`,
-      targetEntityId: targetEnt.id,
-      targetEntityName: targetEnt.name,
-      type: relType,
-      label,
-      icon: preset.icon,
-    }
-    const reverseLink: EntityRelationship = {
-      id: `rel_${Date.now()}_r`,
-      targetEntityId: sourceEnt.id,
-      targetEntityName: sourceEnt.name,
-      type: relType,
-      label,
-      icon: preset.icon,
-    }
-
     onChange(
-      entities.map((ent) => {
-        if (ent.id === sourceEnt.id) {
-          return {
-            ...ent,
-            diplomaticLinks: [...(ent.diplomaticLinks || []), forwardLink],
-          }
-        }
-        if (ent.id === targetEnt.id) {
-          return {
-            ...ent,
-            diplomaticLinks: [...(ent.diplomaticLinks || []), reverseLink],
-          }
-        }
-        return ent
-      })
+      setPairRelationship(entities, relSourceId, relTargetId, relType, relCustomLabel)
     )
     setRelCustomLabel('')
   }
@@ -646,6 +611,103 @@ export function EntityRegistry({
               >
                 Link
               </button>
+            </div>
+          </div>
+
+          {/* Phase 25: Interactive N x N Diplomatic Relationship Matrix */}
+          <div
+            data-testid="codex-relationship-matrix"
+            className="pt-2 border-t border-border/60 space-y-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+              <span className="font-bold text-primary">
+                🌐 Interactive Diplomatic Matrix — Click any cell to cycle relation:
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-semibold">
+                  🤝 Alliance / ⚖️ Trade / ✨ Faith
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-red-500/15 text-red-700 dark:text-red-300 font-semibold">
+                  ⚔️ War / 🗡️ Rivalry
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold">
+                  👑 Vassalage
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border border-border bg-background">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted/50 border-b border-border">
+                    <th className="p-2 text-left font-bold text-[11px] text-muted-foreground">
+                      Entity Pair
+                    </th>
+                    {entities.slice(0, 10).map((colEnt) => (
+                      <th
+                        key={colEnt.id}
+                        className="p-2 text-center font-bold text-[11px] min-w-[92px] border-l border-border/60"
+                        title={colEnt.name}
+                      >
+                        <div className="truncate max-w-[100px] mx-auto">
+                          {colEnt.icon} {colEnt.name}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {entities.slice(0, 10).map((rowEnt) => (
+                    <tr key={rowEnt.id} className="border-b border-border/60 last:border-b-0">
+                      <td className="p-2 font-bold text-[11px] bg-muted/20 whitespace-nowrap">
+                        {rowEnt.icon} {rowEnt.name}
+                      </td>
+                      {entities.slice(0, 10).map((colEnt) => {
+                        if (rowEnt.id === colEnt.id) {
+                          return (
+                            <td
+                              key={colEnt.id}
+                              className="p-1.5 text-center bg-muted/30 text-muted-foreground/40 border-l border-border/60 font-mono"
+                            >
+                              —
+                            </td>
+                          )
+                        }
+                        const cell = getPairRelationship(entities, rowEnt.id, colEnt.id)
+                        const badgeClass =
+                          cell.tone === 'conflict'
+                            ? 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30 font-bold'
+                            : cell.tone === 'alliance'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-bold'
+                            : cell.tone === 'hierarchy'
+                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30 font-bold'
+                            : 'bg-background text-muted-foreground border-border/60 hover:border-primary/50'
+                        return (
+                          <td
+                            key={colEnt.id}
+                            className="p-1 text-center border-l border-border/60"
+                          >
+                            <button
+                              type="button"
+                              data-testid={`matrix-cell-${rowEnt.id}-${colEnt.id}`}
+                              onClick={() =>
+                                onChange(
+                                  cyclePairRelationship(entities, rowEnt.id, colEnt.id)
+                                )
+                              }
+                              className={`w-full px-1.5 py-1 rounded border text-[10px] transition-all flex items-center justify-center gap-1 ${badgeClass}`}
+                              title={`${rowEnt.name} ↔ ${colEnt.name}: ${cell.label} (Click to cycle diplomatic status)`}
+                            >
+                              <span>{cell.icon}</span>
+                              <span className="truncate max-w-[72px]">{cell.label}</span>
+                            </button>
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
