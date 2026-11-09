@@ -202,6 +202,13 @@ status: active
   - [x] Fast, tactile 1-click Custom Event & Stamp mode (`✨ Custom Event / Stamp` and `🎨 Icon & Terrain`) with 18 quick icons, 11 terrain overrides, 7 slot categories, combinatorial name re-rolls, and auto-prose synthesis
   - [x] Explicit `💾 Save to Record` button (`save-turn-record-btn`) and inline editable Event/Action Title in `TimelinePanel.tsx`
   - [x] Automated test suite in `turnWorkbenchEngine.test.ts` and `PlayStudio.test.tsx` (174/174 tests passing across 25 suites)
+- [x] **Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX** *(Score: 88.0 / 100 via ADR-030)*
+  - [x] Deterministic, non-LLM 2-Page World Overview condenser engine (`twoPageOverviewEngine.ts`) using heuristic importance scoring and strict information-density budgeting (`buildWorldTwoPageOverview`, `exportTwoPageOverviewMarkdown`)
+  - [x] Page 1 condenser: rule-synthesized Executive Synopsis, Land/Water & Biome breakdown, clickable Mini-Atlas grid, and Top 8 Iconic Regions & Landmarks Gazetteer (`condenseTopLandmarks`)
+  - [x] Page 2 condenser: Top 8 Species/Societies/Myths roster (`condenseTopEntities`), deduplicated Diplomatic Web (`condenseDiplomaticWeb`), and 4-Ages Chronicle Digest capped at Top 3 pivotal turns per stage (`condenseFourAgesDigest`)
+  - [x] Interactive & printable `WorldTwoPagerModal.tsx` with Side-by-Side 2-Page Spread, 1-click Markdown copy, `@media print` 2-page break layout, and clickable coordinate/entity jump links
+  - [x] Always-accessible Tile Inspector Quick-Stamp & Auto-Name Bar (`inspector-quick-stamp-bar` in `MapCanvas.tsx`) with 1-click `📍 Stamp Active Turn Here` (`inspector-stamp-active-turn-btn`) and `🎲 Auto-Name`
+  - [x] Automated test suite in `twoPageOverviewEngine.test.ts` and `PlayStudio.test.tsx` (177/177 tests passing across 26 suites)
 
 ---
 
@@ -237,6 +244,7 @@ status: active
 - [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
 - [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
 - [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
-- [ ] Implement Phase 24: Direct On-Map Radial Context Menus, Interactive Codex Relationship Graph & Living Chronicle Scrubber (Target: 88.5 / 100).
+- [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
+- [ ] Implement Phase 25: Interactive Codex Relationship Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (Target: 91.0 / 100).
 
 

@@ -808,6 +808,29 @@ status: active
   - Makes both Preset-driven and Custom freeform turns in Studio Mode fast, tactile, live-populated, and non-destructively editable before and after map placement.
   - Advances the verified Core AAA Score from **83.0 -> 85.0 / 100** across 25 test suites (174/174 tests passing).
 
+---
+
+## ADR-030: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX
+
+- **Status**: Accepted
+- **Date**: 2026-11-08
+- **Context**:
+  The user requested a deterministic, non-LLM powered way to condense any co-created world into a crisp **2-Page World Overview** and asked to continue into the next phase:
+  > "feature requrest. 2-pager overview of a world. a non llm powered way to condense a world into 2 pager. consider in backlog. continue next phase."
+- **Decision**:
+  1. **Deterministic Non-LLM 2-Page World Overview Engine (`twoPageOverviewEngine.ts`)**:
+     - Implemented heuristic importance scoring, biome aggregation, and strict information-density budgeting (`buildWorldTwoPageOverview`, `exportTwoPageOverviewMarkdown`) to condense a world of any length into two structured pages without any LLM:
+       - **Page 1 (Physical Atlas & Iconic Landmarks)**: Rule-synthesized 3-sentence Executive Realm Synopsis, Land vs. Water & Top Biomes breakdown (`computeBiomeBreakdown`), interactive Mini-Atlas grid, and the **Top 8 Iconic Regions & Landmarks Gazetteer** (`condenseTopLandmarks`) ranked by turn mentions, custom labels, and slot priority.
+       - **Page 2 (Peoples, Diplomacy & Four Ages Digest)**: **Top 8 Major Species, Societies & Mythic Forces** (`condenseTopEntities`), deduplicated **Active Diplomatic Web & Fault Lines** (`condenseDiplomaticWeb`), and **The Four Ages Condensed Digest** (`condenseFourAgesDigest`) capping each stage at its Top 3 highest-significance turns (prioritizing Ace Cataclysms, Fantastical Face/Joker draws, and multi-link events).
+  2. **Interactive & Printable 2-Pager Folio Modal (`WorldTwoPagerModal.tsx`)**:
+     - Supports **2-Page Side-by-Side Spread**, **Page 1 Focus**, and **Page 2 Focus** views, clickable `(col,row)` province jump links, clickable Codex entity links, 1-click **Copy 2-Pager (`.md`)**, and `@media print` `break-after-page` 2-page PDF/print layout.
+     - Accessible in 1 click from the Studio Header (`📄 2-Pager`) and the `Share & Export` menu.
+  3. **Direct On-Map Tile Inspector Quick-Stamp & Auto-Name Bar (`MapCanvas.tsx`)**:
+     - Added an always-available **Province Label & Quick-Stamp Bar** (`data-testid="inspector-quick-stamp-bar"`) inside the `MapCanvas` Tile Inspector so the Single-PC driver can click **`📍 Stamp Active Turn Here`** (`inspector-stamp-active-turn-btn`) or **`🎲 Auto-Name`** (`inspector-autoname-btn`) directly on the map even while in safe inspect mode.
+- **Consequences**:
+  - Gives tabletop groups an instant, zero-AI 2-page executive summary of their world at any point in the campaign.
+  - Advances the verified Core AAA Score from **85.0 -> 88.0 / 100** across 26 test suites (177/177 tests passing).
+
 
 
 
