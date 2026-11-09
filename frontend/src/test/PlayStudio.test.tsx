@@ -713,6 +713,22 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByTestId('two-pager-page-2')).toBeInTheDocument()
     expect(screen.getByTestId('two-pager-executive-synopsis')).toHaveTextContent(/Emerald Vale/i)
 
+    // Phase 25: Open Curate & Pin Drawer and customize the Executive Synopsis inline
+    const curateBtn = screen.getByTestId('two-pager-curate-toggle-btn')
+    await act(async () => {
+      fireEvent.click(curateBtn)
+    })
+    expect(screen.getByTestId('two-pager-curation-drawer')).toBeInTheDocument()
+    const synopsisInput = screen.getByTestId('two-pager-synopsis-input') as HTMLTextAreaElement
+    await act(async () => {
+      fireEvent.change(synopsisInput, {
+        target: { value: 'Emerald Vale is a legendary realm of shattered peaks.' },
+      })
+    })
+    expect(screen.getByTestId('two-pager-executive-synopsis')).toHaveTextContent(
+      /Emerald Vale is a legendary realm of shattered peaks/i
+    )
+
     // Close 2-Pager modal
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Close 2-Page World Overview/i }))

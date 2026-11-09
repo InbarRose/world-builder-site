@@ -10,11 +10,15 @@ import {
   Users,
   Clock,
   Globe,
+  Sliders,
+  RotateCcw,
 } from 'lucide-react'
-import { WorldState } from '../engine/types'
+import { TwoPagerCurationConfig, WorldState } from '../engine/types'
 import {
   buildWorldTwoPageOverview,
   exportTwoPageOverviewMarkdown,
+  toggleTwoPagerExcludeItem,
+  toggleTwoPagerPinItem,
 } from '../engine/twoPageOverviewEngine'
 import { TERRAIN_PALETTE, createDefaultTile, getTileId } from '../engine/mapEngine'
 
@@ -24,6 +28,7 @@ interface WorldTwoPagerModalProps {
   world: WorldState
   onSelectCoord?: (col: number, row: number) => void
   onSelectEntity?: (entityId: string) => void
+  onUpdateTwoPagerConfig?: (config: TwoPagerCurationConfig) => void
 }
 
 type TwoPagerViewMode = 'spread' | 'page1' | 'page2'
@@ -34,13 +39,35 @@ export function WorldTwoPagerModal({
   world,
   onSelectCoord,
   onSelectEntity,
+  onUpdateTwoPagerConfig,
 }: WorldTwoPagerModalProps) {
   const [viewMode, setViewMode] = useState<TwoPagerViewMode>('spread')
   const [copied, setCopied] = useState(false)
+  const [isCurating, setIsCurating] = useState(false)
 
   const overview = useMemo(() => buildWorldTwoPageOverview(world), [world])
 
   if (!isOpen) return null
+
+  const currentConfig: TwoPagerCurationConfig = world.twoPagerConfig || {}
+  const pinnedCount =
+    (currentConfig.pinnedTileIds?.length || 0) +
+    (currentConfig.pinnedEntityIds?.length || 0) +
+    (currentConfig.pinnedEventIds?.length || 0)
+  const excludedCount =
+    (currentConfig.excludedTileIds?.length || 0) +
+    (currentConfig.excludedEntityIds?.length || 0) +
+    (currentConfig.excludedEventIds?.length || 0)
+
+  const handleTogglePin = (category: 'tile' | 'entity' | 'event', itemId: string) => {
+    if (!onUpdateTwoPagerConfig) return
+    onUpdateTwoPagerConfig(toggleTwoPagerPinItem(currentConfig, category, itemId))
+  }
+
+  const handleToggleExclude = (category: 'tile' | 'entity' | 'event', itemId: string) => {
+    if (!onUpdateTwoPagerConfig) return
+    onUpdateTwoPagerConfig(toggleTwoPagerExcludeItem(currentConfig, category, itemId))
+  }
 
   const handleCopyMarkdown = () => {
     const md = exportTwoPageOverviewMarkdown(overview)
@@ -130,6 +157,27 @@ export function WorldTwoPagerModal({
               </button>
             </div>
 
+            {onUpdateTwoPagerConfig && (
+              <button
+                type="button"
+                data-testid="two-pager-curate-toggle-btn"
+                onClick={() => setIsCurating((v) => !v)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  isCurating
+                    ? 'bg-primary text-primary-foreground border-primary shadow-2xs'
+                    : 'bg-background border-border hover:bg-muted text-foreground'
+                }`}
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                <span>
+                  📌 Curate &amp; Pin
+                  {pinnedCount + excludedCount > 0
+                    ? ` (${pinnedCount} pinned${excludedCount > 0 ? `, ${excludedCount} hidden` : ''})`
+                    : ''}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
               data-testid="copy-two-pager-md-btn"
@@ -168,6 +216,164 @@ export function WorldTwoPagerModal({
             </button>
           </div>
         </div>
+
+        {/* Collapsible Curation & Section Pinning Studio Drawer */}
+        {isCurating && onUpdateTwoPagerConfig && (
+          <div
+            data-testid="two-pager-curation-drawer"
+            className="no-print px-5 py-3.5 border-b border-primary/30 bg-primary/[0.04] space-y-3 text-xs animate-in fade-in duration-150 shrink-0"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="font-bold text-primary flex items-center gap-1.5">
+                <Sliders className="h-4 w-4" />
+                <span>2-Pager Curation &amp; Section Pinning</span>
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  — Pin must-have landmarks, entities, or turns so they always appear in the 2-Page spread, or customize the Executive Synopsis.
+                </span>
+              </div>
+              {(pinnedCount > 0 || excludedCount > 0 || page1.hasCustomSynopsis) && (
+                <button
+                  type="button"
+                  data-testid="two-pager-reset-pins-btn"
+                  onClick={() => onUpdateTwoPagerConfig({})}
+                  className="px-2.5 py-1 rounded-lg bg-background border border-border hover:bg-muted text-[11px] font-semibold flex items-center gap-1"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span>Reset All Curation ({pinnedCount + excludedCount})</span>
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+              {/* Custom Synopsis Override */}
+              <div className="lg:col-span-6 space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Executive Synopsis (Editable Override)
+                  </label>
+                  {page1.hasCustomSynopsis && (
+                    <button
+                      type="button"
+                      data-testid="two-pager-reset-synopsis-btn"
+                      onClick={() =>
+                        onUpdateTwoPagerConfig({
+                          ...currentConfig,
+                          customSynopsisOverride: undefined,
+                        })
+                      }
+                      className="text-[10px] text-primary hover:underline"
+                    >
+                      Restore Auto-Synopsis
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  data-testid="two-pager-synopsis-input"
+                  rows={2}
+                  value={
+                    currentConfig.customSynopsisOverride !== undefined
+                      ? currentConfig.customSynopsisOverride
+                      : page1.defaultExecutiveSynopsis
+                  }
+                  onChange={(e) =>
+                    onUpdateTwoPagerConfig({
+                      ...currentConfig,
+                      customSynopsisOverride: e.target.value,
+                    })
+                  }
+                  className="input w-full text-xs py-1.5 leading-snug"
+                />
+              </div>
+
+              {/* Quick-Pin Pickers */}
+              <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    📌 Pin Map Province
+                  </label>
+                  <select
+                    aria-label="Pin Map Province"
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) handleTogglePin('tile', e.target.value)
+                    }}
+                    className="input h-8 text-xs py-1 w-full"
+                  >
+                    <option value="">+ Pin Landmark/Tile...</option>
+                    {Object.values(world.map.tiles)
+                      .filter(
+                        (t) =>
+                          t.label ||
+                          (t.slots && t.slots.length > 0) ||
+                          t.linkedEventIds.length > 0
+                      )
+                      .map((t) => {
+                        const isPinned = (currentConfig.pinnedTileIds || []).includes(t.id)
+                        const label =
+                          t.label ||
+                          t.slots?.[0]?.name ||
+                          `${TERRAIN_PALETTE[t.terrain]?.label || t.terrain}`
+                        return (
+                          <option key={t.id} value={t.id}>
+                            {isPinned ? '📌 ' : ''}({t.id}) {label}
+                          </option>
+                        )
+                      })}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    📌 Pin Codex Entity
+                  </label>
+                  <select
+                    aria-label="Pin Codex Entity"
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) handleTogglePin('entity', e.target.value)
+                    }}
+                    className="input h-8 text-xs py-1 w-full"
+                  >
+                    <option value="">+ Pin Species/Society...</option>
+                    {world.entities.map((ent) => {
+                      const isPinned = (currentConfig.pinnedEntityIds || []).includes(ent.id)
+                      return (
+                        <option key={ent.id} value={ent.id}>
+                          {isPinned ? '📌 ' : ''}
+                          {ent.icon} {ent.name}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    📌 Pin Chronicle Turn
+                  </label>
+                  <select
+                    aria-label="Pin Chronicle Turn"
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) handleTogglePin('event', e.target.value)
+                    }}
+                    className="input h-8 text-xs py-1 w-full"
+                  >
+                    <option value="">+ Pin Pivotal Turn...</option>
+                    {world.drawHistory.map((rec) => {
+                      const isPinned = (currentConfig.pinnedEventIds || []).includes(rec.id)
+                      return (
+                        <option key={rec.id} value={rec.id}>
+                          {isPinned ? '📌 ' : ''}#{rec.moveId} {rec.actionTitle || rec.power}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Scrollable 2-Page Spread Container */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted/20">
@@ -331,21 +537,54 @@ export function WorldTwoPagerModal({
                       {page1.topLandmarks.map((lm) => (
                         <div
                           key={lm.tileId}
-                          className="p-2.5 rounded-lg bg-background border border-border/80 hover:border-primary/50 transition-all text-xs space-y-1"
+                          className={`p-2.5 rounded-lg bg-background border transition-all text-xs space-y-1 ${
+                            lm.isPinned
+                              ? 'border-primary/70 ring-1 ring-primary/30'
+                              : 'border-border/80 hover:border-primary/50'
+                          }`}
                         >
                           <div className="flex items-center justify-between gap-1">
                             <span className="font-bold truncate flex items-center gap-1">
+                              {lm.isPinned && <span title="Pinned to 2-Pager">📌</span>}
                               <span>{lm.icon}</span>
                               <span>{lm.name}</span>
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => handleJumpToTile(lm.tileId)}
-                              className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono text-[10px] hover:underline shrink-0"
-                              title="Jump to map coordinate"
-                            >
-                              ({lm.tileId})
-                            </button>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleJumpToTile(lm.tileId)}
+                                className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono text-[10px] hover:underline shrink-0"
+                                title="Jump to map coordinate"
+                              >
+                                ({lm.tileId})
+                              </button>
+                              {onUpdateTwoPagerConfig && (
+                                <button
+                                  type="button"
+                                  data-testid={`two-pager-pin-tile-${lm.tileId}`}
+                                  onClick={() => handleTogglePin('tile', lm.tileId)}
+                                  className={`no-print px-1 py-0.2 rounded text-[10px] border transition-colors ${
+                                    lm.isPinned
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'
+                                  }`}
+                                  title={lm.isPinned ? 'Unpin landmark' : 'Pin landmark to 2-Pager'}
+                                >
+                                  📌
+                                </button>
+                              )}
+                              {onUpdateTwoPagerConfig && isCurating && (
+                                <button
+                                  type="button"
+                                  data-testid={`two-pager-hide-tile-${lm.tileId}`}
+                                  onClick={() => handleToggleExclude('tile', lm.tileId)}
+                                  className="no-print px-1 py-0.2 rounded text-[10px] bg-destructive/10 text-destructive hover:bg-destructive/20"
+                                  title="Hide landmark from 2-Pager"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="text-[10px] text-muted-foreground flex items-center justify-between">
                             <span>{lm.terrainLabel}</span>
@@ -411,7 +650,11 @@ export function WorldTwoPagerModal({
                       {page2.topEntities.map((ent) => (
                         <div
                           key={ent.id}
-                          className="p-2.5 rounded-lg bg-background border border-border/80 hover:border-primary/50 transition-all text-xs space-y-1"
+                          className={`p-2.5 rounded-lg bg-background border transition-all text-xs space-y-1 ${
+                            ent.isPinned
+                              ? 'border-primary/70 ring-1 ring-primary/30'
+                              : 'border-border/80 hover:border-primary/50'
+                          }`}
                         >
                           <div className="flex items-center justify-between gap-1">
                             <button
@@ -424,6 +667,7 @@ export function WorldTwoPagerModal({
                               }}
                               className="font-bold truncate flex items-center gap-1 hover:text-primary text-left"
                             >
+                              {ent.isPinned && <span title="Pinned to 2-Pager">📌</span>}
                               <span>{ent.icon}</span>
                               <span>{ent.name}</span>
                             </button>
@@ -438,6 +682,32 @@ export function WorldTwoPagerModal({
                                   className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono text-[10px] hover:underline"
                                 >
                                   ({ent.originTileId})
+                                </button>
+                              )}
+                              {onUpdateTwoPagerConfig && (
+                                <button
+                                  type="button"
+                                  data-testid={`two-pager-pin-entity-${ent.id}`}
+                                  onClick={() => handleTogglePin('entity', ent.id)}
+                                  className={`no-print px-1 py-0.2 rounded text-[10px] border transition-colors ${
+                                    ent.isPinned
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground'
+                                  }`}
+                                  title={ent.isPinned ? 'Unpin entity' : 'Pin entity to 2-Pager'}
+                                >
+                                  📌
+                                </button>
+                              )}
+                              {onUpdateTwoPagerConfig && isCurating && (
+                                <button
+                                  type="button"
+                                  data-testid={`two-pager-hide-entity-${ent.id}`}
+                                  onClick={() => handleToggleExclude('entity', ent.id)}
+                                  className="no-print px-1 py-0.2 rounded text-[10px] bg-destructive/10 text-destructive hover:bg-destructive/20"
+                                  title="Hide entity from 2-Pager"
+                                >
+                                  ✕
                                 </button>
                               )}
                             </div>
@@ -520,21 +790,35 @@ export function WorldTwoPagerModal({
                                 className="text-[11px] leading-snug flex items-start justify-between gap-1.5"
                               >
                                 <div>
+                                  {ev.isPinned && <span title="Pinned to 2-Pager">📌 </span>}
                                   <span className="font-mono font-bold text-primary">
                                     #{ev.moveId}
                                   </span>{' '}
                                   <span className="font-semibold">{ev.title}:</span>{' '}
                                   <span className="text-foreground/85">{ev.summary}</span>
                                 </div>
-                                {ev.tileId && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleJumpToTile(ev.tileId!)}
-                                    className="px-1 py-0.2 rounded bg-primary/10 text-primary font-mono text-[9px] shrink-0 hover:underline"
-                                  >
-                                    ({ev.tileId})
-                                  </button>
-                                )}
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {ev.tileId && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleJumpToTile(ev.tileId!)}
+                                      className="px-1 py-0.2 rounded bg-primary/10 text-primary font-mono text-[9px] shrink-0 hover:underline"
+                                    >
+                                      ({ev.tileId})
+                                    </button>
+                                  )}
+                                  {onUpdateTwoPagerConfig && isCurating && (
+                                    <button
+                                      type="button"
+                                      data-testid={`two-pager-hide-event-${ev.recordId}`}
+                                      onClick={() => handleToggleExclude('event', ev.recordId)}
+                                      className="no-print px-1 py-0.2 rounded text-[9px] bg-destructive/10 text-destructive hover:bg-destructive/20"
+                                      title="Hide turn from 2-Pager"
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
                               </li>
                             ))}
                           </ul>

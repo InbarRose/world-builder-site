@@ -10,7 +10,13 @@
  * - Page 2: Major Powers/Species/Myths Roster, Diplomatic Web & 4-Ages Digest
  */
 
-import { DrawRecord, StageId, WorldEntity, WorldState } from './types'
+import {
+  DrawRecord,
+  StageId,
+  TwoPagerCurationConfig,
+  WorldEntity,
+  WorldState,
+} from './types'
 import { STAGES, isFantasticalCard, JOKER } from './deckEngine'
 import { TERRAIN_PALETTE, getTileDomain } from './mapEngine'
 import {
@@ -30,6 +36,7 @@ export interface CondensedLandmarkEntry {
   turnMentions: number
   importanceScore: number
   summary: string
+  isPinned?: boolean
 }
 
 export interface CondensedEntityEntry {
@@ -43,6 +50,7 @@ export interface CondensedEntityEntry {
   turnMentions: number
   importanceScore: number
   shortDescription: string
+  isPinned?: boolean
 }
 
 export interface CondensedDiplomacyEntry {
@@ -58,6 +66,7 @@ export interface CondensedDiplomacyEntry {
 }
 
 export interface CondensedEraHighlight {
+  recordId: string
   moveId: number
   epochYear: string
   title: string
@@ -65,6 +74,7 @@ export interface CondensedEraHighlight {
   significance: EventSignificance
   tileId?: string
   importanceScore: number
+  isPinned?: boolean
 }
 
 export interface CondensedEraDigest {
@@ -107,6 +117,8 @@ export interface WorldTwoPageOverview {
   }
   page1: {
     executiveSynopsis: string
+    defaultExecutiveSynopsis: string
+    hasCustomSynopsis: boolean
     biomeBreakdown: WorldBiomeBreakdown
     topLandmarks: CondensedLandmarkEntry[]
   }
@@ -232,6 +244,8 @@ export function condenseTopLandmarks(
   world: WorldState,
   limit = 8
 ): CondensedLandmarkEntry[] {
+  const pinnedSet = new Set(world.twoPagerConfig?.pinnedTileIds || [])
+  const excludedSet = new Set(world.twoPagerConfig?.excludedTileIds || [])
   const tileMentionCounts: Record<string, number> = {}
   const tileLatestNote: Record<string, string> = {}
 
@@ -247,12 +261,15 @@ export function condenseTopLandmarks(
   const candidates: CondensedLandmarkEntry[] = []
 
   for (const tile of Object.values(world.map.tiles)) {
+    const isPinned = pinnedSet.has(tile.id)
+    if (excludedSet.has(tile.id) && !isPinned) continue
+
     const slots = tile.slots || []
     const mentions = tileMentionCounts[tile.id] || 0
     const hasLabel = Boolean(tile.label && tile.label.trim())
     const hasSlots = slots.length > 0
 
-    if (!hasLabel && !hasSlots && mentions === 0 && !tile.notes) continue
+    if (!isPinned && !hasLabel && !hasSlots && mentions === 0 && !tile.notes) continue
 
     const topSlot = slots[0]
     const maxPriority = topSlot?.priority || 0
@@ -263,6 +280,7 @@ export function condenseTopLandmarks(
     if (slots.some((s) => s.category === 'myth' || s.category === 'structure')) score += 22
     if (tile.hasRiver) score += 6
     if (tile.hasRoad) score += 6
+    if (isPinned) score += 1000
 
     const name =
       tile.label?.trim() ||
@@ -300,6 +318,7 @@ export function condenseTopLandmarks(
       turnMentions: mentions,
       importanceScore: Math.round(score),
       summary: truncateText(rawSummary, 105),
+      isPinned,
     })
   }
 
@@ -314,6 +333,8 @@ export function condenseTopEntities(
   world: WorldState,
   limit = 8
 ): CondensedEntityEntry[] {
+  const pinnedSet = new Set(world.twoPagerConfig?.pinnedEntityIds || [])
+  const excludedSet = new Set(world.twoPagerConfig?.excludedEntityIds || [])
   const mentionCounts: Record<string, number> = {}
   for (const rec of world.drawHistory) {
     for (const eid of rec.linkedEntityIds || []) {
@@ -321,37 +342,42 @@ export function condenseTopEntities(
     }
   }
 
-  const scored: CondensedEntityEntry[] = world.entities.map((ent: WorldEntity) => {
-    const mentions = mentionCounts[ent.id] || 0
-    const diploCount = ent.diplomaticLinks?.length || 0
-    const traitList = [...(ent.traits || []), ...(ent.abilities || [])]
+  const scored: CondensedEntityEntry[] = world.entities
+    .filter((ent) => !excludedSet.has(ent.id) || pinnedSet.has(ent.id))
+    .map((ent: WorldEntity) => {
+      const isPinned = pinnedSet.has(ent.id)
+      const mentions = mentionCounts[ent.id] || 0
+      const diploCount = ent.diplomaticLinks?.length || 0
+      const traitList = [...(ent.traits || []), ...(ent.abilities || [])]
 
-    const importanceScore =
-      mentions * 18 +
-      diploCount * 14 +
-      traitList.length * 6 +
-      (ent.originTileId ? 10 : 0) +
-      (ent.category === 'society' ? 8 : 5)
+      const importanceScore =
+        mentions * 18 +
+        diploCount * 14 +
+        traitList.length * 6 +
+        (ent.originTileId ? 10 : 0) +
+        (ent.category === 'society' ? 8 : 5) +
+        (isPinned ? 1000 : 0)
 
-    return {
-      id: ent.id,
-      name: ent.name,
-      icon: ent.icon || '🏛️',
-      category: ent.category,
-      status: ent.status || 'Active',
-      originTileId: ent.originTileId,
-      traitsSummary:
-        traitList.length > 0
-          ? traitList.slice(0, 3).join(' · ')
-          : ent.archetype || ent.category,
-      turnMentions: mentions,
-      importanceScore,
-      shortDescription: truncateText(
-        ent.description || `Prominent ${ent.category} of ${world.name}.`,
-        110
-      ),
-    }
-  })
+      return {
+        id: ent.id,
+        name: ent.name,
+        icon: ent.icon || '🏛️',
+        category: ent.category,
+        status: ent.status || 'Active',
+        originTileId: ent.originTileId,
+        traitsSummary:
+          traitList.length > 0
+            ? traitList.slice(0, 3).join(' · ')
+            : ent.archetype || ent.category,
+        turnMentions: mentions,
+        importanceScore,
+        shortDescription: truncateText(
+          ent.description || `Prominent ${ent.category} of ${world.name}.`,
+          110
+        ),
+        isPinned,
+      }
+    })
 
   scored.sort((a, b) => b.importanceScore - a.importanceScore)
   return scored.slice(0, limit)
@@ -414,12 +440,18 @@ export function condenseFourAgesDigest(
   world: WorldState,
   maxEventsPerStage = 3
 ): CondensedEraDigest[] {
+  const pinnedSet = new Set(world.twoPagerConfig?.pinnedEventIds || [])
+  const excludedSet = new Set(world.twoPagerConfig?.excludedEventIds || [])
+
   return STAGES.map((stageMeta) => {
     const stageRecords = world.drawHistory.filter(
-      (r) => (r.stage || 'genesis') === stageMeta.id
+      (r) =>
+        (r.stage || 'genesis') === stageMeta.id &&
+        (!excludedSet.has(r.id) || pinnedSet.has(r.id))
     )
 
     const scoredEvents: CondensedEraHighlight[] = stageRecords.map((rec: DrawRecord) => {
+      const isPinned = pinnedSet.has(rec.id)
       const sig = classifyEventSignificance(rec)
       let score = 10
       if (rec.card.value === 'A' || sig === 'cataclysm') score += 40
@@ -427,6 +459,7 @@ export function condenseFourAgesDigest(
       if (sig === 'conflict' || sig === 'diplomacy') score += 20
       if (rec.actionTitle) score += 15
       score += ((rec.linkedTileIds?.length || 0) + (rec.linkedEntityIds?.length || 0)) * 8
+      if (isPinned) score += 1000
 
       const title =
         rec.actionTitle?.trim() ||
@@ -440,6 +473,7 @@ export function condenseFourAgesDigest(
           : `${title} shaped the realm during ${stageMeta.name}.`)
 
       return {
+        recordId: rec.id,
         moveId: rec.moveId,
         epochYear: rec.epochYear || `Turn #${rec.moveId}`,
         title,
@@ -447,6 +481,7 @@ export function condenseFourAgesDigest(
         significance: sig,
         tileId: rec.linkedTileIds?.[0],
         importanceScore: score,
+        isPinned,
       }
     })
 
@@ -484,6 +519,90 @@ export function condenseFourAgesDigest(
 }
 
 /**
+ * Toggles an item's pinned status in TwoPagerCurationConfig (and removes it from excluded if pinned).
+ */
+export function toggleTwoPagerPinItem(
+  config: TwoPagerCurationConfig | undefined,
+  category: 'tile' | 'entity' | 'event',
+  itemId: string
+): TwoPagerCurationConfig {
+  const base: TwoPagerCurationConfig = { ...(config || {}) }
+  if (category === 'tile') {
+    const pinned = new Set(base.pinnedTileIds || [])
+    const excluded = new Set(base.excludedTileIds || [])
+    if (pinned.has(itemId)) {
+      pinned.delete(itemId)
+    } else {
+      pinned.add(itemId)
+      excluded.delete(itemId)
+    }
+    return { ...base, pinnedTileIds: Array.from(pinned), excludedTileIds: Array.from(excluded) }
+  }
+  if (category === 'entity') {
+    const pinned = new Set(base.pinnedEntityIds || [])
+    const excluded = new Set(base.excludedEntityIds || [])
+    if (pinned.has(itemId)) {
+      pinned.delete(itemId)
+    } else {
+      pinned.add(itemId)
+      excluded.delete(itemId)
+    }
+    return { ...base, pinnedEntityIds: Array.from(pinned), excludedEntityIds: Array.from(excluded) }
+  }
+  const pinned = new Set(base.pinnedEventIds || [])
+  const excluded = new Set(base.excludedEventIds || [])
+  if (pinned.has(itemId)) {
+    pinned.delete(itemId)
+  } else {
+    pinned.add(itemId)
+    excluded.delete(itemId)
+  }
+  return { ...base, pinnedEventIds: Array.from(pinned), excludedEventIds: Array.from(excluded) }
+}
+
+/**
+ * Toggles an item's excluded status in TwoPagerCurationConfig (and unpins it if excluded).
+ */
+export function toggleTwoPagerExcludeItem(
+  config: TwoPagerCurationConfig | undefined,
+  category: 'tile' | 'entity' | 'event',
+  itemId: string
+): TwoPagerCurationConfig {
+  const base: TwoPagerCurationConfig = { ...(config || {}) }
+  if (category === 'tile') {
+    const pinned = new Set(base.pinnedTileIds || [])
+    const excluded = new Set(base.excludedTileIds || [])
+    if (excluded.has(itemId)) {
+      excluded.delete(itemId)
+    } else {
+      excluded.add(itemId)
+      pinned.delete(itemId)
+    }
+    return { ...base, pinnedTileIds: Array.from(pinned), excludedTileIds: Array.from(excluded) }
+  }
+  if (category === 'entity') {
+    const pinned = new Set(base.pinnedEntityIds || [])
+    const excluded = new Set(base.excludedEntityIds || [])
+    if (excluded.has(itemId)) {
+      excluded.delete(itemId)
+    } else {
+      excluded.add(itemId)
+      pinned.delete(itemId)
+    }
+    return { ...base, pinnedEntityIds: Array.from(pinned), excludedEntityIds: Array.from(excluded) }
+  }
+  const pinned = new Set(base.pinnedEventIds || [])
+  const excluded = new Set(base.excludedEventIds || [])
+  if (excluded.has(itemId)) {
+    excluded.delete(itemId)
+  } else {
+    excluded.add(itemId)
+    pinned.delete(itemId)
+  }
+  return { ...base, pinnedEventIds: Array.from(pinned), excludedEventIds: Array.from(excluded) }
+}
+
+/**
  * Main entry point: deterministically condenses a WorldState into a 2-Page Overview.
  */
 export function buildWorldTwoPageOverview(world: WorldState): WorldTwoPageOverview {
@@ -500,9 +619,9 @@ export function buildWorldTwoPageOverview(world: WorldState): WorldTwoPageOvervi
   const dominantBiomeNames =
     biomeBreakdown.topBiomes.length > 0
       ? biomeBreakdown.topBiomes
-          .slice(0, 2)
-          .map((b) => `${b.label.toLowerCase()} (${b.percent}%)`)
-          .join(' and ')
+           .slice(0, 2)
+           .map((b) => `${b.label.toLowerCase()} (${b.percent}%)`)
+           .join(' and ')
       : 'untamed waters and primordial shores'
 
   const topLandmarkNames =
@@ -525,7 +644,10 @@ export function buildWorldTwoPageOverview(world: WorldState): WorldTwoPageOvervi
           .join(', ')}`
       : 'awaiting its first chronicled civilizations'
 
-  const executiveSynopsis = `${world.name} is a ${world.generationSettings.geographyPreset} realm (${biomeBreakdown.landPercent}% landmass, ${biomeBreakdown.waterPercent}% seas) dominated by ${dominantBiomeNames}, with key geographic anchors at ${topLandmarkNames}. Across ${world.drawHistory.length} recorded turns reaching Age ${currentStageMeta.number}: ${currentStageMeta.name}, ${speciesCount} species, ${societyCount} societies, and ${mythCount} mythic forces have risen—${leadEntityText}. Current geopolitical climate: ${stability.status} (${stability.score}/100) — ${stability.summary}`
+  const defaultExecutiveSynopsis = `${world.name} is a ${world.generationSettings.geographyPreset} realm (${biomeBreakdown.landPercent}% landmass, ${biomeBreakdown.waterPercent}% seas) dominated by ${dominantBiomeNames}, with key geographic anchors at ${topLandmarkNames}. Across ${world.drawHistory.length} recorded turns reaching Age ${currentStageMeta.number}: ${currentStageMeta.name}, ${speciesCount} species, ${societyCount} societies, and ${mythCount} mythic forces have risen—${leadEntityText}. Current geopolitical climate: ${stability.status} (${stability.score}/100) — ${stability.summary}`
+
+  const customOverride = world.twoPagerConfig?.customSynopsisOverride?.trim()
+  const executiveSynopsis = customOverride || defaultExecutiveSynopsis
 
   return {
     worldName: world.name,
@@ -542,6 +664,8 @@ export function buildWorldTwoPageOverview(world: WorldState): WorldTwoPageOvervi
     },
     page1: {
       executiveSynopsis,
+      defaultExecutiveSynopsis,
+      hasCustomSynopsis: Boolean(customOverride),
       biomeBreakdown,
       topLandmarks,
     },

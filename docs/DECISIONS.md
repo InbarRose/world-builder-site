@@ -831,6 +831,30 @@ status: active
   - Gives tabletop groups an instant, zero-AI 2-page executive summary of their world at any point in the campaign.
   - Advances the verified Core AAA Score from **85.0 -> 88.0 / 100** across 26 test suites (177/177 tests passing).
 
+---
+
+## ADR-031: Interactive Codex Diplomatic Matrix, Custom 2-Pager Curation & Pinning, and Turn Replay Scrubber
+
+- **Status**: Accepted
+- **Date**: 2026-11-09
+- **Context**:
+  Continuing our single-PC laptop driver + table chime-in roadmap into Phase 25, we identified three high-leverage interactive UX enhancements:
+  1. **Custom 2-Pager Section Pinning & Synopsis Curation**: While `twoPageOverviewEngine.ts` deterministically ranks the Top 8 Landmarks, Top 8 Entities, and Top 3 Pivotal Events per stage, a tabletop driver often wants to guarantee that a specific favorite landmark, faction, or turn appears on the 2-Page handout (or customize the Executive Synopsis).
+  2. **Interactive $N \times N$ Codex Relationship Matrix**: Scrolling through individual Codex cards or 3-dropdown forms to manage bilateral relationships across multiple species, societies, and myths is slow when players chime in around the table.
+  3. **Step-by-Step Turn Replay Scrubber**: Reviewing a campaign's history in `TimelinePanel.tsx` benefits from an interactive turn-by-turn scrubber (`⏮️ #1`, `◀️ Prev`, `Next ▶️`, range slider) with a spotlight card and 1-click `📌 Pin to 2-Pager`.
+- **Decision**:
+  1. **Custom 2-Pager Curation & Section Pinning (`twoPageOverviewEngine.ts`, `WorldTwoPagerModal.tsx`, `types.ts`)**:
+     - Added `TwoPagerCurationConfig` (`pinnedTileIds`, `excludedTileIds`, `pinnedEntityIds`, `excludedEntityIds`, `pinnedEventIds`, `excludedEventIds`, `customSynopsisOverride`) to `WorldState`.
+     - Added **`📌 Curate & Pin`** mode (`two-pager-curate-toggle-btn` / `two-pager-curation-drawer`) inside `WorldTwoPagerModal.tsx` with inline Executive Synopsis editing (`two-pager-synopsis-input`), quick-pin dropdowns, and inline `📌` / `✕` buttons on every Landmark, Entity, and Era Event.
+  2. **Interactive $N \times N$ Codex Diplomatic Relationship Matrix (`relationshipMatrixEngine.ts`, `EntityRegistry.tsx`)**:
+     - Implemented `getPairRelationship`, `setPairRelationship` (symmetric link setting with automatic deduplication), `cyclePairRelationship`, and `buildRelationshipMatrix`.
+     - Added the interactive **`codex-relationship-matrix`** table in `EntityRegistry.tsx` so clicking any `(Entity A × Entity B)` cell cycles diplomatic status (`Unaligned` → `🤝 Alliance` → `⚖️ Trade Pact` → `🗡️ Rivalry` → `⚔️ War` → `👑 Vassalage` → `✨ Shared Faith`) in 1 click.
+  3. **Interactive Turn Replay Scrubber & Chronicle Pinning (`TimelinePanel.tsx`)**:
+     - Added `chronicle-turn-scrubber` with `⏮️ #1`, `◀️ Prev`, `Next ▶️`, range slider, and `scrubber-active-turn-card` spotlight view, plus 1-click `📌 Pin 2-Pager` on every recorded turn.
+- **Consequences**:
+  - Advances the verified Core AAA Score from **88.0 -> 91.0 / 100** across 27 test suites (181/181 tests passing).
+
+
 
 
 

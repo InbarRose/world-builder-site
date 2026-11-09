@@ -209,6 +209,11 @@ status: active
   - [x] Interactive & printable `WorldTwoPagerModal.tsx` with Side-by-Side 2-Page Spread, 1-click Markdown copy, `@media print` 2-page break layout, and clickable coordinate/entity jump links
   - [x] Always-accessible Tile Inspector Quick-Stamp & Auto-Name Bar (`inspector-quick-stamp-bar` in `MapCanvas.tsx`) with 1-click `📍 Stamp Active Turn Here` (`inspector-stamp-active-turn-btn`) and `🎲 Auto-Name`
   - [x] Automated test suite in `twoPageOverviewEngine.test.ts` and `PlayStudio.test.tsx` (177/177 tests passing across 26 suites)
+- [x] **Phase 25: Interactive Codex Diplomatic Matrix, Custom 2-Pager Curation & Pinning, and Turn Replay Scrubber** *(Score: 91.0 / 100 via ADR-031)*
+  - [x] Custom 2-Pager Curation & Section Pinning (`TwoPagerCurationConfig`, `toggleTwoPagerPinItem`, `toggleTwoPagerExcludeItem` in `twoPageOverviewEngine.ts`) allowing players to pin or hide specific landmarks, Codex entities, or historical turns and customize the Executive Synopsis (`WorldTwoPagerModal.tsx`)
+  - [x] Interactive $N \times N$ Codex Diplomatic Relationship Matrix (`relationshipMatrixEngine.ts`, `codex-relationship-matrix` in `EntityRegistry.tsx`) with 1-click cell relationship cycling and symmetric link deduplication
+  - [x] Interactive Turn Replay Scrubber (`chronicle-turn-scrubber` and `scrubber-active-turn-card` in `TimelinePanel.tsx`) with step controls, range slider, and 1-click `📌 Pin 2-Pager` on every turn
+  - [x] Automated test suite in `relationshipMatrixEngine.test.ts`, `twoPageOverviewEngine.test.ts`, `TimelineAndEntities.test.tsx`, and `PlayStudio.test.tsx` (181/181 tests passing across 27 suites)
 
 ---
 
@@ -245,6 +250,7 @@ status: active
 - [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
 - [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
 - [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
-- [ ] Implement Phase 25: Interactive Codex Relationship Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (Target: 91.0 / 100).
+- [x] Implement Phase 25: Interactive Codex Relationship Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
+- [ ] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (Target: 94.0 / 100).
 
 

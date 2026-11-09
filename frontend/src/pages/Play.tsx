@@ -150,6 +150,7 @@ import { CampaignHooksModal } from '../components/CampaignHooksModal'
 import { PresetCompendiumModal } from '../components/PresetCompendiumModal'
 import { SessionZeroPrimerModal } from '../components/SessionZeroPrimerModal'
 import { WorldTwoPagerModal } from '../components/WorldTwoPagerModal'
+import { toggleTwoPagerPinItem } from '../engine/twoPageOverviewEngine'
 import { TableSyncModal } from '../components/TableSyncModal'
 import {
   TablePeerSession,
@@ -2969,6 +2970,16 @@ export function Play() {
                   setSavedWorlds(listSavedWorlds())
                   setDeck(buildShuffledDeck(branched.deckConfig))
                 }}
+                onTogglePinEvent={(recordId) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    twoPagerConfig: toggleTwoPagerPinItem(
+                      prev.twoPagerConfig,
+                      'event',
+                      recordId
+                    ),
+                  }))
+                }
               />
             </section>
           )}
@@ -4658,6 +4669,16 @@ export function Play() {
                         setSavedWorlds(listSavedWorlds())
                         setDeck(buildShuffledDeck(branched.deckConfig))
                       }}
+                      onTogglePinEvent={(recordId) =>
+                        persistWorldUpdate((prev) => ({
+                          ...prev,
+                          twoPagerConfig: toggleTwoPagerPinItem(
+                            prev.twoPagerConfig,
+                            'event',
+                            recordId
+                          ),
+                        }))
+                      }
                     />
                   )}
                 </section>
@@ -4750,6 +4771,16 @@ export function Play() {
                   setSavedWorlds(listSavedWorlds())
                   setDeck(buildShuffledDeck(branched.deckConfig))
                 }}
+                onTogglePinEvent={(recordId) =>
+                  persistWorldUpdate((prev) => ({
+                    ...prev,
+                    twoPagerConfig: toggleTwoPagerPinItem(
+                      prev.twoPagerConfig,
+                      'event',
+                      recordId
+                    ),
+                  }))
+                }
               />
             </section>
           )}
@@ -5054,6 +5085,12 @@ export function Play() {
         world={world}
         onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
         onSelectEntity={(eid) => setFlyoutEntityId(eid)}
+        onUpdateTwoPagerConfig={(nextConfig) =>
+          persistWorldUpdate((prev) => ({
+            ...prev,
+            twoPagerConfig: nextConfig,
+          }))
+        }
       />
 
       {/* Tabletop Presets & Tropes Compendium Modal */}

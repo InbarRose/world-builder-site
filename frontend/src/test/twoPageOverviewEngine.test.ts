@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import {
   buildWorldTwoPageOverview,
   exportTwoPageOverviewMarkdown,
+  toggleTwoPagerExcludeItem,
+  toggleTwoPagerPinItem,
 } from '../engine/twoPageOverviewEngine'
 import { createNewWorld } from '../engine/storageService'
 import { autoPlayFullWorld } from '../engine/autoPlayEngine'
@@ -37,5 +39,37 @@ describe('Phase 24: Deterministic Non-LLM 2-Page World Overview Engine (twoPageO
     expect(md).toContain('## Page 1: Physical Atlas & Iconic Landmarks')
     expect(md).toContain('## Page 2: Peoples, Powers & The Four Ages Digest')
     expect(md).toContain('---')
+  })
+
+  it('honors Phase 25 custom 2-Pager pinning, exclusions, and synopsis override', () => {
+    const base = createNewWorld('Curated Realm')
+    const simulated = autoPlayFullWorld(base, 3)
+    const targetEntityId = simulated.entities[simulated.entities.length - 1].id
+
+    let config = toggleTwoPagerPinItem(undefined, 'entity', targetEntityId)
+    config = toggleTwoPagerPinItem(config, 'tile', '0,0')
+    config.customSynopsisOverride = 'Custom curated synopsis for table handout.'
+
+    const curatedWorld = {
+      ...simulated,
+      twoPagerConfig: config,
+    }
+    const overview = buildWorldTwoPageOverview(curatedWorld)
+    expect(overview.page1.hasCustomSynopsis).toBe(true)
+    expect(overview.page1.executiveSynopsis).toBe('Custom curated synopsis for table handout.')
+    expect(overview.page1.topLandmarks[0].tileId).toBe('0,0')
+    expect(overview.page1.topLandmarks[0].isPinned).toBe(true)
+    expect(overview.page2.topEntities[0].id).toBe(targetEntityId)
+    expect(overview.page2.topEntities[0].isPinned).toBe(true)
+
+    // Excluding removes the pinned flag and hides the entity
+    const afterExclude = toggleTwoPagerExcludeItem(config, 'entity', targetEntityId)
+    const overviewAfterExclude = buildWorldTwoPageOverview({
+      ...simulated,
+      twoPagerConfig: afterExclude,
+    })
+    expect(
+      overviewAfterExclude.page2.topEntities.some((e) => e.id === targetEntityId)
+    ).toBe(false)
   })
 })
