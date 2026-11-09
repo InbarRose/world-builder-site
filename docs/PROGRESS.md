@@ -303,7 +303,52 @@ status: active
 - [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
 - [x] Implement Phase 25: Interactive Codex Diplomatic Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
 - [x] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (ADR-032, Core Score: 94.0 / 100).
+- [x] **Phase 28: Geopolitical Simulation Engine, Realm Spheres of Influence & Strategic Province Depth** *(Score: 98.0 / 100 via ADR-034)*
+  - [x] Geopolitical Simulation Engine (`geopoliticalEngine.ts`): Multi-source Dijkstra cost-distance propagation across terrain friction (roads = 0.5 friction, rivers = 0.75, plains = 1.0, mountains = 3.5, water = 3.5), directional perimeter border computation (`computeBorderPerimeters`), defensibility rating (`calculateTileDefense`), dynamic economic output (`calculateProvinceEconomy`), trade route network synthesis (`detectTradeRoutes`), and province chronicle annals (`getProvinceChronicleHistory`)
+  - [x] Interactive Geopolitical Map Layer & 1-Click Influence Projection (`MapCanvas.tsx`): 1-click **`👑 Project Realm Borders`** button (`project-realm-borders-btn`), directional perimeter borders (`perims.top/right/bottom/left`), soft faction tint overlay (`territory-overlay-${col}-${row}`), capital crowns (`👑`), and contested marchland markers (`⚔️`)
+  - [x] Strategic Province Dossier in Tile Inspector (`province-strategic-dossier`): 6-tier classification (`capital_domain`, `urban_core`, `rural_province`, `frontier_outpost`, `disputed_marchland`, `wilderness`), defensibility score (1-10) with terrain and fortress modifiers, allegiance score, and 4-way economic yields (🌾 Food, ⛏️ Minerals, 🌲 Timber, 💰 Trade)
+  - [x] Deep Realm Geopolitics & Holdings in Codex (`EntityRegistry.tsx`): Geopolitical Territory & Holdings Dossier (`realm-geopolitics-dossier`) displaying controlled province counts, percentage of civilized land, capital city coordinate links, active holdings (settlements, resource nodes, citadels), and contested marchland frontier links
+  - [x] Automated test suite in `geopoliticalEngine.test.ts` and `PlayStudio.test.tsx` (200/200 tests passing across 30 suites)
+
+---
+
+## Tasks
+
+- [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
+- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot.
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine.
+- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish.
+- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher.
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code.
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera.
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles.
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending.
+- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes.
+- [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery.
+- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio.
+- [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
+- [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
+- [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export.
+- [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (`mountain-snow`, `mountain-range`, `mesa`, `crag`, `volcano`).
+- [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
+- [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
+- [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Score: 62.5 / 100).
+- [x] Implement Phase 20: Tabletop Campaign Bridge, Session Zero Primer & Collaborative Conclave Handoff (Score: 73.0 / 100).
+- [x] Implement Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase (ADR-020).
+- [x] Implement Phase 20.6: Comprehensive Genesis Variants Catalog & Multi-Tile Concepts (ADR-021).
+- [x] Implement Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System (ADR-022).
+- [x] Implement Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names (ADR-023).
+- [x] Implement Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration (ADR-024).
+- [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
+- [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
+- [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
+- [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
+- [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
+- [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
+- [x] Implement Phase 25: Interactive Codex Diplomatic Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
+- [x] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (ADR-032, Core Score: 94.0 / 100).
 - [x] Implement Phase 27: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice (ADR-033, Core Score: 96.0 / 100).
-- [ ] Implement Phase 28: Interactive Campaign Launch Handout & Party Character Origin Forge (Target: 98.0 / 100).
+- [x] Implement Phase 28: Geopolitical Simulation Engine, Realm Spheres of Influence & Strategic Province Depth (ADR-034, Core Score: 98.0 / 100).
+- [ ] Implement Phase 29: Deep Civilization Dynamics & Interactive Party Origin Forge (Target: 99.0 / 100).
 
 

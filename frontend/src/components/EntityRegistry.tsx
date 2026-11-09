@@ -48,6 +48,7 @@ import {
   getPairRelationship,
   setPairRelationship,
 } from '../engine/relationshipMatrixEngine'
+import { projectRealmInfluence } from '../engine/geopoliticalEngine'
 
 interface EntityRegistryProps {
   entities: WorldEntity[]
@@ -1377,6 +1378,122 @@ export function EntityRegistry({
                     </button>
                   ))}
               </div>
+
+              {/* Phase 28: Realm Geopolitics & Holdings Dossier */}
+              {map && inspectedEntity.category === 'society' && (() => {
+                const geopoliticalState = projectRealmInfluence(map, entities).geopolitical
+                const realm = geopoliticalState.realms[inspectedEntity.id]
+                const relevantRoutes = geopoliticalState.tradeRoutes.filter(
+                  (r) => r.fromSocietyId === inspectedEntity.id || r.toSocietyId === inspectedEntity.id
+                )
+
+                if (!realm) return null
+
+                return (
+                  <div
+                    data-testid="realm-geopolitics-dossier"
+                    className="p-3.5 rounded-xl border border-primary/25 bg-muted/40 space-y-2.5 text-xs"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-foreground">
+                        <span>👑</span>
+                        <span>Geopolitical Territory & Holdings Dossier</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold text-[10px]">
+                        {realm.totalTiles} Provinces ({realm.percentageOfLand}% of civilized land)
+                      </span>
+                    </div>
+
+                    {/* Capital & Strategic Holdings Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-border/50 text-center">
+                      <div className="p-2 rounded bg-background border border-border/60">
+                        <div className="text-[10px] text-muted-foreground">🏛️ Seat of Power</div>
+                        <div className="font-bold text-primary truncate" title={realm.capitalName || 'Capital'}>
+                          {realm.capitalName || 'Capital'}
+                        </div>
+                        {realm.capitalTileId && (
+                          <button
+                            type="button"
+                            onClick={() => onSelectTile?.(realm.capitalTileId!)}
+                            className="text-[10px] text-primary underline mt-0.5 block mx-auto font-mono"
+                          >
+                            Tile ({realm.capitalTileId})
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="p-2 rounded bg-background border border-border/60">
+                        <div className="text-[10px] text-muted-foreground">🏙️ Settlements</div>
+                        <div className="font-bold text-foreground text-sm">{realm.settlementCount}</div>
+                      </div>
+
+                      <div className="p-2 rounded bg-background border border-border/60">
+                        <div className="text-[10px] text-muted-foreground">⛏️ Resource Nodes</div>
+                        <div className="font-bold text-amber-600 dark:text-amber-400 text-sm">{realm.resourceCount}</div>
+                      </div>
+
+                      <div className="p-2 rounded bg-background border border-border/60">
+                        <div className="text-[10px] text-muted-foreground">🏰 Fortresses</div>
+                        <div className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">{realm.fortressCount}</div>
+                      </div>
+                    </div>
+
+                    {/* Contested Marchlands & Borders */}
+                    {realm.rivalBorderTiles.length > 0 && (
+                      <div className="p-2 rounded bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold flex items-center gap-1 text-[11px]">
+                            <span>⚔️</span> Contested Marchlands ({realm.rivalBorderTiles.length} tiles)
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {realm.rivalBorderTiles.slice(0, 8).map((tid) => (
+                            <button
+                              key={tid}
+                              type="button"
+                              onClick={() => onSelectTile?.(tid)}
+                              className="px-1.5 py-0.5 rounded bg-background border border-rose-500/40 text-[10px] hover:border-rose-500 font-mono"
+                            >
+                              {tid}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active Trade Networks */}
+                    {relevantRoutes.length > 0 && (
+                      <div className="space-y-1 pt-1 border-t border-border/50">
+                        <span className="text-[11px] font-semibold text-muted-foreground block">
+                          Active Trade Networks ({relevantRoutes.length}):
+                        </span>
+                        <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
+                          {relevantRoutes.map((route) => (
+                            <div
+                              key={route.id}
+                              className="p-1.5 rounded bg-background border border-border/60 flex items-center justify-between text-[11px]"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span>{route.medium === 'road' ? '🛣️' : route.medium === 'river' ? '💧' : '⛵'}</span>
+                                <span>{route.fromSettlementName} ↔ {route.toSettlementName}</span>
+                              </div>
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
+                                  route.diplomaticStatus === 'domestic'
+                                    ? 'bg-blue-500/10 text-blue-600'
+                                    : 'bg-emerald-500/10 text-emerald-600'
+                                }`}
+                              >
+                                {route.diplomaticStatus}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           )}
 
