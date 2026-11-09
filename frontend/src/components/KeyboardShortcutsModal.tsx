@@ -10,6 +10,16 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
 
   const shortcuts = [
     {
+      group: 'Single-PC Laptop Driver & Turn Velocity',
+      items: [
+        { keys: ['D'], label: 'Draw Card (Deal active historical turn card)' },
+        { keys: ['R'], label: 'Redraw Card (Mulligan: shuffle back and deal new card)' },
+        { keys: ['P'], label: 'Place on Map (Stamp active turn draft onto inspected tile)' },
+        { keys: ['2'], label: 'Toggle 2-Page World Overview Folio' },
+        { keys: ['A'], label: 'Auto-Pick Smart Tile for Current Preset' },
+      ],
+    },
+    {
       group: 'Spotlight & Navigation',
       items: [
         { keys: ['Ctrl', 'K'], label: 'Open Global Command Palette / Spotlight' },

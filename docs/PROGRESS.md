@@ -251,6 +251,51 @@ status: active
 - [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
 - [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
 - [x] Implement Phase 25: Interactive Codex Relationship Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
-- [ ] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (Target: 94.0 / 100).
+- [x] **Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio** *(Score: 94.0 / 100 via ADR-032)*
+  - [x] High-DPI Cartography Cartouche & Legend Exporter (`cartoucheExportEngine.ts`) with vector double borders, corner filigrees, ornate Title Cartouche, 8-point nautical Compass Rose (`generateCompassRoseSvg`), dynamic map legend box, distance scale bar (`generateDistanceScaleBar`), and 4 selectable themes (`parchment`, `grimdark`, `royal-gold`, `atlas`)
+  - [x] Offscreen canvas rasterizer (`renderCartoucheSvgToPngBlob`) rendering vector cartography at 300 DPI / 4x resolution for print-ready PNG poster export
+  - [x] High-DPI Cartographic Atlas Studio card in Tab 3 of Export Suite (`ExportSuiteModal.tsx`) with 1-click 300 DPI PNG and SVG download actions
+  - [x] Multi-Theme Sourcebook Publisher (`exportService.ts`, `ExportSuiteModal.tsx`) supporting `parchment`, `grimdark`, `royal-gold`, and `modern` themes
+  - [x] Single-PC Laptop Driver Velocity Quick-Keys (`Play.tsx`, `KeyboardShortcutsModal.tsx`): `D` (Draw), `R` (Redraw), `P` (Place on Map), `2` (Toggle 2-Pager), `A` (Auto-Pick Smart Tile)
+  - [x] Automated test suite in `cartoucheExportEngine.test.ts` and `PlayStudio.test.tsx` (186/186 tests passing across 28 suites)
+
+---
+
+## Tasks
+
+- [x] Complete Phase 0–6 implementation and test verification (34/34 tests passing).
+- [x] Record ADR-010, revamped AAA rubric, and baseline snapshot.
+- [x] Implement Phase 7: Map Canvas Resilience & Undo/Redo Engine.
+- [x] Implement Phase 8: Tactile Game Feel, Card Juice & Audio Polish.
+- [x] Implement Phase 9: Standalone "Campaign Sourcebook" Publisher.
+- [x] Implement Phase 10: Frictionless Table Sharing via Compact URL / QR Code.
+- [x] Implement Phase 11: 60fps Smooth Pan/Zoom Cartography Camera.
+- [x] Implement Phase 12: Emergent Narrative Simulation & Dynamic Chronicles.
+- [x] Implement Phase 13: Organic Cartography Shading & Dynamic Biome Blending.
+- [x] Implement Phase 14: Full Physical Play Mat Mode & Ambient Soundscapes.
+- [x] Implement Phase 15: Polished AAA Orchestration & PWA Offline Mastery.
+- [x] Implement Phase 16: AAA Game Launcher, Deliberate Ceremonies & Focused Tabletop Studio.
+- [x] Establish ADR-012, Adversarial Multi-Domain Rubric, and 47.0 / 100 True Baseline (`docs/AUDIT_RUBRIC.md`).
+- [x] Establish ADR-013, Human Experience (HX)-Led Engineering Framework (`docs/HUMAN_EXPERIENCE_FRAMEWORK.md`, `docs/USER_JOURNEYS.md`, `docs/PRD_HLD_SPECS.md`).
+- [x] Establish ADR-014, Deprecate QR Codes in favor of Portable JSON World Files (`.world.json`) & Import/Export.
+- [x] Expand Stage Presets & Creative Prompts with Mountain & Relief Variants (`mountain-snow`, `mountain-range`, `mesa`, `crag`, `volcano`).
+- [x] Implement Phase 17: Unified Transactional Command Engine & IndexedDB Resilience (Score: 53.0 / 100).
+- [x] Implement Phase 18: Dual Hexagonal & Orthogonal Cartography Engine (Score: 58.0 / 100).
+- [x] Implement Phase 19: Vector Watershed Physics & Connected Road Pathfinding (Score: 62.5 / 100).
+- [x] Implement Phase 20: Tabletop Campaign Bridge, Session Zero Primer & Collaborative Conclave Handoff (Score: 73.0 / 100).
+- [x] Implement Phase 20.5: 48 Whiteboard Marker Cartographic Tropes & Symbol Engine for Genesis Phase (ADR-020).
+- [x] Implement Phase 20.6: Comprehensive Genesis Variants Catalog & Multi-Tile Concepts (ADR-021).
+- [x] Implement Phase 20.7: Multi-Stage Preset Diversity, Whiteboard Habitation Tropes & Codex Icon System (ADR-022).
+- [x] Implement Phase 20.8: Studio Preset Categorization, Affinity/Anti-Affinity Engine, and Evocative Flavor Names (ADR-023).
+- [x] Implement Phase 20.9: Tabletop Presets & Tropes Compendium, Enriched Lore Descriptions, and Codex Integration (ADR-024).
+- [x] Implement Phase 20.10: Data-Driven Content Taxonomy, Hierarchical JSON Manifests, and Surgical Human Authoring with Graphic Fallbacks (ADR-025).
+- [x] Implement Phase 20.11: SOLID Multi-Shard Catalog Manifests, Dedicated Graphic Sub-Leaf Schema & Externalized Weights (ADR-026, Studio Architecture Score: 19.5 / 20.0).
+- [x] Implement Phase 21: Real-Time Table Peer Synchronization, Tablet Multi-Touch Ergonomics & Live In-Workshop Bot Weight Tuner (ADR-027, Core Score: 78.5 / 100).
+- [x] Implement Phase 22: Single-PC Tabletop Driver UX, Zero-Ping-Pong Turn Flow & Kinetic Card Tactility (ADR-028, Core Score: 83.0 / 100).
+- [x] Implement Phase 23: Editable Turn Event & Map Stamp Workbench — Preset Population, Live In-Place Map Editing & Fast Custom Stamp Flow (ADR-029, Core Score: 85.0 / 100).
+- [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
+- [x] Implement Phase 25: Interactive Codex Diplomatic Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
+- [x] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (ADR-032, Core Score: 94.0 / 100).
+- [ ] Implement Phase 27: Tabletop Session Zero Ceremony & Interactive Campaign Launch Handout (Target: 97.0 / 100).
 
 

@@ -1560,6 +1560,59 @@ export function Play() {
     setTurnPhase('await_draw')
   }
 
+  // Single-PC Laptop Driver: Keyboard Velocity Hotkeys ('D' Draw, 'R' Redraw, 'P' Place, '2' 2-Pager, 'A' Auto-Pick)
+  useEffect(() => {
+    const handleDriverHotkeys = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement
+      const isInput =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.tagName === 'SELECT' ||
+          (activeEl as HTMLElement).isContentEditable)
+      if (isInput || e.ctrlKey || e.metaKey || e.altKey) return
+
+      const key = e.key.toLowerCase()
+
+      if (key === 'd') {
+        if (!world.isLocked && deck.length > 0 && (gameMode === 'companion' || turnPhase === 'await_draw')) {
+          e.preventDefault()
+          handleDrawCard()
+        }
+      } else if (key === 'r') {
+        if (!world.isLocked && deck.length > 0 && turnPhase === 'action_select') {
+          e.preventDefault()
+          handleRedrawCurrentCard()
+        }
+      } else if (key === 'p') {
+        if (!world.isLocked && turnPhase === 'action_select') {
+          e.preventDefault()
+          handlePlaceDraftOnMap()
+        }
+      } else if (e.key === '2') {
+        e.preventDefault()
+        setShowTwoPagerModal((prev) => !prev)
+      } else if (key === 'a') {
+        if (!world.isLocked && turnPhase === 'action_select') {
+          e.preventDefault()
+          handleAutoPickSmartTile()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleDriverHotkeys)
+    return () => window.removeEventListener('keydown', handleDriverHotkeys)
+  }, [
+    world.isLocked,
+    deck.length,
+    gameMode,
+    turnPhase,
+    handleDrawCard,
+    handleRedrawCurrentCard,
+    handlePlaceDraftOnMap,
+    handleAutoPickSmartTile,
+  ])
+
   const handleStageChange = (newStage: StageId) => {
     if (world.isLocked) return
     playStageAdvanceSound()

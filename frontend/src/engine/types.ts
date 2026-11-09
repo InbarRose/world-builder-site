@@ -300,6 +300,7 @@ export interface SelectiveExportOptions {
   includeGenerationSettings?: boolean
   includePlayers?: boolean
   stageFilter?: StageId | 'all'
+  sourcebookTheme?: 'parchment' | 'grimdark' | 'royal-gold' | 'modern'
 }
 
 export interface LayeredMapExport {

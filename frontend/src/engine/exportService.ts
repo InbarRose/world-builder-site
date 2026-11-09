@@ -487,6 +487,58 @@ export function exportCampaignSourcebookHtml(
       --shadow: rgba(0, 0, 0, 0.08);
     }
 
+    body.theme-parchment {
+      --bg-page: #fbf8f2;
+      --bg-card: #f4eee1;
+      --bg-card-alt: #ede4d1;
+      --text-main: #2a241e;
+      --text-muted: #6b5e51;
+      --text-accent: #7c2d12;
+      --border-color: #d8cbb8;
+      --border-ornate: #b45309;
+      --badge-bg: #e2d6c1;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    body.theme-grimdark {
+      --bg-page: #090d14;
+      --bg-card: #131b28;
+      --bg-card-alt: #1a2538;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-accent: #ef4444;
+      --border-color: #334155;
+      --border-ornate: #dc2626;
+      --badge-bg: #271418;
+      --shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-royal-gold {
+      --bg-page: #071120;
+      --bg-card: #0e1f38;
+      --bg-card-alt: #162d50;
+      --text-main: #fef3c7;
+      --text-muted: #cbd5e1;
+      --text-accent: #fbbf24;
+      --border-color: #334155;
+      --border-ornate: #f59e0b;
+      --badge-bg: #1c2e4a;
+      --shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-modern {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-alt: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-accent: #0284c7;
+      --border-color: #cbd5e1;
+      --border-ornate: #0284c7;
+      --badge-bg: #e2e8f0;
+      --shadow: rgba(0, 0, 0, 0.06);
+    }
+
     body.theme-dark {
       --bg-page: #12141a;
       --bg-card: #1c1f28;
@@ -834,7 +886,7 @@ export function exportCampaignSourcebookHtml(
     }
   </style>
 </head>
-<body>
+<body class="theme-${options.sourcebookTheme || 'parchment'}">
   <!-- Action Bar -->
   <div class="action-bar no-print">
     <div>
@@ -1065,13 +1117,12 @@ export function exportCampaignSourcebookHtml(
   </div>
 
   <script>
-    const themes = ['theme-parchment', 'theme-dark', 'theme-print'];
-    let currentThemeIdx = 0;
+    const themes = ['theme-parchment', 'theme-grimdark', 'theme-royal-gold', 'theme-modern', 'theme-dark', 'theme-print'];
+    let currentThemeIdx = themes.indexOf(document.body.className.trim()) >= 0 ? themes.indexOf(document.body.className.trim()) : 0;
     function cycleTheme() {
-      document.body.classList.remove('theme-dark', 'theme-print');
-      currentThemeIdx = (currentThemeIdx + 1) % 3;
-      if (currentThemeIdx === 1) document.body.classList.add('theme-dark');
-      if (currentThemeIdx === 2) document.body.classList.add('theme-print');
+      themes.forEach(t => document.body.classList.remove(t));
+      currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+      document.body.classList.add(themes[currentThemeIdx]);
     }
   </script>
 </body>
