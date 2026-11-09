@@ -258,6 +258,13 @@ status: active
   - [x] Multi-Theme Sourcebook Publisher (`exportService.ts`, `ExportSuiteModal.tsx`) supporting `parchment`, `grimdark`, `royal-gold`, and `modern` themes
   - [x] Single-PC Laptop Driver Velocity Quick-Keys (`Play.tsx`, `KeyboardShortcutsModal.tsx`): `D` (Draw), `R` (Redraw), `P` (Place on Map), `2` (Toggle 2-Pager), `A` (Auto-Pick Smart Tile)
   - [x] Automated test suite in `cartoucheExportEngine.test.ts` and `PlayStudio.test.tsx` (186/186 tests passing across 28 suites)
+- [x] **Phase 27: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice** *(Score: 96.0 / 100 via ADR-033)*
+  - [x] Tabletop Session Checkpoint Vault Engine (`snapshotVaultEngine.ts`) with deep world cloning, automated diff metrics, quota-safe FIFO browser storage, and JSON snapshot export
+  - [x] Dedicated Session Vault Modal (`SessionVaultModal.tsx`, `Play.tsx`) with 1-click manual checkpoint creation, filter tabs, disaster restore with confirmation dialog, `📸 Vault` header launcher, and `Alt+S` quick-key
+  - [x] Automated milestone saves on era transitions (`handleAdvanceStageCeremonially`) and cataclysm draws (Aces and Jokers in `handleDrawCard`)
+  - [x] Table Brainstorm Candidate Stash (`turnWorkbenchEngine.ts`, `Play.tsx`): 1-click `💡 Stash Idea` (`stash-idea-btn`), interactive candidate carousel strip (`brainstorm-stash-strip`), candidate comparison, and 1-click swap preserving map placement
+  - [x] Table Chime-In Player Voice & Quote Capture (`turnWorkbenchEngine.ts`, `Play.tsx`): dedicated quote bar (`workbench-chimein-quote-bar`), 1-click speaker attribution, and formatted markdown blockquotes (`> *"..."* — **Speaker**`) synced into the Chronicle record
+  - [x] Automated test suite in `snapshotVaultEngine.test.ts`, `turnWorkbenchEngine.test.ts`, and `PlayStudio.test.tsx` (193/193 tests passing across 29 suites)
 
 ---
 
@@ -296,6 +303,7 @@ status: active
 - [x] Implement Phase 24: Deterministic Non-LLM 2-Page World Overview Condenser & Direct On-Map Active-Turn Stamp UX (ADR-030, Core Score: 88.0 / 100).
 - [x] Implement Phase 25: Interactive Codex Diplomatic Matrix, Bulk Turn Scrubber Replay & Custom 2-Pager Section Pinning (ADR-031, Core Score: 91.0 / 100).
 - [x] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (ADR-032, Core Score: 94.0 / 100).
-- [ ] Implement Phase 27: Tabletop Session Zero Ceremony & Interactive Campaign Launch Handout (Target: 97.0 / 100).
+- [x] Implement Phase 27: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice (ADR-033, Core Score: 96.0 / 100).
+- [ ] Implement Phase 28: Interactive Campaign Launch Handout & Party Character Origin Forge (Target: 98.0 / 100).
 
 

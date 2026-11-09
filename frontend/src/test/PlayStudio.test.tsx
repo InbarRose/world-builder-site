@@ -792,4 +792,76 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByTestId('cartouche-theme-royal-gold'))
     })
   })
+
+  it('supports Phase 27 Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // 1. Open Session Checkpoint Vault via header button
+    const vaultBtn = screen.getByTestId('header-open-vault-btn')
+    await act(async () => {
+      fireEvent.click(vaultBtn)
+    })
+    expect(screen.getByTestId('session-vault-modal')).toBeInTheDocument()
+
+    // Create a manual checkpoint
+    const titleInput = screen.getByTestId('snapshot-title-input')
+    const descInput = screen.getByTestId('snapshot-desc-input')
+    await act(async () => {
+      fireEvent.change(titleInput, { target: { value: 'Dawn of the Council' } })
+      fireEvent.change(descInput, { target: { value: 'Saved right before first deal' } })
+    })
+    const saveCheckpointBtn = screen.getByTestId('create-checkpoint-btn')
+    await act(async () => {
+      fireEvent.click(saveCheckpointBtn)
+    })
+    expect(screen.getByText('Dawn of the Council')).toBeInTheDocument()
+
+    // Close modal
+    const closeBtn = screen.getByTestId('close-vault-modal-btn')
+    await act(async () => {
+      fireEvent.click(closeBtn)
+    })
+    expect(screen.queryByTestId('session-vault-modal')).not.toBeInTheDocument()
+
+    // 2. Deal a card to open Turn Workshop
+    const drawBtn = screen.getByRole('button', { name: /Draw Card/i })
+    await act(async () => {
+      fireEvent.click(drawBtn)
+    })
+    expect(screen.getByTestId('turn-event-workbench')).toBeInTheDocument()
+
+    // 3. Test Table Brainstorm Candidate Stash
+    const stashBtn = screen.getByTestId('stash-idea-btn')
+    expect(stashBtn).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(stashBtn)
+    })
+    expect(screen.getByTestId('brainstorm-stash-strip')).toBeInTheDocument()
+    expect(screen.getByTestId('brainstorm-idea-chip')).toBeInTheDocument()
+
+    // 4. Test Player Chime-In Quote capture
+    const quoteBar = screen.getByTestId('workbench-chimein-quote-bar')
+    expect(quoteBar).toBeInTheDocument()
+    const quoteInput = screen.getByTestId('workbench-chimein-quote-input')
+    await act(async () => {
+      fireEvent.change(quoteInput, { target: { value: 'Beware the rising mists in the valley!' } })
+    })
+    const appendQuoteBtn = screen.getByTestId('append-quote-btn')
+    await act(async () => {
+      fireEvent.click(appendQuoteBtn)
+    })
+
+    // Verify quote is appended into the turn note input
+    const noteInput = screen.getByPlaceholderText(/Describe what occurred in the world/i)
+    expect((noteInput as HTMLInputElement).value).toContain('Beware the rising mists in the valley!')
+  })
 })

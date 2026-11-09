@@ -890,6 +890,38 @@ status: active
   - Maxes out Domain 6 (Campaign Publishing & Typographic Fidelity) from **8.5 -> 10.0 / 10.0** (M6.1: 5.0 / 5.0, M6.2: 5.0 / 5.0).
   - Elevates the verified Core AAA Score from **91.0 -> 94.0 / 100** across 28 test suites (186/186 tests passing, zero TypeScript errors, clean production bundle).
 
+---
+
+## ADR-033: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice
+
+- **Status**: Accepted
+- **Date**: 2026-11-09
+- **Context**:
+  For the primary single-PC laptop driver facilitating a tabletop group chiming in from the side:
+  1. **Brainstorm Alternatives**: Table players frequently pitch competing ideas for each drawn card (e.g. volcanic caldera vs. crystal cave). Previously, selecting a preset immediately overwrote active fields, causing players to lose their initial draft.
+  2. **Table Voice & Banter Attribution**: When friends chime in with iconic quotes, fears, or declarations, the driver had to manually format quote blocks or omit them entirely.
+  3. **Disaster Recovery & Branching Vault**: Facilitators running multi-hour campaigns need explicit named checkpoints ("Before the Cataclysm", "Founding of the Silver Citadel"), automated milestone saves at era transitions and cataclysm cards, and 1-click restore without data loss.
+- **Decision**:
+  1. **Tabletop Session Checkpoint Vault Engine (`snapshotVaultEngine.ts`)**:
+     - Implemented `createWorldCheckpoint`, `restoreWorldFromCheckpoint`, `computeCheckpointDiff`, and `exportCheckpointAsJson`.
+     - Automatically computes differential changes (tiles modified, entities created, turn delta) between snapshots.
+     - Categorizes snapshots by trigger type: `manual`, `era_transition`, `cataclysm`, `auto_interval`.
+     - Quota-safe FIFO browser storage pruning prioritizing manual player checkpoints.
+  2. **Session Vault Modal & Automated Triggers (`SessionVaultModal.tsx`, `Play.tsx`)**:
+     - Dedicated modal with 1-click checkpoint creation, filter tabs, JSON export, and safety-guarded state restore.
+     - Auto-saves milestones on era changes (`handleAdvanceStageCeremonially`) and cataclysm draws (Aces and Jokers in `handleDrawCard`).
+     - Added `📸 Vault` header button and global `Alt+S` velocity quick-key (documented in `KeyboardShortcutsModal.tsx`).
+  3. **Table Brainstorm Candidate Stash (`turnWorkbenchEngine.ts`, `Play.tsx`)**:
+     - Added `BrainstormIdea`, `createBrainstormIdea`, `applyBrainstormIdea`, and **`💡 Stash Idea`** (`stash-idea-btn`).
+     - Renders an interactive candidate strip (`brainstorm-stash-strip`) allowing the table to compare up to 5 pitches, preview icons/titles, and swap any idea into the active workbench in 1 click while preserving map coordinates.
+  4. **Table Chime-In Player Voice Capture (`turnWorkbenchEngine.ts`, `Play.tsx`)**:
+     - Added `appendChimeInQuote` and dedicated `workbench-chimein-quote-bar`.
+     - Supports instant 1-click speaker attribution and formats rich typographic blockquotes (`> *"..."* — **Speaker**`) synced directly into the draft note and Chronicle record.
+- **Consequences**:
+  - Maxes out Domain 5 (System Reliability & Persistence) from **13.0 -> 15.0 / 15.0**.
+  - Elevates the verified Core AAA Score from **94.0 -> 97.0 / 100** across 29 test suites (193/193 tests passing, zero TypeScript errors, clean production bundle).
+
+
 
 
 
