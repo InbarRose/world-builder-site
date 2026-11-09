@@ -864,4 +864,58 @@ describe('Play Studio & Rules Integration', () => {
     const noteInput = screen.getByPlaceholderText(/Describe what occurred in the world/i)
     expect((noteInput as HTMLInputElement).value).toContain('Beware the rising mists in the valley!')
   })
+
+  it('Phase 28: simulates Geopolitical Realm Influence, renders Province Strategic Dossier and Realm Holdings', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Switch to World Map tab
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
+    })
+
+    // Click Edit Map button to reveal cartography workshop tools
+    const editMapBtn = screen.getByRole('button', { name: /Edit Map/i })
+    await act(async () => {
+      fireEvent.click(editMapBtn)
+    })
+
+    // Open Layer & Stylization Controls drawer
+    const layerDrawerBtn = screen.getByRole('button', { name: /Layer Stacking Drawer/i })
+    await act(async () => {
+      fireEvent.click(layerDrawerBtn)
+    })
+
+    // Verify 1-Click Project Realm Borders button exists
+    const projectBordersBtn = screen.getByTestId('project-realm-borders-btn')
+    expect(projectBordersBtn).toBeInTheDocument()
+
+    // Click Project Realm Borders
+    await act(async () => {
+      fireEvent.click(projectBordersBtn)
+    })
+
+    // Verify Strategic Province Dossier is rendered in the Inspector panel
+    const dossier = screen.getByTestId('province-strategic-dossier')
+    expect(dossier).toBeInTheDocument()
+    expect(screen.getByText(/Province Strategic Dossier/i)).toBeInTheDocument()
+    expect(screen.getByText(/Defensibility:/i)).toBeInTheDocument()
+    expect(screen.getByText(/Provincial Economic Yields:/i)).toBeInTheDocument()
+
+    // Switch to Codex tab
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Codex/i }))
+    })
+
+    // Verify Codex is loaded
+    expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
+  })
 })

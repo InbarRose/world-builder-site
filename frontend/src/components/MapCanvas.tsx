@@ -79,6 +79,14 @@ import {
 } from '../engine/watershedPathEngine'
 import { SLOT_ICON_PALETTE } from '../engine/presets'
 import {
+  projectRealmInfluence,
+  computeBorderPerimeters,
+  calculateTileDefense,
+  calculateProvinceEconomy,
+  getProvinceChronicleHistory,
+  ProvinceTier,
+} from '../engine/geopoliticalEngine'
+import {
   renderCartographicMarkerSVG,
   resolveCartographicSymbol,
   getSymbolsByCategory,
@@ -612,6 +620,17 @@ export function MapCanvas({
 
     onChange({ ...map, tiles: nextTiles })
   }
+
+  const handleProjectRealmBorders = () => {
+    pushToUndo(map)
+    const result = projectRealmInfluence(map, entities)
+    onChange(result.mapWithTerritories)
+    setVisibleLayers((prev) => ({ ...prev, territories: true }))
+  }
+
+  const geopoliticalState = React.useMemo(() => {
+    return projectRealmInfluence(map, entities).geopolitical
+  }, [map, entities])
 
   const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('forest')
   const [selectedRelief, setSelectedRelief] = useState<ReliefType>('none')
@@ -1844,6 +1863,15 @@ export function MapCanvas({
                 >
                   <span>🛣️ Auto-Connect Roads</span>
                 </button>
+                <button
+                  type="button"
+                  data-testid="project-realm-borders-btn"
+                  onClick={handleProjectRealmBorders}
+                  className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1.5 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 border-purple-500/30 font-medium"
+                  title="Simulate realistic geopolitical spheres of influence and project realm borders across terrain friction"
+                >
+                  <span>👑 Project Realm Borders</span>
+                </button>
               </div>
             </div>
 
@@ -2351,6 +2379,8 @@ export function MapCanvas({
                       )
                       const isCoastal = isCoastalLandTile(col, row, tile)
                       const neighborContext = computeTileNeighborContext(map, col, row)
+                      const tilePerims = computeBorderPerimeters(map, id)
+                      const provinceProfile = geopoliticalState.provinces[id]
 
                       // Hex vs Square calculations
                       const center = isHex
@@ -2477,6 +2507,36 @@ export function MapCanvas({
                             <div className="absolute inset-0 bg-amber-400/25 pointer-events-none z-10 animate-pulse" />
                           )}
 
+                          {/* Geopolitical Territory Overlay & Directional Perimeter Borders */}
+                          {visibleLayers.territories && (
+                            <div
+                              data-testid={`territory-overlay-${col}-${row}`}
+                              className="absolute inset-0 pointer-events-none z-10 transition-colors"
+                              style={{
+                                backgroundColor:
+                                  tile.territoryId && entityColorMap[tile.territoryId]
+                                    ? `${entityColorMap[tile.territoryId].color}26`
+                                    : undefined,
+                                borderTop:
+                                  tile.territoryId && tilePerims.top
+                                    ? `2.5px solid ${entityColorMap[tile.territoryId]?.color || '#f59e0b'}`
+                                    : undefined,
+                                borderRight:
+                                  tile.territoryId && tilePerims.right
+                                    ? `2.5px solid ${entityColorMap[tile.territoryId]?.color || '#f59e0b'}`
+                                    : undefined,
+                                borderBottom:
+                                  tile.territoryId && tilePerims.bottom
+                                    ? `2.5px solid ${entityColorMap[tile.territoryId]?.color || '#f59e0b'}`
+                                    : undefined,
+                                borderLeft:
+                                  tile.territoryId && tilePerims.left
+                                    ? `2.5px solid ${entityColorMap[tile.territoryId]?.color || '#f59e0b'}`
+                                    : undefined,
+                              }}
+                            />
+                          )}
+
                       {/* Corner Micro-Indicators (Top-Left: Extra Slots or Lake/Island indicator) */}
                       {visibleLayers.slots && (extraSlotCount > 0 ? (
                         <span
@@ -2500,6 +2560,30 @@ export function MapCanvas({
                           className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400 ring-1 ring-black/70 z-20"
                           title="Has linked historical events or lore notes"
                         />
+                      )}
+
+                      {/* Bottom Micro-Indicators for Geopolitical Simulation */}
+                      {visibleLayers.territories && provinceProfile && (
+                        <>
+                          {provinceProfile.tier === 'capital_domain' && (
+                            <span
+                              className="absolute bottom-0.5 left-0.5 text-[10px] leading-none z-20 drop-shadow"
+                              title={`Capital Domain of ${provinceProfile.governingSocietyName || 'Realm'}`}
+                            >
+                              👑
+                            </span>
+                          )}
+                          {provinceProfile.isMarchland && (
+                            <span
+                              className="absolute bottom-0.5 right-0.5 text-[9px] leading-none z-20 drop-shadow"
+                              title={`Contested Marchland / Border Friction with ${provinceProfile.borderingSocietyIds
+                                .map((id) => entityColorMap[id]?.name || id)
+                                .join(', ')}`}
+                            >
+                              ⚔️
+                            </span>
+                          )}
+                        </>
                       )}
 
                       {/* Center Priority Slot Display (Zero icon clutter on empty background tiles!) */}
@@ -3149,6 +3233,202 @@ export function MapCanvas({
                     </select>
                   </div>
                 )}
+
+                {/* Phase 28: Strategic Province Dossier */}
+                {(() => {
+                  const province = geopoliticalState.provinces[inspectedTile.id] || {
+                    tileId: inspectedTile.id,
+                    col: inspectedTile.col,
+                    row: inspectedTile.row,
+                    tier: (inspectedTile.territoryId ? 'frontier_outpost' : 'wilderness') as ProvinceTier,
+                    allegianceScore: inspectedTile.territoryId ? 60 : 0,
+                    defensiveRating: calculateTileDefense(inspectedTile).score,
+                    defensiveModifiers: calculateTileDefense(inspectedTile).modifiers,
+                    economicOutput: calculateProvinceEconomy(inspectedTile),
+                    borderingSocietyIds: [],
+                    isMarchland: false,
+                    connectedSettlementNames: [],
+                    activeResourceNames: [],
+                  }
+                  const tileChronicle = getProvinceChronicleHistory(drawHistory, inspectedTile.id)
+
+                  const TIER_LABELS: Record<
+                    ProvinceTier,
+                    { label: string; icon: string; badgeClass: string }
+                  > = {
+                    capital_domain: {
+                      label: 'Capital Domain',
+                      icon: '👑',
+                      badgeClass: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40',
+                    },
+                    urban_core: {
+                      label: 'Urban Core',
+                      icon: '🏙️',
+                      badgeClass: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/40',
+                    },
+                    rural_province: {
+                      label: 'Rural Province',
+                      icon: '🌾',
+                      badgeClass: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40',
+                    },
+                    frontier_outpost: {
+                      label: 'Frontier Outpost',
+                      icon: '🛡️',
+                      badgeClass: 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/40',
+                    },
+                    disputed_marchland: {
+                      label: 'Disputed Marchland',
+                      icon: '⚔️',
+                      badgeClass: 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40',
+                    },
+                    wilderness: {
+                      label: 'Wilderness',
+                      icon: '🌲',
+                      badgeClass: 'bg-stone-500/20 text-stone-700 dark:text-stone-300 border-stone-500/40',
+                    },
+                  }
+
+                  const tierMeta = TIER_LABELS[province.tier] || TIER_LABELS.wilderness
+
+                  return (
+                    <div
+                      data-testid="province-strategic-dossier"
+                      className="p-3 rounded-lg border border-border/80 bg-muted/30 space-y-2.5 text-xs"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 font-bold text-foreground">
+                          <span>🏛️</span>
+                          <span>Province Strategic Dossier</span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold flex items-center gap-1 ${tierMeta.badgeClass}`}
+                        >
+                          <span>{tierMeta.icon}</span>
+                          <span>{tierMeta.label}</span>
+                        </span>
+                      </div>
+
+                      {/* Defensive & Allegiance Bar */}
+                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/50">
+                        <div>
+                          <div className="flex items-center justify-between text-[11px] mb-1">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <span>🛡️</span> Defensibility:
+                            </span>
+                            <span className="font-bold text-foreground">
+                              {province.defensiveRating} / 10
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                province.defensiveRating >= 7
+                                  ? 'bg-emerald-500'
+                                  : province.defensiveRating >= 4
+                                  ? 'bg-amber-500'
+                                  : 'bg-rose-500'
+                              }`}
+                              style={{ width: `${province.defensiveRating * 10}%` }}
+                            />
+                          </div>
+                          {province.defensiveModifiers.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1 text-[10px] text-muted-foreground">
+                              {province.defensiveModifiers.map((mod, idx) => (
+                                <span
+                                  key={idx}
+                                  className="bg-background/80 px-1 py-0.5 rounded border border-border/50"
+                                >
+                                  +{mod.score} {mod.label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between text-[11px] mb-1">
+                            <span className="text-muted-foreground flex items-center gap-1">
+                              <span>🚩</span> Allegiance:
+                            </span>
+                            <span className="font-bold text-foreground">
+                              {province.allegianceScore}%
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${province.allegianceScore}%` }}
+                            />
+                          </div>
+                          {province.isMarchland && (
+                            <div className="mt-1 flex items-center gap-1 text-[10px] text-rose-600 dark:text-rose-400 font-semibold">
+                              <span>⚔️ Contested Marchland</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Economic Yields Grid */}
+                      <div className="pt-2 border-t border-border/50">
+                        <span className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                          Provincial Economic Yields:
+                        </span>
+                        <div className="grid grid-cols-4 gap-1.5 text-center">
+                          <div className="p-1.5 rounded bg-background border border-border/60">
+                            <div className="text-[10px] text-muted-foreground">🌾 Food</div>
+                            <div className="font-bold text-emerald-600 dark:text-emerald-400">
+                              +{province.economicOutput.food}
+                            </div>
+                          </div>
+                          <div className="p-1.5 rounded bg-background border border-border/60">
+                            <div className="text-[10px] text-muted-foreground">⛏️ Minerals</div>
+                            <div className="font-bold text-amber-600 dark:text-amber-400">
+                              +{province.economicOutput.minerals}
+                            </div>
+                          </div>
+                          <div className="p-1.5 rounded bg-background border border-border/60">
+                            <div className="text-[10px] text-muted-foreground">🌲 Timber</div>
+                            <div className="font-bold text-green-700 dark:text-green-500">
+                              +{province.economicOutput.timber}
+                            </div>
+                          </div>
+                          <div className="p-1.5 rounded bg-background border border-border/60">
+                            <div className="text-[10px] text-muted-foreground">💰 Trade</div>
+                            <div className="font-bold text-blue-600 dark:text-blue-400">
+                              +{province.economicOutput.trade}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Local Province Chronicle Annals */}
+                      {tileChronicle.length > 0 && (
+                        <div className="pt-2 border-t border-border/50 space-y-1">
+                          <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                            <span>📜</span> Local Chronicle Annals ({tileChronicle.length}):
+                          </span>
+                          <div className="max-h-24 overflow-y-auto space-y-1 pr-1">
+                            {tileChronicle.map((rec) => (
+                              <div
+                                key={rec.id}
+                                onClick={() => onSelectEvent?.(rec.moveId)}
+                                className="p-1 rounded bg-background border border-border/50 text-[10px] flex items-center justify-between cursor-pointer hover:border-primary transition-colors"
+                                title="Jump to chronicle move"
+                              >
+                                <span className="font-medium truncate max-w-[70%]">
+                                  Turn #{rec.moveId}: {rec.actionTitle || rec.power || 'Map Event'}
+                                </span>
+                                <span className="text-muted-foreground font-mono">
+                                  {rec.card.suit}{rec.card.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
 
                 {/* Tags */}
                 <div>

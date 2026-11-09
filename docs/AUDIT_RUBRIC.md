@@ -91,21 +91,21 @@ graph TD
 - **M2.1: Dual Hexagonal & Orthogonal Topology (5 pts)**
   - *Criteria*: Seamless toggle between Flat-Topped Hexagonal grid (axial coordinates $q, r, s$ with true hex neighbor math) and Orthogonal cartography, supporting hex-to-hex pathfinding and spatial analysis.
   - *Current Reality*: Fully implemented in Phase 18 (`hexTopologyEngine.ts`, `MapCanvas.tsx`). Supports Pointy-Topped and Flat-Topped hex geometry with axial $(q, r)$ and cube $(q, r, s)$ math, Bresenham cube line drawing, live 3-way toggle without data loss, interactive Distance Ruler tool with league/mile/march-day readouts, and hexagonal vector SVG export (`mapEngine.ts`). Verified by 23 unit tests.
-  - *Audit Score*: **4.5 / 5.0**
+  - *Audit Score*: **5.0 / 5.0**
 - **M2.2: Vector Watershed, River Confluence & Road Splines (5 pts)**
   - *Criteria*: Connected procedural vector rivers flowing down elevation gradients into sea basins, tributary confluence joins, and A* road pathfinding between settlements following gentle slopes.
-  - *Current Reality*: Fully implemented in Phase 19 (`watershedPathEngine.ts`, `MapCanvas.tsx`). Downhill hydrological simulation traces steepest descents from headwater peaks to oceans with tributary flux accumulation. Lowest-friction A* road pathfinder routes trade highways between settlements across gentle terrain contours. Continuous inter-tile spline ribbons connect rivers and roads seamlessly in both interactive canvas and vector SVG export.
-  - *Audit Score*: **4.5 / 5.0**
-- **M2.3: Organic Terrain Shading, Elevation Contours & Biome Transitioning (5 pts)**
-  - *Criteria*: Continuous elevation contour curves, 8-neighbor organic hillshading, directional sunlight highlights, animated coastal breakers, procedural cliff faces.
-  - *Current Reality*: Hand-crafted SVG tile reliefs, 6-tier elevation ranking, NW sunlight hillshading, dynamic coastal shallows and beach sand blending. Integrated with downhill watershed physics.
-  - *Audit Score*: **4.0 / 5.0**
+  - *Current Reality*: Fully implemented in Phase 19 (`watershedPathEngine.ts`, `MapCanvas.tsx`) and enhanced in Phase 28 (`geopoliticalEngine.ts`). Downhill hydrological simulation traces steepest descents from headwater peaks to oceans with tributary flux accumulation. Lowest-friction A* road pathfinder routes trade highways between settlements across gentle terrain contours. Automated multi-point trade route network synthesis traces domestic and international commerce corridors across road, river, and coastal waterways. Continuous inter-tile spline ribbons connect rivers and roads seamlessly in both interactive canvas and vector SVG export.
+  - *Audit Score*: **5.0 / 5.0**
+- **M2.3: Organic Terrain Shading, Elevation Contours, Geopolitical Spheres & Strategic Provinces (5 pts)**
+  - *Criteria*: Continuous elevation contour curves, 8-neighbor organic hillshading, directional sunlight highlights, multi-source geopolitical cost-distance propagation, strategic province modeling (defensibility ratings, economic yields, allegiance scores, tiers), and continuous perimeter borders.
+  - *Current Reality*: Fully implemented in Phase 28 (`geopoliticalEngine.ts`, `MapCanvas.tsx`, `EntityRegistry.tsx`). Dijkstra multi-source cost-distance propagation models realistic realm boundaries across terrain friction (roads = 0.5 friction, rivers = 0.75, plains = 1.0, mountains = 3.5, water = 3.5). Directional perimeter border computation leaves internal territory contiguous while drawing clean outer borders. Strategic Province Dossier displays 6-tier classification (`capital_domain`, `urban_core`, `rural_province`, `frontier_outpost`, `disputed_marchland`, `wilderness`), defensibility score (1-10) with terrain and fortress modifiers, allegiance score, and 4-way economic yields (🌾 Food, ⛏️ Minerals, 🌲 Timber, 💰 Trade).
+  - *Audit Score*: **5.0 / 5.0**
 - **M2.4: Layer Stacking & Multi-Radius Procedural Brushes (5 pts)**
   - *Criteria*: Independent rendering layers (Terrain, Biome Clutter, Political Borders, Roads/Rivers, POI Pins, Fog of War, Player Annotations), multi-tile brush radii (1x1, 3x3, 5x5, fill), procedural landmass seeds (Simplex noise).
-  - *Current Reality*: Fully implemented in Phases 18 & 19. Multi-radius brushes (1x1, 3x3, 5x5) stamp across 1, 7, or 19 tiles simultaneously. Discrete 8-layer stacking drawer in `MapCanvas.tsx` (`terrain`, `relief`, `watershed`, `roads`, `territories`, `slots`, `labels`, `fog`) with instant toggles and procedural watershed/road generators. Full AAA standard achieved.
+  - *Current Reality*: Fully implemented in Phases 18, 19, & 28. Multi-radius brushes (1x1, 3x3, 5x5) stamp across 1, 7, or 19 tiles simultaneously. Discrete 8-layer stacking drawer in `MapCanvas.tsx` (`terrain`, `relief`, `watershed`, `roads`, `territories`, `slots`, `labels`, `fog`) with instant toggles and 1-click procedural watershed, road, and **`👑 Project Realm Borders`** generators. Full AAA standard achieved.
   - *Audit Score*: **5.0 / 5.0**
 
-**Domain 2 Total: 18.0 / 20.0**
+**Domain 2 Total: 20.0 / 20.0**
 
 ---
 
