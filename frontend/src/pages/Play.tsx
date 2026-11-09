@@ -149,6 +149,7 @@ import { KeyboardShortcutsModal } from '../components/KeyboardShortcutsModal'
 import { CampaignHooksModal } from '../components/CampaignHooksModal'
 import { PresetCompendiumModal } from '../components/PresetCompendiumModal'
 import { SessionZeroPrimerModal } from '../components/SessionZeroPrimerModal'
+import { WorldTwoPagerModal } from '../components/WorldTwoPagerModal'
 import { TableSyncModal } from '../components/TableSyncModal'
 import {
   TablePeerSession,
@@ -260,6 +261,7 @@ export function Play() {
   const [isDraftingWorkshop, setIsDraftingWorkshop] = useState(false)
   const [showCampaignHooksModal, setShowCampaignHooksModal] = useState(false)
   const [showSessionZeroPrimerModal, setShowSessionZeroPrimerModal] = useState(false)
+  const [showTwoPagerModal, setShowTwoPagerModal] = useState(false)
   const [showCompendiumModal, setShowCompendiumModal] = useState(false)
   const [showTableSyncModal, setShowTableSyncModal] = useState(false)
   const [showInlineBotWeightTuner, setShowInlineBotWeightTuner] = useState(false)
@@ -2047,6 +2049,16 @@ export function Play() {
             </button>
             <button
               type="button"
+              onClick={() => setShowTwoPagerModal(true)}
+              aria-label="2-Page World Overview"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
+              title="Deterministic Non-LLM 2-Page World Overview Folio (Page 1: Atlas & Landmarks · Page 2: Peoples & 4 Ages)"
+            >
+              <Columns className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">2-Pager</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowTableSyncModal(true)}
               aria-label="Real-Time Table Peer Synchronization"
               className={`btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${
@@ -2114,6 +2126,17 @@ export function Play() {
                   >
                     <FileText className="h-3.5 w-3.5" />
                     <span>📜 Session Zero Primer Handout</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowTwoPagerModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-cyan-600 dark:text-cyan-400"
+                  >
+                    <Columns className="h-3.5 w-3.5" />
+                    <span>📄 2-Page World Overview</span>
                   </button>
                   <button
                     type="button"
@@ -4578,6 +4601,14 @@ export function Play() {
                       onSelectTile={setSelectedTileId}
                       onSelectEntity={handleNavigateToEntity}
                       onSelectEvent={handleNavigateToEvent}
+                      onStampActiveTurnOnTile={
+                        drawnCard && !world.isLocked ? handlePlaceDraftOnMap : undefined
+                      }
+                      activeTurnActionLabel={
+                        turnDraft.featureName ||
+                        turnDraft.actionTitle ||
+                        selectedPreset?.name
+                      }
                       onChange={handleWorkspaceMapChange}
                       initialViewOnly={true}
                     />
@@ -4648,6 +4679,14 @@ export function Play() {
                 onSelectTile={setSelectedTileId}
                 onSelectEntity={handleNavigateToEntity}
                 onSelectEvent={handleNavigateToEvent}
+                onStampActiveTurnOnTile={
+                  drawnCard && !world.isLocked ? handlePlaceDraftOnMap : undefined
+                }
+                activeTurnActionLabel={
+                  turnDraft.featureName ||
+                  turnDraft.actionTitle ||
+                  selectedPreset?.name
+                }
                 onChange={handleWorkspaceMapChange}
                 initialViewOnly={true}
               />
@@ -5006,6 +5045,15 @@ export function Play() {
         onClose={() => setShowSessionZeroPrimerModal(false)}
         world={world}
         onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
+      />
+
+      {/* Deterministic Non-LLM 2-Page World Overview Modal */}
+      <WorldTwoPagerModal
+        isOpen={showTwoPagerModal}
+        onClose={() => setShowTwoPagerModal(false)}
+        world={world}
+        onSelectCoord={(col, row) => handleNavigateToTile(`${col},${row}`)}
+        onSelectEntity={(eid) => setFlyoutEntityId(eid)}
       />
 
       {/* Tabletop Presets & Tropes Compendium Modal */}

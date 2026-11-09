@@ -87,6 +87,7 @@ import {
   CartographicCategory,
 } from '../engine/cartographicSymbolEngine'
 import { playUndoSound, playCardFlipSound } from '../engine/soundEngine'
+import { generateFeatureName } from '../engine/flavorNameEngine'
 import {
   TouchPoint,
   getTouchDistance,
@@ -108,6 +109,8 @@ interface MapCanvasProps {
   onSelectTile?: (tileId: string) => void
   onSelectEntity?: (entityId: string) => void
   onSelectEvent?: (moveId: number) => void
+  onStampActiveTurnOnTile?: (tileId: string) => void
+  activeTurnActionLabel?: string
   onChange: (newMap: MapState) => void
 }
 
@@ -516,6 +519,8 @@ export function MapCanvas({
   onSelectTile,
   onSelectEntity,
   onSelectEvent,
+  onStampActiveTurnOnTile,
+  activeTurnActionLabel,
   onChange,
 }: MapCanvasProps) {
   const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
@@ -2735,21 +2740,57 @@ export function MapCanvas({
           </div>
 
           <div className="space-y-3.5">
-            {/* Location Name (Editable in Edit Mode) */}
-            {!isViewOnly && (
+            {/* Always-Available Province Label & 1-Click Quick-Stamp Bar */}
+            <div
+              data-testid="inspector-quick-stamp-bar"
+              className="p-2.5 rounded-xl bg-primary/[0.04] border border-primary/25 space-y-2"
+            >
+              {onStampActiveTurnOnTile && (
+                <button
+                  type="button"
+                  data-testid="inspector-stamp-active-turn-btn"
+                  onClick={() => onStampActiveTurnOnTile(selectedTileId)}
+                  className="w-full py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-xs shadow-2xs hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>📍</span>
+                  <span>
+                    Stamp Active Turn Here ({inspectedTile.col}, {inspectedTile.row})
+                    {activeTurnActionLabel ? ` — ${activeTurnActionLabel}` : ''}
+                  </span>
+                </button>
+              )}
+
               <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  Location Name / Label
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">
+                    Location Name / Label
+                  </label>
+                  <button
+                    type="button"
+                    data-testid="inspector-autoname-btn"
+                    onClick={() => {
+                      const generated = generateFeatureName(
+                        inspectedTile.terrain,
+                        'general',
+                        Date.now() + Math.random()
+                      )
+                      handleUpdateInspectedTile({ label: generated })
+                    }}
+                    className="text-[10px] font-semibold text-primary hover:underline"
+                    title="Generate an evocative fantasy name for this province"
+                  >
+                    🎲 Auto-Name
+                  </button>
+                </div>
                 <input
                   type="text"
                   value={inspectedTile.label || ''}
                   onChange={(e) => handleUpdateInspectedTile({ label: e.target.value })}
                   placeholder="e.g., Mount Doom, Silverwood..."
-                  className="input w-full text-sm h-8"
+                  className="input w-full text-xs h-8"
                 />
               </div>
-            )}
+            </div>
 
             {/* Active Tile Slots & Priority Queue */}
             <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2">

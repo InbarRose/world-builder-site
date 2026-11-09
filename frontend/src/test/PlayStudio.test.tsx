@@ -671,4 +671,51 @@ describe('Play Studio & Rules Integration', () => {
       /Saved to Turn #1 Record/i
     )
   })
+
+  it('supports Deterministic Non-LLM 2-Page World Overview Modal and Direct On-Map Active-Turn Stamp Bar', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    // Resume campaign
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Draw a card and select a preset
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Apply Bot Pick/i }))
+    })
+
+    // Switch to World Map tab and stamp active turn directly from the Tile Inspector Quick-Stamp Bar
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
+    })
+    expect(screen.getByTestId('inspector-quick-stamp-bar')).toBeInTheDocument()
+    const stampHereBtn = screen.getByTestId('inspector-stamp-active-turn-btn')
+    await act(async () => {
+      fireEvent.click(stampHereBtn)
+    })
+
+    // Open the Deterministic 2-Page World Overview Modal from the header
+    const twoPagerBtn = screen.getByRole('button', { name: /2-Page World Overview/i })
+    await act(async () => {
+      fireEvent.click(twoPagerBtn)
+    })
+
+    expect(screen.getByTestId('world-two-pager-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('two-pager-page-1')).toBeInTheDocument()
+    expect(screen.getByTestId('two-pager-page-2')).toBeInTheDocument()
+    expect(screen.getByTestId('two-pager-executive-synopsis')).toHaveTextContent(/Emerald Vale/i)
+
+    // Close 2-Pager modal
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Close 2-Page World Overview/i }))
+    })
+  })
 })
