@@ -37,6 +37,9 @@ import {
   Sliders,
   Plus,
   RefreshCw,
+  Camera,
+  Lightbulb,
+  MessageSquare,
 } from 'lucide-react'
 import {
   BotPersonalityId,
@@ -120,6 +123,7 @@ import {
 } from '../engine/cardPhysicsEngine'
 import {
   TurnActionDraft,
+  BrainstormIdea,
   WORKBENCH_QUICK_ICONS,
   WORKBENCH_SLOT_CATEGORIES,
   WORKBENCH_TERRAIN_OPTIONS,
@@ -128,7 +132,15 @@ import {
   generateDraftChronicleNote,
   stampDraftOnMapTile,
   syncDraftToDrawRecord,
+  createBrainstormIdea,
+  applyBrainstormIdea,
+  appendChimeInQuote,
 } from '../engine/turnWorkbenchEngine'
+import { SessionVaultModal } from '../components/SessionVaultModal'
+import {
+  createWorldCheckpoint,
+  saveWorldCheckpoint,
+} from '../engine/snapshotVaultEngine'
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
@@ -268,6 +280,10 @@ export function Play() {
   const [showInlineBotWeightTuner, setShowInlineBotWeightTuner] = useState(false)
   const [cardTiltTransform, setCardTiltTransform] = useState<string | null>(null)
   const [showCardPickerPopover, setShowCardPickerPopover] = useState(false)
+  const [showVaultModal, setShowVaultModal] = useState(false)
+  const [brainstormIdeas, setBrainstormIdeas] = useState<BrainstormIdea[]>([])
+  const [chimeInQuote, setChimeInQuote] = useState('')
+  const [chimeInSpeakerName, setChimeInSpeakerName] = useState('')
   const [pickerSuit, setPickerSuit] = useState<Suit>('♠')
   const [pickerValue, setPickerValue] = useState<string>('10')
   const [showInlineMiniMap, setShowInlineMiniMap] = useState(false)
@@ -591,10 +607,22 @@ export function Play() {
         drawHistory: updatedHistory,
       }
     })
+    const stageName = STAGES.find((s) => s.id === nextStage)?.name || nextStage
     setStageCelebration({
       active: true,
-      stageName: STAGES.find((s) => s.id === nextStage)?.name || nextStage,
+      stageName,
     })
+    try {
+      const chk = createWorldCheckpoint(
+        world,
+        `Dawn of ${stageName}`,
+        epilogueNote || `Milestone transition into the ${stageName} era.`,
+        'era_transition'
+      )
+      saveWorldCheckpoint(chk)
+    } catch {
+      // safe storage fallback
+    }
   }
 
 
@@ -867,12 +895,30 @@ export function Play() {
     } else if (card.value === JOKER || isFantasticalCard(card)) {
       playJokerWonderStinger()
     }
+
+    if (card.value === 'A' || card.value === JOKER) {
+      try {
+        const cataclysmType = card.value === 'A' ? 'Cataclysm (Ace)' : 'Wonder (Joker)'
+        const chk = createWorldCheckpoint(
+          world,
+          `${cataclysmType}: ${card.value} of ${card.suit}`,
+          `Milestone checkpoint prior to resolving ${cataclysmType.toLowerCase()}.`,
+          'cataclysm'
+        )
+        saveWorldCheckpoint(chk)
+      } catch {
+        // safe storage fallback
+      }
+    }
+
     setSelectedPreset(null)
     setGeneratedFeatureName('')
     setPresetCategory('all')
     setPresetSearchQuery('')
     setShowAffinityDetails(false)
     setPendingNote('')
+    setBrainstormIdeas([])
+    setChimeInQuote('')
     setTurnModifiedTiles([])
     setTurnModifiedEntities([])
     setRecordSavedFeedback(null)
@@ -1570,9 +1616,17 @@ export function Play() {
           activeEl.tagName === 'TEXTAREA' ||
           activeEl.tagName === 'SELECT' ||
           (activeEl as HTMLElement).isContentEditable)
-      if (isInput || e.ctrlKey || e.metaKey || e.altKey) return
+      if (isInput || e.ctrlKey || e.metaKey) return
 
       const key = e.key.toLowerCase()
+
+      if (e.altKey) {
+        if (key === 's') {
+          e.preventDefault()
+          setShowVaultModal((prev) => !prev)
+        }
+        return
+      }
 
       if (key === 'd') {
         if (!world.isLocked && deck.length > 0 && (gameMode === 'companion' || turnPhase === 'await_draw')) {
@@ -2113,6 +2167,17 @@ export function Play() {
             </button>
             <button
               type="button"
+              onClick={() => setShowVaultModal(true)}
+              aria-label="Session Checkpoint Vault"
+              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+              title="Tabletop Session Checkpoint Vault & Disaster Recovery (Alt+S)"
+              data-testid="header-open-vault-btn"
+            >
+              <Camera className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Vault</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowTableSyncModal(true)}
               aria-label="Real-Time Table Peer Synchronization"
               className={`btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${
@@ -2191,6 +2256,18 @@ export function Play() {
                   >
                     <Columns className="h-3.5 w-3.5" />
                     <span>📄 2-Page World Overview</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowVaultModal(true)
+                      setShowShareMenu(false)
+                    }}
+                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
+                    data-testid="share-menu-open-checkpoints-btn"
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    <span>📸 Session Checkpoint Vault</span>
                   </button>
                   <button
                     type="button"
@@ -3846,6 +3923,22 @@ export function Play() {
                             <div className="flex flex-wrap items-center gap-1.5">
                               <button
                                 type="button"
+                                data-testid="stash-idea-btn"
+                                onClick={() => {
+                                  const speaker = activePlayer?.name || chimeInSpeakerName || 'Table Conclave'
+                                  const idea = createBrainstormIdea(turnDraft, speaker)
+                                  setBrainstormIdeas((prev) => [idea, ...prev.filter((i) => i.id !== idea.id).slice(0, 4)])
+                                  setRecordSavedFeedback(`Stashed brainstorm idea "${idea.title}"`)
+                                }}
+                                className="px-2.5 py-1 rounded-lg border text-[11px] font-semibold bg-background/90 border-border hover:border-amber-500/50 text-foreground transition-all flex items-center gap-1"
+                                title="Stash this draft as a candidate idea so other players can pitch alternatives without losing it"
+                              >
+                                <Lightbulb className="h-3 w-3 text-amber-500" />
+                                <span>💡 Stash Idea{brainstormIdeas.length > 0 ? ` (${brainstormIdeas.length})` : ''}</span>
+                              </button>
+
+                              <button
+                                type="button"
                                 data-testid="switch-to-custom-workbench-btn"
                                 onClick={handleSwitchToCustomDraft}
                                 className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all flex items-center gap-1 ${
@@ -3884,6 +3977,71 @@ export function Play() {
                               </button>
                             </div>
                           </div>
+
+                          {/* Table Brainstorm Stash Strip */}
+                          {brainstormIdeas.length > 0 && (
+                            <div
+                              data-testid="brainstorm-stash-strip"
+                              className="p-2 rounded-lg bg-background/95 border border-amber-500/30 space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                                <span className="flex items-center gap-1 text-amber-800 dark:text-amber-300">
+                                  <Lightbulb className="w-3 h-3 text-amber-500" />
+                                  Table Brainstorm Candidates ({brainstormIdeas.length}):
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setBrainstormIdeas([])}
+                                  className="text-[10px] text-muted-foreground hover:text-destructive underline"
+                                >
+                                  Clear Stash
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                                {brainstormIdeas.map((idea) => (
+                                  <div
+                                    key={idea.id}
+                                    data-testid="brainstorm-idea-chip"
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/50 border border-border text-xs flex-shrink-0"
+                                  >
+                                    <span className="text-sm">{idea.icon}</span>
+                                    <div className="flex flex-col text-left">
+                                      <span className="font-semibold text-foreground text-[11px] max-w-[130px] truncate">
+                                        {idea.title}
+                                      </span>
+                                      {idea.suggestedBy && (
+                                        <span className="text-[9px] text-muted-foreground truncate max-w-[130px]">
+                                          by {idea.suggestedBy}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <button
+                                      type="button"
+                                      data-testid="swap-idea-btn"
+                                      onClick={() => {
+                                        const updated = applyBrainstormIdea(turnDraft, idea)
+                                        applyLiveTurnDraftUpdate(updated)
+                                        setRecordSavedFeedback(`Swapped to idea: "${idea.title}"`)
+                                      }}
+                                      className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary hover:bg-primary/30"
+                                      title="Swap into active draft"
+                                    >
+                                      Use
+                                    </button>
+                                    <button
+                                      type="button"
+                                      data-testid="delete-idea-btn"
+                                      onClick={() => setBrainstormIdeas((prev) => prev.filter((i) => i.id !== idea.id))}
+                                      className="text-muted-foreground hover:text-destructive px-1 text-[12px]"
+                                      title="Remove idea"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Live Feedback Toast inside Workbench */}
                           {recordSavedFeedback && (
@@ -4525,6 +4683,72 @@ export function Play() {
                               </div>
                             </div>
                           )}
+
+                          {/* Table Voice & Chime-In Player Quote Capture */}
+                          <div
+                            data-testid="workbench-chimein-quote-bar"
+                            className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 flex flex-wrap items-center gap-2 text-xs"
+                          >
+                            <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-semibold text-[11px] shrink-0">
+                              <MessageSquare className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                              <span>Table Chime-In / Player Quote:</span>
+                            </div>
+                            <input
+                              type="text"
+                              value={chimeInQuote}
+                              onChange={(e) => setChimeInQuote(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  if (!chimeInQuote.trim()) return
+                                  const speaker = chimeInSpeakerName.trim() || activePlayer?.name || 'Table'
+                                  const nextNote = appendChimeInQuote(pendingNote || turnDraft.note, speaker, chimeInQuote)
+                                  setPendingNote(nextNote)
+                                  applyLiveTurnDraftUpdate({
+                                    ...turnDraft,
+                                    note: nextNote,
+                                  })
+                                  setChimeInQuote('')
+                                  setRecordSavedFeedback(`Appended quote from ${speaker}`)
+                                }
+                              }}
+                              placeholder='e.g. "We should build watchtowers along these ridges!"'
+                              data-testid="workbench-chimein-quote-input"
+                              className="input flex-1 text-xs h-8 min-w-[200px]"
+                            />
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[10px] text-muted-foreground">Speaker:</span>
+                              <input
+                                type="text"
+                                value={chimeInSpeakerName}
+                                onChange={(e) => setChimeInSpeakerName(e.target.value)}
+                                placeholder={activePlayer?.name || 'Table'}
+                                className="input h-8 w-24 text-[11px] px-2"
+                                title="Attribution name for this quote"
+                              />
+                              <button
+                                type="button"
+                                data-testid="append-quote-btn"
+                                onClick={() => {
+                                  if (!chimeInQuote.trim()) return
+                                  const speaker = chimeInSpeakerName.trim() || activePlayer?.name || 'Table'
+                                  const nextNote = appendChimeInQuote(pendingNote || turnDraft.note, speaker, chimeInQuote)
+                                  setPendingNote(nextNote)
+                                  applyLiveTurnDraftUpdate({
+                                    ...turnDraft,
+                                    note: nextNote,
+                                  })
+                                  setChimeInQuote('')
+                                  setRecordSavedFeedback(`Appended quote from ${speaker}`)
+                                }}
+                                disabled={!chimeInQuote.trim()}
+                                className="btn-outline px-2.5 h-8 text-[11px] font-semibold flex items-center gap-1 text-amber-800 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/20 disabled:opacity-40"
+                                title="Append player quote to the turn note and sync to record"
+                              >
+                                <span>🗣️ Append Quote</span>
+                              </button>
+                            </div>
+                          </div>
 
                           <div className="flex flex-wrap gap-2">
                             <input
@@ -5215,6 +5439,19 @@ export function Play() {
         onOpenCodexEntity={(eid) => setFlyoutEntityId(eid)}
         onReturnToLauncher={handleReturnToLauncher}
         onOpenShortcutsModal={() => setShowShortcutsModal(true)}
+      />
+
+      {/* Session Checkpoint Snapshot Vault Modal */}
+      <SessionVaultModal
+        isOpen={showVaultModal}
+        onClose={() => setShowVaultModal(false)}
+        world={world}
+        onRestoreWorld={(restored) => {
+          persistWorldUpdate(() => restored)
+          setTurnPhase('await_draw')
+          setDrawnCard(null)
+        }}
+        onNotify={(msg) => setRecordSavedFeedback(msg)}
       />
 
       {/* Keyboard Shortcuts Cheat Sheet (?) */}

@@ -44,6 +44,21 @@ export interface TurnActionDraft {
   placedTileIds: string[]
 }
 
+/**
+ * Phase 27: Tabletop Brainstorm Candidate Idea.
+ * Stashes candidate turn pitches from chiming-in players without overwriting the active draft.
+ */
+export interface BrainstormIdea {
+  id: string
+  title: string
+  featureName: string
+  icon: string
+  slotCategory: TileSlotCategory
+  draft: TurnActionDraft
+  suggestedBy?: string
+  timestamp: number
+}
+
 export const WORKBENCH_QUICK_ICONS: { icon: string; label: string }[] = [
   { icon: '🏔️', label: 'Mountain' },
   { icon: '🌋', label: 'Volcano' },
@@ -344,3 +359,70 @@ export function syncDraftToDrawRecord(
     slotChanges: updatedSlotChanges,
   }
 }
+
+/**
+ * Creates a stashed brainstorm idea from the current TurnActionDraft.
+ */
+export function createBrainstormIdea(
+  draft: TurnActionDraft,
+  suggestedBy?: string
+): BrainstormIdea {
+  const id = `idea_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+  const title =
+    draft.actionTitle.trim() ||
+    (draft.source === 'preset' ? 'Stashed Preset Idea' : 'Stashed Custom Idea')
+  const featureName = draft.featureName.trim() || 'World Feature'
+
+  return {
+    id,
+    title,
+    featureName,
+    icon: draft.icon || '💡',
+    slotCategory: draft.slotCategory,
+    draft: {
+      ...draft,
+      placedTileIds: [...draft.placedTileIds],
+    },
+    suggestedBy: suggestedBy?.trim() || undefined,
+    timestamp: Date.now(),
+  }
+}
+
+/**
+ * Applies a stashed BrainstormIdea into an active TurnActionDraft, preserving
+ * the current draft's placed tile coordinates so the map placement is maintained.
+ */
+export function applyBrainstormIdea(
+  currentDraft: TurnActionDraft,
+  idea: BrainstormIdea
+): TurnActionDraft {
+  return {
+    ...idea.draft,
+    placedTileIds:
+      currentDraft.placedTileIds.length > 0
+        ? [...currentDraft.placedTileIds]
+        : [...idea.draft.placedTileIds],
+  }
+}
+
+/**
+ * Appends a chime-in quote or table banter from a player into the draft note.
+ */
+export function appendChimeInQuote(
+  existingNote: string,
+  speakerName: string,
+  quote: string
+): string {
+  const cleanQuote = quote.trim()
+  if (!cleanQuote) return existingNote
+
+  const attribution = speakerName.trim() || 'Table Conclave'
+  const quoteBlock = `> *"${cleanQuote}"*\n> — **${attribution}**`
+
+  const trimmed = existingNote.trim()
+  if (!trimmed) {
+    return quoteBlock
+  }
+  return `${trimmed}\n\n${quoteBlock}`
+}
+

@@ -17,6 +17,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
         { keys: ['P'], label: 'Place on Map (Stamp active turn draft onto inspected tile)' },
         { keys: ['2'], label: 'Toggle 2-Page World Overview Folio' },
         { keys: ['A'], label: 'Auto-Pick Smart Tile for Current Preset' },
+        { keys: ['Alt', 'S'], label: 'Open Session Checkpoint Vault (Snapshots & Disaster Recovery)' },
       ],
     },
     {
