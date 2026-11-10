@@ -323,6 +323,14 @@ status: active
   - [x] Layer 5 (Geopolitical Province & Lore): Controlling faction dropdown, full Strategic Province Dossier (Defensibility 1-10, Allegiance %, dynamic yields, chronicle annals), and tags.
   - [x] Restructured Palette Drawer with Clean Category Menus (`MapCanvas.tsx`): Replaced monolithic scrolling drawer with clean categorized tabs: `🌍 1. Base Biomes`, `🏔️ 2. Relief & Canopy`, `🌾 3. Strategic Resources`, `🏰 4. Settlements & Roads`, `🖌️ 5. Whiteboard Tropes (48)`, `🚩 6. Realm Borders`.
   - [x] Comprehensive test coverage in `MapCanvas.test.tsx` (16/16 passing) and full Vitest suite (208/208 tests passing across 31 test suites).
+- [x] **Phase 31: Safe Tile Selection Defaults, 1-Click Domain Switcher & Clean Single-Change Clicks** *(Score: 99.8 / 100 via ADR-037)*
+  - [x] Default Safe Selection & Tooling Ergonomics (`MapCanvas.tsx`): `activeTool` defaults to `'inspect'` (labeled `[ 👆 Select & Inspect ]` with `[S]` shortcut badge), placed first in the toolbar. Clicking tiles in Select mode selects without mutating.
+  - [x] Active Painting Warning Banner: Armed paint state (`brush`, `fill`, `erase`, `fog`, `ruler`) displays a warning strip with a 1-click `[ 👆 Exit to Select [S] ]` button. `Alt + Click` allows safe sampling while armed.
+  - [x] Dynamic Viewport Cursor: Reflects active tool mode (`pointer` in select, `crosshair` in brush/fill, `not-allowed` in erase, `grab` in pan).
+  - [x] Global Keyboard Hotkeys: `Escape`, `KeyS`, and `KeyV` instantly return to Safe Select; `KeyB` arms the Paint Brush.
+  - [x] 1-Click Domain Switcher: Prominent 2-button segmented control `[ 🌱 Land Domain ]` vs `[ 🌊 Water Domain ]` added directly in the Tile Inspector header and at the top of Layer 1. 1-click toggling resets domain and baseline terrain cleanly.
+  - [x] Clean Single-Change Clicks & Icon Hygiene: `handleSelectTerrainBiome` ensures clicking grassland/plains cleanly resets leftover flora, relief, and custom symbols. Hand-drawn whiteboard marker drawings only render when explicitly assigned or stamped.
+  - [x] Comprehensive test coverage in `MapCanvas.test.tsx` (19/19 passing) and full Vitest suite (211/211 tests passing across 31 test suites).
 
 ---
 
@@ -365,6 +373,7 @@ status: active
 - [x] Implement Phase 28: Geopolitical Simulation Engine, Realm Spheres of Influence & Strategic Province Depth (ADR-034, Core Score: 98.0 / 100).
 - [x] Implement Phase 29: Natural Procedural World Generation, Civ-Style Tectonic Presets & Gallery (ADR-035, Core Score: 99.0 / 100).
 - [x] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (ADR-036, Core Score: 99.5 / 100).
-- [ ] Implement Phase 31: Dynamic Regional Biome Ecology & Deep Tabletop World Simulation (Target: 100.0 / 100).
+- [x] Implement Phase 31: Safe Tile Selection Defaults, 1-Click Domain Switcher & Clean Single-Change Clicks (ADR-037, Core Score: 99.8 / 100).
+- [ ] Implement Phase 32: Dynamic Regional Biome Ecology & Deep Tabletop World Simulation (Target: 100.0 / 100).
 
 
