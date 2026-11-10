@@ -146,6 +146,50 @@ const GEOGRAPHY_PRESETS: { id: GeographyPreset; label: string }[] = [
   { id: 'twin-continents', label: '🌐 Twin Hemispheres (Old & New)' },
 ]
 
+export interface FantasyResourcePreset {
+  name: string
+  icon: string
+  category: TileSlotCategory
+  priority: number
+  group: 'Food & Crops' | 'Minerals & Ores' | 'Timber & Canopy' | 'Arcane & Wonders'
+}
+
+export const FANTASY_RESOURCE_PRESETS: FantasyResourcePreset[] = [
+  { name: 'Grain Fields', icon: '🌾', category: 'resource', priority: 60, group: 'Food & Crops' },
+  { name: 'Coastal Fishery', icon: '🐟', category: 'resource', priority: 60, group: 'Food & Crops' },
+  { name: 'Hillside Vineyard', icon: '🍇', category: 'resource', priority: 60, group: 'Food & Crops' },
+  { name: 'Fertile Pasture', icon: '🐄', category: 'resource', priority: 60, group: 'Food & Crops' },
+  { name: 'Iron Mine', icon: '⛏️', category: 'resource', priority: 65, group: 'Minerals & Ores' },
+  { name: 'Deep Gold Lode', icon: '💰', category: 'resource', priority: 70, group: 'Minerals & Ores' },
+  { name: 'Gem Quarry', icon: '💎', category: 'resource', priority: 70, group: 'Minerals & Ores' },
+  { name: 'Obsidian Crag', icon: '🌑', category: 'resource', priority: 65, group: 'Minerals & Ores' },
+  { name: 'Lumber Camp', icon: '🪵', category: 'resource', priority: 55, group: 'Timber & Canopy' },
+  { name: 'Ancient Grove', icon: '🌲', category: 'resource', priority: 65, group: 'Timber & Canopy' },
+  { name: 'Mana Spring', icon: '🔮', category: 'myth', priority: 80, group: 'Arcane & Wonders' },
+  { name: 'Sun-Fruit Grove', icon: '🍎', category: 'resource', priority: 75, group: 'Arcane & Wonders' },
+  { name: 'Dragon Bones', icon: '🐉', category: 'myth', priority: 85, group: 'Arcane & Wonders' },
+  { name: 'Ancient Monolith', icon: '🗿', category: 'structure', priority: 80, group: 'Arcane & Wonders' },
+]
+
+export interface FantasySettlementPreset {
+  name: string
+  icon: string
+  overlay: TileOverlay
+  priority: number
+  description: string
+}
+
+export const FANTASY_SETTLEMENT_PRESETS: FantasySettlementPreset[] = [
+  { name: 'Nomadic Camp', icon: '🏕️', overlay: 'settlement', priority: 80, description: 'Light encampment' },
+  { name: 'Agricultural Village', icon: '🏡', overlay: 'settlement', priority: 85, description: 'Rural village' },
+  { name: 'Market Town', icon: '🏘️', overlay: 'town', priority: 90, description: 'Walled town & commerce' },
+  { name: 'Fortified City', icon: '🏙️', overlay: 'city', priority: 95, description: 'Metropolis & stone walls' },
+  { name: 'Royal Capital', icon: '👑', overlay: 'capital', priority: 100, description: 'Imperial seat of power' },
+  { name: 'Citadel Fortress', icon: '🏰', overlay: 'castle', priority: 92, description: 'High stone fortress' },
+  { name: 'Grand Monument', icon: '🗿', overlay: 'monument', priority: 89, description: 'Ancient pillar of civilization' },
+  { name: 'Sunken Ruins', icon: '🏛️', overlay: 'ruins', priority: 85, description: 'Ancient civilization ruins' },
+]
+
 /**
  * Renders hand-drawn SVG cartographic artwork with coordinate-seeded variance
  * so no two neighboring mountains, forests, or coastlines look identical.
@@ -652,6 +696,12 @@ export function MapCanvas({
   const [rulerStart, setRulerStart] = useState<OffsetCoord | null>(null)
   const [rulerHover, setRulerHover] = useState<OffsetCoord | null>(null)
   const [brushRadius, setBrushRadius] = useState<number>(0) // 0: 1x1, 1: 3x3, 2: 5x5
+  const [paletteTab, setPaletteTab] = useState<
+    'terrain' | 'relief_flora' | 'resources' | 'settlements' | 'tropes' | 'borders'
+  >('terrain')
+  const [sidebarLayerTab, setSidebarLayerTab] = useState<
+    'all' | 'base' | 'relief' | 'resources' | 'settlements' | 'realm'
+  >('all')
 
   const rulerMeasurement: MeasurementResult | null =
     activeTool === 'ruler' && rulerStart && rulerHover
@@ -1905,349 +1955,546 @@ export function MapCanvas({
         {/* Collapsible Brush Palette & Multi-Layer Overlay Drawer */}
         {!isViewOnly && showPaletteDrawer && (activeTool === 'brush' || activeTool === 'fill') && (
           <div className="pt-2 border-t border-border space-y-3">
-            {/* Base Terrain Row */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">
-                  1. Base Biome & Domain (Empty grass/ocean tiles stay clean without icon noise)
-                </label>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded border border-border">
-                    <span className="text-[10px] text-muted-foreground px-1 font-medium">Brush:</span>
-                    <button
-                      type="button"
-                      onClick={() => setBrushRadius(0)}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                        brushRadius === 0
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                      title="Single Tile (1x1)"
+            {/* Category Menu Navigation Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-border/60">
+              <button
+                type="button"
+                onClick={() => setPaletteTab('terrain')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'terrain'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🌍</span>
+                <span>1. Base Biomes</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteTab('relief_flora')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'relief_flora'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🏔️</span>
+                <span>2. Relief & Canopy</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteTab('resources')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'resources'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🌾</span>
+                <span>3. Strategic Resources</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteTab('settlements')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'settlements'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🏰</span>
+                <span>4. Settlements & Roads</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteTab('tropes')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'tropes'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🖌️</span>
+                <span>5. Whiteboard Tropes (48)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaletteTab('borders')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  paletteTab === 'borders'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                }`}
+              >
+                <span>🚩</span>
+                <span>6. Realm Borders</span>
+              </button>
+            </div>
+
+            {/* TAB 1: Base Terrains, Brush Radius & Tile Style */}
+            {paletteTab === 'terrain' && (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    1. Base Biome & Domain (Empty grass/ocean tiles stay clean without icon noise)
+                  </label>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded border border-border">
+                      <span className="text-[10px] text-muted-foreground px-1 font-medium">Brush:</span>
+                      <button
+                        type="button"
+                        onClick={() => setBrushRadius(0)}
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                          brushRadius === 0
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Single Tile (1x1)"
+                      >
+                        1×1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBrushRadius(1)}
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                          brushRadius === 1
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Radius 1 (3x3 or 7 hexes)"
+                      >
+                        3×3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBrushRadius(2)}
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                          brushRadius === 2
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Radius 2 (5x5 or 19 hexes)"
+                      >
+                        5×5
+                      </button>
+                    </div>
+                    <span className="text-muted-foreground">Tile Style:</span>
+                    <select
+                      value={selectedColoringMode}
+                      onChange={(e) =>
+                        setSelectedColoringMode(e.target.value as TileColoringMode)
+                      }
+                      className="input h-6 text-xs py-0 px-2 w-auto"
                     >
-                      1×1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBrushRadius(1)}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                        brushRadius === 1
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                      title="Radius 1 (3x3 or 7 hexes)"
-                    >
-                      3×3
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBrushRadius(2)}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                        brushRadius === 2
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                      title="Radius 2 (5x5 or 19 hexes)"
-                    >
-                      5×5
-                    </button>
+                      {COLORING_MODES.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <span className="text-muted-foreground">Tile Style:</span>
-                  <select
-                    value={selectedColoringMode}
-                    onChange={(e) =>
-                      setSelectedColoringMode(e.target.value as TileColoringMode)
-                    }
-                    className="input h-6 text-xs py-0 px-2 w-auto"
-                  >
-                    {COLORING_MODES.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5">
-                {Object.values(TERRAIN_PALETTE).map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setSelectedTerrain(t.id)}
-                    className={`p-1.5 rounded border text-xs flex flex-col items-center gap-0.5 transition-all ${
-                      selectedTerrain === t.id
-                        ? 'ring-2 ring-primary border-primary font-bold scale-105'
-                        : 'border-border opacity-85 hover:opacity-100'
-                    }`}
-                    style={{ backgroundColor: t.color, color: '#fff' }}
-                  >
-                    <span className="text-sm drop-shadow">{t.symbol}</span>
-                    <span className="text-[9px] leading-tight drop-shadow truncate max-w-full">
-                      {t.label.split(' ')[0]}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Composite Layers: Relief + Flora + Linear Networks + Landmarks */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-1">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  2. Elevation Slot
-                </label>
-                <select
-                  value={selectedRelief}
-                  onChange={(e) => setSelectedRelief(e.target.value as ReliefType)}
-                  className="input h-8 text-xs py-1 w-full"
-                >
-                  {Object.values(RELIEF_PALETTE).map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.symbol ? `${r.symbol} ${r.label}` : 'Flat / None'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  3. Vegetation Slot
-                </label>
-                <select
-                  value={selectedFlora}
-                  onChange={(e) => setSelectedFlora(e.target.value as FloraType)}
-                  className="input h-8 text-xs py-1 w-full"
-                >
-                  {Object.values(FLORA_PALETTE).map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.symbol ? `${f.symbol} ${f.label}` : 'No Flora Overlay'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  4. Primary Settlement / Marker
-                </label>
-                <select
-                  value={selectedOverlay}
-                  onChange={(e) => setSelectedOverlay(e.target.value as TileOverlay)}
-                  className="input h-8 text-xs py-1 w-full"
-                >
-                  {Object.values(OVERLAY_PALETTE).map((ov) => (
-                    <option key={ov.id} value={ov.id}>
-                      {ov.symbol ? `${ov.symbol} ${ov.label}` : 'None'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                  5. Rivers, Roads & Borders
-                </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaintRiver(!paintRiver)}
-                    className={`px-2 py-1 rounded border text-xs flex-1 ${
-                      paintRiver
-                        ? 'bg-blue-600 text-white border-blue-600 font-semibold'
-                        : 'bg-background border-border'
-                    }`}
-                  >
-                    💧 River
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaintRoad(!paintRoad)}
-                    className={`px-2 py-1 rounded border text-xs flex-1 ${
-                      paintRoad
-                        ? 'bg-amber-800 text-white border-amber-800 font-semibold'
-                        : 'bg-background border-border'
-                    }`}
-                  >
-                    🛤️ Road
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {selectedPattern !== 'solid' || selectedColoringMode === 'patterned' ? (
-              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
-                <span className="font-semibold text-muted-foreground">Pattern Style:</span>
-                <select
-                  value={selectedPattern}
-                  onChange={(e) => setSelectedPattern(e.target.value as TilePattern)}
-                  className="input h-7 text-xs py-0 px-2 w-auto"
-                >
-                  {PATTERNS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-                <span className="font-semibold text-muted-foreground">Secondary Color:</span>
-                <select
-                  value={secondaryTerrain}
-                  onChange={(e) => setSecondaryTerrain(e.target.value as TerrainType)}
-                  className="input h-7 text-xs py-0 px-2 w-auto"
-                >
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5">
                   {Object.values(TERRAIN_PALETTE).map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.symbol} {t.label}
-                    </option>
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedTerrain(t.id)}
+                      className={`p-1.5 rounded border text-xs flex flex-col items-center gap-0.5 transition-all ${
+                        selectedTerrain === t.id
+                          ? 'ring-2 ring-primary border-primary font-bold scale-105'
+                          : 'border-border opacity-85 hover:opacity-100'
+                      }`}
+                      style={{ backgroundColor: t.color, color: '#fff' }}
+                    >
+                      <span className="text-sm drop-shadow">{t.symbol}</span>
+                      <span className="text-[9px] leading-tight drop-shadow truncate max-w-full">
+                        {t.label.split(' ')[0]}
+                      </span>
+                    </button>
                   ))}
-                </select>
-              </div>
-            ) : null}
+                </div>
 
-            {entities.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                <span className="font-semibold text-muted-foreground">
-                  Faction Territory Border:
-                </span>
-                <select
-                  value={selectedTerritoryId}
-                  onChange={(e) => setSelectedTerritoryId(e.target.value)}
-                  className="input h-7 text-xs py-0 px-2 w-auto"
-                >
-                  <option value="">No Faction Border</option>
-                  {entities.map((ent) => (
-                    <option key={ent.id} value={ent.id}>
-                      {ent.icon || '🚩'} {ent.name}
-                    </option>
-                  ))}
-                </select>
+                {selectedPattern !== 'solid' || selectedColoringMode === 'patterned' ? (
+                  <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                    <span className="font-semibold text-muted-foreground">Pattern Style:</span>
+                    <select
+                      value={selectedPattern}
+                      onChange={(e) => setSelectedPattern(e.target.value as TilePattern)}
+                      className="input h-7 text-xs py-0 px-2 w-auto"
+                    >
+                      {PATTERNS.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="font-semibold text-muted-foreground">Secondary Color:</span>
+                    <select
+                      value={secondaryTerrain}
+                      onChange={(e) => setSecondaryTerrain(e.target.value as TerrainType)}
+                      className="input h-7 text-xs py-0 px-2 w-auto"
+                    >
+                      {Object.values(TERRAIN_PALETTE).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.symbol} {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
               </div>
             )}
 
-            {/* Whiteboard Marker Tropes (48 Tabletop Cartography Symbols) */}
-            <div className="pt-2.5 border-t border-border/70 space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <span>🖌️</span>
-                    <span>Whiteboard Marker Tropes (48 Genesis Symbols)</span>
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Tabletop hand-drawn cartography silhouettes
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCartographicSymbol(null)}
-                  className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
-                    selectedCartographicSymbol === null
-                      ? 'bg-primary text-primary-foreground border-primary font-medium'
-                      : 'border-border text-muted-foreground hover:text-foreground'
-                  }`}
-                  title="Revert to automatic relief & flora silhouettes"
-                >
-                  Auto / None
-                </button>
-              </div>
+            {/* TAB 2: Relief & Flora Canopy */}
+            {paletteTab === 'relief_flora' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Elevation Relief (Mountains, Hills, Valleys)
+                    </label>
+                    <div className="grid grid-cols-4 gap-1 mb-1.5">
+                      {Object.values(RELIEF_PALETTE).map((r) => (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => setSelectedRelief(r.id)}
+                          className={`px-2 py-1.5 rounded border text-xs flex items-center justify-center gap-1 transition-all ${
+                            selectedRelief === r.id
+                              ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                              : 'bg-background hover:bg-muted border-border text-muted-foreground'
+                          }`}
+                        >
+                          <span>{r.symbol || '·'}</span>
+                          <span className="truncate">{r.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* Category Filter Pills: Earth, Water, Plant, Feature, Settlement, Construction */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {(
-                  [
-                    { id: 'earth' as CartographicCategory, label: `♠ Earth (${getSymbolsByCategory('earth').length})` },
-                    { id: 'water' as CartographicCategory, label: `♥ Water (${getSymbolsByCategory('water').length})` },
-                    { id: 'plant' as CartographicCategory, label: `♣ Flora (${getSymbolsByCategory('plant').length})` },
-                    { id: 'feature' as CartographicCategory, label: `♦ Feature (${getSymbolsByCategory('feature').length})` },
-                    { id: 'settlement' as CartographicCategory, label: `🏘️ Towns (${getSymbolsByCategory('settlement').length})` },
-                    { id: 'construction' as CartographicCategory, label: `🏰 Monuments (${getSymbolsByCategory('construction').length})` },
-                  ]
-                ).map((cat) => (
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                      Flora Canopy (Forests, Jungles, Marshes)
+                    </label>
+                    <div className="grid grid-cols-3 gap-1 mb-1.5">
+                      {Object.values(FLORA_PALETTE).map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => setSelectedFlora(f.id)}
+                          className={`px-2 py-1.5 rounded border text-xs flex items-center justify-center gap-1 transition-all ${
+                            selectedFlora === f.id
+                              ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                              : 'bg-background hover:bg-muted border-border text-muted-foreground'
+                          }`}
+                        >
+                          <span>{f.symbol || '·'}</span>
+                          <span className="truncate">{f.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: Strategic Resources & Wonders */}
+            {paletteTab === 'resources' && (
+              <div className="space-y-2.5">
+                <div className="text-xs font-semibold text-muted-foreground flex items-center justify-between">
+                  <span>Fantasy RPG Strategic Resources & Natural Wonders:</span>
+                  <span className="text-[10px] text-muted-foreground">Stamp onto tiles or paint</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-1.5">
+                  {FANTASY_RESOURCE_PRESETS.map((res) => (
+                    <button
+                      key={res.name}
+                      type="button"
+                      onClick={() => {
+                        handleAddCustomSlotToInspected(
+                          res.category,
+                          res.name,
+                          res.icon,
+                          res.priority
+                        )
+                      }}
+                      className="p-1.5 rounded border border-border bg-background hover:bg-accent text-left flex items-center gap-1.5 text-xs transition-colors"
+                      title={`Add ${res.name} to selected tile (${res.group})`}
+                    >
+                      <span className="text-base shrink-0">{res.icon}</span>
+                      <div className="min-w-0 flex-1 truncate">
+                        <div className="font-medium truncate text-[11px]">{res.name}</div>
+                        <div className="text-[9px] text-muted-foreground truncate">{res.group.split(' ')[0]}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: Settlements & Roads */}
+            {paletteTab === 'settlements' && (
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground block">
+                      Settlements & Holdings Overlays
+                    </label>
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="text-[10px] text-muted-foreground">Pick overlay:</span>
+                      <select
+                        value={selectedOverlay}
+                        onChange={(e) => setSelectedOverlay(e.target.value as TileOverlay)}
+                        className="input h-6 text-xs py-0 px-1.5 w-auto"
+                      >
+                        {Object.values(OVERLAY_PALETTE).map((ov) => (
+                          <option key={ov.id} value={ov.id}>
+                            {ov.symbol ? `${ov.symbol} ${ov.label}` : 'None'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-1.5">
+                    {FANTASY_SETTLEMENT_PRESETS.map((setPreset) => (
+                      <button
+                        key={setPreset.name}
+                        type="button"
+                        onClick={() => setSelectedOverlay(setPreset.overlay)}
+                        className={`p-1.5 rounded border text-xs flex flex-col items-center gap-0.5 transition-all ${
+                          selectedOverlay === setPreset.overlay
+                            ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs scale-102'
+                            : 'bg-background hover:bg-muted border-border text-muted-foreground'
+                        }`}
+                        title={setPreset.description}
+                      >
+                        <span className="text-base">{setPreset.icon}</span>
+                        <span className="text-[10px] truncate max-w-full">{setPreset.name.split(' ')[0]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border/60 flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaintRiver(!paintRiver)}
+                      className={`px-3 py-1.5 rounded border text-xs font-semibold flex items-center gap-1.5 ${
+                        paintRiver
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                          : 'bg-background border-border text-muted-foreground'
+                      }`}
+                    >
+                      <span>💧</span>
+                      <span>Paint River: {paintRiver ? 'ON' : 'OFF'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaintRoad(!paintRoad)}
+                      className={`px-3 py-1.5 rounded border text-xs font-semibold flex items-center gap-1.5 ${
+                        paintRoad
+                          ? 'bg-amber-800 text-white border-amber-800 shadow-2xs'
+                          : 'bg-background border-border text-muted-foreground'
+                      }`}
+                    >
+                      <span>🛤️</span>
+                      <span>Paint Road: {paintRoad ? 'ON' : 'OFF'}</span>
+                    </button>
+                  </div>
+                  <div className="h-4 w-px bg-border hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAutoConnectRoads}
+                      className="btn-outline text-xs py-1 px-2.5 flex items-center gap-1"
+                      title="Auto-route trade roads connecting all settlements"
+                    >
+                      <span>🛤️</span>
+                      <span>Auto-Connect Roads</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimulateWatersheds}
+                      className="btn-outline text-xs py-1 px-2.5 flex items-center gap-1"
+                      title="Downhill vector watershed river simulation"
+                    >
+                      <span>💧</span>
+                      <span>Simulate Watersheds</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: Whiteboard Marker Tropes (48 Genesis Symbols) */}
+            {paletteTab === 'tropes' && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <span>🖌️</span>
+                      <span>Whiteboard Marker Tropes (48 Genesis Symbols)</span>
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Tabletop hand-drawn cartography silhouettes
+                    </span>
+                  </div>
                   <button
-                    key={cat.id}
                     type="button"
-                    onClick={() => {
-                      setActiveMarkerCategory(cat.id)
-                      setActiveMarkerConcept('all')
-                    }}
-                    className={`text-[11px] px-2.5 py-0.5 rounded-full border transition-all ${
-                      activeMarkerCategory === cat.id
-                        ? 'bg-primary/20 border-primary text-primary font-semibold'
+                    onClick={() => setSelectedCartographicSymbol(null)}
+                    className={`text-[11px] px-2 py-0.5 rounded border transition-colors ${
+                      selectedCartographicSymbol === null
+                        ? 'bg-primary text-primary-foreground border-primary font-medium'
                         : 'border-border text-muted-foreground hover:text-foreground'
                     }`}
+                    title="Revert to automatic relief & flora silhouettes"
                   >
-                    {cat.label}
+                    Auto / None
                   </button>
-                ))}
-              </div>
+                </div>
 
-              {/* Concept Sub-Filter Pills (e.g. Mountains, Hills, Canyons & Cliffs, Deserts, Caves) */}
-              <div className="flex flex-wrap items-center gap-1 pt-0.5">
-                <button
-                  type="button"
-                  onClick={() => setActiveMarkerConcept('all')}
-                  className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                    activeMarkerConcept === 'all'
-                      ? 'bg-secondary text-secondary-foreground font-semibold border-secondary'
-                      : 'border-border/60 text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  All ({getSymbolsByCategory(activeMarkerCategory).length})
-                </button>
-                {getConceptsByCategory(activeMarkerCategory).map((concept) => (
+                {/* Category Filter Pills: Earth, Water, Plant, Feature, Settlement, Construction */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(
+                    [
+                      { id: 'earth' as CartographicCategory, label: `♠ Earth (${getSymbolsByCategory('earth').length})` },
+                      { id: 'water' as CartographicCategory, label: `♥ Water (${getSymbolsByCategory('water').length})` },
+                      { id: 'plant' as CartographicCategory, label: `♣ Flora (${getSymbolsByCategory('plant').length})` },
+                      { id: 'feature' as CartographicCategory, label: `♦ Feature (${getSymbolsByCategory('feature').length})` },
+                      { id: 'settlement' as CartographicCategory, label: `🏘️ Towns (${getSymbolsByCategory('settlement').length})` },
+                      { id: 'construction' as CartographicCategory, label: `🏰 Monuments (${getSymbolsByCategory('construction').length})` },
+                    ]
+                  ).map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveMarkerCategory(cat.id)
+                        setActiveMarkerConcept('all')
+                      }}
+                      className={`text-[11px] px-2.5 py-0.5 rounded-full border transition-all ${
+                        activeMarkerCategory === cat.id
+                          ? 'bg-primary/20 border-primary text-primary font-semibold'
+                          : 'border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Concept Sub-Filter Pills */}
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
                   <button
-                    key={concept.id}
                     type="button"
-                    onClick={() => setActiveMarkerConcept(concept.id)}
+                    onClick={() => setActiveMarkerConcept('all')}
                     className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                      activeMarkerConcept === concept.id
+                      activeMarkerConcept === 'all'
                         ? 'bg-secondary text-secondary-foreground font-semibold border-secondary'
                         : 'border-border/60 text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    {concept.label} ({concept.count})
+                    All ({getSymbolsByCategory(activeMarkerCategory).length})
                   </button>
-                ))}
-              </div>
-
-              {/* Tropes for Active Category & Concept */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 max-h-56 overflow-y-auto p-1 bg-muted/20 rounded border border-border/50">
-                {(activeMarkerConcept === 'all'
-                  ? getSymbolsByCategory(activeMarkerCategory)
-                  : getSymbolsByConcept(activeMarkerConcept)
-                ).map((sym) => {
-                  const isSelected = selectedCartographicSymbol === sym.id
-                  return (
+                  {getConceptsByCategory(activeMarkerCategory).map((concept) => (
                     <button
-                      key={sym.id}
+                      key={concept.id}
                       type="button"
-                      onClick={() =>
-                        setSelectedCartographicSymbol(isSelected ? null : sym.id)
-                      }
-                      className={`p-1.5 rounded-lg border text-left flex items-center gap-2 transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/20 ring-2 ring-primary text-foreground font-semibold shadow-sm'
-                          : 'border-border/80 bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground'
+                      onClick={() => setActiveMarkerConcept(concept.id)}
+                      className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                        activeMarkerConcept === concept.id
+                          ? 'bg-secondary text-secondary-foreground font-semibold border-secondary'
+                          : 'border-border/60 text-muted-foreground hover:text-foreground'
                       }`}
-                      title={`${sym.name} [${sym.variantName}] (${sym.icon}): ${sym.description}`}
                     >
-                      <svg
-                        viewBox="0 0 48 48"
-                        className="w-7 h-7 shrink-0 rounded bg-muted/50 p-0.5 border border-border/40"
-                      >
-                        {renderCartographicMarkerSVG(sym.id)}
-                      </svg>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[11px] truncate leading-tight font-medium">
-                          {sym.name}
-                        </div>
-                        <div className="text-[9px] text-muted-foreground truncate flex items-center gap-1">
-                          <span>{sym.icon}</span>
-                          <span className="opacity-80">· {sym.variantName}</span>
-                        </div>
-                      </div>
+                      {concept.label} ({concept.count})
                     </button>
-                  )
-                })}
+                  ))}
+                </div>
+
+                {/* Tropes for Active Category & Concept */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 max-h-56 overflow-y-auto p-1 bg-muted/20 rounded border border-border/50">
+                  {(activeMarkerConcept === 'all'
+                    ? getSymbolsByCategory(activeMarkerCategory)
+                    : getSymbolsByConcept(activeMarkerConcept)
+                  ).map((sym) => {
+                    const isSelected = selectedCartographicSymbol === sym.id
+                    return (
+                      <button
+                        key={sym.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedCartographicSymbol(isSelected ? null : sym.id)
+                        }
+                        className={`p-1.5 rounded-lg border text-left flex items-center gap-2 transition-all ${
+                          isSelected
+                            ? 'border-primary bg-primary/20 ring-2 ring-primary text-foreground font-semibold shadow-sm'
+                            : 'border-border/80 bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                        title={`${sym.name} [${sym.variantName}] (${sym.icon}): ${sym.description}`}
+                      >
+                        <svg
+                          viewBox="0 0 48 48"
+                          className="w-7 h-7 shrink-0 rounded bg-muted/50 p-0.5 border border-border/40"
+                        >
+                          {renderCartographicMarkerSVG(sym.id)}
+                        </svg>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] truncate leading-tight font-medium">
+                            {sym.name}
+                          </div>
+                          <div className="text-[9px] text-muted-foreground truncate flex items-center gap-1">
+                            <span>{sym.icon}</span>
+                            <span className="opacity-80">· {sym.variantName}</span>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* TAB 6: Realm Borders & Geopolitical Projections */}
+            {paletteTab === 'borders' && (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      Paint Faction Territory:
+                    </label>
+                    <select
+                      value={selectedTerritoryId}
+                      onChange={(e) => setSelectedTerritoryId(e.target.value)}
+                      className="input h-8 text-xs py-0 px-2 w-auto"
+                    >
+                      <option value="">No Faction Border (Wilderness)</option>
+                      {entities.map((ent) => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.icon || '🚩'} {ent.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    data-testid="project-realm-borders-btn"
+                    onClick={handleProjectRealmBorders}
+                    className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5 shadow-2xs"
+                    title="Simulate geopolitical influence and project soft border tints"
+                  >
+                    <span>👑</span>
+                    <span>Project Realm Borders</span>
+                  </button>
+                </div>
+                <p className="text-[11px] text-muted-foreground italic">
+                  Realm spheres of influence propagate across terrain friction (roads = 0.5 friction, rivers = 0.75, mountains = 3.5).
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -2408,6 +2655,12 @@ export function MapCanvas({
                           key={id}
                           type="button"
                           data-testid={`map-tile-${col}-${row}`}
+                          onClick={(e) => {
+                            if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
+                              return
+                            }
+                            applyToolToTile(col, row)
+                          }}
                           onMouseDown={(e) => {
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
                               return
@@ -2878,344 +3131,486 @@ export function MapCanvas({
               </div>
             </div>
 
-            {/* Active Tile Slots & Priority Queue */}
-            <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
-                  <Layers className="h-3.5 w-3.5" />
-                  <span>Tile Slots (Priority Order)</span>
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  Top 1–2 show on map
-                </span>
-              </div>
+            {/* Direct In-Place Layered Tile Studio (Edit Mode Only) */}
+            {!isViewOnly && (
+              <div className="space-y-3">
+                {/* Layer Navigator Ribbon */}
+                <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/40 rounded-lg border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('all')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'all'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🌐 All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('base')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'base'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🌍 1. Base
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('relief')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'relief'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🏔️ 2. Relief
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('resources')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'resources'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🌾 3. Res
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('settlements')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'settlements'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🏰 4. Holds
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarLayerTab('realm')}
+                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                      sidebarLayerTab === 'realm'
+                        ? 'bg-background text-primary shadow-xs border border-primary/30'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🚩 5. Realm
+                  </button>
+                </div>
 
-              {inspectedSlots.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground italic">
-                  Calm background {inspectedDomain} tile (no extra icons shown).
-                </p>
-              ) : (
-                <div className="space-y-1.5">
-                  {inspectedSlots.map((slot, idx) => (
-                    <div
-                      key={slot.id}
-                      className={`flex items-center justify-between px-2.5 py-1.5 rounded border text-xs ${
-                        idx < 2
-                          ? 'bg-background border-primary/40 font-medium'
-                          : 'bg-muted/60 border-border opacity-85'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-base shrink-0">{slot.icon}</span>
-                        <div className="truncate">
-                          <div className="truncate">{slot.name}</div>
-                          <div className="text-[10px] text-muted-foreground uppercase">
-                            {slot.category} · Priority {slot.priority}
-                            {idx === 0
-                              ? ' ★ Primary'
-                              : idx === 1
-                              ? ' · Secondary'
-                              : ' · Corner (+)'}
-                          </div>
-                        </div>
+                {/* LAYER 1: Base Terrain & Hydrology */}
+                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'base') && (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
+                        <span>🌍</span>
+                        <span>Layer 1: Base Terrain & Hydrology</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
+                      </span>
+                    </div>
+
+                    {/* Quick Biome Buttons Grid */}
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
+                      {Object.values(TERRAIN_PALETTE).map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => handleUpdateInspectedTile({ terrain: t.id })}
+                          className={`p-1 rounded border text-xs flex flex-col items-center gap-0.5 transition-all ${
+                            inspectedTile.terrain === t.id
+                              ? 'ring-2 ring-primary border-primary font-bold scale-102 bg-primary/20 text-foreground'
+                              : 'border-border/70 bg-background/80 hover:bg-muted text-muted-foreground'
+                          }`}
+                          title={`Set base biome to ${t.label}`}
+                        >
+                          <span className="text-sm">{t.symbol}</span>
+                          <span className="text-[9px] truncate max-w-full">{t.label.split(' ')[0]}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* River & Trade Road Checkboxes */}
+                    <div className="flex flex-wrap items-center justify-between pt-1 border-t border-border/60">
+                      <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(inspectedTile.hasRiver)}
+                          onChange={(e) => handleUpdateInspectedTile({ hasRiver: e.target.checked })}
+                          className="rounded"
+                        />
+                        <span>💧 River</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(inspectedTile.hasRoad)}
+                          onChange={(e) => handleUpdateInspectedTile({ hasRoad: e.target.checked })}
+                          className="rounded"
+                        />
+                        <span>🛤️ Trade Road</span>
+                      </label>
+                    </div>
+
+                    {/* Primary & Secondary Color Overrides */}
+                    <div className="flex items-center justify-between gap-2 text-xs bg-muted/30 p-1.5 rounded border border-border/70">
+                      <div className="flex items-center gap-2">
+                        <label className="text-[10px] font-medium text-muted-foreground">Tint 1:</label>
+                        <input
+                          type="color"
+                          aria-label="Tile Primary Color"
+                          value={
+                            inspectedTile.customColors?.primary ||
+                            TERRAIN_PALETTE[inspectedTile.terrain]?.color ||
+                            '#86efac'
+                          }
+                          onChange={(e) =>
+                            handleUpdateInspectedTile({
+                              customColors: {
+                                ...inspectedTile.customColors,
+                                primary: e.target.value,
+                              },
+                            })
+                          }
+                          className="h-5 w-7 rounded border border-border cursor-pointer"
+                        />
+                        <label className="text-[10px] font-medium text-muted-foreground">Tint 2:</label>
+                        <input
+                          type="color"
+                          aria-label="Tile Secondary Color"
+                          value={
+                            inspectedTile.customColors?.secondary ||
+                            TERRAIN_PALETTE[inspectedTile.terrain]?.secondaryColor ||
+                            '#4ade80'
+                          }
+                          onChange={(e) =>
+                            handleUpdateInspectedTile({
+                              customColors: {
+                                ...inspectedTile.customColors,
+                                secondary: e.target.value,
+                              },
+                            })
+                          }
+                          className="h-5 w-7 rounded border border-border cursor-pointer"
+                        />
                       </div>
-                      {!isViewOnly && (
+                      {inspectedTile.customColors && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveSlotFromInspected(slot.id)}
-                          className="text-muted-foreground hover:text-destructive p-1"
-                          title="Remove slot from tile"
+                          onClick={() => handleUpdateInspectedTile({ customColors: undefined })}
+                          className="text-[10px] text-muted-foreground hover:text-foreground underline"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          Reset
                         </button>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Quick Add Slot to Tile (Edit Mode Only) */}
-              {!isViewOnly && (
-                <div className="pt-2 border-t border-border/60 space-y-2">
-                  <div className="text-[11px] font-semibold text-muted-foreground">
-                    + Add Feature / Slot to Tile
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {SLOT_ICON_PALETTE.map((group) => (
-                      <button
-                        key={group.category}
-                        type="button"
-                        onClick={() => {
-                          setNewSlotCategory(group.category)
-                          setNewSlotIcon(group.icons[0].icon)
-                          setNewSlotName(group.icons[0].name)
-                        }}
-                        className={`px-2 py-0.5 rounded text-[10px] border ${
-                          newSlotCategory === group.category
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-background border-border'
-                        }`}
-                      >
-                        {group.category}
-                      </button>
-                    ))}
-                  </div>
+                )}
 
-                  {/* Preset Icons for Selected Slot Category */}
-                  <div className="flex flex-wrap gap-1">
-                    {SLOT_ICON_PALETTE.find((g) => g.category === newSlotCategory)?.icons.map(
-                      (item) => (
+                {/* LAYER 2: Topography Relief & Flora Canopy */}
+                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'relief') && (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
+                        <span>🏔️</span>
+                        <span>Layer 2: Topography Relief & Canopy</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">Permanent Features</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                          Elevation Relief (Peaks, Hills, Valleys)
+                        </label>
+                        <div className="grid grid-cols-4 gap-1">
+                          {Object.values(RELIEF_PALETTE).map((r) => (
+                            <button
+                              key={r.id}
+                              type="button"
+                              onClick={() => handleUpdateInspectedTile({ relief: r.id })}
+                              className={`px-1.5 py-1 rounded border text-xs flex items-center justify-center gap-1 transition-all ${
+                                (inspectedTile.relief || 'none') === r.id
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                                  : 'bg-background hover:bg-muted border-border/80 text-muted-foreground'
+                              }`}
+                              title={r.label}
+                            >
+                              <span>{r.symbol || '·'}</span>
+                              <span className="truncate text-[10px]">{r.label.split(' ')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                          Vegetation Canopy (Forests, Jungles, Marshes)
+                        </label>
+                        <div className="grid grid-cols-3 gap-1">
+                          {Object.values(FLORA_PALETTE).map((f) => (
+                            <button
+                              key={f.id}
+                              type="button"
+                              onClick={() => handleUpdateInspectedTile({ flora: f.id })}
+                              className={`px-1.5 py-1 rounded border text-xs flex items-center justify-center gap-1 transition-all ${
+                                (inspectedTile.flora || 'none') === f.id
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                                  : 'bg-background hover:bg-muted border-border/80 text-muted-foreground'
+                              }`}
+                              title={f.label}
+                            >
+                              <span>{f.symbol || '·'}</span>
+                              <span className="truncate text-[10px]">{f.label.split(' ')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                          Hand-Drawn Cartographic Trope (48 Symbols)
+                        </label>
+                        <select
+                          value={inspectedTile.cartographicSymbol || ''}
+                          onChange={(e) =>
+                            handleUpdateInspectedTile({
+                              cartographicSymbol: e.target.value || undefined,
+                            })
+                          }
+                          className="input w-full text-xs py-1 h-8"
+                        >
+                          <option value="">Auto (from relief/flora)</option>
+                          {(['earth', 'water', 'plant', 'feature', 'settlement', 'construction'] as CartographicCategory[]).map(
+                            (cat) => (
+                              <React.Fragment key={cat}>
+                                {getConceptsByCategory(cat).map((concept) => (
+                                  <optgroup
+                                    key={concept.id}
+                                    label={`${cat === 'earth' ? '♠' : cat === 'water' ? '♥' : cat === 'plant' ? '♣' : cat === 'feature' ? '♦' : cat === 'settlement' ? '🏘️' : '🏰'} ${concept.label}`}
+                                  >
+                                    {getSymbolsByConcept(concept.id).map((s) => (
+                                      <option key={s.id} value={s.id}>
+                                        {s.icon} {s.name} — {s.variantName}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                ))}
+                              </React.Fragment>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* LAYER 3: Strategic Resources & Wonders */}
+                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'resources') && (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
+                        <span>🌾</span>
+                        <span>Layer 3: Strategic Resources & Wonders</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">Harvestable Nodes</span>
+                    </div>
+
+                    {/* Quick-Pick Resource Chips */}
+                    <div>
+                      <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                        + Quick-Stamp Fantasy Resources:
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+                        {FANTASY_RESOURCE_PRESETS.map((res) => (
+                          <button
+                            key={res.name}
+                            type="button"
+                            onClick={() =>
+                              handleAddCustomSlotToInspected(
+                                res.category,
+                                res.name,
+                                res.icon,
+                                res.priority
+                              )
+                            }
+                            className="px-1.5 py-1 rounded border border-border/80 bg-background hover:bg-accent text-left flex items-center gap-1.5 text-[11px] transition-colors"
+                            title={`Add ${res.name} (${res.group})`}
+                          >
+                            <span>{res.icon}</span>
+                            <span className="truncate">{res.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Active Resource & Feature Slots */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-semibold text-muted-foreground block">
+                        Active Slots on Tile ({inspectedSlots.length}):
+                      </label>
+                      {inspectedSlots.length === 0 ? (
+                        <p className="text-[11px] text-muted-foreground italic">
+                          No extra resources or wonders placed on this tile.
+                        </p>
+                      ) : (
+                        inspectedSlots.map((slot, idx) => (
+                          <div
+                            key={slot.id}
+                            className={`flex items-center justify-between px-2 py-1 rounded border text-xs ${
+                              idx < 2
+                                ? 'bg-background border-primary/40 font-medium'
+                                : 'bg-muted/60 border-border opacity-85'
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-base shrink-0">{slot.icon}</span>
+                              <div className="truncate">
+                                <span className="font-semibold">{slot.name}</span>
+                                <span className="text-[10px] text-muted-foreground ml-1.5 uppercase">
+                                  {slot.category} · P{slot.priority}
+                                  {idx === 0 ? ' (Primary)' : idx === 1 ? ' (Secondary)' : ''}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSlotFromInspected(slot.id)}
+                              className="text-muted-foreground hover:text-destructive p-0.5 ml-1"
+                              title="Remove slot from tile"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Custom Slot Name + Icon Input */}
+                    <div className="pt-2 border-t border-border/60 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-semibold text-muted-foreground block">
+                          Custom Slot / Wonder:
+                        </label>
+                        <div className="flex flex-wrap gap-1">
+                          {SLOT_ICON_PALETTE.map((g) => (
+                            <button
+                              key={g.category}
+                              type="button"
+                              onClick={() => {
+                                setNewSlotCategory(g.category)
+                                setNewSlotIcon(g.icons[0]?.icon || '✨')
+                              }}
+                              className={`px-1.5 py-0.5 rounded text-[9px] border transition-colors ${
+                                newSlotCategory === g.category
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold'
+                                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              {g.category}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          value={newSlotIcon}
+                          onChange={(e) => setNewSlotIcon(e.target.value)}
+                          className="input w-9 h-7 text-center text-xs px-1"
+                          maxLength={4}
+                          title="Custom Slot Icon"
+                        />
+                        <input
+                          type="text"
+                          value={newSlotName}
+                          onChange={(e) => setNewSlotName(e.target.value)}
+                          placeholder="Custom resource (e.g. Mithril Vein)..."
+                          className="input flex-1 h-7 text-xs"
+                        />
                         <button
-                          key={item.name}
                           type="button"
                           onClick={() => {
-                            const group = SLOT_ICON_PALETTE.find(
-                              (g) => g.category === newSlotCategory
-                            )!
                             handleAddCustomSlotToInspected(
                               newSlotCategory,
-                              item.name,
-                              item.icon,
-                              group.defaultPriority
+                              newSlotName || 'Feature',
+                              newSlotIcon || '✨',
+                              70
                             )
                           }}
-                          className="px-2 py-1 rounded border border-border bg-background hover:bg-accent text-[11px] flex items-center gap-1"
-                          title={`Add ${item.name} slot to tile`}
+                          className="btn-primary px-2.5 h-7 text-xs flex items-center gap-1"
                         >
-                          <span>{item.icon}</span>
-                          <span>{item.name}</span>
+                          <Plus className="h-3 w-3" />
+                          <span>Add</span>
                         </button>
-                      )
-                    )}
+                      </div>
+                    </div>
                   </div>
+                )}
 
-                  {/* Custom Slot Name + Icon Input */}
-                  <div className="flex gap-1.5">
-                    <input
-                      type="text"
-                      value={newSlotIcon}
-                      onChange={(e) => setNewSlotIcon(e.target.value)}
-                      className="input w-11 h-7 text-center text-xs px-1"
-                      maxLength={4}
-                      title="Custom Slot Icon"
-                    />
-                    <input
-                      type="text"
-                      value={newSlotName}
-                      onChange={(e) => setNewSlotName(e.target.value)}
-                      placeholder="Custom slot name (e.g. Crater Lake)..."
-                      className="input flex-1 h-7 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const group = SLOT_ICON_PALETTE.find(
-                          (g) => g.category === newSlotCategory
-                        )
-                        handleAddCustomSlotToInspected(
-                          newSlotCategory,
-                          newSlotName || 'Feature',
-                          newSlotIcon || '✨',
-                          group?.defaultPriority || 70
-                        )
-                      }}
-                      className="btn-primary px-2.5 h-7 text-xs flex items-center gap-1"
-                    >
-                      <Plus className="h-3 w-3" />
-                      <span>Add</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+                {/* LAYER 4: Settlements & Holdings */}
+                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'settlements') && (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
+                        <span>🏰</span>
+                        <span>Layer 4: Settlements & Holdings</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {inspectedTile.overlay !== 'none' ? `Active: ${inspectedTile.overlay}` : 'Uninhabited'}
+                      </span>
+                    </div>
 
-            {!isViewOnly && (
-              <>
-                {/* Base Terrain, Coloring Style & Custom Colors */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Base Biome
-                    </label>
-                    <select
-                      value={inspectedTile.terrain}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          terrain: e.target.value as TerrainType,
-                        })
-                      }
-                      className="input w-full text-xs py-1 h-8"
-                    >
-                      {Object.values(TERRAIN_PALETTE).map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.symbol} {t.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div>
+                      <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                        Settlement / Citadel Holding:
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateInspectedTile({ overlay: 'none' })}
+                          className={`px-1.5 py-1 rounded border text-[11px] flex items-center justify-center gap-1 transition-all ${
+                            inspectedTile.overlay === 'none'
+                              ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                              : 'bg-background hover:bg-muted border-border/80 text-muted-foreground'
+                          }`}
+                        >
+                          <span>🚫</span>
+                          <span>None</span>
+                        </button>
+                        {FANTASY_SETTLEMENT_PRESETS.map((setPreset) => (
+                          <button
+                            key={setPreset.name}
+                            type="button"
+                            onClick={() => handleUpdateInspectedTile({ overlay: setPreset.overlay })}
+                            className={`px-1.5 py-1 rounded border text-[11px] flex items-center justify-center gap-1 transition-all ${
+                              inspectedTile.overlay === setPreset.overlay
+                                ? 'bg-primary text-primary-foreground border-primary font-bold shadow-2xs'
+                                : 'bg-background hover:bg-muted border-border/80 text-muted-foreground'
+                            }`}
+                            title={setPreset.description}
+                          >
+                            <span>{setPreset.icon}</span>
+                            <span className="truncate">{setPreset.name.split(' ')[0]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Elevation Relief
-                    </label>
-                    <select
-                      value={inspectedTile.relief || 'none'}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          relief: e.target.value as ReliefType,
-                        })
-                      }
-                      className="input w-full text-xs py-1 h-8"
-                    >
-                      {Object.values(RELIEF_PALETTE).map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.symbol ? `${r.symbol} ${r.label}` : 'Flat / None'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Flora Slot
-                    </label>
-                    <select
-                      value={inspectedTile.flora || 'none'}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          flora: e.target.value as FloraType,
-                        })
-                      }
-                      className="input w-full text-xs py-1 h-8"
-                    >
-                      {Object.values(FLORA_PALETTE).map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.symbol ? `${f.symbol} ${f.label}` : 'None'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Cartographic Trope
-                    </label>
-                    <select
-                      value={inspectedTile.cartographicSymbol || ''}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          cartographicSymbol: e.target.value || undefined,
-                        })
-                      }
-                      className="input w-full text-xs py-1 h-8"
-                    >
-                      <option value="">Auto (from relief/flora)</option>
-                      {(['earth', 'water', 'plant', 'feature', 'settlement', 'construction'] as CartographicCategory[]).map(
-                        (cat) => (
-                          <React.Fragment key={cat}>
-                            {getConceptsByCategory(cat).map((concept) => (
-                              <optgroup
-                                key={concept.id}
-                                label={`${cat === 'earth' ? '♠' : cat === 'water' ? '♥' : cat === 'plant' ? '♣' : cat === 'feature' ? '♦' : cat === 'settlement' ? '🏘️' : '🏰'} ${concept.label}`}
-                              >
-                                {getSymbolsByConcept(concept.id).map((s) => (
-                                  <option key={s.id} value={s.id}>
-                                    {s.icon} {s.name} — {s.variantName}
-                                  </option>
-                                ))}
-                              </optgroup>
-                            ))}
-                          </React.Fragment>
-                        )
-                      )}
-                    </select>
-                  </div>
-                </div>
+                )}
 
-                {/* Custom Primary & Secondary Tile Palette Overrides */}
-                <div className="flex items-center justify-between gap-2 text-xs bg-muted/30 p-2 rounded border border-border">
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-muted-foreground">
-                      Primary:
-                    </label>
-                    <input
-                      type="color"
-                      aria-label="Tile Primary Color"
-                      value={
-                        inspectedTile.customColors?.primary ||
-                        TERRAIN_PALETTE[inspectedTile.terrain]?.color ||
-                        '#86efac'
-                      }
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          customColors: {
-                            ...inspectedTile.customColors,
-                            primary: e.target.value,
-                          },
-                        })
-                      }
-                      className="h-6 w-8 rounded border border-border cursor-pointer"
-                    />
-                    <label className="text-[11px] font-medium text-muted-foreground">
-                      Secondary:
-                    </label>
-                    <input
-                      type="color"
-                      aria-label="Tile Secondary Color"
-                      value={
-                        inspectedTile.customColors?.secondary ||
-                        TERRAIN_PALETTE[inspectedTile.terrain]?.secondaryColor ||
-                        '#4ade80'
-                      }
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({
-                          customColors: {
-                            ...inspectedTile.customColors,
-                            secondary: e.target.value,
-                          },
-                        })
-                      }
-                      className="h-6 w-8 rounded border border-border cursor-pointer"
-                    />
-                  </div>
-                  {inspectedTile.customColors && (
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateInspectedTile({ customColors: undefined })}
-                      className="text-[10px] text-muted-foreground hover:text-foreground underline"
-                    >
-                      Reset Colors
-                    </button>
-                  )}
-                </div>
-
-                {/* River, Road & Territory Inspector Controls */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(inspectedTile.hasRiver)}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({ hasRiver: e.target.checked })
-                      }
-                      className="rounded"
-                    />
-                    <span>💧 River</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(inspectedTile.hasRoad)}
-                      onChange={(e) =>
-                        handleUpdateInspectedTile({ hasRoad: e.target.checked })
-                      }
-                      className="rounded"
-                    />
-                    <span>🛤️ Trade Road</span>
-                  </label>
-                </div>
-
-                {entities.length > 0 && (
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                      Controlling Faction / Territory
+                {/* LAYER 5: Controlling Faction Selector */}
+                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'realm') && entities.length > 0 && (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground block">
+                      Layer 5: Controlling Faction / Realm
                     </label>
                     <select
                       value={inspectedTile.territoryId || ''}
@@ -3226,7 +3621,7 @@ export function MapCanvas({
                       }
                       className="input w-full text-xs py-1 h-8"
                     >
-                      <option value="">Unclaimed / Neutral</option>
+                      <option value="">Unclaimed / Neutral Marchland</option>
                       {entities.map((ent) => (
                         <option key={ent.id} value={ent.id}>
                           {ent.icon || '🚩'} {ent.name} ({ent.category})
@@ -3235,6 +3630,28 @@ export function MapCanvas({
                     </select>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Read-only Slot Summary when viewing only */}
+            {isViewOnly && inspectedSlots.length > 0 && (
+              <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2">
+                <span className="text-xs font-bold text-primary">Tile Features & Slots:</span>
+                <div className="space-y-1">
+                  {inspectedSlots.map((slot) => (
+                    <div key={slot.id} className="text-xs flex items-center gap-1.5">
+                      <span>{slot.icon}</span>
+                      <span className="font-medium">{slot.name}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">({slot.category})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Strategic Province Dossier & Chronicle Annals */}
+            {(isViewOnly || sidebarLayerTab === 'all' || sidebarLayerTab === 'realm') && (
+              <div className="space-y-3">
 
                 {/* Phase 28: Strategic Province Dossier */}
                 {(() => {
@@ -3481,7 +3898,7 @@ export function MapCanvas({
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Full Traceable Event & Entity Lineage for this Tile */}

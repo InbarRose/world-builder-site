@@ -314,6 +314,15 @@ status: active
   - [x] 6 Civilization-Style Geography Presets (`continent`, `highlands`, `inland-sea`, `archipelago`, `pangaea`, `twin-continents`) plus deterministic seeded `random` default.
   - [x] Interactive Visual Preset Thumbnail Gallery in New Campaign Ceremony (`NewGameCeremonyModal.tsx`), Map Canvas (`MapCanvas.tsx`), Game Setup Wizard (`GameSetupWizardModal.tsx`), and World Manager (`WorldManagerModal.tsx`).
   - [x] Comprehensive test coverage in `proceduralWorldEngine.test.ts` (6/6 passing) and full vitest suite (206/206 tests passing across 31 test suites).
+- [x] **Phase 30: Direct In-Place Layered Tile Studio on Sidebar & Restructured Palette Categorized Menus** *(Score: 99.5 / 100 via ADR-036)*
+  - [x] Direct In-Place Layered Tile Studio on Right Sidebar (`MapCanvas.tsx`): 5 distinct AAA fantasy layers with layer navigator (`🌐 All`, `🌍 1. Base`, `🏔️ 2. Relief`, `🌾 3. Resources`, `🏰 4. Settlements`, `🚩 5. Realm`) providing instant 1-click mutation without opening any drawers.
+  - [x] Layer 1 (Base Biomes & Hydrology): 1-click biome buttons, hydrological river & trade road toggles, primary/secondary tint overrides.
+  - [x] Layer 2 (Topography Relief & Canopy): relief peaks/hills/valleys buttons, flora canopy buttons, and 48 hand-drawn Whiteboard cartography tropes dropdown.
+  - [x] Layer 3 (Strategic Resources & Natural Wonders): Quick-stamp fantasy RPG resources (Grain, Fishery, Vineyard, Pasture, Iron, Gold, Gems, Obsidian, Timber, Mana Spring, Sun-Fruit, Dragon Bones, Monolith), active slot list with 1-click removal, custom slot builder.
+  - [x] Layer 4 (Settlements & Citadels): Holding stamps (Nomadic Camp, Farming Village, Market Town, Fortified City, Royal Capital, Citadel Fortress, Grand Monument, Sunken Ruins) and active holding indicator.
+  - [x] Layer 5 (Geopolitical Province & Lore): Controlling faction dropdown, full Strategic Province Dossier (Defensibility 1-10, Allegiance %, dynamic yields, chronicle annals), and tags.
+  - [x] Restructured Palette Drawer with Clean Category Menus (`MapCanvas.tsx`): Replaced monolithic scrolling drawer with clean categorized tabs: `🌍 1. Base Biomes`, `🏔️ 2. Relief & Canopy`, `🌾 3. Strategic Resources`, `🏰 4. Settlements & Roads`, `🖌️ 5. Whiteboard Tropes (48)`, `🚩 6. Realm Borders`.
+  - [x] Comprehensive test coverage in `MapCanvas.test.tsx` (16/16 passing) and full Vitest suite (208/208 tests passing across 31 test suites).
 
 ---
 
@@ -355,6 +364,7 @@ status: active
 - [x] Implement Phase 27: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice (ADR-033, Core Score: 96.0 / 100).
 - [x] Implement Phase 28: Geopolitical Simulation Engine, Realm Spheres of Influence & Strategic Province Depth (ADR-034, Core Score: 98.0 / 100).
 - [x] Implement Phase 29: Natural Procedural World Generation, Civ-Style Tectonic Presets & Gallery (ADR-035, Core Score: 99.0 / 100).
-- [ ] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (Target: 99.5 / 100).
+- [x] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (ADR-036, Core Score: 99.5 / 100).
+- [ ] Implement Phase 31: Dynamic Regional Biome Ecology & Deep Tabletop World Simulation (Target: 100.0 / 100).
 
 

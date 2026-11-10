@@ -429,5 +429,90 @@ describe('MapCanvas Component', () => {
 
     fireEvent.touchEnd(viewport, { touches: [] })
   })
+
+  it('supports Direct In-Place Layered Tile Studio on the right sidebar with 1-click mutation and layer tabs', () => {
+    function DirectTileEditor() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(8, 8))
+      return <MapCanvas map={currentMap} worldName="Valoria" onChange={setCurrentMap} />
+    }
+
+    render(<DirectTileEditor />)
+
+    // Select tile (2, 3) on the canvas via mouseDown
+    const tile23 = screen.getByTestId('map-tile-2-3')
+    fireEvent.mouseDown(tile23)
+
+    // Sidebar should display coordinate header for Tile (2, 3)
+    expect(screen.getByText(/Coord \(2, 3\)/i)).toBeInTheDocument()
+
+    // Layer Navigator should be present with all 5 layers
+    expect(screen.getByRole('button', { name: /🌐 All/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /🌍 1\. Base/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /🏔️ 2\. Relief/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /🌾 3\. Res/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /🏰 4\. Holds/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /🚩 5\. Realm/i })).toBeInTheDocument()
+
+    // Switch to Layer 1 (Base Biomes)
+    fireEvent.click(screen.getByRole('button', { name: /🌍 1\. Base/i }))
+    expect(screen.getByText(/Layer 1: Base Terrain & Hydrology/i)).toBeInTheDocument()
+
+    // 1-Click toggle River on tile (2, 3)
+    const riverCheckbox = screen.getByRole('checkbox', { name: /💧 River/i })
+    fireEvent.change(riverCheckbox, { target: { checked: true } })
+    expect(riverCheckbox).toBeChecked()
+
+    // Switch to Layer 3 (Resources)
+    fireEvent.click(screen.getByRole('button', { name: /🌾 3\. Res/i }))
+    expect(screen.getByText(/Layer 3: Strategic Resources & Wonders/i)).toBeInTheDocument()
+
+    // 1-Click stamp Grain Fields resource
+    const grainBtn = screen.getByRole('button', { name: /🌾 Grain Fields/i })
+    fireEvent.click(grainBtn)
+
+    // Grain Fields slot should now appear in active slots list
+    expect(screen.getAllByText('Grain Fields').length).toBeGreaterThanOrEqual(2)
+
+    // Switch to Layer 4 (Holdings)
+    fireEvent.click(screen.getByRole('button', { name: /🏰 4\. Holds/i }))
+    expect(screen.getByText(/Layer 4: Settlements & Holdings/i)).toBeInTheDocument()
+
+    // 1-Click set Market Town holding
+    const townBtn = screen.getByRole('button', { name: /🏘️ Market/i })
+    fireEvent.click(townBtn)
+
+    // Tile (2, 3) should now display town
+    expect(screen.getByText(/Active: town/i)).toBeInTheDocument()
+  })
+
+  it('supports Restructured Palette Drawer categorized menus', () => {
+    function CategorizedPaletteMap() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(8, 8))
+      return <MapCanvas map={currentMap} worldName="Valoria" onChange={setCurrentMap} />
+    }
+
+    render(<CategorizedPaletteMap />)
+
+    // Open Palette Drawer
+    const paletteBtn = screen.getByRole('button', { name: /Palette & Overlays/i })
+    fireEvent.click(paletteBtn)
+
+    // Palette Category Menu tabs should be visible
+    expect(screen.getByRole('button', { name: /1\. Base Biomes/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /2\. Relief & Canopy/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /3\. Strategic Resources/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /4\. Settlements & Roads/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /5\. Whiteboard Tropes/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /6\. Realm Borders/i })).toBeInTheDocument()
+
+    // Switch to Tab 2: Relief & Canopy
+    fireEvent.click(screen.getByRole('button', { name: /2\. Relief & Canopy/i }))
+    expect(screen.getAllByText(/Elevation Relief/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/Flora Canopy/i).length).toBeGreaterThanOrEqual(1)
+
+    // Switch to Tab 6: Realm Borders
+    fireEvent.click(screen.getByRole('button', { name: /6\. Realm Borders/i }))
+    expect(screen.getByTestId('project-realm-borders-btn')).toBeInTheDocument()
+  })
 })
 
