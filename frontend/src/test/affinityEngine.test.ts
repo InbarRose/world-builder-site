@@ -63,6 +63,7 @@ describe('affinityEngine - Preset Metadata, Affinities, and Weighted Bot Selecti
     world.map.tiles['2,2'] = {
       ...world.map.tiles['2,2'],
       terrain: 'desert',
+      hasRiver: false,
     }
 
     const portPreset = STAGE_ACTION_PRESETS.find((p) => p.id === 'civ_const_port')!
