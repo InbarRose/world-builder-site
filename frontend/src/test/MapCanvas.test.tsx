@@ -13,25 +13,34 @@ describe('MapCanvas Component', () => {
     render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
 
     expect(screen.getByText(/Eldoria Atlas \(6 × 4\)/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Select & Inspect/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Paint Brush/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Bucket Fill/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Inspect Tile/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /14×9/i })).toBeInTheDocument()
   })
 
-  it('paints a tile when clicked in brush mode and supports dimension resizing', () => {
+  it('defaults to safe inspect mode preventing accidental painting, and paints when paint brush is armed', () => {
     const map = createInitialMap(4, 4)
     const handleChange = vi.fn()
 
     render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
 
+    // 1. By default, activeTool is 'inspect': clicking a tile does NOT mutate the map
     const tileBtn = screen.getByTestId('map-tile-0-0')
     fireEvent.mouseDown(tileBtn)
+    expect(handleChange).not.toHaveBeenCalled()
 
+    // 2. Arm Paint Brush tool
+    fireEvent.click(screen.getByRole('button', { name: /Paint Brush/i }))
+    expect(screen.getByTestId('active-painting-banner')).toBeInTheDocument()
+
+    // 3. Clicking tile now paints with selected terrain
+    fireEvent.mouseDown(tileBtn)
     expect(handleChange).toHaveBeenCalledTimes(1)
     const updatedMap = handleChange.mock.calls[0][0]
-    expect(updatedMap.tiles['0,0'].terrain).toBe('forest')
+    expect(updatedMap.tiles['0,0'].terrain).toBe('plains')
 
+    // 4. Test dimension resizing
     fireEvent.click(screen.getByRole('button', { name: /14×9/i }))
     expect(handleChange).toHaveBeenCalledTimes(2)
     expect(handleChange.mock.calls[1][0].width).toBe(14)
@@ -107,6 +116,9 @@ describe('MapCanvas Component', () => {
     // Initially, both Undo and Redo are disabled
     expect(undoBtn).toBeDisabled()
     expect(redoBtn).toBeDisabled()
+
+    // Arm Paint Brush
+    fireEvent.click(screen.getByRole('button', { name: /Paint Brush/i }))
 
     // 1. Single click brush paint on (0, 0)
     const tile00 = screen.getByTestId('map-tile-0-0')
@@ -337,7 +349,8 @@ describe('MapCanvas Component', () => {
 
     render(<MultiRadiusMap />)
 
-    // Open palette drawer
+    // Arm Paint Brush and open palette drawer
+    fireEvent.click(screen.getByRole('button', { name: /Paint Brush/i }))
     const paletteBtn = screen.getByRole('button', { name: /Palette & Overlays/i })
     fireEvent.click(paletteBtn)
 
@@ -350,9 +363,9 @@ describe('MapCanvas Component', () => {
     fireEvent.mouseDown(tile33)
 
     // Tile (3, 3) and adjacent neighbor (3, 4) should both have been mutated
-    expect(tile33).toHaveAttribute('title', expect.stringContaining('Forest'))
+    expect(tile33).toHaveAttribute('title', expect.stringContaining('Grasslands & Meadows'))
     const tile34 = screen.getByTestId('map-tile-3-4')
-    expect(tile34).toHaveAttribute('title', expect.stringContaining('Forest'))
+    expect(tile34).toHaveAttribute('title', expect.stringContaining('Grasslands & Meadows'))
   })
 
   it('supports Layer Stacking drawer, toggling layers, and procedural watershed/road generation', () => {
@@ -513,6 +526,100 @@ describe('MapCanvas Component', () => {
     // Switch to Tab 6: Realm Borders
     fireEvent.click(screen.getByRole('button', { name: /6\. Realm Borders/i }))
     expect(screen.getByTestId('project-realm-borders-btn')).toBeInTheDocument()
+  })
+
+  it('supports 1-Click Domain Switcher (Land vs Water) in header and Layer 1', () => {
+    function DomainMapTest() {
+      const [currentMap, setCurrentMap] = React.useState(() => {
+        const m = createInitialMap(4, 4)
+        m.tiles['1,1'] = {
+          ...m.tiles['1,1'],
+          domain: 'water',
+          terrain: 'ocean',
+        }
+        return m
+      })
+      return <MapCanvas map={currentMap} worldName="DomainRealm" onChange={setCurrentMap} />
+    }
+
+    render(<DomainMapTest />)
+
+    // Select tile (1, 1) safely
+    fireEvent.click(screen.getByTestId('map-tile-1-1'))
+
+    // Initially tile is in Water Domain
+    expect(screen.getByTestId('domain-switcher-segmented-bar')).toBeInTheDocument()
+
+    // 1-Click switch to Land Domain
+    fireEvent.click(screen.getByTestId('domain-switch-land-btn'))
+    // Tile (1, 1) should now be in Land domain and have Grasslands & Meadows (Plains) terrain
+    expect(screen.getByText(/Coord \(1, 1\) · Grasslands & Meadows/i)).toBeInTheDocument()
+
+    // 1-Click switch to Water Domain via Layer 1
+    fireEvent.click(screen.getByTestId('layer1-domain-water-btn'))
+    expect(screen.getByText(/Coord \(1, 1\) · Coastal Sea/i)).toBeInTheDocument()
+  })
+
+  it('supports Clean Single-Change Clicks: setting grassland cleans extraneous flora, relief, and whiteboard doodles', () => {
+    function CleanClicksMapTest() {
+      const [currentMap, setCurrentMap] = React.useState(() => {
+        const m = createInitialMap(4, 4)
+        // Seed tile 2,2 with mountain, forest, and whiteboard symbol
+        m.tiles['2,2'] = {
+          ...m.tiles['2,2'],
+          domain: 'land',
+          terrain: 'mountain',
+          relief: 'mountain',
+          flora: 'forest',
+          cartographicSymbol: 'mountain-peak',
+        }
+        return m
+      })
+      return <MapCanvas map={currentMap} worldName="CleanWorld" onChange={setCurrentMap} />
+    }
+
+    render(<CleanClicksMapTest />)
+
+    // Select tile 2,2
+    fireEvent.click(screen.getByTestId('map-tile-2-2'))
+
+    // Tile 2,2 currently has Mountain (Alpine Peaks) terrain
+    expect(screen.getByText(/Coord \(2, 2\) · Alpine Peaks/i)).toBeInTheDocument()
+
+    // Click Plains (Grasslands) in Layer 1 via testid
+    const plainsBtn = screen.getByTestId('layer1-biome-plains-btn')
+    fireEvent.click(plainsBtn)
+
+    // Verify tile 2,2 is now pure Plains, with relief reset to none and flora reset to none
+    // No auto-added trees or whiteboard drawings
+    expect(
+      screen.getByText(/Coord \(2, 2\) · Grasslands & Meadows · 0 active slot\(s\)/i)
+    ).toBeInTheDocument()
+  })
+
+  it('supports Exit to Select button and hotkeys from armed painting state', () => {
+    function HotkeysMapTest() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(4, 4))
+      return <MapCanvas map={currentMap} worldName="HotkeyRealm" onChange={setCurrentMap} />
+    }
+
+    render(<HotkeysMapTest />)
+
+    // 1. Arm Paint Brush
+    fireEvent.click(screen.getByRole('button', { name: /Paint Brush/i }))
+    expect(screen.getByTestId('active-painting-banner')).toBeInTheDocument()
+
+    // 2. Click Exit to Select button
+    fireEvent.click(screen.getByTestId('exit-to-select-btn'))
+    expect(screen.queryByTestId('active-painting-banner')).not.toBeInTheDocument()
+
+    // 3. Press KeyB to arm Paint Brush
+    fireEvent.keyDown(window, { code: 'KeyB' })
+    expect(screen.getByTestId('active-painting-banner')).toBeInTheDocument()
+
+    // 4. Press Escape to return to Safe Select
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByTestId('active-painting-banner')).not.toBeInTheDocument()
   })
 })
 

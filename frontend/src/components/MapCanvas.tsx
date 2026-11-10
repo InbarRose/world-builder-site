@@ -88,7 +88,6 @@ import {
 } from '../engine/geopoliticalEngine'
 import {
   renderCartographicMarkerSVG,
-  resolveCartographicSymbol,
   getSymbolsByCategory,
   getSymbolsByConcept,
   getConceptsByCategory,
@@ -212,7 +211,7 @@ function TileCartographySvg({
   riverAdjacencies = [],
   roadAdjacencies = [],
   cartographicSymbol,
-  overlay,
+  overlay: _overlay,
 }: {
   col: number
   row: number
@@ -260,15 +259,8 @@ function TileCartographySvg({
   const showOrganic = !simpleMode && enableOrganicShading
 
   const effectiveCartoSymbol =
-    showRelief && !simpleMode
-      ? cartographicSymbol ||
-        resolveCartographicSymbol({
-          cartographicSymbol,
-          relief: effectiveRelief,
-          flora: effectiveFlora,
-          terrain,
-          overlay,
-        })
+    showRelief && !simpleMode && cartographicSymbol
+      ? cartographicSymbol
       : null
 
   return (
@@ -579,7 +571,7 @@ export function MapCanvas({
 }: MapCanvasProps) {
   const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
   const tileSizePx = 42
-  const [activeTool, setActiveTool] = useState<MapTool>('brush')
+  const [activeTool, setActiveTool] = useState<MapTool>('inspect')
   const [renderStyle, setRenderStyle] = useState<AtlasRenderStyle>('tilt-25d')
   const [shadingMode, setShadingMode] = useState<'organic' | 'crisp'>('organic')
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
@@ -678,7 +670,7 @@ export function MapCanvas({
     return projectRealmInfluence(map, entities).geopolitical
   }, [map, entities])
 
-  const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('forest')
+  const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('plains')
   const [selectedRelief, setSelectedRelief] = useState<ReliefType>('none')
   const [selectedFlora, setSelectedFlora] = useState<FloraType>('none')
   const [secondaryTerrain, setSecondaryTerrain] = useState<TerrainType>('plains')
@@ -992,7 +984,7 @@ export function MapCanvas({
     }
   }, [handleMouseUpGlobal])
 
-  // Keyboard Shortcuts: Ctrl+Z (Undo) and Ctrl+Y / Ctrl+Shift+Z (Redo)
+  // Keyboard Shortcuts: Ctrl+Z (Undo), Ctrl+Y (Redo), S/V/Esc (Select Mode), B (Brush)
   useEffect(() => {
     if (isViewOnly) return
 
@@ -1008,17 +1000,25 @@ export function MapCanvas({
       }
 
       const isCtrlOrMeta = e.ctrlKey || e.metaKey
-      if (!isCtrlOrMeta) return
+      if (isCtrlOrMeta) {
+        if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+          e.preventDefault()
+          handleUndo()
+        } else if (
+          e.key.toLowerCase() === 'y' ||
+          (e.key.toLowerCase() === 'z' && e.shiftKey)
+        ) {
+          e.preventDefault()
+          handleRedo()
+        }
+        return
+      }
 
-      if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        handleUndo()
-      } else if (
-        e.key.toLowerCase() === 'y' ||
-        (e.key.toLowerCase() === 'z' && e.shiftKey)
-      ) {
-        e.preventDefault()
-        handleRedo()
+      // Safe Tool Switching Hotkeys
+      if (e.key === 'Escape' || e.code === 'KeyS' || e.code === 'KeyV') {
+        setActiveTool('inspect')
+      } else if (e.code === 'KeyB') {
+        setActiveTool('brush')
       }
     }
 
@@ -1052,7 +1052,7 @@ export function MapCanvas({
   const inspectedDomain = getTileDomain(inspectedTile)
   const inspectedSlots = getEffectiveTileSlots(inspectedTile, entities)
 
-  const applyToolToTile = (col: number, row: number) => {
+  const applyToolToTile = (col: number, row: number, altKey = false) => {
     const id = getTileId(col, row)
     setSelectedTileId(id)
 
@@ -1069,7 +1069,7 @@ export function MapCanvas({
       return
     }
 
-    if (isViewOnly || activeTool === 'inspect') {
+    if (isViewOnly || activeTool === 'inspect' || altKey) {
       return
     }
 
@@ -1142,24 +1142,46 @@ export function MapCanvas({
     if (activeTool === 'brush') {
       hasStrokeMutatedRef.current = true
       const nextTiles = { ...map.tiles }
+      const targetDomain =
+        selectedTerrain === 'water' || selectedTerrain === 'ocean' ? 'water' : 'land'
+      const isPlains = selectedTerrain === 'plains'
+
       for (const coord of affectedCoords) {
         const tid = getTileId(coord.col, coord.row)
         const existing = nextTiles[tid] || createDefaultTile(coord.col, coord.row)
         nextTiles[tid] = {
           ...existing,
+          domain: targetDomain,
           terrain: selectedTerrain,
-          relief: selectedRelief !== 'none' ? selectedRelief : existing.relief,
-          flora: selectedFlora !== 'none' ? selectedFlora : existing.flora,
+          relief:
+            selectedRelief !== 'none'
+              ? selectedRelief
+              : isPlains
+              ? 'none'
+              : existing.relief,
+          flora:
+            selectedFlora !== 'none'
+              ? selectedFlora
+              : isPlains
+              ? 'none'
+              : existing.flora,
           secondaryTerrain: selectedPattern === 'solid' ? undefined : secondaryTerrain,
           pattern: selectedPattern,
           coloringMode: selectedColoringMode,
-          overlay: selectedOverlay !== 'none' ? selectedOverlay : existing.overlay,
-          hasRiver: paintRiver ? true : existing.hasRiver,
-          hasRoad: paintRoad ? true : existing.hasRoad,
+          overlay:
+            selectedOverlay !== 'none'
+              ? selectedOverlay
+              : targetDomain === 'water'
+              ? 'none'
+              : existing.overlay,
+          hasRiver: paintRiver ? true : targetDomain === 'water' ? false : existing.hasRiver,
+          hasRoad: targetDomain === 'water' ? false : paintRoad ? true : existing.hasRoad,
           territoryId: selectedTerritoryId || existing.territoryId,
           cartographicSymbol:
             selectedCartographicSymbol !== null
               ? selectedCartographicSymbol || undefined
+              : isPlains
+              ? undefined
               : existing.cartographicSymbol,
         }
       }
@@ -1181,6 +1203,99 @@ export function MapCanvas({
   ) => {
     pushToUndo(map)
     onChange(paintTile(map, inspectedTile.col, inspectedTile.row, updates))
+  }
+
+  // 1-Click Clean Domain Switcher: Instantly switch between Land and Water without clutter
+  const handleSwitchDomain = (targetDomain: 'land' | 'water') => {
+    if (targetDomain === 'water') {
+      handleUpdateInspectedTile({
+        domain: 'water',
+        terrain: 'water',
+        relief: 'none',
+        flora: 'none',
+        hasRoad: false,
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else {
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain:
+          inspectedTile.terrain === 'ocean' || inspectedTile.terrain === 'water'
+            ? 'plains'
+            : inspectedTile.terrain,
+        relief: 'none',
+        flora: 'none',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    }
+  }
+
+  // Clean Single-Change Biome Selection: Prevents leftover trees/relief/doodles when switching biomes
+  const handleSelectTerrainBiome = (terrainId: TerrainType) => {
+    if (terrainId === 'water' || terrainId === 'ocean') {
+      handleUpdateInspectedTile({
+        domain: 'water',
+        terrain: terrainId,
+        relief: 'none',
+        flora: 'none',
+        hasRoad: false,
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else if (terrainId === 'mountain') {
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain: 'mountain',
+        relief: 'mountain',
+        flora: 'none',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else if (terrainId === 'forest') {
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain: 'plains',
+        relief: 'none',
+        flora: 'forest',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else if (terrainId === 'jungle') {
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain: 'plains',
+        relief: 'none',
+        flora: 'jungle',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else if (terrainId === 'swamp') {
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain: 'swamp',
+        relief: 'none',
+        flora: 'marsh',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    } else {
+      // plains, earth, desert, tundra, canyon, volcano
+      handleUpdateInspectedTile({
+        domain: 'land',
+        terrain: terrainId,
+        relief:
+          terrainId === 'canyon'
+            ? 'canyon'
+            : terrainId === 'volcano'
+            ? 'volcano'
+            : 'none',
+        flora: 'none',
+        cartographicSymbol: undefined,
+        customColors: undefined,
+      })
+    }
   }
 
   const handleAddCustomSlotToInspected = (
@@ -1412,56 +1527,80 @@ export function MapCanvas({
             {!isViewOnly && (
               <>
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
+                {/* 1. Safe Select & Inspect Tool (Default & Primary) */}
                 <button
                   type="button"
+                  data-testid="tool-inspect-btn"
+                  onClick={() => setActiveTool('inspect')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                    activeTool === 'inspect'
+                      ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/40'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  }`}
+                  title="Safe Select & Inspect Mode: Click any tile to inspect and edit its layers safely without accidental painting (Hotkey: S, V, or Esc)"
+                  aria-label="Select & Inspect Tool"
+                >
+                  <MousePointer className="h-3.5 w-3.5" />
+                  <span>Select & Inspect</span>
+                  <span className="text-[10px] opacity-75 font-mono">[S]</span>
+                </button>
+
+                {/* 2. Paint Brush Tool */}
+                <button
+                  type="button"
+                  data-testid="tool-brush-btn"
                   onClick={() => setActiveTool('brush')}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'brush'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
                       : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }`}
+                  title="Paint Brush: Paint terrain and features across map tiles (Hotkey: B)"
+                  aria-label="Paint Brush Tool"
                 >
                   <Paintbrush className="h-3.5 w-3.5" />
                   <span>Paint Brush</span>
+                  <span className="text-[10px] opacity-75 font-mono">[B]</span>
                 </button>
+
+                {/* 3. Bucket Fill Tool */}
                 <button
                   type="button"
+                  data-testid="tool-fill-btn"
                   onClick={() => setActiveTool('fill')}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fill'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
                       : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }`}
+                  title="Bucket Fill: Flood fill contiguous matching terrain"
+                  aria-label="Bucket Fill Tool"
                 >
                   <PaintBucket className="h-3.5 w-3.5" />
                   <span>Bucket Fill</span>
                 </button>
+
+                {/* 4. Erase Tool */}
                 <button
                   type="button"
-                  onClick={() => setActiveTool('inspect')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'inspect'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  <MousePointer className="h-3.5 w-3.5" />
-                  <span>Inspect Tile</span>
-                </button>
-                <button
-                  type="button"
+                  data-testid="tool-erase-btn"
                   onClick={() => setActiveTool('erase')}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'erase'
-                      ? 'bg-destructive text-destructive-foreground'
+                      ? 'bg-destructive text-destructive-foreground shadow-sm'
                       : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }`}
+                  title="Erase: Reset tile to open ocean water"
+                  aria-label="Erase Tool"
                 >
                   <Eraser className="h-3.5 w-3.5" />
                   <span>Erase</span>
                 </button>
+
+                {/* 5. Pan Map Tool */}
                 <button
                   type="button"
+                  data-testid="tool-pan-btn"
                   onClick={() => setActiveTool('pan')}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'pan'
@@ -1469,12 +1608,16 @@ export function MapCanvas({
                       : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }`}
                   title="Pan Map Camera (or hold Spacebar + Drag)"
+                  aria-label="Pan Map Tool"
                 >
                   <Hand className="h-3.5 w-3.5" />
                   <span>Pan Map</span>
                 </button>
+
+                {/* 6. Fog of War Tool */}
                 <button
                   type="button"
+                  data-testid="tool-fog-btn"
                   onClick={() => setActiveTool('fog')}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fog'
@@ -1487,8 +1630,11 @@ export function MapCanvas({
                   <CloudFog className="h-3.5 w-3.5" />
                   <span>Fog / Reveal</span>
                 </button>
+
+                {/* 7. Ruler Tool */}
                 <button
                   type="button"
+                  data-testid="tool-ruler-btn"
                   onClick={() => {
                     setActiveTool('ruler')
                     setRulerStart(null)
@@ -1807,6 +1953,42 @@ export function MapCanvas({
           </div>
         </div>
 
+        {/* Safe Mode Indicator / Active Painting Warning Strip */}
+        {!isViewOnly && activeTool !== 'inspect' && activeTool !== 'pan' && (
+          <div
+            data-testid="active-painting-banner"
+            className="pt-2 border-t border-amber-500/30 flex flex-wrap items-center justify-between gap-2 px-1 text-xs bg-amber-500/10 -mx-3 -mb-1 px-3 py-1.5 rounded-b"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+              <span className="font-bold text-amber-800 dark:text-amber-300">
+                {activeTool === 'brush'
+                  ? `🎨 Paint Brush Armed: ${TERRAIN_PALETTE[selectedTerrain]?.label || selectedTerrain}`
+                  : activeTool === 'fill'
+                  ? `🪣 Bucket Fill Armed: ${TERRAIN_PALETTE[selectedTerrain]?.label || selectedTerrain}`
+                  : activeTool === 'erase'
+                  ? '🧹 Erase Tool Armed (reverts to ocean)'
+                  : activeTool === 'fog'
+                  ? '🌫️ Fog of War Tool Armed'
+                  : '📏 Distance Ruler Armed'}
+              </span>
+              <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                Clicking map tiles will apply edits. Press [S] or hold [Alt] to select safely.
+              </span>
+            </div>
+            <button
+              type="button"
+              data-testid="exit-to-select-btn"
+              onClick={() => setActiveTool('inspect')}
+              className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center gap-1.5 transition-colors shadow-2xs"
+              title="Return to Safe Select & Inspect (Hotkey: S, V, or Esc)"
+            >
+              <MousePointer className="h-3 w-3" />
+              <span>Exit to Select [S]</span>
+            </button>
+          </div>
+        )}
+
         {/* Collapsible Dimensions & Geography Template Drawer */}
         {!isViewOnly && showGridDrawer && (
           <div className="pt-2 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -1953,7 +2135,7 @@ export function MapCanvas({
         )}
 
         {/* Collapsible Brush Palette & Multi-Layer Overlay Drawer */}
-        {!isViewOnly && showPaletteDrawer && (activeTool === 'brush' || activeTool === 'fill') && (
+        {!isViewOnly && showPaletteDrawer && (
           <div className="pt-2 border-t border-border space-y-3">
             {/* Category Menu Navigation Tabs */}
             <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-border/60">
@@ -2560,6 +2742,14 @@ export function MapCanvas({
                 ? 'grabbing'
                 : isSpacePressed || activeTool === 'pan'
                 ? 'grab'
+                : activeTool === 'inspect'
+                ? 'pointer'
+                : activeTool === 'ruler'
+                ? 'crosshair'
+                : activeTool === 'erase'
+                ? 'not-allowed'
+                : activeTool === 'brush' || activeTool === 'fill' || activeTool === 'fog'
+                ? 'crosshair'
                 : 'default',
             }}
           >
@@ -2659,18 +2849,18 @@ export function MapCanvas({
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
                               return
                             }
-                            applyToolToTile(col, row)
+                            applyToolToTile(col, row, e.altKey)
                           }}
                           onMouseDown={(e) => {
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
                               return
                             }
-                            if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase')) {
+                            if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase') && !e.altKey) {
                               setIsDragging(true)
                               dragStartMapRef.current = map
                               hasStrokeMutatedRef.current = false
                             }
-                            applyToolToTile(col, row)
+                            applyToolToTile(col, row, e.altKey)
                           }}
                           onMouseEnter={() => {
                             if (isSpacePressed || activeTool === 'pan' || isPanning) {
@@ -3051,20 +3241,54 @@ export function MapCanvas({
         <div className="xl:col-span-4 card p-4 sm:p-5 space-y-4 h-fit">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
                 <h3 className="text-base font-bold">
                   {inspectedTile.label || `Tile (${inspectedTile.col}, ${inspectedTile.row})`}
                 </h3>
-                <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                    inspectedDomain === 'land'
-                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                      : 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
-                  }`}
-                >
-                  {inspectedDomain} Domain
-                </span>
+                {!isViewOnly ? (
+                  <div
+                    data-testid="domain-switcher-segmented-bar"
+                    className="flex items-center p-0.5 rounded-lg bg-muted/60 border border-border"
+                  >
+                    <button
+                      type="button"
+                      data-testid="domain-switch-land-btn"
+                      onClick={() => handleSwitchDomain('land')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition-all ${
+                        inspectedDomain === 'land'
+                          ? 'bg-emerald-600 text-white shadow-2xs ring-1 ring-emerald-400'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      }`}
+                      title="Switch to Land Domain (1-Click clean Plains terrain)"
+                    >
+                      <span>🌱 Land</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="domain-switch-water-btn"
+                      onClick={() => handleSwitchDomain('water')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition-all ${
+                        inspectedDomain === 'water'
+                          ? 'bg-sky-600 text-white shadow-2xs ring-1 ring-sky-400'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      }`}
+                      title="Switch to Water Domain (1-Click clean Ocean/Sea)"
+                    >
+                      <span>🌊 Water</span>
+                    </button>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                      inspectedDomain === 'land'
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                    }`}
+                  >
+                    {inspectedDomain} Domain
+                  </span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Coord ({inspectedTile.col}, {inspectedTile.row}) ·{' '}
@@ -3217,19 +3441,52 @@ export function MapCanvas({
                       </span>
                     </div>
 
-                    {/* Quick Biome Buttons Grid */}
+                    {/* 1-Click Domain Quick Switch */}
+                    <div className="flex items-center gap-1.5 p-1 rounded-md bg-background/80 border border-border">
+                      <button
+                        type="button"
+                        data-testid="layer1-domain-land-btn"
+                        onClick={() => handleSwitchDomain('land')}
+                        className={`flex-1 py-1 px-2 rounded text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                          inspectedDomain === 'land'
+                            ? 'bg-emerald-600 text-white shadow-2xs font-bold ring-1 ring-emerald-400'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        }`}
+                        title="1-Click Switch to Land Domain (sets clean plains)"
+                      >
+                        <span>🌱</span>
+                        <span>Land Domain</span>
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="layer1-domain-water-btn"
+                        onClick={() => handleSwitchDomain('water')}
+                        className={`flex-1 py-1 px-2 rounded text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                          inspectedDomain === 'water'
+                            ? 'bg-sky-600 text-white shadow-2xs font-bold ring-1 ring-sky-400'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        }`}
+                        title="1-Click Switch to Water Domain (sets clean ocean water)"
+                      >
+                        <span>🌊</span>
+                        <span>Water Domain</span>
+                      </button>
+                    </div>
+
+                    {/* Quick Biome Buttons Grid (Clean Single-Change Clicks) */}
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
                       {Object.values(TERRAIN_PALETTE).map((t) => (
                         <button
                           key={t.id}
                           type="button"
-                          onClick={() => handleUpdateInspectedTile({ terrain: t.id })}
+                          data-testid={`layer1-biome-${t.id}-btn`}
+                          onClick={() => handleSelectTerrainBiome(t.id)}
                           className={`p-1 rounded border text-xs flex flex-col items-center gap-0.5 transition-all ${
                             inspectedTile.terrain === t.id
                               ? 'ring-2 ring-primary border-primary font-bold scale-102 bg-primary/20 text-foreground'
                               : 'border-border/70 bg-background/80 hover:bg-muted text-muted-foreground'
                           }`}
-                          title={`Set base biome to ${t.label}`}
+                          title={`Set base biome to ${t.label} (cleans extraneous leftover relief and flora)`}
                         >
                           <span className="text-sm">{t.symbol}</span>
                           <span className="text-[9px] truncate max-w-full">{t.label.split(' ')[0]}</span>
@@ -3387,7 +3644,7 @@ export function MapCanvas({
                           }
                           className="input w-full text-xs py-1 h-8"
                         >
-                          <option value="">Auto (from relief/flora)</option>
+                          <option value="">None / Off (Standard Map Display)</option>
                           {(['earth', 'water', 'plant', 'feature', 'settlement', 'construction'] as CartographicCategory[]).map(
                             (cat) => (
                               <React.Fragment key={cat}>
