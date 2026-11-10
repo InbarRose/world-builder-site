@@ -26,6 +26,7 @@ import {
   getConnectedRoadAdjacencies,
   generateConnectedPathD,
 } from './watershedPathEngine'
+import { generateNaturalWorld } from './proceduralWorldEngine'
 
 export const DEFAULT_MAP_WIDTH = 20
 export const DEFAULT_MAP_HEIGHT = 12
@@ -394,114 +395,19 @@ export function getEffectiveTileSlots(
 export function createInitialMap(
   width: number = DEFAULT_MAP_WIDTH,
   height: number = DEFAULT_MAP_HEIGHT,
-  preset: GeographyPreset = 'continent',
+  preset: GeographyPreset = 'random',
   rng?: () => number
 ): MapState {
-  const tiles: Record<string, MapTile> = {}
-  const centerX = (width - 1) / 2
-  const centerY = (height - 1) / 2
-  const radiusX = width * 0.35
-  const radiusY = height * 0.35
+  const seed = rng
+    ? `map-seed-${Math.floor(rng() * 1000000)}`
+    : `world-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const jitter = rng ? (rng() - 0.5) * 0.28 : 0
-      let terrain: TerrainType = 'ocean'
-      let relief: ReliefType = 'none'
-      let flora: FloraType = 'none'
-
-      if (preset === 'archipelago') {
-        const c1 =
-          Math.pow((col - width * 0.25) / (width * 0.16), 2) +
-          Math.pow((row - height * 0.35) / (height * 0.22), 2)
-        const c2 =
-          Math.pow((col - width * 0.65) / (width * 0.18), 2) +
-          Math.pow((row - height * 0.6) / (height * 0.22), 2)
-        const c3 =
-          Math.pow((col - width * 0.5) / (width * 0.12), 2) +
-          Math.pow((row - height * 0.25) / (height * 0.16), 2)
-        const minDist = Math.min(c1, c2, c3) + jitter
-        if (minDist < 0.36) {
-          terrain = 'earth'
-          relief = 'hills'
-        } else if (minDist < 0.85) {
-          terrain = 'plains'
-          flora = minDist < 0.52 ? 'forest' : 'none'
-        } else if (minDist < 1.15) {
-          terrain = 'water'
-        }
-      } else if (preset === 'twin-continents') {
-        const leftDist =
-          Math.pow((col - width * 0.26) / (width * 0.2), 2) +
-          Math.pow((row - centerY) / (height * 0.36), 2) +
-          jitter
-        const rightDist =
-          Math.pow((col - width * 0.74) / (width * 0.2), 2) +
-          Math.pow((row - centerY) / (height * 0.36), 2) +
-          jitter
-        const d = Math.min(leftDist, rightDist)
-        if (d < 0.25) {
-          terrain = 'earth'
-          relief = 'mountain'
-        } else if (d < 0.85) {
-          terrain = 'plains'
-        } else if (d < 1.1) {
-          terrain = 'water'
-        }
-      } else if (preset === 'inland-sea') {
-        const distFromCenter =
-          Math.pow((col - centerX) / radiusX, 2) +
-          Math.pow((row - centerY) / radiusY, 2) +
-          jitter
-        if (distFromCenter < 0.35) {
-          terrain = 'water'
-        } else if (distFromCenter < 1.2) {
-          terrain = 'plains'
-          if (distFromCenter > 0.95) relief = 'hills'
-        } else {
-          terrain = 'earth'
-          relief = 'mountain'
-        }
-      } else if (preset === 'pangaea') {
-        const normDist =
-          Math.pow((col - centerX) / (width * 0.44), 2) +
-          Math.pow((row - centerY) / (height * 0.44), 2) +
-          jitter
-        if (normDist < 0.2) {
-          terrain = 'mountain'
-          relief = 'mountain'
-        } else if (normDist < 0.42) {
-          terrain = 'earth'
-          relief = 'hills'
-        } else if (normDist < 0.92) {
-          terrain = 'plains'
-        } else if (normDist < 1.08) {
-          terrain = 'water'
-        }
-      } else {
-        // Standard central continent: mostly calm plains with a central spine so the map starts clean
-        const normDist =
-          Math.pow((col - centerX) / radiusX, 2) +
-          Math.pow((row - centerY) / radiusY, 2) +
-          jitter
-        if (normDist < 0.22) {
-          terrain = 'earth'
-          relief = 'hills'
-        } else if (normDist < 0.85) {
-          terrain = 'plains'
-        } else if (normDist < 1.05) {
-          terrain = 'water'
-        }
-      }
-
-      const tile = createDefaultTile(col, row, terrain)
-      tile.relief = relief
-      tile.flora = flora
-      tiles[tile.id] = tile
-    }
-  }
-
-  return { width, height, tiles }
+  return generateNaturalWorld({
+    width,
+    height,
+    preset,
+    seed,
+  })
 }
 
 export function resizeMap(map: MapState, newWidth: number, newHeight: number): MapState {

@@ -139,6 +139,12 @@ describe('watershedPathEngine', () => {
   describe('Connected Splines & Layer Stacking', () => {
     it('detects adjacent connected road and river neighbors', () => {
       const map = createInitialMap(5, 5)
+      Object.values(map.tiles).forEach((t) => {
+        t.terrain = 'plains'
+        t.domain = 'land'
+        t.hasRoad = false
+        t.hasRiver = false
+      })
       map.tiles['2,2'] = { ...createDefaultTile(2, 2, 'plains'), hasRoad: true, hasRiver: true }
       map.tiles['2,1'] = { ...createDefaultTile(2, 1, 'plains'), hasRoad: true }
       map.tiles['3,2'] = { ...createDefaultTile(3, 2, 'plains'), hasRiver: true }

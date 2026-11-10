@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { X, Sparkles, Compass, Users, Layers, ShieldCheck, Dice5 } from 'lucide-react'
-import { GameMode, PlayerSeat, StageId, WorldState } from '../engine/types'
+import { GameMode, GeographyPreset, PlayerSeat, StageId, WorldState } from '../engine/types'
 import { createNewWorld } from '../engine/storageService'
+import { createInitialMap, DEFAULT_MAP_WIDTH, DEFAULT_MAP_HEIGHT } from '../engine/mapEngine'
+import { ALL_GEOGRAPHY_PRESETS } from '../engine/proceduralWorldEngine'
 import { playStageAdvanceSound, triggerHapticFeedback } from '../engine/soundEngine'
 import { STAGES } from '../engine/deckEngine'
 
@@ -30,6 +32,7 @@ export function NewGameCeremonyModal({
   const [name, setName] = useState('New Realm')
   const [gameMode, setGameMode] = useState<GameMode>('studio')
   const [startingStage, setStartingStage] = useState<StageId>('genesis')
+  const [geographyPreset, setGeographyPreset] = useState<GeographyPreset>('random')
   const [premise, setPremise] = useState('')
   const [players, setPlayers] = useState<PlayerSeat[]>([
     { id: 'p1', name: 'Player 1', color: '#3b82f6', isBot: false, role: 'Player', personality: 'shaper' },
@@ -70,6 +73,8 @@ export function NewGameCeremonyModal({
     realm.deckConfig.selectedStage = startingStage
     realm.players = players
     realm.currentPlayerIndex = 0
+    realm.generationSettings.geographyPreset = geographyPreset
+    realm.map = createInitialMap(DEFAULT_MAP_WIDTH, DEFAULT_MAP_HEIGHT, geographyPreset)
 
     if (premise.trim()) {
       realm.stageNotes[startingStage] = premise.trim()
@@ -211,11 +216,81 @@ export function NewGameCeremonyModal({
             </div>
           </div>
 
-          {/* Step 3: Starting Era */}
+          {/* Step 3: Natural World Geography (Civ-Style Presets) */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Compass className="h-3.5 w-3.5 text-primary" />
+                <span>3. Natural World Geography & Seeding</span>
+              </label>
+              <span className="text-[11px] text-primary font-semibold">
+                {geographyPreset === 'random'
+                  ? '🎲 Random (Surprise Me)'
+                  : ALL_GEOGRAPHY_PRESETS.find((p) => p.id === geographyPreset)?.name}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {/* Option 1: Random Shuffled Cosmos */}
+              <button
+                type="button"
+                data-testid="geography-preset-random"
+                onClick={() => setGeographyPreset('random')}
+                className={`p-3 rounded-xl border text-left transition-all space-y-1 ${
+                  geographyPreset === 'random'
+                    ? 'border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm'
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-xs text-primary">
+                  <span className="text-base">🎲</span>
+                  <span>Random / Shuffled Cosmos</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground font-medium">Default: Organic Surprise</div>
+                <p className="text-[11px] text-muted-foreground/80 leading-normal line-clamp-2">
+                  Deterministically shuffles and selects from the natural terrain scripts.
+                </p>
+              </button>
+
+              {/* 6 Civilization-Style Presets */}
+              {ALL_GEOGRAPHY_PRESETS.map((preset) => {
+                const isSelected = geographyPreset === preset.id
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    data-testid={`geography-preset-${preset.id}`}
+                    onClick={() => setGeographyPreset(preset.id)}
+                    className={`p-3 rounded-xl border text-left transition-all space-y-1 ${
+                      isSelected
+                        ? 'border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm'
+                        : 'border-border bg-background hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
+                      <span className="text-base">{preset.icon}</span>
+                      <span className="truncate">{preset.name}</span>
+                    </div>
+                    <div className="text-[10px] text-primary font-semibold truncate">
+                      {preset.subtitle}
+                    </div>
+                    <p
+                      className="text-[11px] text-muted-foreground/80 leading-normal line-clamp-2"
+                      title={preset.description}
+                    >
+                      {preset.description}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Step 4: Starting Era */}
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>3. Starting Era / Stage</span>
+              <span>4. Starting Era / Stage</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {STAGES.map((st) => (
@@ -236,12 +311,12 @@ export function NewGameCeremonyModal({
             </div>
           </div>
 
-          {/* Step 4: Council of Players */}
+          {/* Step 5: Council of Players */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5 text-primary" />
-                <span>4. Council of Players ({players.length})</span>
+                <span>5. Council of Players ({players.length})</span>
               </label>
               {players.length < 6 && (
                 <button

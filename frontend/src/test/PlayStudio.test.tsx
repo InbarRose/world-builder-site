@@ -307,6 +307,15 @@ describe('Play Studio & Rules Integration', () => {
 
     // Verify New Game Ceremony Modal is open
     expect(screen.getByText(/Initiate New Campaign/i)).toBeInTheDocument()
+    expect(screen.getByText(/3\. Natural World Geography & Seeding/i)).toBeInTheDocument()
+    expect(screen.getByTestId('geography-preset-random')).toBeInTheDocument()
+    expect(screen.getByTestId('geography-preset-highlands')).toBeInTheDocument()
+
+    // Select Highlands preset
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('geography-preset-highlands'))
+    })
+
     expect(screen.getByRole('button', { name: /Forge Realm & Inscribe Destiny/i })).toBeInTheDocument()
 
     // Consecrate realm into live session
