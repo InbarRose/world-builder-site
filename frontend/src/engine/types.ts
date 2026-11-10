@@ -46,11 +46,13 @@ export interface PlayerSeat {
 }
 
 export type GeographyPreset =
+  | 'random'
   | 'continent'
+  | 'highlands'
+  | 'inland-sea'
   | 'archipelago'
   | 'pangaea'
   | 'twin-continents'
-  | 'inland-sea'
 
 export interface GenerationSettings {
   seed: string

@@ -26,11 +26,13 @@ export interface CreateWorldOptions {
 }
 
 const GEOGRAPHY_OPTIONS: { id: GeographyPreset; label: string }[] = [
-  { id: 'pangaea', label: 'Pangaea Continent' },
-  { id: 'continent', label: 'Central Continent' },
-  { id: 'archipelago', label: 'Archipelago Isles' },
-  { id: 'twin-continents', label: 'Twin Continents' },
-  { id: 'inland-sea', label: 'Inland Sea Basin' },
+  { id: 'random', label: '🎲 Random Cosmos (Civ-Style)' },
+  { id: 'continent', label: '🌍 Fractal Continents & Straits' },
+  { id: 'highlands', label: '🏔️ Tectonic Highlands & River Basin' },
+  { id: 'inland-sea', label: '🌊 Inland Sea & Mediterranean Rim' },
+  { id: 'archipelago', label: '🏝️ Shattered Archipelagos & Atolls' },
+  { id: 'pangaea', label: '🌋 Pangaea Rift & Grand Steppe' },
+  { id: 'twin-continents', label: '🌐 Twin Hemispheres (Old & New)' },
 ]
 
 interface WorldManagerModalProps {

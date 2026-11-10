@@ -173,11 +173,13 @@ export function AutoPlayConsoleModal({
                   }
                   className="input h-8 text-xs py-0 w-full"
                 >
-                  <option value="continent">Central Continent</option>
-                  <option value="archipelago">Island Archipelago</option>
-                  <option value="twin-continents">Twin Continents</option>
-                  <option value="inland-sea">Inland Sea Basin</option>
-                  <option value="pangaea">Supercontinent (Pangaea)</option>
+                  <option value="random">🎲 Random Cosmos (Civ-Style)</option>
+                  <option value="continent">🌍 Fractal Continents & Straits</option>
+                  <option value="highlands">🏔️ Tectonic Highlands & River Basin</option>
+                  <option value="inland-sea">🌊 Inland Sea & Mediterranean Rim</option>
+                  <option value="archipelago">🏝️ Shattered Archipelagos & Atolls</option>
+                  <option value="pangaea">🌋 Pangaea Rift & Grand Steppe</option>
+                  <option value="twin-continents">🌐 Twin Hemispheres (Old & New)</option>
                 </select>
               </div>
 

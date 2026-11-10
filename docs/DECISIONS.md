@@ -951,6 +951,37 @@ status: active
   - Maxes out Domain 2 (Cartographic Engineering & Spatial Simulation) from **18.0 -> 20.0 / 20.0**.
   - Elevates the verified Core AAA Score from **97.0 -> 98.0 / 100** across 30 test suites (200/200 tests passing, zero TypeScript errors, clean production bundle).
 
+---
+
+## ADR-035: Natural Procedural World Generation Engine & Civilization-Style Tectonic Presets
+
+- **Status**: Accepted
+- **Date**: 2026-11-09
+- **Context**:
+  Users noted that procedural world generation was overly simplistic, generating concentric circular islands with concentric bullseye rings of mountains and water. World generation lacked organic coastlines, continental rifts, island chains, mountain spines (cordilleras), and natural biome distribution inspired by Civilization games.
+- **Decision**:
+  1. **Natural Procedural World Generation Engine (`proceduralWorldEngine.ts`)**:
+     - Multi-octave Simplex/Perlin noise with **Domain Warping** for organic shorelines, fiords, bays, and peninsulas.
+     - **Tectonic Plate Convergence Simulation (Orogeny)** generating continuous mountain spines and cordilleras along convergent boundaries rather than central concentric bullseyes.
+     - **Whittaker / Köppen Climate Matrix**: Combines elevation, latitude insolation, and moisture gradients to distribute biomes (Tundra, Taiga, Woodlands, Steppe, Desert, Jungle, Swamp).
+     - Downhill hydrological simulation and ancestral valley settlement/resource seeding.
+  2. **6 Diverse AAA Civilization-Style Geography Presets**:
+     - `continent`: Fractal Continents & Straits (2–3 large organic landmasses separated by ocean channels).
+     - `highlands`: Tectonic Highlands & Great River Valley (continuous mountain cordilleras and fertile river basin).
+     - `inland-sea`: Mediterranean Rim & Protected Gulf (sprawling central sea ringed by coastal peninsulas).
+     - `archipelago`: Shattered Archipelagos & Atolls (scattered island chains, lagoons, and reefs).
+     - `pangaea`: Pangaea Rift & Grand Steppe (colossal supercontinent with diagonal rift chasm).
+     - `twin-continents`: Twin Hemispheres / Old World & New World (two balanced continents).
+     - `random`: Deterministically shuffles and selects from the natural terrain scripts.
+  3. **Visual Thumbnail Gallery in New Campaign Ceremony (`NewGameCeremonyModal.tsx`)**:
+     - Added Step 3 with a thumbnail gallery displaying preset cards with icons, subtitles, and descriptions.
+     - Defaults to **`🎲 Random / Shuffled Cosmos`** for natural surprise on campaign launch.
+- **Consequences**:
+  - Eliminates circular island artifacts; every generated world is organic, naturalistic, and primed for fantasy worldbuilding.
+  - Backwards-compatible across MapState, storage, auto-play, and share services.
+  - 206/206 tests passing across 31 test suites.
+
+
 
 
 

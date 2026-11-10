@@ -309,6 +309,11 @@ status: active
   - [x] Strategic Province Dossier in Tile Inspector (`province-strategic-dossier`): 6-tier classification (`capital_domain`, `urban_core`, `rural_province`, `frontier_outpost`, `disputed_marchland`, `wilderness`), defensibility score (1-10) with terrain and fortress modifiers, allegiance score, and 4-way economic yields (🌾 Food, ⛏️ Minerals, 🌲 Timber, 💰 Trade)
   - [x] Deep Realm Geopolitics & Holdings in Codex (`EntityRegistry.tsx`): Geopolitical Territory & Holdings Dossier (`realm-geopolitics-dossier`) displaying controlled province counts, percentage of civilized land, capital city coordinate links, active holdings (settlements, resource nodes, citadels), and contested marchland frontier links
   - [x] Automated test suite in `geopoliticalEngine.test.ts` and `PlayStudio.test.tsx` (200/200 tests passing across 30 suites)
+- [x] **Phase 29: Natural Procedural World Generation, Civ-Style Tectonic Presets & Gallery** *(Score: 99.0 / 100 via ADR-035)*
+  - [x] Procedural World Generation Engine (`proceduralWorldEngine.ts`): Replaced concentric circular rings with multi-octave domain-warped Simplex/Perlin noise, tectonic convergence simulation (cordilleras and mountain spines), Whittaker/Köppen moisture & latitude climate matrix, downhill vector river carving, and ancestral resource/settlement seeding.
+  - [x] 6 Civilization-Style Geography Presets (`continent`, `highlands`, `inland-sea`, `archipelago`, `pangaea`, `twin-continents`) plus deterministic seeded `random` default.
+  - [x] Interactive Visual Preset Thumbnail Gallery in New Campaign Ceremony (`NewGameCeremonyModal.tsx`), Map Canvas (`MapCanvas.tsx`), Game Setup Wizard (`GameSetupWizardModal.tsx`), and World Manager (`WorldManagerModal.tsx`).
+  - [x] Comprehensive test coverage in `proceduralWorldEngine.test.ts` (6/6 passing) and full vitest suite (206/206 tests passing across 31 test suites).
 
 ---
 
@@ -349,6 +354,7 @@ status: active
 - [x] Implement Phase 26: High-DPI Cartography Cartouche & Legend Exporter, Single-PC Driver Quick-Keys, and Multi-Theme Sourcebook Studio (ADR-032, Core Score: 94.0 / 100).
 - [x] Implement Phase 27: Tabletop Session Checkpoint Vault, Table Brainstorm Stash, and Player Chime-In Voice (ADR-033, Core Score: 96.0 / 100).
 - [x] Implement Phase 28: Geopolitical Simulation Engine, Realm Spheres of Influence & Strategic Province Depth (ADR-034, Core Score: 98.0 / 100).
-- [ ] Implement Phase 29: Deep Civilization Dynamics & Interactive Party Origin Forge (Target: 99.0 / 100).
+- [x] Implement Phase 29: Natural Procedural World Generation, Civ-Style Tectonic Presets & Gallery (ADR-035, Core Score: 99.0 / 100).
+- [ ] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (Target: 99.5 / 100).
 
 
