@@ -1125,6 +1125,10 @@ export function Play() {
       power = data?.power
     }
 
+    const freshDraft = createCustomTurnDraft(currentStage, power, selectedTileId)
+    setTurnDraft(freshDraft)
+    setPendingNote('')
+
     persistWorldUpdate((prev) => {
       const nextHistory = [...prev.drawHistory]
       if (turnPhase === 'action_select' && nextHistory.length > 0) {
@@ -1133,6 +1137,7 @@ export function Play() {
           ...nextHistory[lastIdx],
           card: nextCard,
           power,
+          actionTitle: power || freshDraft.actionTitle,
         }
       }
       return {
@@ -1160,6 +1165,10 @@ export function Play() {
       power = data?.power
     }
 
+    const freshDraft = createCustomTurnDraft(currentStage, power, selectedTileId)
+    setTurnDraft(freshDraft)
+    setPendingNote('')
+
     persistWorldUpdate((prev) => {
       const nextHistory = [...prev.drawHistory]
       if (turnPhase === 'action_select' && nextHistory.length > 0) {
@@ -1168,6 +1177,7 @@ export function Play() {
           ...nextHistory[lastIdx],
           card: nextCard,
           power,
+          actionTitle: power || freshDraft.actionTitle,
         }
       }
       return {
@@ -3649,7 +3659,13 @@ export function Play() {
           3. AREA 3.2 (STUDIO MODE) & AREA 3.3 (FREEFORM SANDBOX)
           ========================================================================= */}
       {gameMode !== 'companion' && (
-        <main className="space-y-4">
+        <main
+          className={
+            activeTab === 'dock' && gameMode === 'studio'
+              ? 'flex-1 min-h-0 flex flex-col overflow-hidden'
+              : 'space-y-4'
+          }
+        >
           {/* Active Studio Turn Context Banner when viewing Map or Codex mid-turn */}
           {gameMode === 'studio' &&
             turnPhase === 'action_select' &&
@@ -4021,14 +4037,14 @@ export function Play() {
                   className={
                     activeTab === 'split'
                       ? 'space-y-4'
-                      : 'grid grid-cols-1 lg:grid-cols-12 gap-4'
+                      : 'grid grid-cols-1 lg:grid-cols-12 gap-4 items-start'
                   }
                 >
                   {/* Card Visual with 3D Kinetic Perspective Tilt & Deck Stack Depth */}
                   <div
                     className={`${
-                      activeTab === 'split' ? '' : 'lg:col-span-4'
-                    } card p-6 flex flex-col items-center justify-center min-h-[240px] perspective-1000 space-y-3`}
+                      activeTab === 'split' ? '' : 'lg:col-span-4 lg:sticky lg:top-2'
+                    } card p-5 flex flex-col items-center justify-center min-h-[240px] perspective-1000 space-y-3`}
                   >
                     {drawnCard ? (
                       <div

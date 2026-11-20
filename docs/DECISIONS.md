@@ -1372,6 +1372,27 @@ status: active
 - **Consequences**:
   - Brings the canonical tabletop stage transitions directly into the Studio without forcing rigid rules or blocking freeform play.
 
+---
+
+## ADR-053: Live Browser Playtest Viewport Lock & Visual Polish Pass
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  A live interactive playtest at `1440×900` (`http://localhost:5173/play`) confirmed 0 console errors, 0 failed network requests, and all 7 core flows working end-to-end, while uncovering 4 concrete visual/layout polish issues:
+  1. `<main className="space-y-4">` in `Play.tsx` lacked `flex-1 min-h-0 flex flex-col overflow-hidden` in `dock` mode, causing `StudioDockWorkspace` to expand past `100vh` and push the Bottom Codex/Chronicle dock below the fold.
+  2. On the `Deck & Draw` tab, the left card column stretched vertically without `items-start`, centering the card with ~550px of empty space above it.
+  3. Redrawing or discarding after a Freeform Turn retained the previous `Freeform World Event` draft label instead of resetting `turnDraft` to the newly drawn card.
+  4. Map toolbar right-hand buttons wrapped onto a 2nd row at `1440×900`.
+- **Decision**:
+  - Locked `<main>` to `flex-1 min-h-0 flex flex-col overflow-hidden` in `Modular Studio` (`dock`) mode so Left Dock, Center Map, and Bottom Codex/Chronicle Dock all fit cleanly inside `100vh` with independent internal scrolling.
+  - Added `items-start` and `lg:sticky lg:top-2` to the `Deck & Draw` card column.
+  - Reset `turnDraft` cleanly in `handleRedrawCurrentCard` and `handleDiscardAndDrawAnother`.
+  - Tightened MapCanvas toolbar button padding (`px-2 py-1 text-[11px]`) to prevent 2-row toolbar wrapping at `1440×900`.
+- **Consequences**:
+  - Delivers true zero-scroll full-viewport responsiveness at `1440×900` and eliminates visual drift across all Studio tabs.
+
+
 
 
 
