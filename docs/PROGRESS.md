@@ -442,5 +442,12 @@ status: active
 - [x] **Phase 49: Live Browser Playtest & Visual Polish Pass** *(ADR-053)*
   - [x] Verified all 7 core Studio flows live at `1440×900` with `0` console errors and `0` failed network requests.
   - [x] Fixed `<main>` flex-height lock in `Play.tsx` so `StudioDockWorkspace` keeps Left Dock, Center Map, and Bottom Codex/Chronicle Dock cleanly inside `100vh` with zero page scrolling; fixed `Deck & Draw` left column vertical stretch (`items-start` + `sticky`); synced `turnDraft` reset on Redraw/Discard; and tightened `MapCanvas` toolbar padding to prevent wrapping.
+- [x] **Phase 50: >=10 Classic Fantasy RPG Presets for Every Stage, Suit & Natural Disaster + Phase-Relevant Examples** *(ADR-054)*
+  - [x] Added `stages/disasters/part2-classic-disasters.json` (10 disasters per stage) and topped up all 12 Primal/Civilization/Intrigue suit shards to 10–11 classic fantasy tropes each, guarded by an automated test in `catalogExtensibility.test.ts`.
+  - [x] Added `getPhaseRelevantExamples` in `deckEngine.ts` and wired it into `Play.tsx`.
+- [x] **Phase 51: Campaign State-Machine Locks (No Mid-Game Resizing or Topology Switching)** *(ADR-055)*
+  - [x] Locked world dimension presets (`14×9`, `20×12`, `26×15`) and Square/Hex topology switchers in `MapCanvas.tsx` once Turn #1 begins in normal play (`isCampaignStarted`), verified in `MapCanvas.test.tsx`.
+- [x] **Phase 52: Single-Pane-of-Glass Edge Tray Pills & Contextual Notification Highlights** *(ADR-056)*
+  - [x] Added `studio-edge-tray-bar` with live counts and pulsing attention highlights in `StudioDockWorkspace.tsx` + `Play.tsx` so hidden/collapsed trays pop back open in 1 click.
 
 

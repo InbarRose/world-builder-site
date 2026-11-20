@@ -1392,6 +1392,50 @@ status: active
 - **Consequences**:
   - Delivers true zero-scroll full-viewport responsiveness at `1440×900` and eliminates visual drift across all Studio tabs.
 
+---
+
+## ADR-054: >=10 Classic Fantasy RPG Presets for Every Stage, Suit & Natural Disaster + Phase-Relevant Card Examples
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  An audit of `frontend/src/data/catalog/stages/` revealed that Natural Disasters only had 1 preset per stage (4 total) and Primal, Civilization, and Intrigue suits had 8–9 presets each. The creator mandated at least **10 classic, cliché fantasy RPG presets for every card at every phase** with appropriate icons/tiles and robust phase-relevant examples.
+- **Decision**:
+  - Added `stages/disasters/part2-classic-disasters.json` (registered in `stages/manifest.json`) expanding every stage's Ace Natural Disasters to **10 classic disasters** (40 total).
+  - Expanded all 12 Primal, Civilization, and Intrigue suit shards to **10–11 classic fantasy tropes each** (Fishing Village, Mountain Hamlet, Surface Iron Ore, Walled Border Castle, Grand Library, Royal Marriage Alliance, Border War, Dragon Lair, Lost Artifact, Haunted Ruins, etc.).
+  - Added `getPhaseRelevantExamples(stage, card, baseExamples)` in `deckEngine.ts` so Aces, Jokers, Face Cards, and standard suits always show rich, stage-appropriate classic examples during card draw.
+  - Added a permanent unit test guard in `catalogExtensibility.test.ts` enforcing `>= 10` presets for every `(stage, suit)` and every `(stage, Ace Natural Disaster)`.
+- **Consequences**:
+  - Every card draw in every stage now offers a rich, recognizable library of classic fantasy RPG tropes.
+
+---
+
+## ADR-055: Campaign State-Machine Locks — No Mid-Game World Resizing or Grid Topology Switching
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  In normal play, allowing players to resize world grid dimensions (`14×9`, `20×12`, `26×15`) or switch Square/Hex topology mid-campaign violates state-machine integrity and risks corrupting recorded turn coordinates.
+- **Decision**:
+  - Added `isCampaignStarted = drawHistory.length > 0 && gameMode !== 'free-create'` in `MapCanvas.tsx`.
+  - Automatically hides world dimension resize presets and Square/Hex topology switchers once Turn #1 begins in normal play (while keeping them available at Turn #0 Pre-Genesis and in `Free-Create` mode).
+- **Consequences**:
+  - Enforces clean state-machine invariants during active campaigns and reclaims ~150px of MapCanvas top toolbar width.
+
+---
+
+## ADR-056: Single-Pane-of-Glass Edge Tray Pills with Contextual Notification Highlights
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  To move closer to a sleek Single Pane of Glass studio where trays stay collapsed out of the way until pressed and subtly notify the player when relevant (e.g., new turns logged or entering Primal/Civilization with no species yet), collapsed/hidden panels needed an instant edge-tray re-entry bar.
+- **Decision**:
+  - Added `panelBadges` and `studio-edge-tray-bar` in `StudioDockWorkspace.tsx` + `Play.tsx`: any collapsed/hidden panel (`Cards`, `Codex`, `Chronicle`) appears as a sleek pill in the bottom-right corner with its live count and a pulsing amber notification dot when attention/action is suggested.
+- **Consequences**:
+  - Players can collapse side/bottom trays for maximum canvas space (`Tab` or `×`) and pop them open smoothly in 1 click whenever notified.
+
+
 
 
 
