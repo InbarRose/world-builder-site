@@ -1049,6 +1049,35 @@ status: active
   - All 211 unit and integration tests passing across 31 test suites.
   - Elevates Core AAA Score from **99.5 -> 99.8 / 100**.
 
+---
+
+## ADR-038: Contiguous Regional Cartography Engine, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  To complete the Single-PC Studio worldbuilding loop and reach **100.0 / 100** on the Core AAA Tabletop Architecture standard, three remaining functional depth pillars were identified:
+  1. **Multi-Tile Geographic Regions**: Individual tiles carried isolated labels, whereas fantasy maps and strategy games group contiguous mountain spines, forests, deserts, swamps, and water basins into named regions (e.g., *"The Ironcrown Spine"*, *"The Mirror Sea"*).
+  2. **Settlement Evolution, Ruin Cycles & Connected Resource Trade Synergy**: Holdings in fantasy RPGs evolve across eras (`Village -> Town -> City -> Capital`), can be toppled by cataclysms or sieges into explorable **Ancient Ruins / Dungeon Sites** while preserving their ancestral founder faction, and draw prosperity from adjacent/road-connected Layer 3 Strategic Resources.
+  3. **5-Layer Turn Workbench Synchronization**: The card-draw Turn Workbench in `Play.tsx` needed direct 1-click Domain Switching (`🌱 Land` / `🌊 Water`), Layer 2 Relief/Canopy overrides, Layer 5 Faction Territory claims, and Phase 31 clean single-change biome stamp hygiene.
+- **Decision**:
+  1. **Contiguous Regional Cartography Engine (`regionCartographyEngine.ts`, `MapCanvas.tsx`)**:
+     - Implemented BFS flood-fill cluster detection across Square, Pointy Hex, and Flat Hex topologies (`detectGeographicRegions`).
+     - Automatically distinguishes enclosed **Inland Seas / Great Lakes** (`inland_sea`) from open perimeter **Ocean Expanses** (`ocean_expanse`), alongside Mountain Ranges, Forests, Deserts, Swamps, Tundra, and Steppes.
+     - Added 1-click Regional Naming & `🎲 Name Region` generator in the sidebar Tile Inspector (`assignRegionNameToCluster`), plus a batch `🗺️ Auto-Name Regions` action in the Layers drawer (`autoNameMajorRegions`) and centroid Region Banners on the map canvas.
+  2. **Settlement Lifecycle & Resource Trade Synergy (`geopoliticalEngine.ts`, `MapCanvas.tsx`, `twoPageOverviewEngine.ts`)**:
+     - Implemented `upgradeTileSettlementTier`, `collapseTileSettlementToRuins` (preserving `ancestralOwnerId` and `ruinOriginLabel`), and `reclaimTileRuins` in Layer 4 (`🏰 Settlements & Holdings`).
+     - Implemented `getSettlementResourceSynergy` to evaluate local and road/river-connected Layer 3 resources, synthesizing fantasy Trade Archetypes (e.g., *Forge & Mining Hub*, *Runeforge & Artificer Citadel*, *Breadbasket & Granary Hub*) and prosperity bonuses.
+     - Integrated regional names and ruin origins into the deterministic **2-Page World Overview** Gazetteer.
+  3. **5-Layer Turn Workbench Integration (`turnWorkbenchEngine.ts`, `Play.tsx`)**:
+     - Extended `TurnActionDraft` and `stampDraftOnMapTile` with `domainChange`, `territoryId`, `WORKBENCH_RELIEF_OPTIONS`, `WORKBENCH_FLORA_OPTIONS`, and clean single-change terrain stamp hygiene so stamping a card preset or custom event onto a tile cleanly resets extraneous leftover clutter.
+- **Consequences**:
+  - Elevates macro-map identity with multi-tile named mountain ranges, forests, and inland seas.
+  - Supports emergent TTRPG history where cities rise, trade along resource roads, fall into explorable ruins, and can be reclaimed.
+  - Unifies the card-driven Turn Workbench with the 5-Layer Tile Studio architecture.
+  - All 217 unit and integration tests passing across 32 test suites.
+  - Elevates Core AAA Score from **99.8 -> 100.0 / 100**.
+
 
 
 

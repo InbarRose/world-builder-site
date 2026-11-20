@@ -53,6 +53,8 @@ import {
   StageId,
   Suit,
   TerrainType,
+  ReliefType,
+  FloraType,
   TileSlotCategory,
   TurnPhase,
   WorldEntity,

@@ -11,7 +11,7 @@ import {
   reclaimTileRuins,
   getSettlementResourceSynergy,
 } from '../engine/geopoliticalEngine'
-import { MapState, WorldEntity, DrawRecord } from '../engine/types'
+import { MapState, MapTile, WorldEntity, DrawRecord } from '../engine/types'
 import { createDefaultTile } from '../engine/mapEngine'
 
 function createTestMap(w = 5, h = 5): MapState {
@@ -249,10 +249,10 @@ describe('geopoliticalEngine (Phase 28)', () => {
 
   it('supports Settlement Lifecycle (Upgrade Tier -> Collapse into Ruins -> Reclaim) and Connected Resource Synergy', () => {
     const map = createTestMap(5, 5)
-    let tile = {
+    let tile: MapTile = {
       ...createDefaultTile(2, 2, 'plains'),
       label: 'Oakhaven',
-      overlay: 'settlement' as const,
+      overlay: 'settlement',
       territoryId: 'soc_valoria',
       hasRoad: true,
     }

@@ -267,17 +267,22 @@ export function condenseTopLandmarks(
     const slots = tile.slots || []
     const mentions = tileMentionCounts[tile.id] || 0
     const hasLabel = Boolean(tile.label && tile.label.trim())
+    const hasRegionName = Boolean(tile.regionName && tile.regionName.trim())
     const hasSlots = slots.length > 0
 
-    if (!isPinned && !hasLabel && !hasSlots && mentions === 0 && !tile.notes) continue
+    if (!isPinned && !hasLabel && !hasRegionName && !hasSlots && mentions === 0 && !tile.notes) {
+      continue
+    }
 
     const topSlot = slots[0]
     const maxPriority = topSlot?.priority || 0
 
     let score = mentions * 18 + maxPriority * 0.4
     if (hasLabel) score += 30
+    if (hasRegionName) score += 15
     if (slots.some((s) => s.category === 'settlement')) score += 28
     if (slots.some((s) => s.category === 'myth' || s.category === 'structure')) score += 22
+    if (tile.overlay === 'ruins') score += 24
     if (tile.hasRiver) score += 6
     if (tile.hasRoad) score += 6
     if (isPinned) score += 1000
@@ -285,11 +290,14 @@ export function condenseTopLandmarks(
     const name =
       tile.label?.trim() ||
       topSlot?.name ||
+      tile.regionName?.trim() ||
       `${TERRAIN_PALETTE[tile.terrain]?.label || 'Province'} (${tile.id})`
 
     const icon =
       topSlot?.icon ||
-      (tile.terrain === 'mountain'
+      (tile.overlay === 'ruins'
+        ? '🏛️'
+        : tile.terrain === 'mountain'
         ? '🏔️'
         : tile.terrain === 'forest'
         ? '🌲'
@@ -297,8 +305,13 @@ export function condenseTopLandmarks(
         ? '🌋'
         : '📍')
 
-    const terrainLabel = TERRAIN_PALETTE[tile.terrain]?.label || tile.terrain
-    const categoryLabel = topSlot?.category || 'region'
+    const terrainLabel = tile.regionName?.trim()
+      ? `${TERRAIN_PALETTE[tile.terrain]?.label || tile.terrain} (${tile.regionName.trim()})`
+      : TERRAIN_PALETTE[tile.terrain]?.label || tile.terrain
+    const categoryLabel =
+      tile.overlay === 'ruins'
+        ? tile.ruinOriginLabel || 'ruins'
+        : topSlot?.category || 'region'
 
     const rawSummary =
       tile.notes?.trim() ||

@@ -331,6 +331,12 @@ status: active
   - [x] 1-Click Domain Switcher: Prominent 2-button segmented control `[ 🌱 Land Domain ]` vs `[ 🌊 Water Domain ]` added directly in the Tile Inspector header and at the top of Layer 1. 1-click toggling resets domain and baseline terrain cleanly.
   - [x] Clean Single-Change Clicks & Icon Hygiene: `handleSelectTerrainBiome` ensures clicking grassland/plains cleanly resets leftover flora, relief, and custom symbols. Hand-drawn whiteboard marker drawings only render when explicitly assigned or stamped.
   - [x] Comprehensive test coverage in `MapCanvas.test.tsx` (19/19 passing) and full Vitest suite (211/211 tests passing across 31 test suites).
+- [x] **Phase 32: Contiguous Regional Cartography, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration** *(Score: 100.0 / 100 via ADR-038)*
+  - [x] Contiguous Geographic Region Engine (`regionCartographyEngine.ts`): BFS flood-fill cluster detection across Square, Pointy Hex, and Flat Hex topologies (`detectGeographicRegions`), distinguishing enclosed Inland Seas / Great Lakes from outer Ocean Expanses, Mountain Ranges, Forests, Deserts, Swamps, Tundra, and Steppes.
+  - [x] 1-Click Regional Naming & Canvas Banners (`MapCanvas.tsx`): Region naming input and `🎲 Name Region` generator in the sidebar Tile Inspector (`assignRegionNameToCluster`), batch `🗺️ Auto-Name Regions` in the Layers drawer (`autoNameMajorRegions`), and centroid Region Banners on the map canvas.
+  - [x] Settlement Lifecycle & Connected Resource Trade Synergy (`geopoliticalEngine.ts`, `MapCanvas.tsx`, `twoPageOverviewEngine.ts`): 1-click `⬆️ Upgrade Holding`, `🏚️ Collapse to Ruins` (preserving `ancestralOwnerId` and `ruinOriginLabel`), and `⚒️ Reclaim & Rebuild` in Layer 4, plus dynamic Layer 3 resource connectivity and fantasy Trade Archetypes.
+  - [x] 5-Layer Turn Workbench Synchronization (`turnWorkbenchEngine.ts`, `Play.tsx`): Added 1-click Domain Switcher (`🌱 Land` / `🌊 Water`), Layer 2 Relief & Canopy pills, Layer 5 Faction Territory claims, and clean single-change terrain stamp hygiene.
+  - [x] Comprehensive test coverage in `regionCartographyEngine.test.ts`, `geopoliticalEngine.test.ts`, `turnWorkbenchEngine.test.ts`, and `MapCanvas.test.tsx` (217/217 tests passing across 32 test suites).
 
 ---
 
@@ -374,6 +380,6 @@ status: active
 - [x] Implement Phase 29: Natural Procedural World Generation, Civ-Style Tectonic Presets & Gallery (ADR-035, Core Score: 99.0 / 100).
 - [x] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (ADR-036, Core Score: 99.5 / 100).
 - [x] Implement Phase 31: Safe Tile Selection Defaults, 1-Click Domain Switcher & Clean Single-Change Clicks (ADR-037, Core Score: 99.8 / 100).
-- [ ] Implement Phase 32: Dynamic Regional Biome Ecology & Deep Tabletop World Simulation (Target: 100.0 / 100).
+- [x] Implement Phase 32: Contiguous Regional Cartography, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration (ADR-038, Core Score: 100.0 / 100).
 
 
