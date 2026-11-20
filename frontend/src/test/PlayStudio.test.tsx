@@ -572,8 +572,11 @@ describe('Play Studio & Rules Integration', () => {
     })
     expect(screen.getByText(/Council Roster \(2\)/i)).toBeInTheDocument()
 
-    // Open "Pick Card" popover to choose a specific card (e.g., 10♠)
-    const pickCardBtn = screen.getByRole('button', { name: /Pick Card/i })
+    // Open streamlined 1-button "Card Options" menu -> Pick Card (10♠)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('card-options-menu-btn'))
+    })
+    const pickCardBtn = screen.getByTestId('card-opt-pick-btn')
     await act(async () => {
       fireEvent.click(pickCardBtn)
     })
@@ -585,8 +588,13 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(tenSpadeBtn)
     })
 
-    // Verify turn entered action_select and Redraw button is available
-    const redrawBtn = screen.getByRole('button', { name: /Redraw/i })
+    // Verify Card Options menu provides Redraw, Discard & Draw Another, and Freeform Turn
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('card-options-menu-btn'))
+    })
+    expect(screen.getByTestId('card-opt-discard-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('card-opt-freeform-btn')).toBeInTheDocument()
+    const redrawBtn = screen.getByTestId('card-opt-redraw-btn')
     expect(redrawBtn).toBeInTheDocument()
     await act(async () => {
       fireEvent.click(redrawBtn)

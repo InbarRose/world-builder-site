@@ -630,6 +630,18 @@ describe('MapCanvas Component', () => {
     function Phase32MapTest() {
       const [currentMap, setCurrentMap] = React.useState(() => {
         const m = createInitialMap(6, 6)
+        // Normalize to bare plains so random starter mountains never shift cluster centroid
+        for (const tid of Object.keys(m.tiles)) {
+          m.tiles[tid] = {
+            ...m.tiles[tid],
+            domain: 'land',
+            terrain: 'plains',
+            relief: 'none',
+            flora: 'none',
+            overlay: 'none',
+            slots: [],
+          }
+        }
         // Paint a 3-tile contiguous mountain range at (1,1), (1,2), (1,3)
         for (const id of ['1,1', '1,2', '1,3']) {
           m.tiles[id] = {
