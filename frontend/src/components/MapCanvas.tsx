@@ -1843,17 +1843,17 @@ export function MapCanvas({
             <button
               type="button"
               onClick={handleExportPng}
-              className="btn-outline px-2.5 py-1.5 text-xs flex items-center gap-1"
+              className="btn-outline px-2 py-1 text-[11px] flex items-center gap-1"
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-3 w-3" />
               <span>PNG</span>
             </button>
             <button
               type="button"
               onClick={handleExportSvg}
-              className="btn-outline px-2.5 py-1.5 text-xs flex items-center gap-1"
+              className="btn-outline px-2 py-1 text-[11px] flex items-center gap-1"
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-3 w-3" />
               <span>SVG</span>
             </button>
 
@@ -1862,14 +1862,14 @@ export function MapCanvas({
               type="button"
               data-testid="toggle-hover-hints-btn"
               onClick={() => setShowHoverHints((v) => !v)}
-              className={`px-2 py-1.5 rounded-md border text-xs font-semibold flex items-center gap-1 transition-colors ${
+              className={`px-2 py-1 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-colors ${
                 showHoverHints
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300'
                   : 'bg-background border-border text-muted-foreground hover:text-foreground'
               }`}
               title="Toggle live contextual hover hints in the Studio Status Bar"
             >
-              <Lightbulb className="h-3.5 w-3.5" />
+              <Lightbulb className="h-3 w-3" />
               <span className="hidden sm:inline">Hints</span>
             </button>
 
@@ -1877,10 +1877,10 @@ export function MapCanvas({
               type="button"
               data-testid="open-studio-tutorial-btn"
               onClick={() => setShowTutorialModal(true)}
-              className="px-2.5 py-1.5 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+              className="px-2 py-1 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-[11px] font-bold flex items-center gap-1 transition-colors shadow-2xs"
               title="Open World Building Studio Guide, 4-Stage Card Rules & Map Editor Tutorial"
             >
-              <HelpCircle className="h-3.5 w-3.5" />
+              <HelpCircle className="h-3 w-3" />
               <span>Studio Guide</span>
             </button>
           </div>
