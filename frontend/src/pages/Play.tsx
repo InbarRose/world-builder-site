@@ -145,6 +145,7 @@ import {
   computeModifiedTileIds,
 } from '../engine/turnWorkbenchEngine'
 import { SessionVaultModal } from '../components/SessionVaultModal'
+import { PreStageSetupModal } from '../components/PreStageSetupModal'
 import {
   createWorldCheckpoint,
   saveWorldCheckpoint,
@@ -231,9 +232,9 @@ export function Play() {
     return world.gameMode || 'studio'
   })
 
-  // Focused Workspace Views (No 3000px vertical stacking!)
+  // Default to full-viewport Modular Studio (Map centered + Docked Cards/Codex/Chronicle)
   const [activeTab, setActiveTab] = useState<StudioTab>(() =>
-    gameMode === 'free-create' ? 'map' : 'cards'
+    gameMode === 'free-create' ? 'map' : 'dock'
   )
   const [splitRightPanel, setSplitRightPanel] = useState<'map' | 'entities' | 'timeline'>('map')
 
@@ -322,6 +323,7 @@ export function Play() {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
   const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
+  const [showPreStageModal, setShowPreStageModal] = useState(false)
   const [showNewGameCeremonyModal, setShowNewGameCeremonyModal] = useState(false)
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [showShortcutsModal, setShowShortcutsModal] = useState(false)
@@ -666,6 +668,8 @@ export function Play() {
       active: true,
       stageName,
     })
+    // Offer the authentic Pre-Primal / Pre-Civilization / Pre-Intrigue setup ritual
+    setShowPreStageModal(true)
     try {
       const chk = createWorldCheckpoint(
         world,
@@ -3086,6 +3090,17 @@ export function Play() {
                   )}
                 </div>
               )}
+
+              <button
+                type="button"
+                data-testid="open-prestage-setup-btn"
+                onClick={() => setShowPreStageModal(true)}
+                className="text-xs text-muted-foreground hover:text-primary font-semibold flex items-center gap-1"
+                title="Open Pre-Stage Setup Checklist (Pre-Genesis, Pre-Primal Species, Pre-Civilization Societies, Pre-Intrigue Naming)"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <span className="hidden md:inline">Stage Setup</span>
+              </button>
 
               <button
                 type="button"
@@ -6549,6 +6564,32 @@ export function Play() {
           setDrawnCard(null)
         }}
         onNotify={(msg) => setRecordSavedFeedback(msg)}
+      />
+
+      {/* Authentic Pre-Stage Guided Setup Ritual Modal (Phase 48 · ADR-052) */}
+      <PreStageSetupModal
+        isOpen={showPreStageModal}
+        stage={currentStage}
+        players={players}
+        entities={world.entities}
+        map={world.map}
+        selectedTileId={selectedTileId}
+        onClose={() => setShowPreStageModal(false)}
+        onCreateEntity={(newEntity) => {
+          handleWorkspaceEntitiesChange([...world.entities, newEntity])
+        }}
+        onRenameTile={(tileId, newLabel) => {
+          const existing = world.map.tiles[tileId]
+          if (!existing) return
+          handleWorkspaceMapChange({
+            ...world.map,
+            tiles: {
+              ...world.map.tiles,
+              [tileId]: { ...existing, label: newLabel },
+            },
+          })
+        }}
+        onOpenNewMapRegen={() => setActiveTab('dock')}
       />
 
       {/* Keyboard Shortcuts Cheat Sheet (?) */}
