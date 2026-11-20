@@ -59,6 +59,7 @@ export function TimelinePanel({
   const [unlockedRecordIds, setUnlockedRecordIds] = useState<Record<string, boolean>>({})
   const [confirmRewindMoveId, setConfirmRewindMoveId] = useState<number | null>(null)
   const [confirmClearHistory, setConfirmClearHistory] = useState(false)
+  const [showToolsMenu, setShowToolsMenu] = useState(false)
   const [scrubbedMoveIndex, setScrubbedMoveIndex] = useState<number | null>(null)
 
   // Freeform Lore Event Adder state
@@ -155,31 +156,30 @@ export function TimelinePanel({
   }
 
   return (
-    <div className="card p-5 sm:p-6 space-y-5">
-      {/* Header & Export Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <Clock className="h-6 w-6 text-primary shrink-0" />
+    <div className="card p-3.5 sm:p-4 space-y-3">
+      {/* Compact Header & Focused Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-primary shrink-0" />
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold">World Chronicle & Timeline</h3>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground flex items-center gap-1">
-                <Lock className="h-3 w-3" />
-                <span>Past Events Protected</span>
+              <h3 className="text-base sm:text-lg font-bold">World Chronicle &amp; Timeline</h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground font-mono">
+                {world.drawHistory.length} turns
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {world.drawHistory.length} historical turns recorded · Past events are locked by default to prevent accidental edits (click Unlock to edit or Branch to fork a new world)
+            <p className="text-[11px] text-muted-foreground">
+              Click any entry&apos;s tile or entity badge to jump there · Past entries lock automatically (click Unlock to edit)
             </p>
           </div>
         </div>
 
-        <div className="no-print flex flex-wrap items-center gap-2">
+        <div className="no-print flex flex-wrap items-center gap-1.5">
           {onAddCustomRecord && !world.isLocked && (
             <button
               type="button"
               onClick={() => setShowAddEventForm((v) => !v)}
-              className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold"
+              className="btn-primary flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>+ Log Custom Event</span>
@@ -188,7 +188,7 @@ export function TimelinePanel({
           <button
             type="button"
             onClick={() => setSortAsc(!sortAsc)}
-            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs"
+            className="btn-outline flex items-center gap-1 px-2.5 py-1.5 text-xs"
             title="Toggle chronological order"
           >
             <ArrowUpDown className="h-3.5 w-3.5" />
@@ -196,76 +196,106 @@ export function TimelinePanel({
           </button>
           <button
             type="button"
-            onClick={handleCopyText}
-            disabled={world.drawHistory.length === 0}
-            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
-          >
-            <Copy className="h-3.5 w-3.5" />
-            <span>Copy Text</span>
-          </button>
-          <button
-            type="button"
             onClick={() => setShowSagaModal(true)}
             disabled={world.drawHistory.length === 0}
-            className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-            title="Synthesize and view rich narrative Realm Saga"
+            className="btn-outline flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50"
+            title="Read narrative Realm Saga"
           >
-            <BookOpen className="h-3.5 w-3.5" />
+            <BookOpen className="h-3.5 w-3.5 text-primary" />
             <span>Realm Saga</span>
           </button>
-          <button
-            type="button"
-            onClick={handleExportMarkdown}
-            disabled={world.drawHistory.length === 0}
-            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Export Chronicle (.md)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            disabled={world.drawHistory.length === 0}
-            className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
-            title="Print World Chronicle"
-          >
-            <Printer className="h-3.5 w-3.5" />
-            <span>Print</span>
-          </button>
-          {!world.isLocked && (
-            confirmClearHistory ? (
-              <div className="inline-flex items-center gap-1 bg-destructive/10 border border-destructive/30 px-2 py-1 rounded text-xs">
-                <span className="text-destructive font-semibold">Clear all turns?</span>
+
+          {/* Compact Export & Manage Popover (hides secondary clutter until clicked) */}
+          <div className="relative">
+            <button
+              type="button"
+              data-testid="timeline-tools-menu-btn"
+              onClick={() => setShowToolsMenu((v) => !v)}
+              className="btn-outline px-2.5 py-1.5 text-xs font-medium"
+              title="Export, Copy, Print, or Clear Chronicle"
+            >
+              ⋯ More
+            </button>
+            {showToolsMenu && (
+              <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-border bg-card shadow-xl p-1.5 z-40 text-xs space-y-1">
                 <button
                   type="button"
                   onClick={() => {
-                    onClearHistory()
-                    setConfirmClearHistory(false)
+                    handleCopyText()
+                    setShowToolsMenu(false)
                   }}
-                  className="px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold"
+                  disabled={world.drawHistory.length === 0}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 disabled:opacity-40"
                 >
-                  Yes
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy Text</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setConfirmClearHistory(false)}
-                  className="px-2 py-0.5 rounded bg-background border border-border"
+                  onClick={() => {
+                    handleExportMarkdown()
+                    setShowToolsMenu(false)
+                  }}
+                  disabled={world.drawHistory.length === 0}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 disabled:opacity-40"
                 >
-                  No
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export Chronicle (.md)</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.print()
+                    setShowToolsMenu(false)
+                  }}
+                  disabled={world.drawHistory.length === 0}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 disabled:opacity-40"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  <span>Print Chronicle</span>
+                </button>
+                {!world.isLocked && (
+                  <div className="border-t border-border/60 pt-1">
+                    {confirmClearHistory ? (
+                      <div className="flex items-center justify-between px-2 py-1 bg-destructive/10 rounded">
+                        <span className="text-destructive font-semibold text-[11px]">Clear all?</span>
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onClearHistory()
+                              setConfirmClearHistory(false)
+                              setShowToolsMenu(false)
+                            }}
+                            className="px-2 py-0.5 rounded bg-destructive text-destructive-foreground font-bold text-[10px]"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmClearHistory(false)}
+                            className="px-2 py-0.5 rounded bg-background border border-border text-[10px]"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmClearHistory(true)}
+                        disabled={world.drawHistory.length === 0}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-destructive/10 text-destructive flex items-center gap-2 disabled:opacity-40"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Clear History</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setConfirmClearHistory(true)}
-                disabled={world.drawHistory.length === 0}
-                className="btn-outline flex items-center gap-1.5 px-3 py-1.5 text-xs text-destructive disabled:opacity-50"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>Clear</span>
-              </button>
-            )
-          )}
+            )}
+          </div>
         </div>
       </div>
 

@@ -281,6 +281,9 @@ export function Play() {
   const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
   const [showSiteMenu, setShowSiteMenu] = useState(false)
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  const [turnFocusTab, setTurnFocusTab] = useState<'presets' | 'edit'>('presets')
+  const [showCardExamples, setShowCardExamples] = useState(false)
+  const [showBotAssist, setShowBotAssist] = useState(false)
   const [workspaceLayout, setWorkspaceLayout] = useState<StudioWorkspaceLayout>(() =>
     loadStudioWorkspaceLayout()
   )
@@ -1853,6 +1856,7 @@ export function Play() {
       turnDraft.placedTileIds
     )
     applyLiveTurnDraftUpdate(draft)
+    setTurnFocusTab('edit')
     setRecordSavedFeedback(
       `Preset "${preset.name}" populated into Turn #${drawHistory.length} — edit freely or place on map!`
     )
@@ -3704,22 +3708,33 @@ export function Play() {
                         )}
                       </div>
                     ) : (
-                      <div className="text-center text-muted-foreground py-6 space-y-2">
-                        <div className="text-5xl">🃏</div>
-                        <p className="text-sm font-semibold">Tap "Draw Card" to Begin</p>
-                        <p className="text-xs">
-                          {deck.length} cards remaining in {currentStageData?.name || 'stage'}
+                      <button
+                        type="button"
+                        data-testid="clickable-card-deck"
+                        disabled={world.isLocked || deck.length === 0}
+                        onClick={handleDrawCard}
+                        className="group relative w-full max-w-[170px] aspect-[5/7] rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/15 via-card to-amber-500/15 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12),8px_8px_0px_0px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:border-primary hover:shadow-xl active:translate-y-0 transition-all flex flex-col items-center justify-center p-4 text-center space-y-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Click the deck to draw your next card (Hotkey: D)"
+                        aria-label="Card Deck — Click to Draw"
+                      >
+                        <div className="text-5xl group-hover:scale-110 transition-transform">🃏</div>
+                        <p className="text-sm font-bold text-foreground">Click Deck to Draw</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {deck.length} cards in {currentStageData?.name || 'stage'}
                         </p>
-                      </div>
+                      </button>
                     )}
 
-                    {/* Physical Deck Stack Depth Progress Bar */}
+                    {/* Physical Deck Stack Depth Progress Bar (Clickable to Draw!) */}
                     {(() => {
                       const stackMetrics = computeDeckStackLayers(deck.length, 54)
                       return (
-                        <div
-                          className="w-full max-w-[180px] space-y-1 text-[10px] text-muted-foreground"
-                          title={`${deck.length} cards remaining (${stackMetrics.visibleLayers} deck layers)`}
+                        <button
+                          type="button"
+                          disabled={world.isLocked || deck.length === 0}
+                          onClick={handleDrawCard}
+                          className="w-full max-w-[180px] space-y-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                          title={`Click to draw (${deck.length} cards remaining · ${stackMetrics.visibleLayers} deck layers)`}
                         >
                           <div className="flex items-center justify-between font-mono">
                             <span>Deck Stack ({stackMetrics.visibleLayers}L)</span>
@@ -3731,7 +3746,7 @@ export function Play() {
                               style={{ width: `${stackMetrics.progressPercent}%` }}
                             />
                           </div>
-                        </div>
+                        </button>
                       )
                     })()}
                   </div>
@@ -3769,48 +3784,97 @@ export function Play() {
                           )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-muted/30 p-3.5 rounded-xl border border-border/60 text-xs">
-                          <div>
-                            <span className="font-bold text-muted-foreground block mb-1">
-                              Rule Prompt:
-                            </span>
-                            <p className="leading-relaxed">
+                        {/* Compact Rule Prompt with Collapsible Examples */}
+                        <div className="bg-muted/30 p-3 rounded-xl border border-border/60 text-xs space-y-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="leading-relaxed text-foreground">
                               {isFantastical && powerData.fantasticalDescription
                                 ? powerData.fantasticalDescription
                                 : powerData.description}
                             </p>
+                            <button
+                              type="button"
+                              data-testid="toggle-card-examples-btn"
+                              onClick={() => setShowCardExamples((v) => !v)}
+                              className="shrink-0 px-2 py-0.5 rounded border border-border bg-background hover:bg-muted text-[10px] font-semibold text-muted-foreground hover:text-foreground"
+                            >
+                              {showCardExamples ? 'Hide Examples' : '💡 Examples'}
+                            </button>
                           </div>
-                          <div>
-                            <span className="font-bold text-muted-foreground block mb-1">
-                              Inspiration:
-                            </span>
-                            <p className="text-muted-foreground leading-relaxed">
-                              {powerData.examples}
+                          {showCardExamples && (
+                            <p className="text-muted-foreground leading-relaxed pt-1 border-t border-border/50">
+                              <strong className="text-foreground">Inspiration:</strong> {powerData.examples}
                             </p>
+                          )}
+                        </div>
+
+                        {/* Clean Focused 2-Tab Turn Switcher: Presets vs Manual/Edit (No Wall of Panels!) */}
+                        <div
+                          data-testid="turn-focus-tabs"
+                          className="flex flex-wrap items-center justify-between gap-2 border-b border-border/70 pb-2"
+                        >
+                          <div className="inline-flex rounded-lg bg-muted/60 p-0.5 border border-border">
+                            <button
+                              type="button"
+                              data-testid="turn-focus-tab-presets"
+                              onClick={() => setTurnFocusTab('presets')}
+                              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                                turnFocusTab === 'presets'
+                                  ? 'bg-background text-primary shadow-2xs border border-primary/25'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              ✨ 1. Pick a Preset ({availableActionPresets.length})
+                            </button>
+                            <button
+                              type="button"
+                              data-testid="turn-focus-tab-edit"
+                              onClick={() => setTurnFocusTab('edit')}
+                              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                                turnFocusTab === 'edit'
+                                  ? 'bg-background text-primary shadow-2xs border border-primary/25'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              ✍️ 2. Write / Place on Map
+                              {turnDraft.placedTileIds.length > 0 ? ' ✓' : ''}
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {botRecommendation && (
+                              <button
+                                type="button"
+                                data-testid="toggle-bot-assist-btn"
+                                onClick={() => setShowBotAssist((v) => !v)}
+                                className={`px-2 py-1 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                                  showBotAssist
+                                    ? 'bg-primary/15 border-primary/40 text-primary'
+                                    : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                }`}
+                                title="Optional: Get a story suggestion or tune bot weights"
+                              >
+                                <Bot className="h-3 w-3" />
+                                <span>{showBotAssist ? 'Hide Assist' : 'Bot Assist'}</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setShowCompendiumModal(true)}
+                              className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                              title="Browse all 200+ canonical powers, whiteboard tropes, traditions, and action presets"
+                            >
+                              <BookOpen className="h-3 w-3" />
+                              <span>Compendium</span>
+                            </button>
                           </div>
                         </div>
 
-                        {/* Action Presets & Tabletop Compendium Header */}
-                        <div className="flex items-center justify-between gap-2 pt-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Action Presets & Tabletop Tropes
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setShowCompendiumModal(true)}
-                            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-                            title="Browse all 200+ canonical powers, whiteboard tropes, traditions, and action presets"
-                          >
-                            <BookOpen className="h-3.5 w-3.5" />
-                            <span>Browse 200+ Tropes Compendium</span>
-                          </button>
-                        </div>
-
-                        {/* Optional Action Presets Workshop with Categories, Search, and Affinity Engine */}
-                        {availableActionPresets.length > 0 && (
-                          <div className="space-y-3 pt-2">
-                            {/* Bot Recommendation Banner */}
-                            {botRecommendation && (
+                        {/* TAB 1: Optional Action Presets Workshop (Hidden when Writing/Placing!) */}
+                        {turnFocusTab === 'presets' && availableActionPresets.length > 0 && (
+                          <div className="space-y-2.5 pt-1">
+                            {/* Bot Recommendation Banner (Collapsed until clicked unless seat is a Bot!) */}
+                            {botRecommendation && (showBotAssist || activePlayer?.isBot) && (
                               <div className="p-3 rounded-xl bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/5 border border-primary/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
                                 <div className="flex items-center gap-2">
                                   <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
@@ -4091,7 +4155,8 @@ export function Play() {
                           </div>
                         )}
 
-                        {/* Unified Turn Event & Map Stamp Workbench (Preset-Populated OR Custom Freeform — Always Editable!) */}
+                        {/* TAB 2: Unified Turn Event & Map Stamp Workbench (Preset-Populated OR Custom Freeform — Always Editable!) */}
+                        {(turnFocusTab === 'edit' || availableActionPresets.length === 0) && (
                         <div
                           data-testid="turn-event-workbench"
                           className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-3 animate-in fade-in duration-150"
@@ -4697,8 +4762,10 @@ export function Play() {
                             </button>
                           </div>
                         </div>
+                        )}
 
-                        {/* Live Turn Activity Basket (Shows Map Tiles & Codex Entries touched this turn) */}
+                        {/* Live Turn Activity Basket (Shown in Tab 2: Write / Place on Map) */}
+                        {(turnFocusTab === 'edit' || availableActionPresets.length === 0) && (
                         <div className="p-3 rounded-xl bg-primary/[0.03] border border-primary/25 space-y-2.5 text-xs">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2">
@@ -5014,6 +5081,7 @@ export function Play() {
                             )}
                           </div>
                         </div>
+                        )}
 
                         {/* Turn Note & Chronicle Action */}
                         <div className="space-y-2 pt-2 border-t border-border">

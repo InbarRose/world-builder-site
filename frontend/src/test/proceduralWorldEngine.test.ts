@@ -81,7 +81,7 @@ describe('proceduralWorldEngine', () => {
     }
   })
 
-  it('generates a mostly bare Pre-Genesis starting map with natural coastlines and only a few starting features (1–4 mountains, 1–2 forest tiles, 1 river)', () => {
+  it('generates an ultra-bare Pre-Genesis starting map with natural coastlines and only 1–2 mountains and 1–2 forests', () => {
     const map = generateNaturalWorld({
       width: 20,
       height: 12,
@@ -91,26 +91,25 @@ describe('proceduralWorldEngine', () => {
     const tiles = Object.values(map.tiles)
     const landTiles = tiles.filter((t) => t.domain === 'land')
 
-    // At least 90% of land tiles must be bare open land (plains with no relief and no flora)
+    // At least 92% of land tiles must be bare open land (plains with no relief and no flora)
     const barePlainsCount = landTiles.filter(
       (t) => t.terrain === 'plains' && t.relief === 'none' && t.flora === 'none'
     ).length
-    expect(barePlainsCount / landTiles.length).toBeGreaterThanOrEqual(0.9)
+    expect(barePlainsCount / landTiles.length).toBeGreaterThanOrEqual(0.92)
 
-    // Only 1–4 starting mountain peaks
+    // Only 1–2 starting mountain peaks
     const mountainCount = landTiles.filter((t) => t.terrain === 'mountain').length
     expect(mountainCount).toBeGreaterThanOrEqual(1)
-    expect(mountainCount).toBeLessThanOrEqual(4)
+    expect(mountainCount).toBeLessThanOrEqual(2)
 
     // Only 1–2 starting forest tiles
     const forestCount = landTiles.filter((t) => t.flora === 'forest').length
     expect(forestCount).toBeGreaterThanOrEqual(1)
     expect(forestCount).toBeLessThanOrEqual(2)
 
-    // 1 starting downhill river path
+    // Zero pre-carved rivers so players draw rivers themselves during Genesis
     const riverTiles = tiles.filter((t) => t.hasRiver)
-    expect(riverTiles.length).toBeGreaterThan(0)
-    expect(riverTiles.length).toBeLessThanOrEqual(12)
+    expect(riverTiles.length).toBe(0)
   })
 
   it('keeps Turn-0 starting maps completely free of pre-seeded resource slots and settlements so players build them during play', () => {
