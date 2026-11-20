@@ -149,6 +149,17 @@ import {
 import { MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
+import { StudioDockWorkspace } from '../components/StudioDockWorkspace'
+import {
+  StudioPanelId,
+  StudioWorkspaceLayout,
+  WORKSPACE_PRESETS,
+  createWorkspacePreset,
+  loadStudioWorkspaceLayout,
+  saveStudioWorkspaceLayout,
+  toggleAllPanelsHidden,
+  togglePanelVisibility,
+} from '../engine/workspaceLayoutEngine'
 import { CreateWorldOptions, WorldManagerModal } from '../components/WorldManagerModal'
 import { ExportSuiteModal } from '../components/ExportSuiteModal'
 import { ShareTableModal } from '../components/ShareTableModal'
@@ -202,7 +213,7 @@ import {
   AmbientSoundscapeMood,
 } from '../engine/soundEngine'
 
-type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
+type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split' | 'dock'
 
 export function Play() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -269,6 +280,32 @@ export function Play() {
   const [showDeckEmptyDialog, setShowDeckEmptyDialog] = useState(false)
   const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
   const [showSiteMenu, setShowSiteMenu] = useState(false)
+  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  const [workspaceLayout, setWorkspaceLayout] = useState<StudioWorkspaceLayout>(() =>
+    loadStudioWorkspaceLayout()
+  )
+
+  const handleWorkspaceLayoutChange = useCallback((next: StudioWorkspaceLayout) => {
+    setWorkspaceLayout(next)
+    saveStudioWorkspaceLayout(next)
+  }, [])
+
+  // Photoshop-style Tab hotkey in Modular Studio: toggle all panels for Pure Canvas view
+  useEffect(() => {
+    const handleTabToggle = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || activeTab !== 'dock') return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      e.preventDefault()
+      setWorkspaceLayout((prev) => {
+        const next = toggleAllPanelsHidden(prev)
+        saveStudioWorkspaceLayout(next)
+        return next
+      })
+    }
+    window.addEventListener('keydown', handleTabToggle)
+    return () => window.removeEventListener('keydown', handleTabToggle)
+  }, [activeTab])
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
   const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
@@ -2610,23 +2647,132 @@ export function Play() {
             </button>
 
             {gameMode === 'studio' && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'split'}
-                onClick={() => setActiveTab('split')}
-                className={`hidden lg:flex px-3.5 py-1.5 rounded-lg text-xs font-semibold items-center gap-1.5 shrink-0 transition-all ${
-                  activeTab === 'split'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted/50 hover:bg-muted text-foreground'
-                }`}
-              >
-                <Columns className="h-3.5 w-3.5" />
-                <span>Side-by-Side Studio</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  role="tab"
+                  data-testid="tab-modular-studio"
+                  aria-selected={activeTab === 'dock'}
+                  onClick={() => setActiveTab('dock')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all ${
+                    activeTab === 'dock'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/50 hover:bg-muted text-foreground'
+                  }`}
+                  title="Photoshop-Style Modular Studio: Map centered with movable, resizable, and floating Cards, Codex & History panels"
+                >
+                  <Columns className="h-3.5 w-3.5" />
+                  <span>Modular Studio</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === 'split'}
+                  onClick={() => setActiveTab('split')}
+                  className={`hidden lg:flex px-3.5 py-1.5 rounded-lg text-xs font-semibold items-center gap-1.5 shrink-0 transition-all ${
+                    activeTab === 'split'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/50 hover:bg-muted text-foreground'
+                  }`}
+                >
+                  <Columns className="h-3.5 w-3.5" />
+                  <span>Side-by-Side Studio</span>
+                </button>
+              </>
             )}
 
             <div className="ml-auto flex items-center gap-2 shrink-0">
+              {/* Modular Studio Workspace Presets & Panel Toggles */}
+              {gameMode === 'studio' && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    data-testid="studio-workspace-menu-btn"
+                    onClick={() => setShowWorkspaceMenu((v) => !v)}
+                    className={`px-2.5 py-1 rounded-md border text-xs font-semibold flex items-center gap-1 transition-colors ${
+                      showWorkspaceMenu || activeTab === 'dock'
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border bg-background hover:bg-muted text-muted-foreground'
+                    }`}
+                    title="Customize Modular Studio panels, docks, floating windows, and presets (Tab = Pure Canvas)"
+                  >
+                    <Columns className="h-3.5 w-3.5" />
+                    <span>Workspace</span>
+                    <ChevronDown className="h-3 w-3 opacity-70" />
+                  </button>
+
+                  {showWorkspaceMenu && (
+                    <div
+                      data-testid="studio-workspace-menu-popover"
+                      className="absolute right-0 mt-1.5 w-64 rounded-xl border border-border bg-card shadow-xl p-2 z-50 text-xs space-y-2"
+                    >
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                        Studio Workspace Presets
+                      </div>
+                      <div className="space-y-1">
+                        {WORKSPACE_PRESETS.map((preset) => (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            data-testid={`workspace-preset-${preset.id}`}
+                            onClick={() => {
+                              handleWorkspaceLayoutChange(createWorkspacePreset(preset.id))
+                              setActiveTab('dock')
+                              setShowWorkspaceMenu(false)
+                            }}
+                            className={`w-full text-left px-2 py-1.5 rounded-lg flex items-start gap-2 transition-colors ${
+                              workspaceLayout.presetId === preset.id
+                                ? 'bg-primary/15 text-primary font-semibold'
+                                : 'hover:bg-accent text-foreground'
+                            }`}
+                          >
+                            <span className="text-sm">{preset.icon}</span>
+                            <div className="min-w-0">
+                              <div className="font-semibold leading-tight">{preset.label}</div>
+                              <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                                {preset.description}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="border-t border-border/60 pt-1.5 space-y-1">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                          Toggle Studio Panels
+                        </div>
+                        {(['cards', 'codex', 'timeline'] as StudioPanelId[]).map((pid) => {
+                          const p = workspaceLayout.panels[pid]
+                          const isVisible = !workspaceLayout.allPanelsHidden && p.dock !== 'hidden'
+                          return (
+                            <button
+                              key={pid}
+                              type="button"
+                              data-testid={`workspace-toggle-panel-${pid}`}
+                              onClick={() => {
+                                handleWorkspaceLayoutChange(
+                                  togglePanelVisibility(workspaceLayout, pid)
+                                )
+                                setActiveTab('dock')
+                              }}
+                              className="w-full px-2 py-1 rounded hover:bg-accent flex items-center justify-between text-foreground"
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <span>{p.icon}</span>
+                                <span>{p.title}</span>
+                              </span>
+                              <span className="text-[10px] font-mono text-muted-foreground uppercase">
+                                {isVisible ? p.dock : 'hidden'}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={() => setShowAgesModal(true)}
@@ -2640,7 +2786,13 @@ export function Play() {
         )}
       </header>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-2.5 py-2 space-y-3">
+      <div
+        className={
+          activeTab === 'dock' && gameMode === 'studio'
+            ? 'flex-1 min-h-0 flex flex-col overflow-hidden'
+            : 'flex-1 min-h-0 overflow-y-auto px-2.5 py-2 space-y-3'
+        }
+      >
 
       {/* Celebratory Stage Advance Banner */}
       {stageCelebration && (
@@ -5206,6 +5358,203 @@ export function Play() {
                 </section>
               )}
             </div>
+          )}
+
+          {/* =================================================================
+              VIEW 1.5: PHOTOSHOP-STYLE MODULAR DOCKABLE STUDIO (Phases 38-39)
+              ================================================================= */}
+          {gameMode === 'studio' && activeTab === 'dock' && (
+            <StudioDockWorkspace
+              layout={workspaceLayout}
+              onChangeLayout={handleWorkspaceLayoutChange}
+              centerCanvas={
+                <MapCanvas
+                  map={world.map}
+                  worldName={world.name}
+                  currentStage={world.currentStage}
+                  gameMode={gameMode}
+                  drawHistory={world.drawHistory}
+                  entities={world.entities}
+                  selectedTileId={selectedTileId}
+                  onSelectTile={setSelectedTileId}
+                  onSelectEntity={handleNavigateToEntity}
+                  onSelectEvent={handleNavigateToEvent}
+                  onStampActiveTurnOnTile={
+                    drawnCard && !world.isLocked ? handlePlaceDraftOnMap : undefined
+                  }
+                  activeTurnActionLabel={
+                    turnDraft.featureName ||
+                    turnDraft.actionTitle ||
+                    selectedPreset?.name
+                  }
+                  onChange={handleWorkspaceMapChange}
+                  initialViewOnly={false}
+                />
+              }
+              panelContents={{
+                cards: (
+                  <div className="space-y-3 text-xs">
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
+                      <div>
+                        <div className="font-bold text-sm">
+                          {currentStageData?.name || 'Genesis'} · {deck.length} cards left
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          Active Speaker: <strong>{activePlayer?.name || 'Player 1'}</strong>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('cards')}
+                        className="px-2 py-1 rounded border border-border hover:bg-accent text-[11px] font-semibold"
+                        title="Open Full Turn Workshop View"
+                      >
+                        Full View ↗
+                      </button>
+                    </div>
+
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        data-testid="dock-draw-card-btn"
+                        disabled={world.isLocked}
+                        onClick={handleDrawCard}
+                        className="btn-primary flex-1 py-2 text-xs font-bold flex items-center justify-center gap-1.5"
+                      >
+                        <PlayIcon className="h-3.5 w-3.5" />
+                        <span>{drawnCard ? 'Draw Next Card' : 'Draw Card [D]'}</span>
+                      </button>
+                      {drawnCard && !world.isLocked && (
+                        <button
+                          type="button"
+                          onClick={handleRedrawCurrentCard}
+                          className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
+                          title="Redraw / Mulligan Card [R]"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {drawnCard ? (
+                      <div className="p-2.5 rounded-lg bg-muted/50 border border-border space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-sm text-primary">
+                            {getCardDisplay(drawnCard).display} · {powerData?.power || turnDraft.actionTitle || 'Power'}
+                          </span>
+                          {isFantasticalCard(drawnCard) && (
+                            <span className="px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
+                              ✨ Fantastical
+                            </span>
+                          )}
+                        </div>
+                        {powerData && (
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            {powerData.description}
+                          </p>
+                        )}
+                        <input
+                          type="text"
+                          value={turnDraft.featureName}
+                          onChange={(e) =>
+                            setTurnDraft((prev) => ({ ...prev, featureName: e.target.value }))
+                          }
+                          placeholder="Name this feature or event..."
+                          className="input w-full h-8 text-xs"
+                        />
+                        <textarea
+                          value={turnDraft.note}
+                          onChange={(e) =>
+                            setTurnDraft((prev) => ({ ...prev, note: e.target.value }))
+                          }
+                          rows={3}
+                          placeholder="Record what happened in the world chronicle..."
+                          className="input w-full text-xs resize-y"
+                        />
+                        <div className="flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handlePlaceDraftOnMap(selectedTileId)}
+                            className="btn-outline flex-1 py-1.5 text-[11px] font-semibold"
+                          >
+                            📍 Stamp ({selectedTileId})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleConfirmTurnChronicle}
+                            className="btn-primary flex-1 py-1.5 text-[11px] font-bold"
+                          >
+                            ✓ Log Turn
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic p-2 rounded bg-muted/30 border border-dashed border-border">
+                        Draw a card to shape the world, then click any tile on the center map to
+                        stamp or edit geography directly. Press <kbd className="px-1 bg-muted rounded">Tab</kbd> for Pure Canvas view.
+                      </p>
+                    )}
+                  </div>
+                ),
+                codex: (
+                  <EntityRegistry
+                    entities={world.entities}
+                    currentStage={currentStage}
+                    drawHistory={world.drawHistory}
+                    map={world.map}
+                    selectedEntityId={selectedEntityId}
+                    onSelectEntity={setSelectedEntityId}
+                    onSelectTile={handleNavigateToTile}
+                    onSelectEvent={handleNavigateToEvent}
+                    onOpenCompendium={() => setShowCompendiumModal(true)}
+                    onChange={handleWorkspaceEntitiesChange}
+                  />
+                ),
+                timeline: (
+                  <TimelinePanel
+                    world={world}
+                    cardColors={cardColors}
+                    onUpdateRecord={(recordId, updates) =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        drawHistory: prev.drawHistory.map((r) =>
+                          r.id === recordId ? { ...r, ...updates } : r
+                        ),
+                      }))
+                    }
+                    onSelectTile={handleNavigateToTile}
+                    onSelectEntity={handleNavigateToEntity}
+                    onClearHistory={() =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        drawHistory: [],
+                        snapshots: [],
+                      }))
+                    }
+                    onRewindToMove={(targetMoveId) => {
+                      persistWorldUpdate((prev) => rewindWorldToMove(prev, targetMoveId))
+                      setDeck(rebuildDeck())
+                    }}
+                    onBranchFromMove={(targetMoveId) => {
+                      const branched = branchWorldAtMove(world, targetMoveId)
+                      setWorld(branched)
+                      setSavedWorlds(listSavedWorlds())
+                      setDeck(buildShuffledDeck(branched.deckConfig))
+                    }}
+                    onTogglePinEvent={(recordId) =>
+                      persistWorldUpdate((prev) => ({
+                        ...prev,
+                        twoPagerConfig: toggleTwoPagerPinItem(
+                          prev.twoPagerConfig,
+                          'event',
+                          recordId
+                        ),
+                      }))
+                    }
+                  />
+                ),
+              }}
+            />
           )}
 
           {/* =================================================================
