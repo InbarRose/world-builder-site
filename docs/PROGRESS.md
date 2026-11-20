@@ -421,5 +421,10 @@ status: active
   - [x] **Phase 40**: Extended Stage-Aware Genesis Basic Geography filtering to the `MapCanvas` Brush Palette Drawer, replaced 4X jargon (`Strategic Resources` / `Harvestable Nodes` → `Natural Resources & Features` / `World Features`), and uncrushed the `Classic Studio` center map layout (Left: Cards `340px`, Center: Wide Map, Bottom: Codex & Chronicle).
   - [x] **Phase 41**: Enriched the Modular Studio docked `Cards & Turn` panel with Speaker Chime-In pills, Quick Stage/Suit Presets for the drawn card, and authentic relative era time context per `docs/world_building_original_docs.md`.
   - [x] **Phase 42**: Re-aligned `docs/AUDIT_RUBRIC.md` with ADR-045 (deprecating 4X computer-game simulation criteria in favor of Ruleset Fidelity and creative studio ergonomics) and verified full build + all 33 test suites (**227/227 tests passing**).
+- [x] **Phase 43: Ultra-Bare Pre-Genesis Worldgen, Clickable Card Deck, Focused Tabbed Turn Flow & Cleaner Chronicle** *(ADR-047)*
+  - [x] Stripped Turn-0 map generation (`proceduralWorldEngine.ts`) down to pure coastlines (`>= 92%` bare `plains`), `1–2` mountain tiles, `1–2` forest tiles, and `0` rivers/slots/settlements.
+  - [x] Made the physical Card Deck (`clickable-card-deck`) and deck stack bar directly clickable to draw cards in `Play.tsx`.
+  - [x] Replaced the post-draw panel explosion with a focused 2-tab flow (`✨ 1. Pick a Preset` | `✍️ 2. Write / Place on Map`) plus collapsible `💡 Examples` and `🤖 Bot Assist` toggles.
+  - [x] Simplified `TimelinePanel.tsx` header by tucking Copy/Export/Print/Clear into a compact `⋯ More` popover.
 
 

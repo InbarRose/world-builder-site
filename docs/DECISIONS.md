@@ -1262,6 +1262,32 @@ status: active
 - **Consequences**:
   - Brings the entire workspace, UI, and governance docs back into 100% alignment with the original *World Building* ruleset and human-experience-led design.
 
+---
+
+## ADR-047: Ultra-Bare Pre-Genesis Continents, Clickable Card Deck, Focused Tabbed Turn Flow & Cleaner Chronicle Header
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Direct human playtesting surfaced four immediate UX and ruleset friction points:
+  1. Initial maps still felt too rich (up to 4 mountains and a 12-tile meandering river) rather than *"just a few small things, a continent shape with water/land a mountain or two, a forest or two. not much more."*
+  2. Pressing directly on the physical card deck graphic did not draw a card.
+  3. After drawing a card, too many panels, examples, bot recommendations, presets, and workbench controls popped up all at once instead of staging choices cleanly in tabs and hiding optional clutter until clicked.
+  4. The World Chronicle header stacked 7 action buttons above the entries.
+- **Decision**:
+  1. **Ultra-Bare Pre-Genesis Worldgen (`proceduralWorldEngine.ts`)**:
+     - Restricted Turn-0 maps strictly to organic coastlines (`water`/`ocean` + `>= 92%` bare `plains`), `1–2` mountain tiles, `1–2` forest tiles, `0` pre-carved rivers, `0` resource slots, and `0` settlements.
+  2. **Tactile Clickable Card Deck (`Play.tsx`)**:
+     - Converted both the physical card deck (`clickable-card-deck`) and the deck-stack bar beneath it into interactive buttons wired directly to `handleDrawCard`.
+  3. **Focused 2-Tab Progressive-Disclosure Turn Flow (`Play.tsx`)**:
+     - Collapsed card examples behind a 1-click `💡 Examples` pill and collapsed Bot Assist behind a 1-click `🤖 Bot Assist` toggle (`toggle-bot-assist-btn`) on human turns.
+     - Staged post-draw interaction into 2 crisp tabs (`turn-focus-tabs`): **Tab 1: `✨ 1. Pick a Preset`** and **Tab 2: `✍️ 2. Write / Place on Map`** (selecting any preset smoothly advances to Tab 2).
+  4. **Cleaner World Chronicle Header (`TimelinePanel.tsx`)**:
+     - Reduced the top header to 3 clear primary controls (`+ Log Custom Event`, `Oldest/Newest`, `Realm Saga`) and tucked secondary export/print/clear actions into a compact `⋯ More` popover (`timeline-tools-menu-btn`).
+- **Consequences**:
+  - Eliminates visual overwhelm after drawing a card, makes drawing from the deck tactile and intuitive, and ensures Turn-0 maps are truly bare canvases ready for Stage 1: Genesis.
+
+
 
 
 
