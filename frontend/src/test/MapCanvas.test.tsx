@@ -571,6 +571,8 @@ describe('MapCanvas Component', () => {
           terrain: 'mountain',
           relief: 'mountain',
           flora: 'forest',
+          overlay: 'none',
+          slots: [],
           cartographicSymbol: 'mountain-peak',
         }
         return m
