@@ -27,6 +27,7 @@ interface StudioDockWorkspaceProps {
   onChangeLayout: (next: StudioWorkspaceLayout) => void
   centerCanvas: React.ReactNode
   panelContents: Record<StudioPanelId, React.ReactNode>
+  panelBadges?: Partial<Record<StudioPanelId, { count?: number; highlight?: boolean }>>
 }
 
 export function StudioDockWorkspace({
@@ -34,6 +35,7 @@ export function StudioDockWorkspace({
   onChangeLayout,
   centerCanvas,
   panelContents,
+  panelBadges = {},
 }: StudioDockWorkspaceProps) {
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
@@ -41,6 +43,9 @@ export function StudioDockWorkspace({
   const rightPanels = layout.allPanelsHidden ? [] : getPanelsInDock(layout, 'right')
   const bottomPanels = layout.allPanelsHidden ? [] : getPanelsInDock(layout, 'bottom')
   const floatingPanels = layout.allPanelsHidden ? [] : getPanelsInDock(layout, 'floating')
+  const collapsedOrHiddenPanels = (Object.values(layout.panels) as StudioPanelConfig[]).filter(
+    (p) => layout.allPanelsHidden || p.dock === 'hidden'
+  )
 
   const startResizeDock = (edge: 'left' | 'right' | 'bottom', e: React.MouseEvent) => {
     e.preventDefault()
@@ -385,6 +390,47 @@ export function StudioDockWorkspace({
           )}
         </div>
       ))}
+      {/* Single-Pane Floating Edge Tray Pills for Hidden / Collapsed Panels with Notification Dots */}
+      {collapsedOrHiddenPanels.length > 0 && (
+        <div
+          data-testid="studio-edge-tray-bar"
+          className="no-print fixed bottom-3 right-3 z-40 flex items-center gap-1.5 px-2 py-1.5 rounded-full border border-border/90 bg-card/95 backdrop-blur-md shadow-xl"
+        >
+          {collapsedOrHiddenPanels.map((p) => {
+            const badge = panelBadges[p.id]
+            return (
+              <button
+                key={p.id}
+                type="button"
+                data-testid={`edge-tray-open-${p.id}`}
+                onClick={() => {
+                  const defaultDock: StudioDockSlot = p.id === 'cards' ? 'left' : 'bottom'
+                  const targetDock = p.dock === 'hidden' ? defaultDock : p.dock
+                  onChangeLayout(
+                    movePanelToDock({ ...layout, allPanelsHidden: false }, p.id, targetDock)
+                  )
+                }}
+                className="relative px-2.5 py-1 rounded-full bg-muted/60 hover:bg-primary hover:text-primary-foreground text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                title={`Open ${p.title} panel`}
+              >
+                <span>{p.icon}</span>
+                <span>{p.title}</span>
+                {typeof badge?.count === 'number' && badge.count > 0 && (
+                  <span className="px-1 rounded-full bg-background/80 text-foreground text-[9px] font-mono font-bold">
+                    {badge.count}
+                  </span>
+                )}
+                {badge?.highlight && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-card animate-pulse"
+                    aria-label={`${p.title} attention highlight`}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

@@ -617,6 +617,8 @@ export function MapCanvas({
   )
   const isGenesisBasicGeography =
     currentStage === 'genesis' && gameMode !== 'free-create' && !showLaterAgeLayers
+  // Phase 51 State-Machine Lock: Once Turn #1 has begun in normal play, world dimensions & topology are locked
+  const isCampaignStarted = drawHistory.length > 0 && gameMode !== 'free-create'
 
   useEffect(() => {
     if (currentStage !== 'genesis' || gameMode === 'free-create') {
@@ -1737,7 +1739,8 @@ export function MapCanvas({
               </button>
             </div>
 
-            {/* Grid Topology Switcher: Square vs Pointy Hex vs Flat Hex */}
+            {/* Grid Topology Switcher: Square vs Pointy Hex vs Flat Hex (Locked once campaign starts) */}
+            {!isCampaignStarted && (
             <div
               className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
               role="group"
@@ -1783,6 +1786,7 @@ export function MapCanvas({
                 ⬢ Flat Hex
               </button>
             </div>
+            )}
 
             {/* Organic Shading & Biome Blending Mode Toggle */}
             <div
@@ -1816,9 +1820,9 @@ export function MapCanvas({
               </button>
             </div>
 
-            {/* Quick Dimension Presets (Visible in Edit Mode) */}
-            {!isViewOnly && (
-              <div className="flex items-center gap-1">
+            {/* Quick Dimension Presets (Locked once campaign starts — state-machine invariant) */}
+            {!isViewOnly && !isCampaignStarted && (
+              <div className="flex items-center gap-1" data-testid="map-dimension-presets">
                 {[
                   { label: '14×9', w: 14, h: 9 },
                   { label: '20×12', w: 20, h: 12 },
