@@ -2114,30 +2114,34 @@ export function MapCanvas({
                 <span>🏔️</span>
                 <span>2. Relief & Canopy</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setPaletteTab('resources')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  paletteTab === 'resources'
-                    ? 'bg-primary text-primary-foreground shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
-                }`}
-              >
-                <span>🌾</span>
-                <span>3. Strategic Resources</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaletteTab('settlements')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  paletteTab === 'settlements'
-                    ? 'bg-primary text-primary-foreground shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
-                }`}
-              >
-                <span>🏰</span>
-                <span>4. Settlements & Roads</span>
-              </button>
+              {!isGenesisBasicGeography && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setPaletteTab('resources')}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                      paletteTab === 'resources'
+                        ? 'bg-primary text-primary-foreground shadow-2xs'
+                        : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                    }`}
+                  >
+                    <span>🌾</span>
+                    <span>3. Natural Resources &amp; Features</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaletteTab('settlements')}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                      paletteTab === 'settlements'
+                        ? 'bg-primary text-primary-foreground shadow-2xs'
+                        : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                    }`}
+                  >
+                    <span>🏰</span>
+                    <span>4. Settlements &amp; Roads</span>
+                  </button>
+                </>
+              )}
               <button
                 type="button"
                 onClick={() => setPaletteTab('tropes')}
@@ -2148,20 +2152,32 @@ export function MapCanvas({
                 }`}
               >
                 <span>🖌️</span>
-                <span>5. Whiteboard Tropes (48)</span>
+                <span>{isGenesisBasicGeography ? '3.' : '5.'} Whiteboard Tropes (48)</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setPaletteTab('borders')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  paletteTab === 'borders'
-                    ? 'bg-primary text-primary-foreground shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
-                }`}
-              >
-                <span>🚩</span>
-                <span>6. Realm Borders</span>
-              </button>
+              {!isGenesisBasicGeography && (
+                <button
+                  type="button"
+                  onClick={() => setPaletteTab('borders')}
+                  className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                    paletteTab === 'borders'
+                      ? 'bg-primary text-primary-foreground shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted'
+                  }`}
+                >
+                  <span>🚩</span>
+                  <span>6. Realm Borders</span>
+                </button>
+              )}
+              {currentStage === 'genesis' && gameMode !== 'free-create' && (
+                <button
+                  type="button"
+                  data-testid="palette-toggle-later-age-btn"
+                  onClick={() => setShowLaterAgeLayers((v) => !v)}
+                  className="ml-auto px-2 py-1 rounded text-[11px] font-semibold border border-dashed border-border text-muted-foreground hover:text-foreground"
+                >
+                  {showLaterAgeLayers ? '− Genesis Only' : '+ Later Ages'}
+                </button>
+              )}
             </div>
 
             {/* TAB 1: Base Terrains, Brush Radius & Tile Style */}
@@ -4077,9 +4093,9 @@ export function MapCanvas({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
                         <span>🌾</span>
-                        <span>Layer 3: Strategic Resources & Wonders</span>
+                        <span>Layer 3: Natural Resources &amp; Features</span>
                       </span>
-                      <span className="text-[10px] text-muted-foreground">Harvestable Nodes</span>
+                      <span className="text-[10px] text-muted-foreground">World Features</span>
                     </div>
 
                     {/* Quick-Pick Resource Chips */}

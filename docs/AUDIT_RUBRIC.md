@@ -1,9 +1,17 @@
 # Uncompromising AAA-Calibrated Tabletop Benchmark Rubric & Multi-Domain Governance
 
 > **Governance Document**: System Quality Standard, Multi-Domain Rubric, and Adversarial Audit Framework  
-> **Effective Date**: 2026-11-06  
-> **Status**: Accepted & Enforced  
+> **Effective Date**: 2026-11-06 *(Re-Aligned 2026-11-19 via ADR-045 & ADR-046)*  
+> **Status**: Governed by ADR-045 (Human-Experience-Led & Ruleset-First Precedence)  
 > **Supersedes**: ADR-010 (Inflated Self-Scoring Standard)
+
+> [!IMPORTANT]
+> **ADR-045 & ADR-046 Re-Alignment Directive (2026-11-19)**:  
+> Every evaluation and engineering decision in this repository is strictly subordinate to:
+> 1. **Human Creator Instructions** (highest authority),
+> 2. **The Original *World Building* Tabletop Ruleset** (`docs/world_building_original_docs.md`) — collaborative storytelling with no winners, no losers, basic geography only at Stage 1: Genesis, and mostly-bare Pre-Genesis starting maps,
+> 3. **Human-Experience-Led Creative Studio Ergonomics** (modeled after *Photoshop, Figma, Wonderdraft, Inkarnate, and the Warcraft 3 World Editor* — **NOT** 4X/grand-strategy video games like *Crusader Kings III*).  
+> Any metric that incentivizes 4X simulation math (economic yields, defensibility ratings, stability percentages, upgrade tech trees, or overcrowded Turn-0 maps) is formally deprecated.
 
 ---
 

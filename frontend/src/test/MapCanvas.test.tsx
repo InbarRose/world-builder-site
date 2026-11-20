@@ -479,7 +479,7 @@ describe('MapCanvas Component', () => {
 
     // Switch to Layer 3 (Resources)
     fireEvent.click(screen.getByRole('button', { name: /🌾 3\. Res/i }))
-    expect(screen.getByText(/Layer 3: Strategic Resources & Wonders/i)).toBeInTheDocument()
+    expect(screen.getByText(/Layer 3: Natural Resources & Features/i)).toBeInTheDocument()
 
     // 1-Click stamp Grain Fields resource
     const grainBtn = screen.getByRole('button', { name: /🌾 Grain Fields/i })
@@ -515,7 +515,7 @@ describe('MapCanvas Component', () => {
     // Palette Category Menu tabs should be visible
     expect(screen.getByRole('button', { name: /1\. Base Biomes/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /2\. Relief & Canopy/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /3\. Strategic Resources/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /3\. Natural Resources & Features/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /4\. Settlements & Roads/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /5\. Whiteboard Tropes/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /6\. Realm Borders/i })).toBeInTheDocument()

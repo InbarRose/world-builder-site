@@ -57,7 +57,7 @@ export const WORKSPACE_PRESETS: WorkspacePresetMeta[] = [
     id: 'classic',
     label: 'Classic Studio',
     icon: '🎨',
-    description: 'Left: Cards & Turn · Center: World Map · Right: Codex & History (tabbed)',
+    description: 'Left: Cards & Turn · Center: Wide World Map · Bottom: Codex & Chronicle (tabbed)',
   },
   {
     id: 'pure-canvas',
@@ -177,16 +177,19 @@ export function createWorkspacePreset(presetId: WorkspacePresetId): StudioWorksp
     }
   }
 
-  // Default: 'classic'
+  // Default: 'classic' — Uncrushed Wide Center Map (Left: Cards, Bottom: Codex & Chronicle)
+  panels.cards.dock = 'left'
+  panels.codex.dock = 'bottom'
+  panels.timeline.dock = 'bottom'
   return {
     presetId: 'classic',
     panels,
-    leftDockWidth: 390,
+    leftDockWidth: 340,
     rightDockWidth: 340,
-    bottomDockHeight: 240,
+    bottomDockHeight: 210,
     activeLeftTab: 'cards',
-    activeRightTab: 'codex',
-    activeBottomTab: null,
+    activeRightTab: null,
+    activeBottomTab: 'codex',
     allPanelsHidden: false,
   }
 }
