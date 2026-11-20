@@ -15,6 +15,16 @@ Too often, software projects descend into "feature checklists" and abstract arch
 
 Technical excellence is not an end in itself; it is the scaffolding required to deliver uncompromised creative flow, emotional resonance, and frictionless tabletop collaboration.
 
+### 1.1 Mandatory Decision Authority & Precedence Order (ADR-045)
+
+Every product, UX, layout, and engineering decision in this repository MUST pass through this strict 3-tier hierarchy of truth:
+
+1. **Human Creator Instructions (Highest Authority)**: Explicit direction, design taste, and course corrections provided by the creator always supersede prior AI proposals, benchmarks, or generic software patterns.
+2. **The Original *World Building* Ruleset (`docs/world_building_original_docs.md`)**: Every feature must honor the authentic 4-stage collaborative tabletop card game (`1. Genesis` basic geography → `2. Primal` species & small settlements → `3. Civilization` societies & kingdoms → `4. Intrigue` recent plots & myths), with **no winners, no losers, no 4X numeric simulation stats, and no overcrowded Turn-0 maps**.
+3. **Human Experience (HX) Ergonomics**: Studio interfaces should behave like a calm, responsive, full-viewport creative tool (e.g., Photoshop / Warcraft 3 World Editor) that eliminates scrolling friction, protects creative flow, and keeps the shared map front-and-center.
+
+> **Anti-Pattern Gate**: Never invent video-game mechanics (economic yield math, stability percentages, defensibility scores, upgrade tech trees, AI scorecards) unless explicitly requested by the human creator.
+
 ---
 
 ## 2. The Traceability Hierarchy

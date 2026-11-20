@@ -1218,6 +1218,26 @@ status: active
   - Transforms the Play Studio into a true full-viewport, customizable creative design studio with zero outer page scrolling.
   - Verified with 4 new tests in `workspaceLayoutEngine.test.tsx` (227/227 total tests passing across 33 test suites).
 
+---
+
+## ADR-045: Human-Experience-Led, Ruleset-First & Creator-Directed Decision Governance
+
+- **Status**: Accepted & Enforced
+- **Date**: 2026-11-19
+- **Context**:
+  Reflecting on earlier phases where 4X video-game mechanics (numeric stability meters, province economic yields, defensibility scores, overcrowded Turn-0 maps) drifted away from the collaborative tabletop nature of *World Building*, the creator established an explicit governance rule for all present and future work:
+  > *"consider every app decision needs to come from human experience led decision, based primarily on the world building ruleset, and my human provided instructions."*
+- **Decision**:
+  1. **Codified 3-Tier Decision Precedence in `docs/HUMAN_EXPERIENCE_FRAMEWORK.md` (§1.1)**:
+     - **Tier 1**: Explicit instructions and design judgment from the human creator.
+     - **Tier 2**: Fidelity to the original *World Building* tabletop ruleset (`docs/world_building_original_docs.md`) — collaborative storytelling, stage-appropriate progression (basic geography in Genesis, species in Primal, societies in Civilization, plots in Intrigue), zero win/loss state.
+     - **Tier 3**: Human-Experience-Led creative studio ergonomics (full-viewport canvas, low clutter, responsive panels, zero accidental mutations).
+  2. **Mandatory Anti-Pattern Gate**:
+     - Before introducing any new mechanic, metric, or UI element, verify it directly serves the human tabletop experience and the original ruleset — rejecting speculative video-game systems or unrequested numeric simulations.
+- **Consequences**:
+  - Anchors all future planning, design reviews, and code changes permanently to the human creator's vision and the authentic *World Building* ruleset.
+
+
 
 
 
