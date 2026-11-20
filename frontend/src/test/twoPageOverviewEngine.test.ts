@@ -72,4 +72,23 @@ describe('Phase 24: Deterministic Non-LLM 2-Page World Overview Engine (twoPageO
       overviewAfterExclude.page2.topEntities.some((e) => e.id === targetEntityId)
     ).toBe(false)
   })
+
+  it('Phase 32: surfaces named Geographic Regions and Collapsed Settlement Ruins in the Page 1 Landmarks Gazetteer', () => {
+    const world = createNewWorld('Regional Gazetteer Realm')
+    world.map.tiles['2,2'] = {
+      ...world.map.tiles['2,2'],
+      label: 'Ruins of Eldergate',
+      regionName: 'The Ashveil Mountains',
+      overlay: 'ruins',
+      ruinOriginLabel: 'Sunken Royal Capital',
+    }
+    world.twoPagerConfig = toggleTwoPagerPinItem(undefined, 'tile', '2,2')
+
+    const overview = buildWorldTwoPageOverview(world)
+    const entry = overview.page1.topLandmarks.find((l) => l.tileId === '2,2')
+    expect(entry).toBeDefined()
+    expect(entry?.name).toBe('Ruins of Eldergate')
+    expect(entry?.terrainLabel).toContain('The Ashveil Mountains')
+    expect(entry?.categoryLabel).toBe('Sunken Royal Capital')
+  })
 })

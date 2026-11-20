@@ -621,5 +621,84 @@ describe('MapCanvas Component', () => {
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(screen.queryByTestId('active-painting-banner')).not.toBeInTheDocument()
   })
+
+  it('Phase 32: supports Contiguous Geographic Region Naming, Canvas Region Banners, Settlement Upgrade/Ruin/Reclaim Cycles, and Resource Trade Synergy', () => {
+    function Phase32MapTest() {
+      const [currentMap, setCurrentMap] = React.useState(() => {
+        const m = createInitialMap(6, 6)
+        // Paint a 3-tile contiguous mountain range at (1,1), (1,2), (1,3)
+        for (const id of ['1,1', '1,2', '1,3']) {
+          m.tiles[id] = {
+            ...m.tiles[id],
+            domain: 'land',
+            terrain: 'mountain',
+            relief: 'mountain',
+            flora: 'none',
+          }
+        }
+        // Place a settlement at (3,3) and an Iron Mine at adjacent (3,2)
+        m.tiles['3,3'] = {
+          ...m.tiles['3,3'],
+          domain: 'land',
+          terrain: 'plains',
+          label: 'Valoria Hold',
+          overlay: 'settlement',
+          hasRoad: true,
+        }
+        m.tiles['3,2'] = {
+          ...m.tiles['3,2'],
+          domain: 'land',
+          terrain: 'mountain',
+          hasRoad: true,
+          slots: [
+            {
+              id: 'res_iron_1',
+              category: 'resource',
+              type: 'iron_mine',
+              name: 'Iron Mine',
+              icon: '⛏️',
+              priority: 65,
+            },
+          ],
+        }
+        return m
+      })
+      return <MapCanvas map={currentMap} worldName="Phase32World" onChange={setCurrentMap} />
+    }
+
+    render(<Phase32MapTest />)
+
+    // 1. Select mountain tile (1, 2) and name the contiguous mountain region
+    fireEvent.click(screen.getByTestId('map-tile-1-2'))
+    expect(screen.getByTestId('inspector-region-card')).toBeInTheDocument()
+
+    const regionInput = screen.getByTestId('inspector-region-name-input')
+    fireEvent.change(regionInput, { target: { value: 'The Ironcrown Spine' } })
+
+    // Centroid (1, 2) should now render the Region Banner on the canvas
+    expect(screen.getByTestId('region-banner-1-2')).toHaveTextContent('The Ironcrown Spine')
+    // Selecting neighbor (1, 1) in the same mountain range should show the shared region name
+    fireEvent.click(screen.getByTestId('map-tile-1-1'))
+    expect(screen.getByTestId('inspector-region-name-input')).toHaveValue('The Ironcrown Spine')
+
+    // 2. Select settlement tile (3, 3) and verify Resource Trade Synergy & Lifecycle
+    fireEvent.click(screen.getByTestId('map-tile-3-3'))
+    const lifecyclePanel = screen.getByTestId('inspector-settlement-lifecycle-panel')
+    expect(lifecyclePanel).toHaveTextContent(/Forge & Mining Hub/i)
+    expect(lifecyclePanel).toHaveTextContent(/Iron Mine/i)
+
+    // Upgrade Village -> Market Town
+    fireEvent.click(screen.getByTestId('inspector-upgrade-settlement-btn'))
+    expect(screen.getByText(/Active: town/i)).toBeInTheDocument()
+
+    // Collapse to Ruins
+    fireEvent.click(screen.getByTestId('inspector-collapse-ruins-btn'))
+    expect(screen.getByText(/Active: ruins/i)).toBeInTheDocument()
+    expect(screen.getByTestId('inspector-reclaim-ruins-btn')).toBeInTheDocument()
+
+    // Reclaim & Rebuild Ruins back into active town
+    fireEvent.click(screen.getByTestId('inspector-reclaim-ruins-btn'))
+    expect(screen.getByText(/Active: town/i)).toBeInTheDocument()
+  })
 })
 

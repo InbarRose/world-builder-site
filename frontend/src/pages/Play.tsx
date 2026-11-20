@@ -53,6 +53,8 @@ import {
   StageId,
   Suit,
   TerrainType,
+  ReliefType,
+  FloraType,
   TileSlotCategory,
   TurnPhase,
   WorldEntity,
@@ -127,6 +129,8 @@ import {
   WORKBENCH_QUICK_ICONS,
   WORKBENCH_SLOT_CATEGORIES,
   WORKBENCH_TERRAIN_OPTIONS,
+  WORKBENCH_RELIEF_OPTIONS,
+  WORKBENCH_FLORA_OPTIONS,
   createCustomTurnDraft,
   createDraftFromPreset,
   generateDraftChronicleNote,
@@ -4186,11 +4190,72 @@ export function Play() {
                                 </div>
                               </div>
 
-                              {/* 1-Click Terrain Override Pills */}
+                              {/* 1-Click Domain Switcher (Layer 1 Domain) */}
                               <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                                  Terrain Stamp Override:
+                                  Layer 1 · Domain & Base Terrain Override:
                                 </span>
+                                <div className="flex items-center gap-1.5 pb-1">
+                                  <button
+                                    type="button"
+                                    data-testid="workbench-domain-keep-btn"
+                                    onClick={() =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        domainChange: undefined,
+                                      })
+                                    }
+                                    className={`px-2.5 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                                      !turnDraft.domainChange
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    <span>🎯 Keep Domain</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    data-testid="workbench-domain-land-btn"
+                                    onClick={() =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        domainChange: 'land',
+                                        terrainChange:
+                                          turnDraft.terrainChange === 'water' ||
+                                          turnDraft.terrainChange === 'ocean'
+                                            ? 'plains'
+                                            : turnDraft.terrainChange || 'plains',
+                                      })
+                                    }
+                                    className={`px-2.5 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                                      turnDraft.domainChange === 'land'
+                                        ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
+                                        : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    <span>🌱 Land Domain</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    data-testid="workbench-domain-water-btn"
+                                    onClick={() =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        domainChange: 'water',
+                                        terrainChange: 'water',
+                                        reliefChange: 'none',
+                                        floraChange: 'none',
+                                      })
+                                    }
+                                    className={`px-2.5 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                                      turnDraft.domainChange === 'water'
+                                        ? 'bg-sky-600 text-white border-sky-500 shadow-2xs'
+                                        : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    <span>🌊 Water Domain</span>
+                                  </button>
+                                </div>
                                 <div className="flex flex-wrap gap-1">
                                   {WORKBENCH_TERRAIN_OPTIONS.map((tOpt) => {
                                     const isAct = (turnDraft.terrainChange || '') === tOpt.id
@@ -4201,6 +4266,12 @@ export function Play() {
                                         onClick={() =>
                                           applyLiveTurnDraftUpdate({
                                             ...turnDraft,
+                                            domainChange:
+                                              tOpt.id === 'water' || tOpt.id === 'ocean'
+                                                ? 'water'
+                                                : tOpt.id
+                                                ? 'land'
+                                                : undefined,
                                             terrainChange: (tOpt.id || undefined) as
                                               | TerrainType
                                               | undefined,
@@ -4220,10 +4291,81 @@ export function Play() {
                                 </div>
                               </div>
 
-                              {/* 1-Click Slot Category Pills */}
+                              {/* Layer 2: Relief & Canopy Override Pills */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                    Layer 2 · Topography Relief:
+                                  </span>
+                                  <div className="flex flex-wrap gap-1">
+                                    {WORKBENCH_RELIEF_OPTIONS.map((rOpt) => {
+                                      const isAct = (turnDraft.reliefChange || '') === rOpt.id
+                                      return (
+                                        <button
+                                          key={rOpt.label}
+                                          type="button"
+                                          data-testid={`workbench-relief-${rOpt.id || 'keep'}-btn`}
+                                          onClick={() =>
+                                            applyLiveTurnDraftUpdate({
+                                              ...turnDraft,
+                                              reliefChange: (rOpt.id || undefined) as
+                                                | ReliefType
+                                                | undefined,
+                                            })
+                                          }
+                                          className={`px-2 py-0.5 rounded-full border text-[10px] font-medium flex items-center gap-1 transition-all ${
+                                            isAct
+                                              ? 'bg-primary text-primary-foreground border-primary'
+                                              : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                          }`}
+                                        >
+                                          <span>{rOpt.icon}</span>
+                                          <span>{rOpt.label}</span>
+                                        </button>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                    Layer 2 · Flora Canopy:
+                                  </span>
+                                  <div className="flex flex-wrap gap-1">
+                                    {WORKBENCH_FLORA_OPTIONS.map((fOpt) => {
+                                      const isAct = (turnDraft.floraChange || '') === fOpt.id
+                                      return (
+                                        <button
+                                          key={fOpt.label}
+                                          type="button"
+                                          data-testid={`workbench-flora-${fOpt.id || 'keep'}-btn`}
+                                          onClick={() =>
+                                            applyLiveTurnDraftUpdate({
+                                              ...turnDraft,
+                                              floraChange: (fOpt.id || undefined) as
+                                                | FloraType
+                                                | undefined,
+                                            })
+                                          }
+                                          className={`px-2 py-0.5 rounded-full border text-[10px] font-medium flex items-center gap-1 transition-all ${
+                                            isAct
+                                              ? 'bg-primary text-primary-foreground border-primary'
+                                              : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                                          }`}
+                                        >
+                                          <span>{fOpt.icon}</span>
+                                          <span>{fOpt.label}</span>
+                                        </button>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Layer 3 & 4: 1-Click Slot Category Pills */}
                               <div className="space-y-1">
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-                                  Feature Category:
+                                  Layer 3 & 4 · Feature / Holding Category:
                                 </span>
                                 <div className="flex flex-wrap gap-1">
                                   {WORKBENCH_SLOT_CATEGORIES.map((catOpt) => {
@@ -4251,6 +4393,33 @@ export function Play() {
                                   })}
                                 </div>
                               </div>
+
+                              {/* Layer 5: Controlling Faction / Realm Claim Override */}
+                              {world.entities.length > 0 && (
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                    Layer 5 · Faction / Realm Province Claim:
+                                  </span>
+                                  <select
+                                    data-testid="workbench-territory-select"
+                                    value={turnDraft.territoryId || ''}
+                                    onChange={(e) =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        territoryId: e.target.value || undefined,
+                                      })
+                                    }
+                                    className="input w-full text-xs py-1 h-7"
+                                  >
+                                    <option value="">Keep Existing / Unclaimed</option>
+                                    {world.entities.map((ent) => (
+                                      <option key={ent.id} value={ent.id}>
+                                        {ent.icon || '🚩'} {ent.name} ({ent.category})
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
                             </div>
                           )}
 

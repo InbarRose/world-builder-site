@@ -6,8 +6,12 @@ import {
   projectRealmInfluence,
   detectTradeRoutes,
   getProvinceChronicleHistory,
+  upgradeTileSettlementTier,
+  collapseTileSettlementToRuins,
+  reclaimTileRuins,
+  getSettlementResourceSynergy,
 } from '../engine/geopoliticalEngine'
-import { MapState, WorldEntity, DrawRecord } from '../engine/types'
+import { MapState, MapTile, WorldEntity, DrawRecord } from '../engine/types'
 import { createDefaultTile } from '../engine/mapEngine'
 
 function createTestMap(w = 5, h = 5): MapState {
@@ -241,5 +245,77 @@ describe('geopoliticalEngine (Phase 28)', () => {
     expect(provinceEvents.length).toBe(1)
     expect(provinceEvents[0].id).toBe('turn_1')
     expect(provinceEvents[0].power).toBe('Shape Mountain')
+  })
+
+  it('supports Settlement Lifecycle (Upgrade Tier -> Collapse into Ruins -> Reclaim) and Connected Resource Synergy', () => {
+    const map = createTestMap(5, 5)
+    let tile: MapTile = {
+      ...createDefaultTile(2, 2, 'plains'),
+      label: 'Oakhaven',
+      overlay: 'settlement',
+      territoryId: 'soc_valoria',
+      hasRoad: true,
+    }
+
+    // 1. Upgrade Village -> Market Town -> Fortified City
+    tile = { ...tile, ...upgradeTileSettlementTier(tile) }
+    expect(tile.overlay).toBe('town')
+
+    tile = { ...tile, ...upgradeTileSettlementTier(tile) }
+    expect(tile.overlay).toBe('city')
+
+    // 2. Collapse into Ruins preserves ancestralOwnerId and records ruinOriginLabel
+    tile = { ...tile, ...collapseTileSettlementToRuins(tile) }
+    expect(tile.overlay).toBe('ruins')
+    expect(tile.label).toBe('Ruins of Oakhaven')
+    expect(tile.ancestralOwnerId).toBe('soc_valoria')
+    expect(tile.ruinOriginLabel).toBe('Fallen Walled City')
+    expect(tile.notes).toContain('Collapsed into Ruins')
+
+    // 3. Reclaim Ruins back into an active Town
+    tile = { ...tile, ...reclaimTileRuins(tile) }
+    expect(tile.overlay).toBe('town')
+    expect(tile.label).toBe('Oakhaven')
+    expect(tile.territoryId).toBe('soc_valoria')
+    expect(tile.notes).toContain('Reclaimed & Rebuilt')
+
+    // 4. Connected Resource Synergy along neighbor and road tiles
+    map.tiles['2,2'] = tile
+    // Neighbor (2,1) has Iron Mine
+    map.tiles['2,1'] = {
+      ...createDefaultTile(2, 1, 'mountain'),
+      hasRoad: true,
+      slots: [
+        {
+          id: 'res_iron',
+          category: 'resource',
+          type: 'iron_mine',
+          name: 'Iron Mine',
+          icon: '⛏️',
+          priority: 65,
+        },
+      ],
+    }
+    // Road-connected 2-hop neighbor (2,0) has Mana Spring
+    map.tiles['2,0'] = {
+      ...createDefaultTile(2, 0, 'plains'),
+      hasRoad: true,
+      slots: [
+        {
+          id: 'res_mana',
+          category: 'myth',
+          type: 'mana_spring',
+          name: 'Mana Spring',
+          icon: '🔮',
+          priority: 72,
+        },
+      ],
+    }
+
+    const synergy = getSettlementResourceSynergy(map, '2,2')
+    expect(synergy.connectedResources).toContain('Iron Mine')
+    expect(synergy.connectedResources).toContain('Mana Spring')
+    expect(synergy.tradeArchetype).toContain('Runeforge & Artificer Citadel')
+    expect(synergy.prosperityBonus).toBeGreaterThanOrEqual(6)
   })
 })

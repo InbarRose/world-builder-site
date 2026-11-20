@@ -136,4 +136,34 @@ describe('Phase 23: Editable Turn Event & Map Stamp Workbench Engine (turnWorkbe
     expect(noteWithQuote).toContain('> *"Look at the veins of mithril in those sheer cliffs!"*')
     expect(noteWithQuote).toContain('— **Bob (Dwarf)**')
   })
+
+  it('Phase 32: supports 5-Layer Turn Workbench stamping with 1-click domain switching, clean biome hygiene, and faction territory claim', () => {
+    // Seed a cluttered mountain/forest tile with a stale cartographic symbol
+    const clutteredTile = {
+      ...createDefaultTile(4, 4, 'mountain'),
+      domain: 'land' as const,
+      terrain: 'mountain' as const,
+      relief: 'mountain' as const,
+      flora: 'forest' as const,
+      cartographicSymbol: 'mountain-peak',
+    }
+
+    const customDraft = {
+      ...createCustomTurnDraft('civilization', 'Royal Meadow', '4,4', 77),
+      domainChange: 'land' as const,
+      terrainChange: 'plains' as const,
+      territoryId: 'soc_sun_empire',
+    }
+
+    const { updatedTile } = stampDraftOnMapTile(clutteredTile, customDraft, 'rec_clean_32', 5)
+    expect(updatedTile.domain).toBe('land')
+    expect(updatedTile.terrain).toBe('plains')
+    // Clean single-change hygiene cleared leftover mountain relief, forest canopy, and stale symbol
+    expect(updatedTile.relief).toBe('none')
+    expect(updatedTile.flora).toBe('none')
+    expect(updatedTile.cartographicSymbol).toBeUndefined()
+    // Layer 5 territory claim stamped and linked
+    expect(updatedTile.territoryId).toBe('soc_sun_empire')
+    expect(updatedTile.linkedEntityIds).toContain('soc_sun_empire')
+  })
 })
