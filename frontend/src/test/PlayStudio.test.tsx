@@ -454,6 +454,11 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.change(searchInput, { target: { value: 'Peak' } })
     })
 
+    // Open optional Bot Assist panel (collapsed by default on human turns)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('toggle-bot-assist-btn'))
+    })
+
     // Verify Bot Pick recommendation button is present
     const botPickBtn = screen.getByRole('button', { name: /Apply Bot Pick/i })
     expect(botPickBtn).toBeInTheDocument()
@@ -524,7 +529,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
     })
 
-    // Open Inline Bot Weight Tuner right inside the Studio Turn Workshop
+    // Open optional Bot Assist and Inline Bot Weight Tuner right inside the Studio Turn Workshop
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('toggle-bot-assist-btn'))
+    })
     const tuneWeightsBtn = screen.getByRole('button', { name: /Tune Weights/i })
     await act(async () => {
       fireEvent.click(tuneWeightsBtn)
@@ -584,6 +592,11 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(redrawBtn)
     })
 
+    // Switch to Tab 2: Write / Place on Map to access Inline Mini-Map & Quick-Forge
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('turn-focus-tab-edit'))
+    })
+
     // Test Inline Mini-Map Coordinate Picker inside Turn Workshop
     const targetBtn = screen.getByRole('button', { name: /🎯 Target/i })
     await act(async () => {
@@ -626,20 +639,22 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
 
-    // Draw a card in Studio Mode
+    // Draw a card in Studio Mode by clicking directly on the physical Card Deck!
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+      fireEvent.click(screen.getByTestId('clickable-card-deck'))
     })
 
-    // Workbench is immediately available
-    const workbench = screen.getByTestId('turn-event-workbench')
-    expect(workbench).toBeInTheDocument()
-
-    // Select a preset via "Apply Bot Pick"
+    // Expand optional Bot Assist and apply recommendation -> auto-switches to Edit & Place tab
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('toggle-bot-assist-btn'))
+    })
     const botPickBtn = screen.getByRole('button', { name: /Apply Bot Pick/i })
     await act(async () => {
       fireEvent.click(botPickBtn)
     })
+
+    const workbench = screen.getByTestId('turn-event-workbench')
+    expect(workbench).toBeInTheDocument()
 
     // Verify Action Title and Feature Name populated into editable inputs
     const titleInput = screen.getByTestId('workbench-action-title-input') as HTMLInputElement
@@ -696,6 +711,9 @@ describe('Play Studio & Rules Integration', () => {
     // Draw a card and select a preset
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Draw Card \(54\)/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('toggle-bot-assist-btn'))
     })
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Apply Bot Pick/i }))
@@ -841,10 +859,13 @@ describe('Play Studio & Rules Integration', () => {
     })
     expect(screen.queryByTestId('session-vault-modal')).not.toBeInTheDocument()
 
-    // 2. Deal a card to open Turn Workshop
+    // 2. Deal a card and switch to Edit & Place tab
     const drawBtn = screen.getByRole('button', { name: /Draw Card/i })
     await act(async () => {
       fireEvent.click(drawBtn)
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('turn-focus-tab-edit'))
     })
     expect(screen.getByTestId('turn-event-workbench')).toBeInTheDocument()
 

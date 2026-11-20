@@ -487,13 +487,12 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
     }
   }
 
-  // Pass 4: Seed Just a Few Starting Features (2–4 Mountains & 2–3 Forest tiles)
+  // Pass 4: Seed Just a Few Starting Features (1–2 Mountains & 1–2 Forest tiles — nothing more)
   if (landCandidates.length > 0) {
     const byElevation = [...landCandidates].sort((a, b) => b.elevScore - a.elevScore)
-    const maxMountains = activePreset === 'highlands' ? 4 : 2
     const mountainCount = Math.min(
-      maxMountains,
-      Math.max(1, Math.floor(landCandidates.length * 0.03))
+      2,
+      Math.max(1, Math.floor(landCandidates.length * 0.02))
     )
 
     const mountainIds = new Set<string>()
@@ -507,11 +506,11 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
       }
     }
 
-    // Seed 1 small starting grove (2–3 forest tiles) away from the mountain peaks
+    // Seed 1–2 small forest tiles away from the mountain peaks
     const byMoisture = landCandidates
       .filter((cand) => !mountainIds.has(cand.id))
       .sort((a, b) => b.moistScore - a.moistScore)
-    const forestCount = Math.min(2, Math.max(1, Math.floor(landCandidates.length * 0.025)))
+    const forestCount = Math.min(2, Math.max(1, Math.floor(landCandidates.length * 0.02)))
 
     for (let i = 0; i < forestCount && i < byMoisture.length; i++) {
       const target = byMoisture[i]
@@ -523,82 +522,10 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
     }
   }
 
-  // Pass 5: Trace 1 Starting River Downhill from a Mountain Peak to the Sea
-  traceProceduralDownhillRivers(tiles, width, height, rng)
-
   return {
     width,
     height,
     gridTopology: 'square',
     tiles,
-  }
-}
-
-/**
- * Traces 1 natural starting river flowing from a mountain peak down to the coast.
- */
-function traceProceduralDownhillRivers(
-  tiles: Record<string, MapTile>,
-  width: number,
-  height: number,
-  rng: () => number
-) {
-  // Find potential headwaters in the starting mountain peaks (or interior land if none)
-  const headwaterCandidates: { c: number; r: number }[] = []
-  for (let r = 1; r < height - 1; r++) {
-    for (let c = 1; c < width - 1; c++) {
-      const tile = tiles[`${c},${r}`]
-      if (tile && tile.domain === 'land' && tile.terrain === 'mountain') {
-        headwaterCandidates.push({ c, r })
-      }
-    }
-  }
-
-  if (headwaterCandidates.length === 0) return
-
-  const startIdx = Math.floor(rng() * headwaterCandidates.length)
-  let curr = headwaterCandidates[startIdx]
-  const visited = new Set<string>()
-
-  for (let step = 0; step < 12; step++) {
-    const key = `${curr.c},${curr.r}`
-    if (visited.has(key)) break
-    visited.add(key)
-
-    const tile = tiles[key]
-    if (!tile) break
-
-    // Stop once we reach water
-    if (tile.domain === 'water') break
-
-    tile.hasRiver = true
-
-    const neighbors = [
-      { c: curr.c + 1, r: curr.r },
-      { c: curr.c - 1, r: curr.r },
-      { c: curr.c, r: curr.r + 1 },
-      { c: curr.c, r: curr.r - 1 },
-    ].filter((n) => n.c >= 0 && n.c < width && n.r >= 0 && n.r < height)
-
-    let bestNext = neighbors[0]
-    let bestScore = Infinity
-
-    for (const nb of neighbors) {
-      const nbKey = `${nb.c},${nb.r}`
-      const nbTile = tiles[nbKey]
-      if (!nbTile || visited.has(nbKey)) continue
-      let score = 5
-      if (nbTile.domain === 'water') score = 0
-      else if (nbTile.terrain === 'plains') score = 2
-      else if (nbTile.terrain === 'mountain') score = 8
-
-      if (score < bestScore) {
-        bestScore = score
-        bestNext = nb
-      }
-    }
-
-    if (!bestNext || visited.has(`${bestNext.c},${bestNext.r}`)) break
-    curr = bestNext
   }
 }
