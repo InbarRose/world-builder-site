@@ -1198,6 +1198,27 @@ status: active
 - **Consequences**:
   - Reclaims ~200px+ of vertical screen height and full widescreen canvas width while establishing the foundational shell for Phases 38–39 (modular dockable, resizable, and floating studio panels).
 
+---
+
+## ADR-044: Modular Dockable, Resizable & Draggable Floating Design Studio (`WorkspaceDockEngine`)
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  To deliver a modern, responsive, customizable creative studio experience (modeled after Photoshop, Figma, and the Warcraft 3 World Editor), the World Map should remain front-and-center while players freely dock, resize, tab-stack, float, roll up, or hide the Cards & Turn, Codex, and Chronicle panels without losing sight of their map.
+- **Decision**:
+  1. **Pure Workspace Layout Engine (`workspaceLayoutEngine.ts`)**:
+     - Manages modular Studio panels (`cards`, `codex`, `timeline`), dock slots (`left`, `right`, `bottom`, `floating`, `hidden`), clamped dock widths/heights, floating window coordinates/dimensions/z-index, and `localStorage` persistence (`wb_studio_workspace_v1`).
+     - Provides 4 built-in 1-click Workspace Presets: `🎨 Classic Studio`, `🗺️ Pure Canvas` (`Tab` hotkey), `🃏 Card & Map Split`, and `📖 Lore & Chronicle`.
+  2. **Interactive Dockable & Floating Workspace (`StudioDockWorkspace.tsx`, `Play.tsx`)**:
+     - Renders resizable Left, Right, and Bottom docks (with drag-to-resize splitters and independent internal scrolling) flanking the always-visible Center Map Canvas.
+     - Supports undocking any panel into a draggable, resizable floating window over the canvas with click-to-focus z-index stacking and double-click titlebar roll-up.
+     - Added **`Modular Studio`** tab (`tab-modular-studio`), top-bar **`Workspace`** preset & panel menu (`studio-workspace-menu-btn`), and Photoshop-style **`Tab`** hotkey to toggle all panels for Pure Canvas mode.
+- **Consequences**:
+  - Transforms the Play Studio into a true full-viewport, customizable creative design studio with zero outer page scrolling.
+  - Verified with 4 new tests in `workspaceLayoutEngine.test.tsx` (227/227 total tests passing across 33 test suites).
+
+
 
 
 
