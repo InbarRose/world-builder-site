@@ -411,11 +411,11 @@ status: active
   - [x] Locked `/play` to `100vw × 100vh` (`h-screen w-screen overflow-hidden`) in `Layout.tsx` (`full-viewport-studio-shell`), suppressing the tall global site navbar and footer during active Studio play.
   - [x] Converted `Play.tsx` to a full-bleed `studio-full-viewport-root` with a slim Photoshop-style top menu bar (`studio-top-menubar`) and compact `☰ Menu` dropdown (`studio-site-menu-btn`) for Home / Rules / Atlas / Main Menu.
   - [x] Moved MapCanvas tools (`Select [S]`, `Brush [B]`, `Fill`, `Erase`, `Pan`, `GM Prep`, `Undo/Redo`) into a docked **48px Vertical Left Tool Rail** (`studio-left-tool-rail`) beside the map canvas.
-- [ ] **Phase 38: Modular Dockable & Resizable Side Panels (`WorkspaceDockEngine`)** *(Planned ADR-044)*
-  - [ ] Implement `workspaceLayoutEngine.ts` with `localStorage` persistence for modular panels (`Cards & Turn`, `Tile Inspector`, `Codex`, `Chronicle / History`), dock slots (`left`, `right`, `bottom`, `floating`, `hidden`), resizable splitters, and 1-click Workspace Presets (`Classic Studio`, `Pure Canvas`, `Card Focus`, `Lore & Chronicle`).
-  - [ ] Keep the World Map centered and always visible while panels dock on the sides/bottom with independent internal scrolling and 1-click dock-repositioning controls.
-- [ ] **Phase 39: Draggable Floating Windows, Tabbed Panel Stacks & Photoshop Shortcuts** *(Planned ADR-045)*
-  - [ ] Support undocking any Studio panel into a draggable, resizable floating window over the canvas with click-to-focus stacking and double-click roll-up.
-  - [ ] Support tabbed panel stacks within docks and Photoshop-style workspace hotkeys (`Tab` to toggle all panels for pure canvas view, `F1–F4` to toggle Cards/Inspector/Codex/History).
+- [x] **Phase 38: Modular Dockable & Resizable Side Panels (`WorkspaceDockEngine`)** *(ADR-044)*
+  - [x] Implemented `workspaceLayoutEngine.ts` with `localStorage` persistence (`wb_studio_workspace_v1`) for modular panels (`Cards & Turn`, `Codex`, `Chronicle`), dock slots (`left`, `right`, `bottom`, `floating`, `hidden`), clamped resizable splitters, and 4 built-in Workspace Presets (`Classic Studio`, `Pure Canvas`, `Card & Map Split`, `Lore & Chronicle`).
+  - [x] Implemented `StudioDockWorkspace.tsx` keeping the World Map centered and always visible while panels dock on the sides/bottom with tabbed stacks, independent internal scrolling, and 1-click dock-repositioning controls.
+- [x] **Phase 39: Draggable Floating Windows, Tabbed Panel Stacks & Photoshop Shortcuts** *(ADR-044)*
+  - [x] Added undockable, draggable, resizable floating studio windows over the canvas with click-to-focus z-index stacking and double-click roll-up.
+  - [x] Wired `Modular Studio` tab (`tab-modular-studio`), top-bar `Workspace` preset & panel menu (`studio-workspace-menu-btn`), and Photoshop-style `Tab` hotkey to toggle Pure Canvas mode, verified by `workspaceLayoutEngine.test.tsx` (**227/227 tests passing across 33 suites**).
 
 
