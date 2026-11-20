@@ -1157,6 +1157,29 @@ status: active
   - Turn-0 starting maps now match the authentic Pre-Genesis tabletop setup: clean, inviting continents and coastlines with just a river, a mountain or two, and a small grove to inspire the table's first card draws.
   - All 6 unit tests in `proceduralWorldEngine.test.ts` and all 222 tests across 32 suites pass.
 
+---
+
+## ADR-042: De-Gamification & Authentic Stage-Aware Genesis Geography
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  Following ADR-040 and ADR-041, the creator requested a comprehensive review of any remaining decisions that made the Studio feel like a computer game rather than a collaborative tabletop world-building studio, and specifically emphasized that **Stage 1: Genesis** should focus strictly on basic geography per `docs/world_building_original_docs.md`.
+- **Decision**:
+  1. **Removed Numeric `World Stability Index` Badges (`Play.tsx`)**:
+     - Removed all three `Stability XX%` badges from the Play Studio header, sub-navigation bar, and Companion Mode bar—eliminating 4X grand-strategy "public order / health" meters from a non-competitive storytelling game.
+  2. **Stage-Aware Genesis Basic Geography Mode (`MapCanvas.tsx`, `Play.tsx`)**:
+     - Passed `currentStage` and `gameMode` into `MapCanvas`.
+     - During **Stage 1: Genesis** (outside `free-create`), the Sidebar Tile Inspector defaults to **Basic Geography** (`Layer 1: Base Terrain & Hydrology` and `Layer 2: Relief, Water & Flora` plus `Location Story & Lore Notes`), hiding Primal/Civilization layers (Resources, Settlements, Faction Borders) behind an optional `+ Later Ages` toggle (`toggle-later-age-layers-btn`).
+  3. **Simplified Layer 4 Settlements & Cleaned Up Gamified Chrome (`MapCanvas.tsx`, `Play.tsx`)**:
+     - Removed computed Trade Archetype headers (`Forge & Mining Hub`, etc.) from Layer 4 and reframed actions around storytelling (`Grow Settlement` / `Mark as Ruins` / `Reclaim & Rebuild`).
+     - Renamed `🏆 Studio` → `🗺️ Studio` and removed numeric `Score: X` badges from the suggestion banner.
+     - Tucked optional RPG campaign prep tools (`Fog / Reveal` and `Distance Ruler`) into a compact `GM Prep` popover (`tool-gm-prep-btn`) so the main World Building toolbar stays calm and focused.
+- **Consequences**:
+  - Restores complete stage-by-stage fidelity to the original *World Building* ruleset while keeping advanced tools 1 click away for later ages and RPG prep.
+  - All 223 unit and integration tests passing across 32 test suites.
+
+
 
 
 
