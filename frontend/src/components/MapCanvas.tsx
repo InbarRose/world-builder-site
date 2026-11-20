@@ -29,9 +29,11 @@ import { StudioHelpTutorialModal } from './StudioHelpTutorialModal'
 import {
   DrawRecord,
   FloraType,
+  GameMode,
   GeographyPreset,
   MapState,
   ReliefType,
+  StageId,
   TerrainType,
   TileColoringMode,
   TileOverlay,
@@ -123,6 +125,8 @@ export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schemat
 interface MapCanvasProps {
   map: MapState
   worldName: string
+  currentStage?: StageId
+  gameMode?: GameMode
   drawHistory?: DrawRecord[]
   entities?: WorldEntity[]
   initialViewOnly?: boolean
@@ -572,6 +576,8 @@ function TileCartographySvg({
 export function MapCanvas({
   map,
   worldName,
+  currentStage,
+  gameMode,
   drawHistory = [],
   entities = [],
   initialViewOnly = false,
@@ -591,6 +597,18 @@ export function MapCanvas({
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
   const [showLayersDrawer, setShowLayersDrawer] = useState(false)
+  const [showGmPrepMenu, setShowGmPrepMenu] = useState(false)
+  const [showLaterAgeLayers, setShowLaterAgeLayers] = useState<boolean>(
+    () => currentStage !== 'genesis' || gameMode === 'free-create'
+  )
+  const isGenesisBasicGeography =
+    currentStage === 'genesis' && gameMode !== 'free-create' && !showLaterAgeLayers
+
+  useEffect(() => {
+    if (currentStage !== 'genesis' || gameMode === 'free-create') {
+      setShowLaterAgeLayers(true)
+    }
+  }, [currentStage, gameMode])
   const [showTutorialModal, setShowTutorialModal] = useState(false)
   const [showHoverHints, setShowHoverHints] = useState(true)
   const [activeHintText, setActiveHintText] = useState<string>(
@@ -1679,53 +1697,78 @@ export function MapCanvas({
                   <span>Pan Map</span>
                 </button>
 
-                {/* 6. Fog of War Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-fog-btn"
-                  onClick={() => setActiveTool('fog')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Fog of War Tool — Shroud unexplored regions in mystery or reveal them as players explore the world.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'fog'
-                      ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Fog of War: Shroud or Reveal Unexplored Wilderness"
-                  aria-label="Fog of War Tool"
-                >
-                  <CloudFog className="h-3.5 w-3.5" />
-                  <span>Fog / Reveal</span>
-                </button>
+                {/* Optional GM / RPG Prep Tools Popover (Fog of War & Distance Ruler) */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    data-testid="tool-gm-prep-btn"
+                    onClick={() => setShowGmPrepMenu((v) => !v)}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'GM / RPG Prep Tools — Optional tools for running RPG campaigns on your finished map (Fog of War shroud & Distance Ruler).'
+                      )
+                    }
+                    className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1 transition-colors ${
+                      activeTool === 'fog' || activeTool === 'ruler' || showGmPrepMenu
+                        ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                    title="Optional GM / RPG Prep Tools (Fog of War & Distance Ruler)"
+                    aria-label="GM Prep Tools"
+                  >
+                    <Compass className="h-3.5 w-3.5" />
+                    <span>GM Prep</span>
+                  </button>
 
-                {/* 7. Ruler Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-ruler-btn"
-                  onClick={() => {
-                    setActiveTool('ruler')
-                    setRulerStart(null)
-                    setRulerHover(null)
-                  }}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Distance Ruler Tool — Click an origin tile and a destination tile to measure travel distances in leagues, miles, and march days.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'ruler'
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Distance Ruler: Measure distances in leagues, miles, and march days"
-                  aria-label="Distance Ruler Tool"
-                >
-                  <Ruler className="h-3.5 w-3.5" />
-                  <span>Ruler</span>
-                </button>
+                  {showGmPrepMenu && (
+                    <div
+                      data-testid="gm-prep-popover"
+                      className="absolute left-0 mt-1.5 w-48 rounded-lg border border-border bg-card shadow-xl p-1.5 z-40 space-y-1"
+                    >
+                      <div className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        RPG Campaign Prep
+                      </div>
+                      <button
+                        type="button"
+                        data-testid="tool-fog-btn"
+                        onClick={() => {
+                          setActiveTool('fog')
+                          setShowGmPrepMenu(false)
+                        }}
+                        className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                          activeTool === 'fog'
+                            ? 'bg-stone-800 text-stone-100'
+                            : 'hover:bg-accent text-foreground'
+                        }`}
+                        title="Fog of War: Shroud or Reveal Unexplored Wilderness"
+                        aria-label="Fog of War Tool"
+                      >
+                        <CloudFog className="h-3.5 w-3.5" />
+                        <span>Fog / Reveal</span>
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="tool-ruler-btn"
+                        onClick={() => {
+                          setActiveTool('ruler')
+                          setRulerStart(null)
+                          setRulerHover(null)
+                          setShowGmPrepMenu(false)
+                        }}
+                        className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                          activeTool === 'ruler'
+                            ? 'bg-amber-600 text-white'
+                            : 'hover:bg-accent text-foreground'
+                        }`}
+                        title="Distance Ruler: Measure distances in leagues, miles, and march days"
+                        aria-label="Distance Ruler Tool"
+                      >
+                        <Ruler className="h-3.5 w-3.5" />
+                        <span>Distance Ruler</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
 
@@ -3675,55 +3718,92 @@ export function MapCanvas({
                   >
                     🏔️ 2. Relief
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setSidebarLayerTab('resources')}
-                    onMouseEnter={() =>
-                      setActiveHintText(
-                        'Layer 3 (Resources & Wonders) — Stamp crops, iron/gold veins, mana springs, monoliths, or custom natural features.'
-                      )
-                    }
-                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
-                      sidebarLayerTab === 'resources'
-                        ? 'bg-background text-primary shadow-xs border border-primary/30'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    🌾 3. Res
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSidebarLayerTab('settlements')}
-                    onMouseEnter={() =>
-                      setActiveHintText(
-                        'Layer 4 (Settlements & Ruins) — Place camps, villages, towns, cities, or citadels, and upgrade or collapse them into explorable ruins.'
-                      )
-                    }
-                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
-                      sidebarLayerTab === 'settlements'
-                        ? 'bg-background text-primary shadow-xs border border-primary/30'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    🏰 4. Holds
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSidebarLayerTab('realm')}
-                    onMouseEnter={() =>
-                      setActiveHintText(
-                        'Layer 5 (Societies, Lore Notes & History) — Assign territory to a Species/Society, write Location Story & Lore Notes, and view card history.'
-                      )
-                    }
-                    className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
-                      sidebarLayerTab === 'realm'
-                        ? 'bg-background text-primary shadow-xs border border-primary/30'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    🚩 5. Realm
-                  </button>
+                  {!isGenesisBasicGeography && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setSidebarLayerTab('resources')}
+                        onMouseEnter={() =>
+                          setActiveHintText(
+                            'Layer 3 (Resources & Wonders) — Stamp crops, iron/gold veins, mana springs, monoliths, or custom natural features.'
+                          )
+                        }
+                        className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                          sidebarLayerTab === 'resources'
+                            ? 'bg-background text-primary shadow-xs border border-primary/30'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        🌾 3. Res
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSidebarLayerTab('settlements')}
+                        onMouseEnter={() =>
+                          setActiveHintText(
+                            'Layer 4 (Settlements & Ruins) — Place camps, villages, towns, cities, or citadels, and mark fallen sites as explorable ruins.'
+                          )
+                        }
+                        className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                          sidebarLayerTab === 'settlements'
+                            ? 'bg-background text-primary shadow-xs border border-primary/30'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        🏰 4. Holds
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSidebarLayerTab('realm')}
+                        onMouseEnter={() =>
+                          setActiveHintText(
+                            'Layer 5 (Societies, Lore Notes & History) — Assign territory to a Species/Society, write Location Story & Lore Notes, and view card history.'
+                          )
+                        }
+                        className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
+                          sidebarLayerTab === 'realm'
+                            ? 'bg-background text-primary shadow-xs border border-primary/30'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        🚩 5. Realm
+                      </button>
+                    </>
+                  )}
+                  {currentStage === 'genesis' && gameMode !== 'free-create' && (
+                    <button
+                      type="button"
+                      data-testid="toggle-later-age-layers-btn"
+                      onClick={() => {
+                        const next = !showLaterAgeLayers
+                        setShowLaterAgeLayers(next)
+                        if (!next && ['resources', 'settlements', 'realm'].includes(sidebarLayerTab)) {
+                          setSidebarLayerTab('all')
+                        }
+                      }}
+                      className="px-2 py-1 rounded text-[10px] font-semibold text-muted-foreground hover:text-foreground hover:bg-background/70 border border-dashed border-border transition-colors"
+                      title={
+                        showLaterAgeLayers
+                          ? 'Hide Primal/Civilization layers and focus on Genesis basic geography'
+                          : 'Show Primal & Civilization layers (Resources, Settlements, Realms)'
+                      }
+                    >
+                      {showLaterAgeLayers ? '− Genesis Only' : '+ Later Ages'}
+                    </button>
+                  )}
                 </div>
+
+                {isGenesisBasicGeography && (
+                  <div
+                    data-testid="genesis-geography-focus-banner"
+                    className="px-2.5 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-center justify-between gap-2"
+                  >
+                    <span>
+                      <strong>Stage 1: Genesis</strong> — Basic geography only (Coastlines, Earth,
+                      Water, Plants &amp; Features).
+                    </span>
+                  </div>
+                )}
 
                 {/* LAYER 1: Base Terrain & Hydrology */}
                 {(sidebarLayerTab === 'all' || sidebarLayerTab === 'base') && (
@@ -3990,7 +4070,7 @@ export function MapCanvas({
                 )}
 
                 {/* LAYER 3: Strategic Resources & Wonders */}
-                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'resources') && (
+                {!isGenesisBasicGeography && (sidebarLayerTab === 'all' || sidebarLayerTab === 'resources') && (
                   <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
@@ -4133,7 +4213,7 @@ export function MapCanvas({
                 )}
 
                 {/* LAYER 4: Settlements & Holdings */}
-                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'settlements') && (
+                {!isGenesisBasicGeography && (sidebarLayerTab === 'all' || sidebarLayerTab === 'settlements') && (
                   <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold flex items-center gap-1.5 text-primary">
@@ -4190,12 +4270,6 @@ export function MapCanvas({
                         data-testid="inspector-settlement-lifecycle-panel"
                         className="pt-2 border-t border-border/70 space-y-2"
                       >
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-semibold text-foreground">
-                            {inspectedSynergy.tradeArchetype}
-                          </span>
-                        </div>
-
                         {inspectedSynergy.allResources.length > 0 && (
                           <p className="text-[10px] text-muted-foreground">
                             <span className="font-semibold">Nearby Natural Resources:</span>{' '}
@@ -4240,10 +4314,10 @@ export function MapCanvas({
                                 )
                               }
                               className="flex-1 py-1 px-2 rounded bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
-                              title="Advance holding to the next urban or fortified tier"
+                              title="Grow this settlement to the next size (Village → Town → City → Capital)"
                             >
-                              <span>⬆️</span>
-                              <span>Upgrade Holding</span>
+                              <span>🏘️</span>
+                              <span>Grow Settlement</span>
                             </button>
                             <button
                               type="button"
@@ -4254,10 +4328,10 @@ export function MapCanvas({
                                 )
                               }
                               className="flex-1 py-1 px-2 rounded bg-amber-600/15 hover:bg-amber-600/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
-                              title="Cataclysm / Siege: Collapse this holding into explorable TTRPG ruins while preserving its ancestral lore"
+                              title="Cataclysm / Siege: Mark this settlement as abandoned ruins while preserving its ancestral lore"
                             >
                               <span>🏚️</span>
-                              <span>Collapse to Ruins</span>
+                              <span>Mark as Ruins</span>
                             </button>
                           </div>
                         )}
@@ -4267,7 +4341,7 @@ export function MapCanvas({
                 )}
 
                 {/* LAYER 5: Controlling Faction Selector */}
-                {(sidebarLayerTab === 'all' || sidebarLayerTab === 'realm') && entities.length > 0 && (
+                {!isGenesisBasicGeography && (sidebarLayerTab === 'all' || sidebarLayerTab === 'realm') && entities.length > 0 && (
                   <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1.5">
                     <label className="text-xs font-semibold text-muted-foreground block">
                       Layer 5: Controlling Faction / Realm

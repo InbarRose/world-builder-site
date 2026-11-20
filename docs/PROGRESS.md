@@ -403,11 +403,10 @@ status: active
 
 ## Upcoming Backlog: Storytelling Core & Full-Viewport Design Studio
 
-- [ ] **Phase 36: De-Gamification & Authentic Stage-Aware Genesis Geography** *(Planned ADR-042)*
-  - [ ] Remove numeric `World Stability Index (Stability XX%)` badges from `Play.tsx` header and sub-navigation.
-  - [ ] Make Map Editor & Sidebar stage-aware: during **Stage 1: Genesis**, focus on **Basic Geography** (`Coastlines & Terrain`, `Relief & Water`, `Plants & Flora`, `Landmarks & Features`) and collapse Primal/Civilization layers behind a `Show Later-Age Layers` toggle (always open in Free-Create).
-  - [ ] Simplify Layer 4 Settlements (replace `⬆️ Upgrade Holding` & Trade Archetypes with a clean Settlement Type picker + Ruins lore toggle) and demote Dijkstra `Project Realm Borders` in favor of direct manual Territory/Region painting.
-  - [ ] Rename `🏆 Studio` → `🗺️ Studio`, show `🤖 Bot Pick` / weight tuners only when a Bot seat is active, and move `Fog / Reveal` & `Distance Ruler` into a collapsible `GM / RPG Prep` submenu.
+- [x] **Phase 36: De-Gamification & Authentic Stage-Aware Genesis Geography** *(ADR-042)*
+  - [x] Removed all numeric `World Stability Index (Stability XX%)` badges from `Play.tsx` header, sub-navigation, and Companion Mode.
+  - [x] Made `MapCanvas.tsx` stage-aware: during **Stage 1: Genesis**, the Sidebar defaults to **Basic Geography** (Coastlines/Terrain, Relief/Water/Flora, and Location Lore Notes) with an optional `+ Later Ages` toggle (`toggle-later-age-layers-btn`); Free-Create keeps all layers open.
+  - [x] Simplified Layer 4 Settlements (removed Trade Archetype headings, reframed to `Grow Settlement` / `Mark as Ruins`), renamed `🏆 Studio` → `🗺️ Studio`, removed numeric `Score:` from suggestions, and tucked `Fog / Reveal` & `Distance Ruler` into a compact `GM Prep` popover (`tool-gm-prep-btn`).
 - [ ] **Phase 37: Full-Viewport Shell & Top Real-Estate Reclamation** *(Planned ADR-043)*
   - [ ] Lock active Play Studio to `100vw × 100vh` (`h-screen overflow-hidden`, zero page scrolling) by hiding the tall global site navbar/footer in `Layout.tsx` during active Studio sessions.
   - [ ] Consolidate global nav, realm header, mode switcher, and studio menus into a single **38px Photoshop-style Top Menu Bar** (reclaiming ~220px of vertical space).
