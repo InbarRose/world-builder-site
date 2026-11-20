@@ -1104,6 +1104,33 @@ status: active
   - All 221 unit and integration tests passing across 32 test suites.
   - Verifies **100.0 / 100** Core AAA Score and **20.0 / 20.0** Studio Architecture Score.
 
+---
+
+## ADR-040: Removal of 4X Computer-Game Numeric Stats from UI & Addition of Interactive Studio Tutorial, Hover Hints, and Warcraft 3 / Photoshop Editor Panel Ergonomics
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  The creator of *World Building* reviewed the Phase 28/32 UI additions and provided a decisive design correction:
+  1. *"also. i dont understand this province strategic dossier, province economic yields. etc. this direction makes the map as if a computer game. it is not. these are not in the spirit of the original game idea. please review these decisions. I dont like them."*
+     - Per the original game design (`docs/world_building_original_docs.md`), *World Building* is a collaborative storytelling and map-making game with no winners, losers, or 4X resource math (`+Food`, `+Minerals`, `Defensibility 8/10`, `Allegiance 85%`, `+Prosperity`). Displaying artificial video-game stats in the Tile Inspector distracted from the true purpose: drawing a world map, naming places, creating species and societies, and recording stories for RPGs.
+  2. *"i think we should have a help/hints/tutorial for the studio. with hover hints, help buttons, etc. consider enriching it to look more like photoshop menu with panels, tools, etc. or warcraft 3 map editor."*
+     - While the *content* of the world is collaborative storytelling, the *authoring interface* should feel like a clear creative suite (like Photoshop or the Warcraft 3 World Editor) with self-explanatory panels, live contextual hover hints in a status bar, inline `?` help buttons, and an accessible Studio Manual & Tutorial.
+- **Decision**:
+  1. **Remove 4X Computer-Game Numeric Stats from the UI (`MapCanvas.tsx`, `EntityRegistry.tsx`)**:
+     - Removed `Province Strategic Dossier`, `Defensibility: X / 10`, `Allegiance: X%`, `Provincial Economic Yields (+Food, +Minerals, +Timber, +Trade)`, `+Prosperity` badges, and bottom-corner `👑`/`⚔️` tile micro-badges from the Map Canvas and Tile Inspector.
+     - Replaced them with the authentic **Location Story & Lore Notes** panel (`tile-story-lore-panel`) containing a direct editable **Worldbuilder Notes textarea** (`tile-lore-notes-input`) for writing local myths, landmarks, and RPG story hooks, plus the list of cards/events recorded at that location.
+     - Reframed the Codex society overview as **Homeland, Settlements & Mapped Locations**.
+  2. **Photoshop / Warcraft 3 Editor Live Hover-Hint Status Bar & Inline `?` Help Buttons (`MapCanvas.tsx`)**:
+     - Added the **Live Contextual Status & Hover-Hint Bar** (`studio-hover-hint-bar`) showing the active tool badge, hovered/selected tile coordinates & biome, and live hover hints for every tool and layer tab (toggleable via `[ 💡 Hints ]`).
+     - Added inline `?` help toggle buttons on the sidebar layer panels to explain how each layer connects to the 4 stages of *World Building*.
+  3. **Interactive Studio Help, Hints & 4-Stage Tutorial Modal (`StudioHelpTutorialModal.tsx`)**:
+     - Created a 4-tab Studio Manual & Tutorial (`1. The World Building Game (4 Stages & 4×4 Table)`, `2. Map Editor & 5-Layer Dock`, `3. Card Turns, Presets & Custom Events`, `4. Hotkeys & Editor Tips`) accessible anytime via `[ ❓ Studio Guide ]`.
+- **Consequences**:
+  - Restores 100% fidelity to the collaborative, non-competitive storytelling spirit of *World Building*.
+  - Gives new and returning players immediate, self-serve guidance via hover hints, inline `?` help cards, and the 4-stage tutorial modal.
+  - All 222 unit and integration tests passing across 32 test suites.
+
 
 
 
