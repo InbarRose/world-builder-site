@@ -22,7 +22,10 @@ import {
   ShieldCheck,
   Unlock,
   Ruler,
+  HelpCircle,
+  Lightbulb,
 } from 'lucide-react'
+import { StudioHelpTutorialModal } from './StudioHelpTutorialModal'
 import {
   DrawRecord,
   FloraType,
@@ -81,14 +84,11 @@ import { SLOT_ICON_PALETTE } from '../engine/presets'
 import {
   projectRealmInfluence,
   computeBorderPerimeters,
-  calculateTileDefense,
-  calculateProvinceEconomy,
   getProvinceChronicleHistory,
   upgradeTileSettlementTier,
   collapseTileSettlementToRuins,
   reclaimTileRuins,
   getSettlementResourceSynergy,
-  ProvinceTier,
 } from '../engine/geopoliticalEngine'
 import {
   detectGeographicRegions,
@@ -591,8 +591,18 @@ export function MapCanvas({
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
   const [showLayersDrawer, setShowLayersDrawer] = useState(false)
+  const [showTutorialModal, setShowTutorialModal] = useState(false)
+  const [showHoverHints, setShowHoverHints] = useState(true)
+  const [activeHintText, setActiveHintText] = useState<string>(
+    'Safe Select & Inspect Mode [S] — Click any tile on the map to inspect and edit its 5 layers in the right panel without accidental painting.'
+  )
+  const [activeLayerHelp, setActiveLayerHelp] = useState<Record<string, boolean>>({})
   const [visibleLayers, setVisibleLayers] =
     useState<Record<MapLayerId, boolean>>(DEFAULT_MAP_LAYERS)
+
+  const toggleLayerHelp = (key: string) => {
+    setActiveLayerHelp((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
 
   const handleToggleLayer = (layerId: MapLayerId) => {
     setVisibleLayers((prev) => ({ ...prev, [layerId]: !prev[layerId] }))
@@ -679,10 +689,6 @@ export function MapCanvas({
     onChange(result.mapWithTerritories)
     setVisibleLayers((prev) => ({ ...prev, territories: true }))
   }
-
-  const geopoliticalState = React.useMemo(() => {
-    return projectRealmInfluence(map, entities).geopolitical
-  }, [map, entities])
 
   const regionAnalysis = React.useMemo(() => {
     return detectGeographicRegions(map, 1)
@@ -1566,6 +1572,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-inspect-btn"
                   onClick={() => setActiveTool('inspect')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Select & Inspect Tool [S / Esc] — Click any tile on the map to focus it in the right-hand Inspector Dock and edit its 5 layers without accidental painting.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                     activeTool === 'inspect'
                       ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/40'
@@ -1584,6 +1595,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-brush-btn"
                   onClick={() => setActiveTool('brush')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Paint Brush Tool [B] — Click and drag across map tiles to paint the active palette biome or feature. Press [S] or [Esc] anytime to return to Safe Select.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'brush'
                       ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
@@ -1602,6 +1618,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-fill-btn"
                   onClick={() => setActiveTool('fill')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Bucket Fill Tool — Click a tile to flood-fill all connected tiles of the same terrain with your selected biome.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fill'
                       ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
@@ -1619,6 +1640,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-erase-btn"
                   onClick={() => setActiveTool('erase')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Erase Tool — Click or drag across tiles to clear them back to open ocean water.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'erase'
                       ? 'bg-destructive text-destructive-foreground shadow-sm'
@@ -1636,6 +1662,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-pan-btn"
                   onClick={() => setActiveTool('pan')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Pan Camera Tool [Spacebar + Drag] — Drag the map viewport to pan smoothly without selecting or modifying tiles.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'pan'
                       ? 'bg-primary text-primary-foreground shadow-sm'
@@ -1653,6 +1684,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-fog-btn"
                   onClick={() => setActiveTool('fog')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Fog of War Tool — Shroud unexplored regions in mystery or reveal them as players explore the world.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fog'
                       ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
@@ -1674,6 +1710,11 @@ export function MapCanvas({
                     setRulerStart(null)
                     setRulerHover(null)
                   }}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Distance Ruler Tool — Click an origin tile and a destination tile to measure travel distances in leagues, miles, and march days.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'ruler'
                       ? 'bg-amber-600 text-white shadow-sm'
@@ -1984,8 +2025,64 @@ export function MapCanvas({
               <Download className="h-3.5 w-3.5" />
               <span>SVG</span>
             </button>
+
+            {/* Studio Hover Hints Toggle & Help/Tutorial Manual Button */}
+            <button
+              type="button"
+              data-testid="toggle-hover-hints-btn"
+              onClick={() => setShowHoverHints((v) => !v)}
+              className={`px-2 py-1.5 rounded-md border text-xs font-semibold flex items-center gap-1 transition-colors ${
+                showHoverHints
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300'
+                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+              }`}
+              title="Toggle live contextual hover hints in the Studio Status Bar"
+            >
+              <Lightbulb className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Hints</span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="open-studio-tutorial-btn"
+              onClick={() => setShowTutorialModal(true)}
+              className="px-2.5 py-1.5 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+              title="Open World Building Studio Guide, 4-Stage Card Rules & Map Editor Tutorial"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Studio Guide</span>
+            </button>
           </div>
         </div>
+
+        {/* Photoshop / Warcraft 3 Editor Live Contextual Status & Hover-Hint Bar */}
+        {showHoverHints && (
+          <div
+            data-testid="studio-hover-hint-bar"
+            className="pt-1.5 border-t border-border/70 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="px-1.5 py-0.5 rounded bg-muted font-mono font-bold text-[10px] text-foreground shrink-0 uppercase">
+                Tool: {activeTool === 'inspect' ? 'Select [S]' : activeTool}
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono font-semibold text-[10px] shrink-0">
+                ({inspectedTile.col}, {inspectedTile.row}) ·{' '}
+                {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
+              </span>
+              <span className="text-foreground/90 truncate flex items-center gap-1">
+                <Lightbulb className="h-3 w-3 text-amber-500 shrink-0" />
+                <span className="truncate">{activeHintText}</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(true)}
+              className="text-[10px] font-semibold text-primary hover:underline shrink-0"
+            >
+              ❓ Full Tutorial &amp; 4-Stage Table →
+            </button>
+          </div>
+        )}
 
         {/* Safe Mode Indicator / Active Painting Warning Strip */}
         {!isViewOnly && activeTool !== 'inspect' && activeTool !== 'pan' && (
@@ -2862,7 +2959,6 @@ export function MapCanvas({
                       const isCoastal = isCoastalLandTile(col, row, tile)
                       const neighborContext = computeTileNeighborContext(map, col, row)
                       const tilePerims = computeBorderPerimeters(map, id)
-                      const provinceProfile = geopoliticalState.provinces[id]
                       const tileRegion = regionAnalysis.tileRegionMap[id]
                       const isRegionCentroid =
                         Boolean(tileRegion?.isNamed) &&
@@ -3053,30 +3149,6 @@ export function MapCanvas({
                           className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400 ring-1 ring-black/70 z-20"
                           title="Has linked historical events or lore notes"
                         />
-                      )}
-
-                      {/* Bottom Micro-Indicators for Geopolitical Simulation */}
-                      {visibleLayers.territories && provinceProfile && (
-                        <>
-                          {provinceProfile.tier === 'capital_domain' && (
-                            <span
-                              className="absolute bottom-0.5 left-0.5 text-[10px] leading-none z-20 drop-shadow"
-                              title={`Capital Domain of ${provinceProfile.governingSocietyName || 'Realm'}`}
-                            >
-                              👑
-                            </span>
-                          )}
-                          {provinceProfile.isMarchland && (
-                            <span
-                              className="absolute bottom-0.5 right-0.5 text-[9px] leading-none z-20 drop-shadow"
-                              title={`Contested Marchland / Border Friction with ${provinceProfile.borderingSocietyIds
-                                .map((id) => entityColorMap[id]?.name || id)
-                                .join(', ')}`}
-                            >
-                              ⚔️
-                            </span>
-                          )}
-                        </>
                       )}
 
                       {/* Center Priority Slot Display (Zero icon clutter on empty background tiles!) */}
@@ -3558,6 +3630,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('all')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'All Layers View — Inspect and edit all 5 layers of the selected tile in a single docked panel.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'all'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3569,6 +3646,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('base')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 1 (Base & Hydrology) — Switch between Land and Water domains in 1 click, set base biomes, or toggle rivers and roads.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'base'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3580,6 +3662,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('relief')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 2 (Relief & Canopy) — Add mountains, hills, canyons, volcanoes, forests, jungles, or optional whiteboard marker symbols.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'relief'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3591,6 +3678,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('resources')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 3 (Resources & Wonders) — Stamp crops, iron/gold veins, mana springs, monoliths, or custom natural features.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'resources'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3602,6 +3694,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('settlements')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 4 (Settlements & Ruins) — Place camps, villages, towns, cities, or citadels, and upgrade or collapse them into explorable ruins.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'settlements'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3613,6 +3710,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('realm')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 5 (Societies, Lore Notes & History) — Assign territory to a Species/Society, write Location Story & Lore Notes, and view card history.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'realm'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3631,10 +3733,33 @@ export function MapCanvas({
                         <span>🌍</span>
                         <span>Layer 1: Base Terrain & Hydrology</span>
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-mono">
-                        {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
+                        </span>
+                        <button
+                          type="button"
+                          data-testid="layer-help-btn-1"
+                          onClick={() => toggleLayerHelp('layer1')}
+                          className="w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-bold flex items-center justify-center hover:bg-primary/25"
+                          title="Toggle Layer 1 Help Tip"
+                        >
+                          ?
+                        </button>
+                      </div>
                     </div>
+
+                    {activeLayerHelp.layer1 && (
+                      <div
+                        data-testid="layer-help-box-1"
+                        className="p-2 rounded bg-primary/5 border border-primary/20 text-[11px] text-muted-foreground"
+                      >
+                        <strong>Layer 1 Tip (1. Genesis — Earth &amp; Water):</strong> Click{' '}
+                        <strong>🌱 Land Domain</strong> or <strong>🌊 Water Domain</strong> to switch
+                        domains in 1 click. Clicking any base biome (like Grasslands) cleanly resets
+                        leftover trees or mountains so every click is a clean single change.
+                      </div>
+                    )}
 
                     {/* 1-Click Domain Quick Switch */}
                     <div className="flex items-center gap-1.5 p-1 rounded-md bg-background/80 border border-border">
@@ -4069,16 +4194,11 @@ export function MapCanvas({
                           <span className="font-semibold text-foreground">
                             {inspectedSynergy.tradeArchetype}
                           </span>
-                          {inspectedSynergy.prosperityBonus > 0 && (
-                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
-                              +{inspectedSynergy.prosperityBonus} Prosperity
-                            </span>
-                          )}
                         </div>
 
                         {inspectedSynergy.allResources.length > 0 && (
                           <p className="text-[10px] text-muted-foreground">
-                            <span className="font-semibold">Connected Layer 3 Resources:</span>{' '}
+                            <span className="font-semibold">Nearby Natural Resources:</span>{' '}
                             {inspectedSynergy.allResources.join(', ')}
                           </p>
                         )}
@@ -4189,182 +4309,74 @@ export function MapCanvas({
               </div>
             )}
 
-            {/* Strategic Province Dossier & Chronicle Annals */}
+            {/* Tile Story, Lore Notes & Local History (True to Collaborative World Building) */}
             {(isViewOnly || sidebarLayerTab === 'all' || sidebarLayerTab === 'realm') && (
               <div className="space-y-3">
-
-                {/* Phase 28: Strategic Province Dossier */}
                 {(() => {
-                  const province = geopoliticalState.provinces[inspectedTile.id] || {
-                    tileId: inspectedTile.id,
-                    col: inspectedTile.col,
-                    row: inspectedTile.row,
-                    tier: (inspectedTile.territoryId ? 'frontier_outpost' : 'wilderness') as ProvinceTier,
-                    allegianceScore: inspectedTile.territoryId ? 60 : 0,
-                    defensiveRating: calculateTileDefense(inspectedTile).score,
-                    defensiveModifiers: calculateTileDefense(inspectedTile).modifiers,
-                    economicOutput: calculateProvinceEconomy(inspectedTile),
-                    borderingSocietyIds: [],
-                    isMarchland: false,
-                    connectedSettlementNames: [],
-                    activeResourceNames: [],
-                  }
                   const tileChronicle = getProvinceChronicleHistory(drawHistory, inspectedTile.id)
-
-                  const TIER_LABELS: Record<
-                    ProvinceTier,
-                    { label: string; icon: string; badgeClass: string }
-                  > = {
-                    capital_domain: {
-                      label: 'Capital Domain',
-                      icon: '👑',
-                      badgeClass: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40',
-                    },
-                    urban_core: {
-                      label: 'Urban Core',
-                      icon: '🏙️',
-                      badgeClass: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/40',
-                    },
-                    rural_province: {
-                      label: 'Rural Province',
-                      icon: '🌾',
-                      badgeClass: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40',
-                    },
-                    frontier_outpost: {
-                      label: 'Frontier Outpost',
-                      icon: '🛡️',
-                      badgeClass: 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/40',
-                    },
-                    disputed_marchland: {
-                      label: 'Disputed Marchland',
-                      icon: '⚔️',
-                      badgeClass: 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-500/40',
-                    },
-                    wilderness: {
-                      label: 'Wilderness',
-                      icon: '🌲',
-                      badgeClass: 'bg-stone-500/20 text-stone-700 dark:text-stone-300 border-stone-500/40',
-                    },
-                  }
-
-                  const tierMeta = TIER_LABELS[province.tier] || TIER_LABELS.wilderness
+                  const ownerInfo = inspectedTile.territoryId
+                    ? entityColorMap[inspectedTile.territoryId]
+                    : undefined
 
                   return (
                     <div
-                      data-testid="province-strategic-dossier"
+                      data-testid="tile-story-lore-panel"
                       className="p-3 rounded-lg border border-border/80 bg-muted/30 space-y-2.5 text-xs"
                     >
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 font-bold text-foreground">
-                          <span>🏛️</span>
-                          <span>Province Strategic Dossier</span>
+                          <span>📜</span>
+                          <span>Location Story & Lore Notes</span>
                         </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold flex items-center gap-1 ${tierMeta.badgeClass}`}
-                        >
-                          <span>{tierMeta.icon}</span>
-                          <span>{tierMeta.label}</span>
-                        </span>
+                        {ownerInfo ? (
+                          <span
+                            className="px-2 py-0.5 rounded-full border text-[10px] font-semibold flex items-center gap-1"
+                            style={{
+                              borderColor: `${ownerInfo.color}66`,
+                              backgroundColor: `${ownerInfo.color}18`,
+                            }}
+                          >
+                            <span>{ownerInfo.icon || '🚩'}</span>
+                            <span>{ownerInfo.name}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground italic">
+                            Unclaimed Wilds
+                          </span>
+                        )}
                       </div>
 
-                      {/* Defensive & Allegiance Bar */}
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/50">
+                      {!isViewOnly ? (
                         <div>
-                          <div className="flex items-center justify-between text-[11px] mb-1">
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <span>🛡️</span> Defensibility:
-                            </span>
-                            <span className="font-bold text-foreground">
-                              {province.defensiveRating} / 10
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${
-                                province.defensiveRating >= 7
-                                  ? 'bg-emerald-500'
-                                  : province.defensiveRating >= 4
-                                  ? 'bg-amber-500'
-                                  : 'bg-rose-500'
-                              }`}
-                              style={{ width: `${province.defensiveRating * 10}%` }}
-                            />
-                          </div>
-                          {province.defensiveModifiers.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1 text-[10px] text-muted-foreground">
-                              {province.defensiveModifiers.map((mod, idx) => (
-                                <span
-                                  key={idx}
-                                  className="bg-background/80 px-1 py-0.5 rounded border border-border/50"
-                                >
-                                  +{mod.score} {mod.label}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          <label className="text-[11px] font-semibold text-muted-foreground block mb-1">
+                            Worldbuilder Notes (Myths, Landmarks, Story Hooks):
+                          </label>
+                          <textarea
+                            data-testid="tile-lore-notes-input"
+                            rows={2}
+                            value={inspectedTile.notes || ''}
+                            onChange={(e) =>
+                              handleUpdateInspectedTile({ notes: e.target.value })
+                            }
+                            placeholder="Write what happened here, local myths, ruins, or story hooks for your game..."
+                            className="input w-full text-xs py-1.5 px-2 resize-y"
+                          />
                         </div>
+                      ) : inspectedTile.notes ? (
+                        <p className="text-xs text-foreground/90 whitespace-pre-line leading-relaxed bg-background/60 p-2 rounded border border-border/50">
+                          {inspectedTile.notes}
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground italic">
+                          No custom lore notes written for this location yet.
+                        </p>
+                      )}
 
-                        <div>
-                          <div className="flex items-center justify-between text-[11px] mb-1">
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <span>🚩</span> Allegiance:
-                            </span>
-                            <span className="font-bold text-foreground">
-                              {province.allegianceScore}%
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-primary"
-                              style={{ width: `${province.allegianceScore}%` }}
-                            />
-                          </div>
-                          {province.isMarchland && (
-                            <div className="mt-1 flex items-center gap-1 text-[10px] text-rose-600 dark:text-rose-400 font-semibold">
-                              <span>⚔️ Contested Marchland</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Economic Yields Grid */}
-                      <div className="pt-2 border-t border-border/50">
-                        <span className="text-[11px] font-semibold text-muted-foreground block mb-1">
-                          Provincial Economic Yields:
-                        </span>
-                        <div className="grid grid-cols-4 gap-1.5 text-center">
-                          <div className="p-1.5 rounded bg-background border border-border/60">
-                            <div className="text-[10px] text-muted-foreground">🌾 Food</div>
-                            <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                              +{province.economicOutput.food}
-                            </div>
-                          </div>
-                          <div className="p-1.5 rounded bg-background border border-border/60">
-                            <div className="text-[10px] text-muted-foreground">⛏️ Minerals</div>
-                            <div className="font-bold text-amber-600 dark:text-amber-400">
-                              +{province.economicOutput.minerals}
-                            </div>
-                          </div>
-                          <div className="p-1.5 rounded bg-background border border-border/60">
-                            <div className="text-[10px] text-muted-foreground">🌲 Timber</div>
-                            <div className="font-bold text-green-700 dark:text-green-500">
-                              +{province.economicOutput.timber}
-                            </div>
-                          </div>
-                          <div className="p-1.5 rounded bg-background border border-border/60">
-                            <div className="text-[10px] text-muted-foreground">💰 Trade</div>
-                            <div className="font-bold text-blue-600 dark:text-blue-400">
-                              +{province.economicOutput.trade}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Local Province Chronicle Annals */}
+                      {/* Local Chronicle Events on this Tile */}
                       {tileChronicle.length > 0 && (
                         <div className="pt-2 border-t border-border/50 space-y-1">
                           <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                            <span>📜</span> Local Chronicle Annals ({tileChronicle.length}):
+                            <span>🃏</span> Cards & History Recorded Here ({tileChronicle.length}):
                           </span>
                           <div className="max-h-24 overflow-y-auto space-y-1 pr-1">
                             {tileChronicle.map((rec) => (
@@ -4374,11 +4386,12 @@ export function MapCanvas({
                                 className="p-1 rounded bg-background border border-border/50 text-[10px] flex items-center justify-between cursor-pointer hover:border-primary transition-colors"
                                 title="Jump to chronicle move"
                               >
-                                <span className="font-medium truncate max-w-[70%]">
-                                  Turn #{rec.moveId}: {rec.actionTitle || rec.power || 'Map Event'}
+                                <span className="font-medium truncate max-w-[75%]">
+                                  Turn #{rec.moveId}: {rec.actionTitle || rec.power || 'World Event'}
                                 </span>
                                 <span className="text-muted-foreground font-mono">
-                                  {rec.card.suit}{rec.card.value}
+                                  {rec.card.suit}
+                                  {rec.card.value}
                                 </span>
                               </div>
                             ))}
@@ -4562,6 +4575,14 @@ export function MapCanvas({
           </div>
         </div>
       </div>
+
+      {/* Studio Help, Hints & 4-Stage World Building Tutorial Modal */}
+      <StudioHelpTutorialModal
+        isOpen={showTutorialModal}
+        onClose={() => setShowTutorialModal(false)}
+        showHoverHints={showHoverHints}
+        onToggleHoverHints={setShowHoverHints}
+      />
     </div>
   )
 }

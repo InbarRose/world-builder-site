@@ -342,6 +342,11 @@ status: active
   - [x] 1-Click Bulk Region Operations (`regionCartographyEngine.ts`, `MapCanvas.tsx`): `claimRegionForFaction`, `toggleRegionFogOfWar`, and `applyCanopyOrReliefToRegion` exposed directly inside the sidebar `inspector-region-card`.
   - [x] Live Codex Realm Holdings & Map Focus (`EntityRegistry.tsx`): Each Codex Entity card displays spanned Named Geographic Regions (`🗺️`), harvested Layer 3 Strategic Resources (`⛏️`, `🌾`, `🔮`), and a 1-click `📍 Focus Realm (col,row)` jump button.
   - [x] Comprehensive test coverage across 32 test suites (**221/221 tests passing**).
+- [x] **Phase 34: Removal of 4X Computer-Game Numeric Stats, Location Story & Lore Notes Panel, Interactive Studio Tutorial, and WC3/Photoshop Hover-Hint Status Bar** *(ADR-040)*
+  - [x] Removed 4X Computer-Game Numeric Stats (`MapCanvas.tsx`, `EntityRegistry.tsx`): Removed `Province Strategic Dossier`, `Defensibility: X/10`, `Allegiance %`, `Provincial Economic Yields (+Food, +Minerals, +Timber, +Trade)`, `+Prosperity` badges, and bottom-corner `👑`/`⚔️` tile badges.
+  - [x] Authentic Location Story & Lore Notes Panel (`MapCanvas.tsx`): Direct editable `Worldbuilder Notes` textarea (`tile-lore-notes-input`) for writing local myths, landmarks, and RPG story hooks, plus cards/history recorded at that location.
+  - [x] Photoshop / Warcraft 3 Editor Live Contextual Status & Hover-Hint Bar (`MapCanvas.tsx`): Docked status bar (`studio-hover-hint-bar`) showing active tool, tile coordinates & biome, and live hover hints for every tool and layer tab, plus inline `?` layer help buttons (`layer-help-btn-1`).
+  - [x] Interactive Studio Help, Hints & 4-Stage Tutorial Modal (`StudioHelpTutorialModal.tsx`): 4-tab manual covering the collaborative spirit of *World Building*, the canonical 4×4 Stage/Suit Powers table, the 5-Layer Map Editor, card turn flow, and keyboard shortcuts (**222/222 tests passing**).
 
 ---
 
@@ -387,5 +392,6 @@ status: active
 - [x] Implement Phase 31: Safe Tile Selection Defaults, 1-Click Domain Switcher & Clean Single-Change Clicks (ADR-037, Core Score: 99.8 / 100).
 - [x] Implement Phase 32: Contiguous Regional Cartography, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration (ADR-038, Core Score: 100.0 / 100).
 - [x] Implement Phase 33: Causal Historical Lineage & Consequence Chains, 1-Click Bulk Region Operations, and Live Codex Holdings Integration (ADR-039, Core Score: 100.0 / 100 + Studio Architecture: 20.0 / 20.0).
+- [x] Implement Phase 34: Removal of 4X Computer-Game Numeric Stats, Authentic Location Story & Lore Notes Panel, Interactive Studio Tutorial, and WC3/Photoshop Hover-Hint Status Bar (ADR-040).
 
 

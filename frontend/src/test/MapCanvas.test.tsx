@@ -702,5 +702,54 @@ describe('MapCanvas Component', () => {
     fireEvent.click(screen.getByTestId('inspector-reclaim-ruins-btn'))
     expect(screen.getByText(/Active: town/i)).toBeInTheDocument()
   })
+
+  it('Phase 34: supports Studio Help & 4-Stage Tutorial Modal, Live Hover-Hint Status Bar, Inline Layer Help, and Location Story & Lore Notes (no videogame economic stats)', () => {
+    function Phase34MapTest() {
+      const [currentMap, setCurrentMap] = React.useState(() => createInitialMap(6, 6))
+      return <MapCanvas map={currentMap} worldName="TutorialWorld" onChange={setCurrentMap} />
+    }
+
+    render(<Phase34MapTest />)
+
+    // 1. Live Hover-Hint Status Bar is visible and updates when hovering tools
+    const hintBar = screen.getByTestId('studio-hover-hint-bar')
+    expect(hintBar).toBeInTheDocument()
+    fireEvent.mouseEnter(screen.getByTestId('tool-brush-btn'))
+    expect(hintBar).toHaveTextContent(/Paint Brush Tool \[B\]/i)
+
+    // 2. Inline ? Help button on Layer 1 toggles explanation box
+    fireEvent.click(screen.getByTestId('layer-help-btn-1'))
+    expect(screen.getByTestId('layer-help-box-1')).toHaveTextContent(/1\. Genesis/i)
+
+    // 3. Location Story & Lore Notes textarea works without computer-game yields/defensibility
+    expect(screen.getByTestId('tile-story-lore-panel')).toBeInTheDocument()
+    expect(screen.queryByText(/Provincial Economic Yields:/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Defensibility:/i)).not.toBeInTheDocument()
+
+    const notesInput = screen.getByTestId('tile-lore-notes-input')
+    fireEvent.change(notesInput, {
+      target: { value: 'Ancient dragon lair beneath the roots.' },
+    })
+    expect(notesInput).toHaveValue('Ancient dragon lair beneath the roots.')
+
+    // 4. Open Studio Guide & 4-Stage Tutorial Modal and switch tabs
+    fireEvent.click(screen.getByTestId('open-studio-tutorial-btn'))
+    expect(screen.getByTestId('studio-help-tutorial-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('tutorial-content-game')).toHaveTextContent(
+      /no winner or loser in World Building/i
+    )
+
+    fireEvent.click(screen.getByTestId('tutorial-tab-editor'))
+    expect(screen.getByTestId('tutorial-content-editor')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('tutorial-tab-turns'))
+    expect(screen.getByTestId('tutorial-content-turns')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('tutorial-tab-shortcuts'))
+    expect(screen.getByTestId('tutorial-content-shortcuts')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('close-studio-tutorial-btn'))
+    expect(screen.queryByTestId('studio-help-tutorial-modal')).not.toBeInTheDocument()
+  })
 })
 
