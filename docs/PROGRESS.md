@@ -432,5 +432,8 @@ status: active
 - [x] **Phase 45: Universal Turn Map Change Sessions Across All Four Stages (`✏️ Free Map Edit` & Automatic Diff Lock-In)** *(ADR-049)*
   - [x] Added `computeModifiedTileIds(baseMap, currentMap)` in `turnWorkbenchEngine.ts` + unit tests in `turnWorkbenchEngine.test.ts`.
   - [x] Added **`✏️ Free Map Edit`** mode (`placement-mode-free-btn`) inside the Turn Map Session bar (`MapCanvas.tsx`, `Play.tsx`) so players in any stage (Genesis, Primal, Civilization, Intrigue, Ace Disasters) can freely apply any set of map consequences (terrain, rivers, roads, settlements, ruins, borders, labels) and **`🔒 Lock In Changes`** to attach all modified tiles to that Chronicle turn (or **`✕ Cancel`** to roll back cleanly).
+- [x] **Phase 46: Streamlined 1-Button Card Flexibility Menu (`Redraw`, `Discard & Draw`, `Freeform Turn`) & Minimal Turn Bar** *(ADR-050)*
+  - [x] Added `handleDiscardAndDrawAnother` and `handleFreeformOverrideTurn` in `Play.tsx` so players have zero-penalty creative freedom on every draw.
+  - [x] Collapsed 7 loose turn/deck buttons and the static phase tracker into **`Draw Card`** + 1 expandable **`🃏 Card Options ▾`** popover (`card-options-menu-btn`), dramatically streamlining the Studio interface.
 
 
