@@ -5399,19 +5399,50 @@ export function Play() {
                         <div className="font-bold text-sm">
                           {currentStageData?.name || 'Genesis'} · {deck.length} cards left
                         </div>
-                        <div className="text-[11px] text-muted-foreground">
-                          Active Speaker: <strong>{activePlayer?.name || 'Player 1'}</strong>
+                        <div className="text-[10px] text-muted-foreground">
+                          {currentStage === 'genesis'
+                            ? 'Pre-History · Tens of Thousands of Years Ago'
+                            : currentStage === 'primal'
+                            ? 'Early History · Thousands of Years Ago'
+                            : currentStage === 'civilization'
+                            ? 'Recorded History · Centuries & Kingdoms'
+                            : 'Recent Decades · Plots & Myths'}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => setActiveTab('cards')}
-                        className="px-2 py-1 rounded border border-border hover:bg-accent text-[11px] font-semibold"
+                        className="px-2 py-1 rounded border border-border hover:bg-accent text-[11px] font-semibold shrink-0"
                         title="Open Full Turn Workshop View"
                       >
                         Full View ↗
                       </button>
                     </div>
+
+                    {/* Speaker Chime-In Pills */}
+                    {players.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1">
+                        {players.map((p, idx) => {
+                          const isCurrent = idx === currentPlayerIndex % players.length
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => handleSelectActiveSpeaker(idx)}
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
+                                isCurrent
+                                  ? 'text-white border-transparent shadow-2xs'
+                                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                              }`}
+                              style={isCurrent ? { backgroundColor: p.color } : undefined}
+                              title={`Attribute this turn to ${p.name}`}
+                            >
+                              {p.name}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
 
                     <div className="flex gap-1.5">
                       <button
@@ -5453,6 +5484,34 @@ export function Play() {
                             {powerData.description}
                           </p>
                         )}
+
+                        {/* Quick Stage/Suit Presets right inside the Dock */}
+                        {availableActionPresets.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Quick Ideas for {powerData?.power || 'This Card'}:
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {availableActionPresets.slice(0, 6).map((preset) => (
+                                <button
+                                  key={preset.id}
+                                  type="button"
+                                  onClick={() => handleSelectPreset(preset)}
+                                  className={`px-2 py-0.5 rounded border text-[11px] flex items-center gap-1 transition-colors ${
+                                    selectedPreset?.id === preset.id
+                                      ? 'bg-primary text-primary-foreground border-primary font-semibold'
+                                      : 'bg-background border-border hover:bg-accent text-foreground'
+                                  }`}
+                                  title={preset.description}
+                                >
+                                  <span>{preset.icon}</span>
+                                  <span>{preset.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         <input
                           type="text"
                           value={turnDraft.featureName}

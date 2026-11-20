@@ -25,8 +25,8 @@ describe('Workspace Layout Engine & Modular Photoshop Studio (Phases 38-39)', ()
   it('creates all 4 built-in Studio Workspace presets with expected dock assignments', () => {
     const classic = createWorkspacePreset('classic')
     expect(classic.panels.cards.dock).toBe('left')
-    expect(classic.panels.codex.dock).toBe('right')
-    expect(classic.panels.timeline.dock).toBe('right')
+    expect(classic.panels.codex.dock).toBe('bottom')
+    expect(classic.panels.timeline.dock).toBe('bottom')
     expect(classic.allPanelsHidden).toBe(false)
 
     const pureCanvas = createWorkspacePreset('pure-canvas')
@@ -49,14 +49,14 @@ describe('Workspace Layout Engine & Modular Photoshop Studio (Phases 38-39)', ()
     expect(layout.panels.cards.dock).toBe('floating')
     expect(layout.activeLeftTab).toBeNull()
 
-    layout = movePanelToDock(layout, 'codex', 'bottom')
-    expect(layout.panels.codex.dock).toBe('bottom')
-    expect(layout.activeBottomTab).toBe('codex')
-    expect(layout.activeRightTab).toBe('timeline')
+    layout = movePanelToDock(layout, 'codex', 'right')
+    expect(layout.panels.codex.dock).toBe('right')
+    expect(layout.activeRightTab).toBe('codex')
+    expect(layout.activeBottomTab).toBe('timeline')
 
     layout = togglePanelVisibility(layout, 'timeline')
     expect(layout.panels.timeline.dock).toBe('hidden')
-    expect(layout.activeRightTab).toBeNull()
+    expect(layout.activeBottomTab).toBeNull()
   })
 
   it('clamps dock resize dimensions, updates floating rects, manages z-index, and persists to localStorage', () => {
@@ -110,11 +110,11 @@ describe('Workspace Layout Engine & Modular Photoshop Studio (Phases 38-39)', ()
 
     expect(screen.getByTestId('studio-center-canvas')).toHaveTextContent('World Map Canvas')
     expect(screen.getByTestId('studio-dock-left')).toHaveTextContent('Cards Panel Body')
-    expect(screen.getByTestId('studio-dock-right')).toHaveTextContent('Codex Panel Body')
+    expect(screen.getByTestId('studio-dock-bottom')).toHaveTextContent('Codex Panel Body')
 
-    // Switch right dock tab to Chronicle
-    fireEvent.click(screen.getByTestId('dock-right-tab-timeline'))
-    expect(screen.getByTestId('studio-dock-right')).toHaveTextContent('Timeline Panel Body')
+    // Switch bottom dock tab to Chronicle
+    fireEvent.click(screen.getByTestId('dock-bottom-tab-timeline'))
+    expect(screen.getByTestId('studio-dock-bottom')).toHaveTextContent('Timeline Panel Body')
 
     // Undock Cards panel as a floating window
     fireEvent.click(screen.getByTestId('panel-cards-float'))
@@ -124,8 +124,8 @@ describe('Workspace Layout Engine & Modular Photoshop Studio (Phases 38-39)', ()
     fireEvent.click(screen.getByTestId('panel-cards-collapse'))
     expect(screen.getByTestId('floating-panel-cards')).not.toHaveTextContent('Cards Panel Body')
 
-    // Re-dock Cards to Bottom drawer
-    fireEvent.click(screen.getByTestId('panel-cards-dock-bottom'))
-    expect(screen.getByTestId('studio-dock-bottom')).toHaveTextContent('Cards Panel Body')
+    // Re-dock Cards to Right dock
+    fireEvent.click(screen.getByTestId('panel-cards-dock-right'))
+    expect(screen.getByTestId('studio-dock-right')).toHaveTextContent('Cards Panel Body')
   })
 })
