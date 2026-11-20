@@ -6,6 +6,9 @@ import {
   assignRegionNameToCluster,
   autoNameMajorRegions,
   generateEvocativeRegionName,
+  claimRegionForFaction,
+  toggleRegionFogOfWar,
+  applyCanopyOrReliefToRegion,
 } from '../engine/regionCartographyEngine'
 
 function createTestBlankMap(width: number, height: number): MapState {
@@ -110,5 +113,38 @@ describe('regionCartographyEngine', () => {
     expect(map.tiles['4,1'].regionName).toBeTruthy()
     expect(map.tiles['4,1'].regionName).toBe(map.tiles['4,2'].regionName)
     expect(generateEvocativeRegionName('desert_waste', 0)).toBeTruthy()
+  })
+
+  it('Phase 33: supports 1-Click Bulk Region Operations (Claim Region for Faction, Toggle Region Fog, Apply Region Canopy)', () => {
+    let map = createTestBlankMap(6, 6)
+
+    // Create a 3-tile desert region at (1,1), (1,2), (2,2)
+    for (const id of ['1,1', '1,2', '2,2']) {
+      map.tiles[id] = {
+        ...map.tiles[id],
+        terrain: 'desert',
+      }
+    }
+
+    // 1. Claim entire contiguous desert region for 'soc_dune_kings'
+    map = claimRegionForFaction(map, '1,2', 'soc_dune_kings')
+    expect(map.tiles['1,1'].territoryId).toBe('soc_dune_kings')
+    expect(map.tiles['1,2'].territoryId).toBe('soc_dune_kings')
+    expect(map.tiles['2,2'].territoryId).toBe('soc_dune_kings')
+    expect(map.tiles['0,0'].territoryId).toBeUndefined()
+
+    // 2. Toggle Fog of War across entire contiguous desert region
+    map = toggleRegionFogOfWar(map, '1,1')
+    expect(map.tiles['1,1'].isUnexplored).toBe(true)
+    expect(map.tiles['1,2'].isUnexplored).toBe(true)
+    expect(map.tiles['2,2'].isUnexplored).toBe(true)
+    expect(map.tiles['0,0'].isUnexplored).toBeFalsy()
+
+    // 3. Apply Forest canopy across the contiguous region
+    map = applyCanopyOrReliefToRegion(map, '2,2', { flora: 'forest' })
+    expect(map.tiles['1,1'].flora).toBe('forest')
+    expect(map.tiles['1,2'].flora).toBe('forest')
+    expect(map.tiles['2,2'].flora).toBe('forest')
+    expect(map.tiles['0,0'].flora).toBe('none')
   })
 })

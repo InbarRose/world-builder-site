@@ -399,3 +399,105 @@ export function autoNameMajorRegions(
     tiles: nextTiles,
   }
 }
+
+/**
+ * 1-Click Bulk Region Operation: Assigns or clears faction territory ownership across
+ * all tiles in the contiguous geographic region containing targetTileId.
+ */
+export function claimRegionForFaction(
+  map: MapState,
+  targetTileId: string,
+  territoryId: string | undefined
+): MapState {
+  const { tileRegionMap } = detectGeographicRegions(map, 1)
+  const region = tileRegionMap[targetTileId]
+  if (!region) return map
+
+  const nextTiles = { ...map.tiles }
+  const cleanTerritoryId = territoryId?.trim() || undefined
+
+  for (const tid of region.tileIds) {
+    const [colStr, rowStr] = tid.split(',')
+    const col = Number(colStr)
+    const row = Number(rowStr)
+    const existing = nextTiles[tid] || createDefaultTile(col, row)
+    nextTiles[tid] = {
+      ...existing,
+      territoryId: cleanTerritoryId,
+    }
+  }
+
+  return {
+    ...map,
+    tiles: nextTiles,
+  }
+}
+
+/**
+ * 1-Click Bulk Region Operation: Shrouds or reveals Fog of War across all tiles
+ * in the contiguous geographic region containing targetTileId.
+ */
+export function toggleRegionFogOfWar(
+  map: MapState,
+  targetTileId: string
+): MapState {
+  const { tileRegionMap } = detectGeographicRegions(map, 1)
+  const region = tileRegionMap[targetTileId]
+  if (!region) return map
+
+  const [targetCol, targetRow] = targetTileId.split(',').map(Number)
+  const targetTile =
+    map.tiles[targetTileId] || createDefaultTile(targetCol || 0, targetRow || 0)
+  const nextUnexplored = !targetTile.isUnexplored
+  const nextTiles = { ...map.tiles }
+
+  for (const tid of region.tileIds) {
+    const [colStr, rowStr] = tid.split(',')
+    const col = Number(colStr)
+    const row = Number(rowStr)
+    const existing = nextTiles[tid] || createDefaultTile(col, row)
+    nextTiles[tid] = {
+      ...existing,
+      isUnexplored: nextUnexplored,
+    }
+  }
+
+  return {
+    ...map,
+    tiles: nextTiles,
+  }
+}
+
+/**
+ * 1-Click Bulk Region Operation: Applies flora canopy or elevation relief across
+ * all land tiles in the contiguous geographic region containing targetTileId.
+ */
+export function applyCanopyOrReliefToRegion(
+  map: MapState,
+  targetTileId: string,
+  updates: { flora?: MapTile['flora']; relief?: MapTile['relief'] }
+): MapState {
+  const { tileRegionMap } = detectGeographicRegions(map, 1)
+  const region = tileRegionMap[targetTileId]
+  if (!region) return map
+
+  const nextTiles = { ...map.tiles }
+
+  for (const tid of region.tileIds) {
+    const [colStr, rowStr] = tid.split(',')
+    const col = Number(colStr)
+    const row = Number(rowStr)
+    const existing = nextTiles[tid] || createDefaultTile(col, row)
+    if (getTileDomain(existing) === 'water') continue
+    nextTiles[tid] = {
+      ...existing,
+      ...(updates.flora !== undefined ? { flora: updates.flora } : {}),
+      ...(updates.relief !== undefined ? { relief: updates.relief } : {}),
+    }
+  }
+
+  return {
+    ...map,
+    tiles: nextTiles,
+  }
+}
