@@ -347,6 +347,10 @@ status: active
   - [x] Authentic Location Story & Lore Notes Panel (`MapCanvas.tsx`): Direct editable `Worldbuilder Notes` textarea (`tile-lore-notes-input`) for writing local myths, landmarks, and RPG story hooks, plus cards/history recorded at that location.
   - [x] Photoshop / Warcraft 3 Editor Live Contextual Status & Hover-Hint Bar (`MapCanvas.tsx`): Docked status bar (`studio-hover-hint-bar`) showing active tool, tile coordinates & biome, and live hover hints for every tool and layer tab, plus inline `?` layer help buttons (`layer-help-btn-1`).
   - [x] Interactive Studio Help, Hints & 4-Stage Tutorial Modal (`StudioHelpTutorialModal.tsx`): 4-tab manual covering the collaborative spirit of *World Building*, the canonical 4×4 Stage/Suit Powers table, the 5-Layer Map Editor, card turn flow, and keyboard shortcuts (**222/222 tests passing**).
+- [x] **Phase 35: Mostly-Bare Pre-Genesis Starting Map Generation** *(ADR-041)*
+  - [x] Updated `generateNaturalWorld` and `traceProceduralDownhillRivers` (`proceduralWorldEngine.ts`) so newly generated Turn-0 maps preserve organic coastlines across all 6 geography presets while keeping 90%+ of land tiles as clean, open `plains` (`relief: 'none'`, `flora: 'none'`, `slots: []`, `overlay: 'none'`).
+  - [x] Restricted Pre-Genesis starter landmarks to only `1–4` mountain tiles, `1–2` forest tiles, and `1` downhill river, with zero pre-seeded resource slots or settlements so players shape the world themselves during Stage 1: Genesis.
+  - [x] Updated `proceduralWorldEngine.test.ts` to verify mostly-bare Pre-Genesis constraints (**222/222 tests passing across 32 test suites**).
 
 ---
 
@@ -393,5 +397,6 @@ status: active
 - [x] Implement Phase 32: Contiguous Regional Cartography, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration (ADR-038, Core Score: 100.0 / 100).
 - [x] Implement Phase 33: Causal Historical Lineage & Consequence Chains, 1-Click Bulk Region Operations, and Live Codex Holdings Integration (ADR-039, Core Score: 100.0 / 100 + Studio Architecture: 20.0 / 20.0).
 - [x] Implement Phase 34: Removal of 4X Computer-Game Numeric Stats, Authentic Location Story & Lore Notes Panel, Interactive Studio Tutorial, and WC3/Photoshop Hover-Hint Status Bar (ADR-040).
+- [x] Implement Phase 35: Mostly-Bare Pre-Genesis Starting Map Generation (ADR-041).
 
 
