@@ -912,12 +912,13 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(projectBordersBtn)
     })
 
-    // Verify Strategic Province Dossier is rendered in the Inspector panel
-    const dossier = screen.getByTestId('province-strategic-dossier')
-    expect(dossier).toBeInTheDocument()
-    expect(screen.getByText(/Province Strategic Dossier/i)).toBeInTheDocument()
-    expect(screen.getByText(/Defensibility:/i)).toBeInTheDocument()
-    expect(screen.getByText(/Provincial Economic Yields:/i)).toBeInTheDocument()
+    // Verify Location Story & Lore Notes panel is rendered in the Inspector panel (without computer-game economic yields)
+    const lorePanel = screen.getByTestId('tile-story-lore-panel')
+    expect(lorePanel).toBeInTheDocument()
+    expect(screen.getByText(/Location Story & Lore Notes/i)).toBeInTheDocument()
+    expect(screen.getByTestId('tile-lore-notes-input')).toBeInTheDocument()
+    expect(screen.queryByText(/Provincial Economic Yields:/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Defensibility:/i)).not.toBeInTheDocument()
 
     // Switch to Codex tab
     await act(async () => {

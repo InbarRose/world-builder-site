@@ -1379,7 +1379,7 @@ export function EntityRegistry({
                   ))}
               </div>
 
-              {/* Phase 28: Realm Geopolitics & Holdings Dossier */}
+              {/* Homeland, Settlements & Mapped Locations on the Atlas */}
               {map && inspectedEntity.category === 'society' && (() => {
                 const geopoliticalState = projectRealmInfluence(map, entities).geopolitical
                 const realm = geopoliticalState.realms[inspectedEntity.id]
@@ -1396,20 +1396,20 @@ export function EntityRegistry({
                   >
                     <div className="flex flex-wrap items-center justify-between gap-1.5">
                       <div className="flex items-center gap-1.5 font-bold text-foreground">
-                        <span>👑</span>
-                        <span>Geopolitical Territory & Holdings Dossier</span>
+                        <span>🗺️</span>
+                        <span>Homeland, Settlements & Mapped Locations</span>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold text-[10px]">
-                        {realm.totalTiles} Provinces ({realm.percentageOfLand}% of civilized land)
+                        {realm.totalTiles} Mapped Tiles
                       </span>
                     </div>
 
-                    {/* Capital & Strategic Holdings Grid */}
+                    {/* Homeland Summary Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-border/50 text-center">
                       <div className="p-2 rounded bg-background border border-border/60">
-                        <div className="text-[10px] text-muted-foreground">🏛️ Seat of Power</div>
-                        <div className="font-bold text-primary truncate" title={realm.capitalName || 'Capital'}>
-                          {realm.capitalName || 'Capital'}
+                        <div className="text-[10px] text-muted-foreground">🏛️ Origin / Seat</div>
+                        <div className="font-bold text-primary truncate" title={realm.capitalName || 'Homeland'}>
+                          {realm.capitalName || 'Homeland'}
                         </div>
                         {realm.capitalTileId && (
                           <button
@@ -1428,44 +1428,21 @@ export function EntityRegistry({
                       </div>
 
                       <div className="p-2 rounded bg-background border border-border/60">
-                        <div className="text-[10px] text-muted-foreground">⛏️ Resource Nodes</div>
+                        <div className="text-[10px] text-muted-foreground">✨ Features & Resources</div>
                         <div className="font-bold text-amber-600 dark:text-amber-400 text-sm">{realm.resourceCount}</div>
                       </div>
 
                       <div className="p-2 rounded bg-background border border-border/60">
-                        <div className="text-[10px] text-muted-foreground">🏰 Fortresses</div>
+                        <div className="text-[10px] text-muted-foreground">🏰 Citadels & Wonders</div>
                         <div className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">{realm.fortressCount}</div>
                       </div>
                     </div>
 
-                    {/* Contested Marchlands & Borders */}
-                    {realm.rivalBorderTiles.length > 0 && (
-                      <div className="p-2 rounded bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold flex items-center gap-1 text-[11px]">
-                            <span>⚔️</span> Contested Marchlands ({realm.rivalBorderTiles.length} tiles)
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {realm.rivalBorderTiles.slice(0, 8).map((tid) => (
-                            <button
-                              key={tid}
-                              type="button"
-                              onClick={() => onSelectTile?.(tid)}
-                              className="px-1.5 py-0.5 rounded bg-background border border-rose-500/40 text-[10px] hover:border-rose-500 font-mono"
-                            >
-                              {tid}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Active Trade Networks */}
+                    {/* Connected Roads & Waterways */}
                     {relevantRoutes.length > 0 && (
                       <div className="space-y-1 pt-1 border-t border-border/50">
                         <span className="text-[11px] font-semibold text-muted-foreground block">
-                          Active Trade Networks ({relevantRoutes.length}):
+                          Connected Roads & Waterways ({relevantRoutes.length}):
                         </span>
                         <div className="space-y-1 max-h-24 overflow-y-auto pr-1">
                           {relevantRoutes.map((route) => (
@@ -1477,15 +1454,6 @@ export function EntityRegistry({
                                 <span>{route.medium === 'road' ? '🛣️' : route.medium === 'river' ? '💧' : '⛵'}</span>
                                 <span>{route.fromSettlementName} ↔ {route.toSettlementName}</span>
                               </div>
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                                  route.diplomaticStatus === 'domestic'
-                                    ? 'bg-blue-500/10 text-blue-600'
-                                    : 'bg-emerald-500/10 text-emerald-600'
-                                }`}
-                              >
-                                {route.diplomaticStatus}
-                              </span>
                             </div>
                           ))}
                         </div>
