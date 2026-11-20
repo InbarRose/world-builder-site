@@ -173,6 +173,19 @@ export function Layout({ children }: LayoutProps) {
     ? STAGES.find((s) => s.id === activeWorld.currentStage)
     : undefined
 
+  const isFullViewportStudio = location.pathname === '/play'
+
+  if (isFullViewportStudio) {
+    return (
+      <div
+        data-testid="full-viewport-studio-shell"
+        className="h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col"
+      >
+        <main className="flex-1 min-h-0 flex flex-col overflow-hidden">{children}</main>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Level 0: Global App Shell Header */}

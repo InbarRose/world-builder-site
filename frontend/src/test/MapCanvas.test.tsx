@@ -777,6 +777,9 @@ describe('MapCanvas Component', () => {
     // Clicking "+ Later Ages" reveals Primal/Civilization layers on demand
     fireEvent.click(screen.getByTestId('toggle-later-age-layers-btn'))
     expect(screen.getByText(/Layer 4: Settlements & Holdings/i)).toBeInTheDocument()
+
+    // Phase 37: Photoshop-style Left Vertical Tool Rail is docked beside the canvas
+    expect(screen.getByTestId('studio-left-tool-rail')).toBeInTheDocument()
   })
 })
 
