@@ -1325,6 +1325,27 @@ status: active
 - **Consequences**:
   - Unifies map editing and Chronicle storytelling across all 4 stages into one cohesive, reversible "Edit Map for This Turn → Lock In Consequences" workflow.
 
+---
+
+## ADR-050: Streamlined 1-Button Card Flexibility Menu (`Redraw`, `Discard & Draw Another`, `Freeform Turn`) & Minimal Turn Bar
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Players wanted full creative freedom when drawing a card they don't like—**Redraw** with no penalty, **Discard & draw another**, or **Ignore the card completely** and run a freeform turn—while minimizing interface clutter by collapsing all 7 loose turn/deck buttons into **one expandable menu**.
+- **Decision**:
+  1. **1-Button Expandable `🃏 Card Options ▾` Menu (`Play.tsx`)**:
+     - Replaced 7 loose buttons (`Redraw`, `Pick Card`, `Auto-Step Turn`, `Auto-Stage`, `Undo`, `Reset Deck`) and the static 3-step phase tracker with a single sleek `Draw Card` + **`🃏 Card Options ▾`** (`card-options-menu-btn`) popover.
+     - Grouped **Player Flexibility (No Penalty)** actions cleanly at the top:
+       - `Redraw (Return & Draw New)` (`handleRedrawCurrentCard`)
+       - `Discard & Draw Another` (`handleDiscardAndDrawAnother`)
+       - `Ignore Card (Freeform Turn)` (`handleFreeformOverrideTurn`)
+       - `Pick Card (Specific Suit/Value)`
+     - Tucked secondary deck/session utilities (`Undo Last Turn`, `Reset Deck`, `Auto-Step`, `Auto-Play Stage`) cleanly below a divider.
+- **Consequences**:
+  - Gives players total creative sovereignty over every draw with zero penalties while cutting top turn-bar clutter by over 70%.
+
+
 
 
 

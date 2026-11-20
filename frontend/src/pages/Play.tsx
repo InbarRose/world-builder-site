@@ -16,7 +16,6 @@ import {
   Lock,
   Unlock,
   BookOpen,
-  ArrowRight,
   Undo2,
   AlertCircle,
   FileText,
@@ -285,6 +284,7 @@ export function Play() {
   const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
   const [showSiteMenu, setShowSiteMenu] = useState(false)
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  const [showCardOptionsMenu, setShowCardOptionsMenu] = useState(false)
   const [turnFocusTab, setTurnFocusTab] = useState<'presets' | 'edit'>('presets')
   const [showCardExamples, setShowCardExamples] = useState(false)
   const [showBotAssist, setShowBotAssist] = useState(false)
@@ -1136,6 +1136,113 @@ export function Play() {
         drawHistory: nextHistory,
       }
     })
+  }
+
+  // Creative Flexibility: Discard unwanted card (remove from stage deck) and draw another with zero penalty
+  const handleDiscardAndDrawAnother = async () => {
+    if (world.isLocked || deck.length === 0) return
+    playCardDrawSound()
+    const nextDeck = [...deck]
+    const nextCard = nextDeck.pop()!
+    setDeck(nextDeck)
+    setDrawnCard(nextCard)
+    setSelectedPreset(null)
+    setGeneratedFeatureName('')
+    setTurnFocusTab('presets')
+
+    let power: string | undefined = undefined
+    if (deckConfig.stagesEnabled) {
+      const data = await loadPowerData(currentStage, nextCard)
+      power = data?.power
+    }
+
+    persistWorldUpdate((prev) => {
+      const nextHistory = [...prev.drawHistory]
+      if (turnPhase === 'action_select' && nextHistory.length > 0) {
+        const lastIdx = nextHistory.length - 1
+        nextHistory[lastIdx] = {
+          ...nextHistory[lastIdx],
+          card: nextCard,
+          power,
+        }
+      }
+      return {
+        ...prev,
+        drawHistory: nextHistory,
+      }
+    })
+    setRecordSavedFeedback('Card discarded — fresh card drawn with no penalty!')
+  }
+
+  // Creative Flexibility: Ignore the card completely and run a Freeform / Custom turn
+  const handleFreeformOverrideTurn = () => {
+    if (world.isLocked) return
+    playTokenPlaceSound()
+    const freeformCard: Card = drawnCard || {
+      id: `freeform_${Date.now()}`,
+      suit: '♦',
+      value: '★',
+    }
+    setDrawnCard(freeformCard)
+    setTurnPhase('action_select')
+    setSelectedPreset(null)
+    setTurnFocusTab('edit')
+    setShowCustomStampControls(true)
+
+    const customDraft = createCustomTurnDraft(
+      currentStage,
+      'Freeform Turn',
+      selectedTileId,
+      Date.now(),
+      turnDraft.placedTileIds
+    )
+    const nextDraft: TurnActionDraft = {
+      ...customDraft,
+      actionTitle: 'Freeform World Event',
+      featureName: turnDraft.featureName || '',
+      note: turnDraft.note || '',
+    }
+
+    if (turnPhase !== 'action_select') {
+      const moveId = drawHistory.length + 1
+      const activeSeat = players[currentPlayerIndex % Math.max(1, players.length)]
+      const newRecord: DrawRecord = {
+        id: `turn_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        moveId,
+        card: freeformCard,
+        timestamp: new Date().toISOString(),
+        stage: currentStage,
+        power: 'Freeform Turn',
+        actionTitle: 'Freeform World Event',
+        note: '',
+        playerId: activeSeat?.id,
+        playerName: activeSeat?.name,
+        playerColor: activeSeat?.color,
+        epochYear: calculateEpochYear(currentStage, moveId),
+        linkedTileIds: [],
+        linkedEntityIds: [],
+      }
+      persistWorldUpdate((prev) => ({
+        ...prev,
+        drawHistory: [...prev.drawHistory, newRecord],
+      }))
+    } else {
+      persistWorldUpdate((prev) => {
+        if (prev.drawHistory.length === 0) return prev
+        const nextHistory = [...prev.drawHistory]
+        const lastIdx = nextHistory.length - 1
+        nextHistory[lastIdx] = {
+          ...nextHistory[lastIdx],
+          power: 'Freeform Turn',
+          actionTitle: 'Freeform World Event',
+        }
+        return { ...prev, drawHistory: nextHistory }
+      })
+    }
+
+    setTurnDraft(nextDraft)
+    setPendingNote(nextDraft.note)
+    setRecordSavedFeedback('Freeform Turn active — ignore the card and shape the world however you like!')
   }
 
   // Single-PC Driver: Choose Specific Card (for physical decks or creative override)
@@ -3617,7 +3724,7 @@ export function Play() {
               >
                 {/* Studio Turn Flow, Speaker Chime-In Bar & Card Freedom Controls */}
                 <div className="card p-4 space-y-3 bg-card border-border/80">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
@@ -3627,112 +3734,155 @@ export function Play() {
                           world.isLocked ||
                           (gameMode === 'studio' && turnPhase === 'action_select')
                         }
-                        className="btn-primary flex items-center space-x-2 px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-50"
+                        className="btn-primary flex items-center space-x-2 px-5 py-2 text-sm font-bold shadow-sm disabled:opacity-50"
                       >
                         <PlayIcon className="h-4 w-4" />
                         <span>Draw Card ({deck.length})</span>
                       </button>
 
-                      {turnPhase === 'action_select' && deck.length > 0 && !world.isLocked && (
-                        <button
-                          type="button"
-                          onClick={handleRedrawCurrentCard}
-                          className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
-                          title="Mulligan: shuffle this card back and draw a fresh card for this turn"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          <span>Redraw</span>
-                        </button>
-                      )}
-
+                      {/* Streamlined 1-Button Expandable Card & Turn Options (Redraw, Discard, Freeform, Pick Card, Utilities) */}
                       {!world.isLocked && (
-                        <button
-                          type="button"
-                          onClick={() => setShowCardPickerPopover((prev) => !prev)}
-                          className={`btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold ${
-                            showCardPickerPopover
-                              ? 'bg-primary text-primary-foreground border-primary'
-                              : ''
-                          }`}
-                          title="Pick a specific card (for physical decks or creative freedom)"
-                        >
-                          <span>🎴</span>
-                          <span>Pick Card</span>
-                        </button>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            data-testid="card-options-menu-btn"
+                            onClick={() => setShowCardOptionsMenu((v) => !v)}
+                            className={`btn-outline flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${
+                              showCardOptionsMenu
+                                ? 'bg-primary/10 border-primary/40 text-primary'
+                                : ''
+                            }`}
+                            title="Flexible card & turn options: Redraw, Discard & draw another, Freeform turn, Pick card, Undo, or Auto-Play"
+                          >
+                            <span>🃏</span>
+                            <span>Card Options</span>
+                            <ChevronDown className="h-3 w-3 opacity-70" />
+                          </button>
+
+                          {showCardOptionsMenu && (
+                            <div
+                              data-testid="card-options-popover"
+                              className="absolute left-0 mt-1.5 w-60 rounded-xl border border-border bg-card shadow-xl p-1.5 z-50 text-xs space-y-1"
+                            >
+                              <div className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Player Flexibility (No Penalty)
+                              </div>
+                              {turnPhase === 'action_select' && deck.length > 0 && (
+                                <>
+                                  <button
+                                    type="button"
+                                    data-testid="card-opt-redraw-btn"
+                                    onClick={() => {
+                                      setShowCardOptionsMenu(false)
+                                      handleRedrawCurrentCard()
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-foreground"
+                                  >
+                                    <RefreshCw className="h-3.5 w-3.5 text-amber-500" />
+                                    <span>Redraw (Return &amp; Draw New)</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    data-testid="card-opt-discard-btn"
+                                    onClick={() => {
+                                      setShowCardOptionsMenu(false)
+                                      handleDiscardAndDrawAnother()
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-foreground"
+                                  >
+                                    <X className="h-3.5 w-3.5 text-rose-500" />
+                                    <span>Discard &amp; Draw Another</span>
+                                  </button>
+                                </>
+                              )}
+                              <button
+                                type="button"
+                                data-testid="card-opt-freeform-btn"
+                                onClick={() => {
+                                  setShowCardOptionsMenu(false)
+                                  handleFreeformOverrideTurn()
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-foreground"
+                              >
+                                <Wand2 className="h-3.5 w-3.5 text-primary" />
+                                <span>Ignore Card (Freeform Turn)</span>
+                              </button>
+                              <button
+                                type="button"
+                                data-testid="card-opt-pick-btn"
+                                onClick={() => {
+                                  setShowCardOptionsMenu(false)
+                                  setShowCardPickerPopover((prev) => !prev)
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-foreground"
+                              >
+                                <span>🎴</span>
+                                <span>Pick Card (Specific Suit/Value)</span>
+                              </button>
+
+                              <div className="border-t border-border/60 pt-1 mt-1 space-y-0.5">
+                                <div className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                  Deck &amp; Session
+                                </div>
+                                {drawHistory.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setShowCardOptionsMenu(false)
+                                      handleUndoLastTurn()
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    <Undo2 className="h-3.5 w-3.5" />
+                                    <span>Undo Last Turn</span>
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowCardOptionsMenu(false)
+                                    handleReshuffleDeck()
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                                >
+                                  <Shuffle className="h-3.5 w-3.5" />
+                                  <span>Reset / Reshuffle Deck</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowCardOptionsMenu(false)
+                                    handleAutoStepOneTurn()
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                                >
+                                  <Bot className="h-3.5 w-3.5 text-primary" />
+                                  <span>Auto-Step 1 Turn</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowCardOptionsMenu(false)
+                                    handleAutoPlayCurrentStage()
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                                >
+                                  <FastForward className="h-3.5 w-3.5 text-primary" />
+                                  <span>Auto-Play Stage</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
-
-                      <button
-                        type="button"
-                        onClick={handleAutoStepOneTurn}
-                        disabled={world.isLocked}
-                        className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
-                        title="Simulate 1 Bot Turn automatically"
-                      >
-                        <Bot className="h-3.5 w-3.5 text-primary" />
-                        <span>Auto-Step Turn</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleAutoPlayCurrentStage}
-                        disabled={world.isLocked}
-                        className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold"
-                        title="Auto-Play remaining turns in current Stage"
-                      >
-                        <FastForward className="h-3.5 w-3.5 text-primary" />
-                        <span className="hidden sm:inline">Auto-Stage</span>
-                      </button>
-
-                      {drawHistory.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleUndoLastTurn}
-                          disabled={world.isLocked}
-                          className="btn-outline flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
-                          title="Undo the last turn and restore previous state"
-                        >
-                          <Undo2 className="h-3.5 w-3.5" />
-                          <span>Undo</span>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={handleReshuffleDeck}
-                        className="btn-outline flex items-center space-x-1.5 px-2.5 py-2 text-xs"
-                        title="Reshuffle Deck"
-                      >
-                        <Shuffle className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Reset Deck</span>
-                      </button>
                     </div>
 
-                    {/* Studio Phase Tracker */}
-                    <div className="flex items-center gap-2 text-xs font-medium bg-muted/50 px-3 py-1.5 rounded-xl border border-border">
-                      <span
-                        className={`px-2 py-0.5 rounded font-bold ${
-                          turnPhase === 'await_draw'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-muted-foreground'
-                        }`}
-                      >
-                        1. Draw
-                      </span>
-                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                      <span
-                        className={`px-2 py-0.5 rounded font-bold ${
-                          turnPhase === 'action_select'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'text-muted-foreground'
-                        }`}
-                      >
-                        2. Act & Record
-                      </span>
-                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                      <span className="px-2 py-0.5 rounded text-muted-foreground font-bold">
-                        3. Pass Turn
-                      </span>
-                    </div>
+                    {/* Compact Turn Status Pill */}
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {turnPhase === 'await_draw'
+                        ? 'Click the deck or Draw Card to begin turn'
+                        : `Active Turn #${drawHistory.length} · Edit freely or Complete Turn`}
+                    </span>
                   </div>
 
                   {/* Popover: Choose Specific Card (Physical Deck / Creative Override) */}
@@ -5729,14 +5879,32 @@ export function Play() {
                         <span>{drawnCard ? 'Draw Next Card' : 'Draw Card [D]'}</span>
                       </button>
                       {drawnCard && !world.isLocked && (
-                        <button
-                          type="button"
-                          onClick={handleRedrawCurrentCard}
-                          className="btn-outline px-2.5 py-2 text-xs flex items-center gap-1"
-                          title="Redraw / Mulligan Card [R]"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleRedrawCurrentCard}
+                            className="btn-outline px-2 py-2 text-xs flex items-center gap-1"
+                            title="Redraw (Return card & draw new — no penalty)"
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDiscardAndDrawAnother}
+                            className="btn-outline px-2 py-2 text-xs flex items-center gap-1 text-rose-500"
+                            title="Discard this card & draw another (no penalty)"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleFreeformOverrideTurn}
+                            className="btn-outline px-2 py-2 text-xs flex items-center gap-1 text-primary"
+                            title="Ignore card and run a Freeform Turn"
+                          >
+                            <Wand2 className="h-3.5 w-3.5" />
+                          </button>
+                        </>
                       )}
                     </div>
 
