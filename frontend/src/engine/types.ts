@@ -195,6 +195,27 @@ export type TilePattern = 'solid' | 'diagonal' | 'horizontal' | 'vertical' | 'ch
 
 export type TileColoringMode = 'fill' | 'outline' | 'patterned'
 
+export type GeographicRegionCategory =
+  | 'mountain_range'
+  | 'forest_woodland'
+  | 'desert_waste'
+  | 'swamp_mire'
+  | 'tundra_frost'
+  | 'inland_sea'
+  | 'ocean_expanse'
+  | 'plains_steppe'
+
+export interface GeographicRegion {
+  id: string
+  name: string
+  category: GeographicRegionCategory
+  categoryLabel: string
+  icon: string
+  tileIds: string[]
+  centroid: { col: number; row: number }
+  isNamed: boolean
+}
+
 export interface MapTile {
   id: string // "col,row"
   col: number
@@ -217,6 +238,10 @@ export interface MapTile {
   hasRoad?: boolean
   isUnexplored?: boolean
   territoryId?: string
+  regionId?: string
+  regionName?: string
+  ancestralOwnerId?: string
+  ruinOriginLabel?: string
   label?: string
   notes?: string
   tags: string[]
