@@ -232,7 +232,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Mutual Defense Pact reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mutual Defense Pact, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_coop_merchant_guild",
@@ -251,7 +253,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Joint Merchant Guild & Fair reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Joint Merchant Guild & Fair, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_coop_relief_aid",
@@ -270,6 +274,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Disaster Relief & Reconstruction reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Disaster Relief & Reconstruction, leaving a lasting mark on the land and its chronicles."
   }
 ]

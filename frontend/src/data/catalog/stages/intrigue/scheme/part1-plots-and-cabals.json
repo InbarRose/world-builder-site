@@ -229,7 +229,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Assassination of a Monarch reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Assassination of a Monarch, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_sch_thieves_guild",
@@ -248,7 +250,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Underground Thieves & Black Market reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Underground Thieves & Black Market, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_sch_secret_alliance",
@@ -267,6 +271,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Secret Pact Between Rivals reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Secret Pact Between Rivals, leaving a lasting mark on the land and its chronicles."
   }
 ]

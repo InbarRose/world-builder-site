@@ -225,7 +225,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Dragon Lair in the Mountains reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Dragon Lair in the Mountains, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_myth_lost_artifact",
@@ -244,7 +246,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Lost Legendary Artifact reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Lost Legendary Artifact, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_myth_haunted_citadel",
@@ -264,6 +268,8 @@
         "scale": 1
       }
     },
-    "overlayChange": "ruins"
+    "overlayChange": "ruins",
+    "creativePrompt": "How does Haunted Ruins & Undead Lord reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Haunted Ruins & Undead Lord, leaving a lasting mark on the land and its chronicles."
   }
 ]

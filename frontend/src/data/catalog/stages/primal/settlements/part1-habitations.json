@@ -215,7 +215,7 @@
     "slotCategory": "settlement",
     "slotPriority": 70,
     "graphic": {
-      "assetId": "village-hamlet",
+      "assetId": null,
       "fallbackAssetId": null,
       "glyph": "🏡",
       "primaryColor": null,
@@ -226,7 +226,9 @@
         "scale": 1
       }
     },
-    "overlayChange": "settlement"
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Coastal Fishing Village reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Coastal Fishing Village, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_set_mountain_hamlet",
@@ -235,7 +237,7 @@
     "slotCategory": "settlement",
     "slotPriority": 70,
     "graphic": {
-      "assetId": "village-hamlet",
+      "assetId": null,
       "fallbackAssetId": null,
       "glyph": "🏘️",
       "primaryColor": null,
@@ -246,7 +248,9 @@
         "scale": 1
       }
     },
-    "overlayChange": "settlement"
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Mountain Valley Hamlet reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mountain Valley Hamlet, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_set_nomad_camp",
@@ -255,7 +259,7 @@
     "slotCategory": "settlement",
     "slotPriority": 65,
     "graphic": {
-      "assetId": "camp-nomad",
+      "assetId": null,
       "fallbackAssetId": null,
       "glyph": "🏕️",
       "primaryColor": null,
@@ -266,6 +270,8 @@
         "scale": 1
       }
     },
-    "overlayChange": "settlement"
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Seasonal Nomad Encampment reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Seasonal Nomad Encampment, leaving a lasting mark on the land and its chronicles."
   }
 ]

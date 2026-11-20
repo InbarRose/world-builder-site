@@ -266,7 +266,9 @@
         "scale": 1
       }
     },
-    "hasRoad": true
+    "hasRoad": true,
+    "creativePrompt": "How does Great Stone Bridge & King Road reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Great Stone Bridge & King Road, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_con_border_castle",
@@ -275,7 +277,7 @@
     "slotCategory": "structure",
     "slotPriority": 82,
     "graphic": {
-      "assetId": "castle-citadel",
+      "assetId": "const-castle",
       "fallbackAssetId": null,
       "glyph": "🏰",
       "primaryColor": null,
@@ -286,6 +288,8 @@
         "scale": 1
       }
     },
-    "overlayChange": "castle"
+    "overlayChange": "castle",
+    "creativePrompt": "How does Walled Border Castle reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Walled Border Castle, leaving a lasting mark on the land and its chronicles."
   }
 ]

@@ -224,7 +224,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Written Code of Laws reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Written Code of Laws, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_enl_grand_library",
@@ -243,7 +245,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Grand Library & Scholars Guild reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Grand Library & Scholars Guild, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_enl_steel_forging",
@@ -262,6 +266,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Fine Steel & Armor Craft reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Fine Steel & Armor Craft, leaving a lasting mark on the land and its chronicles."
   }
 ]

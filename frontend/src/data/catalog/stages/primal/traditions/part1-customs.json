@@ -224,7 +224,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Autumn Harvest Festival reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Autumn Harvest Festival, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_trad_coming_of_age",
@@ -243,7 +245,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Trial of Coming of Age reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Trial of Coming of Age, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_trad_ancestor_shrine",
@@ -262,6 +266,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Ancestor Worship & Burial Cairns reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Ancestor Worship & Burial Cairns, leaving a lasting mark on the land and its chronicles."
   }
 ]

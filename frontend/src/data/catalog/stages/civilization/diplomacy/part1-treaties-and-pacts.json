@@ -232,7 +232,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Royal Marriage Alliance reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Royal Marriage Alliance, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_dip_trade_charter",
@@ -252,7 +254,9 @@
         "scale": 1
       }
     },
-    "hasRoad": true
+    "hasRoad": true,
+    "creativePrompt": "How does Cross-Border Trade Charter reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Cross-Border Trade Charter, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_dip_border_treaty",
@@ -271,6 +275,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Negotiated Border Treaty reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Negotiated Border Treaty, leaving a lasting mark on the land and its chronicles."
   }
 ]

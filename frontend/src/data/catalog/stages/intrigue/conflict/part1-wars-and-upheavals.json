@@ -232,7 +232,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Border War & Skirmishes reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Border War & Skirmishes, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_con_city_siege",
@@ -252,7 +254,9 @@
         "scale": 1
       }
     },
-    "overlayChange": "ruins"
+    "overlayChange": "ruins",
+    "creativePrompt": "How does Siege & Sack of a City reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Siege & Sack of a City, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "int_con_peasant_rebellion",
@@ -271,6 +275,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Popular Uprising & Civil War reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Popular Uprising & Civil War, leaving a lasting mark on the land and its chronicles."
   }
 ]

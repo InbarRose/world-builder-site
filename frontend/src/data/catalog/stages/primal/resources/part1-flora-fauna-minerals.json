@@ -224,7 +224,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Surface Iron Ore Deposit reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Surface Iron Ore Deposit, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_res_wild_horses",
@@ -243,7 +245,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Domesticated Herds & Horses reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Domesticated Herds & Horses, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_res_grain_fields",
@@ -262,6 +266,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Cultivated Grain & Barley reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Cultivated Grain & Barley, leaving a lasting mark on the land and its chronicles."
   }
 ]

@@ -227,7 +227,7 @@
     "slotCategory": "settlement",
     "slotPriority": 80,
     "graphic": {
-      "assetId": "city-walled",
+      "assetId": null,
       "fallbackAssetId": null,
       "glyph": "⚓",
       "primaryColor": null,
@@ -238,7 +238,9 @@
         "scale": 1
       }
     },
-    "overlayChange": "city"
+    "overlayChange": "city",
+    "creativePrompt": "How does Founding a Busy Trade Port reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Founding a Busy Trade Port, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_exp_frontier_outpost",
@@ -247,7 +249,7 @@
     "slotCategory": "structure",
     "slotPriority": 74,
     "graphic": {
-      "assetId": "castle-citadel",
+      "assetId": "const-castle",
       "fallbackAssetId": null,
       "glyph": "🗼",
       "primaryColor": null,
@@ -258,7 +260,9 @@
         "scale": 1
       }
     },
-    "overlayChange": "castle"
+    "overlayChange": "castle",
+    "creativePrompt": "How does Frontier Garrison & Watchtower reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Frontier Garrison & Watchtower, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "civ_exp_kingdom_unification",
@@ -267,7 +271,7 @@
     "slotCategory": "settlement",
     "slotPriority": 84,
     "graphic": {
-      "assetId": "city-walled",
+      "assetId": null,
       "fallbackAssetId": null,
       "glyph": "👑",
       "primaryColor": null,
@@ -278,6 +282,8 @@
         "scale": 1
       }
     },
-    "overlayChange": "capital"
+    "overlayChange": "capital",
+    "creativePrompt": "How does Unification of Rival Towns reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Unification of Rival Towns, leaving a lasting mark on the land and its chronicles."
   }
 ]

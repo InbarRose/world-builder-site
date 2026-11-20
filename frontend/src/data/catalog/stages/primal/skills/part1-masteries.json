@@ -224,7 +224,9 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Mastery of Boat-Making & Sailing reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mastery of Boat-Making & Sailing, leaving a lasting mark on the land and its chronicles."
   },
   {
     "id": "pri_skill_herbalism",
@@ -243,6 +245,8 @@
         "fillOpacity": 0.15,
         "scale": 1
       }
-    }
+    },
+    "creativePrompt": "How does Herbal Medicine & Healing reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Herbal Medicine & Healing, leaving a lasting mark on the land and its chronicles."
   }
 ]
