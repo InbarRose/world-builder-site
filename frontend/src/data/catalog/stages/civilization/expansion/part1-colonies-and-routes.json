@@ -219,5 +219,71 @@
     "abilityGranted": "Planar Colonization Bridge",
     "creativePrompt": "What miraculous vegetation and strange skies await colonists beyond the portal threshold?",
     "exampleNarrative": "Through the shimmering gateway of silver light, pioneer skyships sailed onto the violet shores of the floating moonlet."
+  },
+  {
+    "id": "civ_exp_port_city",
+    "name": "Founding a Busy Trade Port",
+    "description": "Settlers establish a fortified harbor city to control coastal shipping lanes.",
+    "slotCategory": "settlement",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚓",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "city",
+    "creativePrompt": "How does Founding a Busy Trade Port reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Founding a Busy Trade Port, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_exp_frontier_outpost",
+    "name": "Frontier Garrison & Watchtower",
+    "description": "Soldiers and pioneers claim untamed borderlands with a timber-and-stone fort.",
+    "slotCategory": "structure",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": "const-castle",
+      "fallbackAssetId": null,
+      "glyph": "🗼",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "castle",
+    "creativePrompt": "How does Frontier Garrison & Watchtower reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Frontier Garrison & Watchtower, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_exp_kingdom_unification",
+    "name": "Unification of Rival Towns",
+    "description": "Neighboring towns swear fealty under one crown, forming a unified kingdom.",
+    "slotCategory": "settlement",
+    "slotPriority": 84,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "👑",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "capital",
+    "creativePrompt": "How does Unification of Rival Towns reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Unification of Rival Towns, leaving a lasting mark on the land and its chronicles."
   }
 ]

@@ -207,5 +207,69 @@
     "abilityGranted": "Cosmic World-Gate",
     "creativePrompt": "What other created worlds lie on the far side of the gate? Who holds the keystone?",
     "exampleNarrative": "Rings of iridescent light spun within the gigantic portal, revealing distant constellations and strange alien moons."
+  },
+  {
+    "id": "int_myth_sleeping_dragon",
+    "name": "Dragon Lair in the Mountains",
+    "description": "An ancient dragon claims a peak and hoards treasure, demanding tribute from nearby towns.",
+    "slotCategory": "myth",
+    "slotPriority": 90,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🐉",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Dragon Lair in the Mountains reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Dragon Lair in the Mountains, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_myth_lost_artifact",
+    "name": "Lost Legendary Artifact",
+    "description": "Rumors surface of a forgotten crown or magic sword buried in a desert tomb.",
+    "slotCategory": "myth",
+    "slotPriority": 86,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "✨",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Lost Legendary Artifact reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Lost Legendary Artifact, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_myth_haunted_citadel",
+    "name": "Haunted Ruins & Undead Lord",
+    "description": "A lich or cursed king awakens in an abandoned palace, drawing adventurers and dread.",
+    "slotCategory": "myth",
+    "slotPriority": 88,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "💀",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "How does Haunted Ruins & Undead Lord reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Haunted Ruins & Undead Lord, leaving a lasting mark on the land and its chronicles."
   }
 ]

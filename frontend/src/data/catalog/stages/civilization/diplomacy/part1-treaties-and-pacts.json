@@ -214,5 +214,69 @@
     "relationshipType": "alliance",
     "creativePrompt": "What tribute or sacred vow must the mortal sovereigns renew every century to preserve the dragon pact?",
     "exampleNarrative": "The great gold wyrm dipped its horned head in solemn covenant, swearing that no demonic host would cross the mountain skies."
+  },
+  {
+    "id": "civ_dip_royal_marriage",
+    "name": "Royal Marriage Alliance",
+    "description": "Two ruling houses wed heirs to seal a lasting peace and unite their banners.",
+    "slotCategory": "feature",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "💍",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Royal Marriage Alliance reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Royal Marriage Alliance, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_dip_trade_charter",
+    "name": "Cross-Border Trade Charter",
+    "description": "Merchants gain safe passage and shared coinage across neighboring realms.",
+    "slotCategory": "feature",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🤝",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "hasRoad": true,
+    "creativePrompt": "How does Cross-Border Trade Charter reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Cross-Border Trade Charter, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_dip_border_treaty",
+    "name": "Negotiated Border Treaty",
+    "description": "Envoys draw clear river and mountain boundaries to end decades of skirmishes.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "📜",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Negotiated Border Treaty reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Negotiated Border Treaty, leaving a lasting mark on the land and its chronicles."
   }
 ]

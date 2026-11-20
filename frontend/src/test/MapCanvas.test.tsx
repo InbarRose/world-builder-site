@@ -792,6 +792,38 @@ describe('MapCanvas Component', () => {
 
     // Phase 37: Photoshop-style Left Vertical Tool Rail is docked beside the canvas
     expect(screen.getByTestId('studio-left-tool-rail')).toBeInTheDocument()
+
+    // Phase 51: Dimension presets are visible at Turn #0, then locked once campaign has started
+    expect(screen.getByTestId('map-dimension-presets')).toBeInTheDocument()
+  })
+
+  it('Phase 51: locks world resizing & grid topology switchers once Turn #1 has begun in normal play', () => {
+    const map = createInitialMap(4, 4)
+    const handleChange = vi.fn()
+
+    render(
+      <MapCanvas
+        map={map}
+        worldName="Active Campaign"
+        currentStage="genesis"
+        gameMode="studio"
+        drawHistory={[
+          {
+            id: 'turn-1',
+            moveId: 1,
+            card: { id: 'c1', suit: '♠', value: '5' },
+            timestamp: '2026-11-20T00:00:00Z',
+            stage: 'genesis',
+            power: 'Earth',
+            note: 'Raised the first mountain.',
+          },
+        ]}
+        onChange={handleChange}
+      />
+    )
+
+    expect(screen.queryByTestId('map-dimension-presets')).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: /Grid Topology Mode/i })).not.toBeInTheDocument()
   })
 })
 

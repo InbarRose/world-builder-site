@@ -207,5 +207,71 @@
     "overlayChange": "capital",
     "creativePrompt": "What miraculous celestial ward protects this glowing sanctuary from mortal harm?",
     "exampleNarrative": "Alabaster spires arose overnight, glowing with the eternal warmth of an unbroken dawn."
+  },
+  {
+    "id": "pri_set_fishing_village",
+    "name": "Coastal Fishing Village",
+    "description": "Stilt huts and wooden piers clustered along a sheltered cove.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏡",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Coastal Fishing Village reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Coastal Fishing Village, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_set_mountain_hamlet",
+    "name": "Mountain Valley Hamlet",
+    "description": "Stone cottages tucked into a high pass sheltered from winter winds.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏘️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Mountain Valley Hamlet reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mountain Valley Hamlet, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_set_nomad_camp",
+    "name": "Seasonal Nomad Encampment",
+    "description": "Painted tents pitched along a migration trail near fresh water.",
+    "slotCategory": "settlement",
+    "slotPriority": 65,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏕️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement",
+    "creativePrompt": "How does Seasonal Nomad Encampment reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Seasonal Nomad Encampment, leaving a lasting mark on the land and its chronicles."
   }
 ]

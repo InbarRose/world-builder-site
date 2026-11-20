@@ -214,5 +214,69 @@
     "relationshipType": "war",
     "creativePrompt": "How does the clash between mountain and sea titans physically reshape the world map?",
     "exampleNarrative": "The heavens tore as two thousand-foot colossi collided, each blow cracking mountains and boiling coastal bays."
+  },
+  {
+    "id": "int_con_border_war",
+    "name": "Border War & Skirmishes",
+    "description": "Rival armies clash over disputed mines, bridges, and fertile valleys.",
+    "slotCategory": "feature",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚔️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Border War & Skirmishes reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Border War & Skirmishes, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_con_city_siege",
+    "name": "Siege & Sack of a City",
+    "description": "Catapults breach ancient walls, leaving a scarred district or smoldering ruins.",
+    "slotCategory": "structure",
+    "slotPriority": 86,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏚️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins",
+    "creativePrompt": "How does Siege & Sack of a City reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Siege & Sack of a City, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_con_peasant_rebellion",
+    "name": "Popular Uprising & Civil War",
+    "description": "Heavily taxed provinces rise against the throne, splitting the realm in two.",
+    "slotCategory": "feature",
+    "slotPriority": 82,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🔥",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Popular Uprising & Civil War reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Popular Uprising & Civil War, leaving a lasting mark on the land and its chronicles."
   }
 ]

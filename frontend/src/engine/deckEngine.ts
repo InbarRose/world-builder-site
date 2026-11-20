@@ -240,3 +240,60 @@ export async function loadPowerData(stage: StageId, card: Card): Promise<PowerDa
   }
   return null
 }
+
+/**
+ * Returns rich, classic, phase-relevant examples and tabletop guidance for any drawn card
+ * (standard suits, Aces / Natural Disasters, Face Cards / Fantastical Powers, and Jokers).
+ */
+export function getPhaseRelevantExamples(
+  stage: StageId,
+  card: Card,
+  baseExamples?: string
+): string {
+  if (card.value === 'A') {
+    const disasterByStage: Record<StageId, string> = {
+      genesis:
+        'Volcanic eruption, great earthquake splitting a canyon, coastal tsunami, meteor impact crater, primeval wildfire, advancing glacier, great drought turning valleys to desert, or a sudden sinkhole.',
+      primal:
+        'Great flood forcing tribes to migrate, spreading plague, long bitter winter, wildfire burning ancestral woods, volcanic ashfall, drought drying riverbeds, or a falling star omen.',
+      civilization:
+        'Earthquake shattering a capital, Great Plague along trade roads, devastating city fire, tsunami wrecking a harbor, prolonged famine, volcanic eruption burying a town, or a great river flood.',
+      intrigue:
+        'Red comet omen sparking panic, capital plague & quarantined gates, earthquake collapsing a royal palace, borderland wildfire sparking blame, storm sinking an invading fleet, or unnatural fog.',
+    }
+    return disasterByStage[stage]
+  }
+
+  if (card.value === JOKER) {
+    const jokerByStage: Record<StageId, string> = {
+      genesis:
+        'Choose any Genesis power (Earth, Water, Plant, or Feature) with a fantastical twist — e.g. floating mountains, a glowing crystal forest, a bottomless whirlpool, or an eternal aurora.',
+      primal:
+        'Choose any Primal power (Settlement, Tradition, Resource, or Skill) with a fantastical twist — e.g. a treetop spirit-village, sky-whale herding, enchanted silver ore, or beast-speech.',
+      civilization:
+        'Choose any Civilization power (Construction, Enlightenment, Expansion, or Diplomacy) with a fantastical twist — e.g. a floating arcane citadel, clockwork guilds, or an immortal treaty.',
+      intrigue:
+        'Choose any Intrigue power (Conflict, Cooperation, Scheme, or Myth) with a fantastical twist — e.g. a waking ancient dragon, a planar conspiracy, a legendary lost sword, or a shadow war.',
+    }
+    return jokerByStage[stage]
+  }
+
+  if (isFantasticalCard(card)) {
+    const fantasticalSuffix: Record<StageId, string> = {
+      genesis:
+        ' Add a classic fantasy twist: crystal peaks, glowing mushrooms, floating islands, whispering rivers, or volcanic obsidian spires.',
+      primal:
+        ' Add a classic fantasy twist: sacred ancient groves, runic stone circles, mithril or moonstone veins, or uncanny ancestral gifts.',
+      civilization:
+        ' Add a classic fantasy twist: grand mage towers, sky-bridges, alchemical academies, enchanted walls, or legendary royal pacts.',
+      intrigue:
+        ' Add a classic fantasy twist: cursed relics, dragon-riders, secret arcane cabals, prophetic omens, or haunted ruins.',
+    }
+    return `${baseExamples || ''}${fantasticalSuffix[stage]}`.trim()
+  }
+
+  return (
+    baseExamples ||
+    'Use this card as creative inspiration to add a classic, memorable landmark, event, or story hook to the world.'
+  )
+}

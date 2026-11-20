@@ -211,5 +211,68 @@
     "relationshipType": "rivalry",
     "creativePrompt": "What ritual marks distinguish the cultists? How do players discover the doppelganger impostors?",
     "exampleNarrative": "Behind polite court smiles, vacant black eyes watched the deliberations, waiting for the hour to unseal the abyssal gate."
+  },
+  {
+    "id": "int_sch_royal_assassination",
+    "name": "Assassination of a Monarch",
+    "description": "A poisoned goblet or dagger in the dark leaves the throne contested.",
+    "slotCategory": "feature",
+    "slotPriority": 84,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🗡️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Assassination of a Monarch reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Assassination of a Monarch, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_sch_thieves_guild",
+    "name": "Underground Thieves & Black Market",
+    "description": "Smugglers and informants build a hidden network beneath the capital streets.",
+    "slotCategory": "feature",
+    "slotPriority": 76,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🎭",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Underground Thieves & Black Market reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Underground Thieves & Black Market, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_sch_secret_alliance",
+    "name": "Secret Pact Between Rivals",
+    "description": "Two ostensible enemies sign a hidden treaty to carve up a third kingdom.",
+    "slotCategory": "feature",
+    "slotPriority": 78,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕯️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Secret Pact Between Rivals reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Secret Pact Between Rivals, leaving a lasting mark on the land and its chronicles."
   }
 ]

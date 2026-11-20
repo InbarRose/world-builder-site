@@ -214,5 +214,68 @@
     "relationshipType": "alliance",
     "creativePrompt": "What sacred relics did each champion carry to the pinnacle of the world to relight the fire?",
     "exampleNarrative": "Bound by a fellowship stronger than crowns, nine champions scaled the highest glacier to kindle the ancient sky-beacon."
+  },
+  {
+    "id": "int_coop_defense_pact",
+    "name": "Mutual Defense Pact",
+    "description": "Neighboring realms pledge armies to defend each other against a rising threat.",
+    "slotCategory": "feature",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🛡️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Mutual Defense Pact reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mutual Defense Pact, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_coop_merchant_guild",
+    "name": "Joint Merchant Guild & Fair",
+    "description": "Rival cities co-host a grand seasonal fair where goods, maps, and rumors flow.",
+    "slotCategory": "feature",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚖️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Joint Merchant Guild & Fair reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Joint Merchant Guild & Fair, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_coop_relief_aid",
+    "name": "Disaster Relief & Reconstruction",
+    "description": "Allies send grain, masons, and healers to rebuild a shattered region together.",
+    "slotCategory": "feature",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🤝",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Disaster Relief & Reconstruction reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Disaster Relief & Reconstruction, leaving a lasting mark on the land and its chronicles."
   }
 ]

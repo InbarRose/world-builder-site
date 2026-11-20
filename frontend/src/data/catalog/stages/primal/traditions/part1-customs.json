@@ -206,5 +206,68 @@
     "abilityGranted": "Astral Spirit Communion",
     "creativePrompt": "What prophecy was imparted during the first communion? What celestial sign heralds the trance?",
     "exampleNarrative": "As meteor dust drifted through the shrine, the shamans spoke in the ringing harmony of distant stars."
+  },
+  {
+    "id": "pri_trad_harvest_festival",
+    "name": "Autumn Harvest Festival",
+    "description": "Annual feasting, bonfires, and songs thanking the land for a full harvest.",
+    "slotCategory": "feature",
+    "slotPriority": 60,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🔥",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Autumn Harvest Festival reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Autumn Harvest Festival, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_trad_coming_of_age",
+    "name": "Trial of Coming of Age",
+    "description": "Youths must survive a solo journey or hunt in the wilds to earn an adult name.",
+    "slotCategory": "feature",
+    "slotPriority": 60,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏹",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Trial of Coming of Age reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Trial of Coming of Age, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_trad_ancestor_shrine",
+    "name": "Ancestor Worship & Burial Cairns",
+    "description": "Stones stacked on hilltops where elders seek counsel from honored forebears.",
+    "slotCategory": "feature",
+    "slotPriority": 62,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪨",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Ancestor Worship & Burial Cairns reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Ancestor Worship & Burial Cairns, leaving a lasting mark on the land and its chronicles."
   }
 ]

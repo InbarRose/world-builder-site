@@ -206,5 +206,47 @@
     "abilityGranted": "Resonant Elemental Singing",
     "creativePrompt": "Which primordial song hums in harmony with the heartbeat of the world?",
     "exampleNarrative": "As the singer raised their voice, stone flowed like warm wax, carving arches and terraces to the rhythm of the melody."
+  },
+  {
+    "id": "pri_skill_sailing",
+    "name": "Mastery of Boat-Making & Sailing",
+    "description": "Craft sturdy canoes and outriggers to fish deep waters and settle nearby islands.",
+    "slotCategory": "feature",
+    "slotPriority": 65,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⛵",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Mastery of Boat-Making & Sailing reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Mastery of Boat-Making & Sailing, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_skill_herbalism",
+    "name": "Herbal Medicine & Healing",
+    "description": "Deep knowledge of wild roots, poultices, and antidotes that save lives in winter.",
+    "slotCategory": "feature",
+    "slotPriority": 65,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌿",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "creativePrompt": "How does Herbal Medicine & Healing reshape the people, landmarks, or stories in this region?",
+    "exampleNarrative": "Word spread across the realm of Herbal Medicine & Healing, leaving a lasting mark on the land and its chronicles."
   }
 ]

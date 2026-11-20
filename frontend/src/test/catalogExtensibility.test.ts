@@ -190,4 +190,21 @@ describe('SOLID Multi-Shard Catalog, Graphic Sub-Leaf Schema & Asset Registry (A
       })
     ).toBe('forest-deciduous')
   })
+
+  it('Phase 50: guarantees at least 10 classic fantasy RPG presets for every (stage, suit) AND every stage Natural Disaster', () => {
+    const stages = ['genesis', 'primal', 'civilization', 'intrigue'] as const
+    const suits = ['♠', '♥', '♣', '♦'] as const
+
+    for (const stage of stages) {
+      // Every Ace Natural Disaster draw in every stage must have >= 10 presets
+      const disasterPresets = getActionPresetsForDraw(stage, '♠', false, true)
+      expect(disasterPresets.length).toBeGreaterThanOrEqual(10)
+
+      // Every suit draw (both standard and fantastical) in every stage must have >= 10 total presets
+      for (const suit of suits) {
+        const allSuitPresets = getActionPresetsForDraw(stage, suit, true, false)
+        expect(allSuitPresets.length).toBeGreaterThanOrEqual(10)
+      }
+    }
+  })
 })
