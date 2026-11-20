@@ -10,6 +10,8 @@ import {
   appendChimeInQuote,
   getCausalChainForRecord,
   inferCausalParentFromTile,
+  cloneMapState,
+  computeModifiedTileIds,
 } from '../engine/turnWorkbenchEngine'
 import { createDefaultTile } from '../engine/mapEngine'
 import { getActionPresetsForDraw } from '../engine/presets'
@@ -221,5 +223,30 @@ describe('Phase 23: Editable Turn Event & Map Stamp Workbench Engine (turnWorkbe
       linkedEventIds: ['rec_1', 'rec_2', 'rec_3'],
     }
     expect(inferCausalParentFromTile(tile22, history, 'rec_4')).toBe('rec_3')
+  })
+
+  it('Phase 45: tracks all modified tiles across any stage during a Universal Turn Map Session via computeModifiedTileIds', () => {
+    const baseMap = {
+      width: 4,
+      height: 4,
+      gridTopology: 'square' as const,
+      tiles: {
+        '0,0': createDefaultTile(0, 0, 'plains'),
+        '1,0': createDefaultTile(1, 0, 'plains'),
+        '2,0': createDefaultTile(2, 0, 'plains'),
+      },
+    }
+
+    const editedMap = cloneMapState(baseMap)
+    expect(computeModifiedTileIds(baseMap, editedMap)).toEqual([])
+
+    // Simulate a multi-consequence Civilization/Intrigue turn:
+    // (0,0) gets a river, (1,0) collapses into ruins, (2,0) gets claimed by a realm
+    editedMap.tiles['0,0'].hasRiver = true
+    editedMap.tiles['1,0'].overlay = 'ruins'
+    editedMap.tiles['2,0'].territoryId = 'ent_kingdom'
+
+    const diff = computeModifiedTileIds(baseMap, editedMap)
+    expect(diff.sort()).toEqual(['0,0', '1,0', '2,0'])
   })
 })
