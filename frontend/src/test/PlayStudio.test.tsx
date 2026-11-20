@@ -43,8 +43,14 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
 
-    // Now in session: breadcrumb trail with Main Menu button
+    // Now in session: defaults to full-viewport Modular Studio with centered map visible immediately
     expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
+    expect(screen.getByTestId('studio-dock-workspace')).toBeInTheDocument()
+
+    // Switch to Deck & Draw tab and draw a card
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
     const drawBtn = screen.getByRole('button', { name: /Draw Card \(54\)/i })
     await act(async () => {
       fireEvent.click(drawBtn)
@@ -357,9 +363,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(quickStartBtn)
     })
 
-    // Live session entered immediately
+    // Live session entered immediately in Modular Studio with docked Draw Card button
     expect(screen.getByRole('button', { name: /Main Menu/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Draw Card \(54\)/i })).toBeInTheDocument()
+    expect(screen.getByTestId('studio-dock-workspace')).toBeInTheDocument()
+    expect(screen.getByTestId('dock-draw-card-btn')).toBeInTheDocument()
   })
 
   it('supports TTRPG Campaign Bridge, Adventure Hooks, Session Zero Primer, and Creative Sparks', async () => {
@@ -372,6 +379,9 @@ describe('Play Studio & Rules Integration', () => {
     // Resume into live studio session
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
     // Open Adventure Hooks modal from header
@@ -439,6 +449,9 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
 
     // Draw card
     await act(async () => {
@@ -504,6 +517,9 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
 
     // Open Real-Time Table Peer Sync Modal
     const syncBtn = screen.getByRole('button', { name: /Real-Time Table Peer Synchronization/i })
@@ -559,6 +575,9 @@ describe('Play Studio & Rules Integration', () => {
     // Resume campaign
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
     // Verify Tabletop Speaker / Chime-In Bar is visible on the main card screen
@@ -645,6 +664,9 @@ describe('Play Studio & Rules Integration', () => {
     // Resume campaign
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
     // Draw a card in Studio Mode by clicking directly on the physical Card Deck!
@@ -735,6 +757,9 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
 
     // Draw a card and select a preset
     await act(async () => {
@@ -801,6 +826,9 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
 
     // Test Quick-Key '2' toggling the 2-Page World Overview Modal
     await act(async () => {
@@ -858,6 +886,9 @@ describe('Play Studio & Rules Integration', () => {
     // Resume campaign
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
     // 1. Open Session Checkpoint Vault via header button
@@ -934,6 +965,9 @@ describe('Play Studio & Rules Integration', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+    })
 
     // Switch to World Map tab
     await act(async () => {
@@ -976,5 +1010,34 @@ describe('Play Studio & Rules Integration', () => {
 
     // Verify Codex is loaded
     expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
+  })
+
+  it('Phases 47-48: defaults Studio launch to Modular Studio and supports Pre-Stage Guided Setup Ritual Modal', async () => {
+    render(
+      <BrowserRouter future={routerFuture}>
+        <Play />
+      </BrowserRouter>
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
+    })
+
+    // Phase 47: Modular Studio with centered Map Canvas is active immediately on launch
+    expect(screen.getByTestId('studio-dock-workspace')).toBeInTheDocument()
+    expect(screen.getByTestId('studio-center-canvas')).toBeInTheDocument()
+
+    // Phase 48: Open Pre-Stage Setup Ritual Modal
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('open-prestage-setup-btn'))
+    })
+    expect(screen.getByTestId('pre-stage-setup-modal')).toBeInTheDocument()
+    expect(screen.getByText(/Pre-Genesis Setup/i)).toBeInTheDocument()
+
+    // Close modal cleanly
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('prestage-done-btn'))
+    })
+    expect(screen.queryByTestId('pre-stage-setup-modal')).not.toBeInTheDocument()
   })
 })
