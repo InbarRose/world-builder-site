@@ -439,5 +439,8 @@ status: active
   - [x] Updated `Play.tsx` so Studio sessions launch directly into `Modular Studio` (`studio-dock-workspace`) with the World Map centered and immediately visible alongside docked Cards, Codex, and Chronicle.
 - [x] **Phase 48: Authentic Pre-Stage Guided Setup Rituals (`PreStageSetupModal.tsx`)** *(ADR-052)*
   - [x] Created `PreStageSetupModal.tsx` implementing the original ruleset's Pre-Genesis, Pre-Primal (quick Species creator + origin tile), Pre-Civilization (quick Society creator + parent species), and Pre-Intrigue (inline city/settlement naming checklist) rituals, triggered on era transitions and via `✨ Stage Setup`.
+- [x] **Phase 49: Live Browser Playtest & Visual Polish Pass** *(ADR-053)*
+  - [x] Verified all 7 core Studio flows live at `1440×900` with `0` console errors and `0` failed network requests.
+  - [x] Fixed `<main>` flex-height lock in `Play.tsx` so `StudioDockWorkspace` keeps Left Dock, Center Map, and Bottom Codex/Chronicle Dock cleanly inside `100vh` with zero page scrolling; fixed `Deck & Draw` left column vertical stretch (`items-start` + `sticky`); synced `turnDraft` reset on Redraw/Discard; and tightened `MapCanvas` toolbar padding to prevent wrapping.
 
 
