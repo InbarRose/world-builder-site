@@ -22,7 +22,10 @@ import {
   ShieldCheck,
   Unlock,
   Ruler,
+  HelpCircle,
+  Lightbulb,
 } from 'lucide-react'
+import { StudioHelpTutorialModal } from './StudioHelpTutorialModal'
 import {
   DrawRecord,
   FloraType,
@@ -588,8 +591,18 @@ export function MapCanvas({
   const [showPaletteDrawer, setShowPaletteDrawer] = useState(false)
   const [showGridDrawer, setShowGridDrawer] = useState(false)
   const [showLayersDrawer, setShowLayersDrawer] = useState(false)
+  const [showTutorialModal, setShowTutorialModal] = useState(false)
+  const [showHoverHints, setShowHoverHints] = useState(true)
+  const [activeHintText, setActiveHintText] = useState<string>(
+    'Safe Select & Inspect Mode [S] — Click any tile on the map to inspect and edit its 5 layers in the right panel without accidental painting.'
+  )
+  const [activeLayerHelp, setActiveLayerHelp] = useState<Record<string, boolean>>({})
   const [visibleLayers, setVisibleLayers] =
     useState<Record<MapLayerId, boolean>>(DEFAULT_MAP_LAYERS)
+
+  const toggleLayerHelp = (key: string) => {
+    setActiveLayerHelp((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
 
   const handleToggleLayer = (layerId: MapLayerId) => {
     setVisibleLayers((prev) => ({ ...prev, [layerId]: !prev[layerId] }))
@@ -1559,6 +1572,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-inspect-btn"
                   onClick={() => setActiveTool('inspect')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Select & Inspect Tool [S / Esc] — Click any tile on the map to focus it in the right-hand Inspector Dock and edit its 5 layers without accidental painting.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                     activeTool === 'inspect'
                       ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/40'
@@ -1577,6 +1595,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-brush-btn"
                   onClick={() => setActiveTool('brush')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Paint Brush Tool [B] — Click and drag across map tiles to paint the active palette biome or feature. Press [S] or [Esc] anytime to return to Safe Select.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'brush'
                       ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
@@ -1595,6 +1618,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-fill-btn"
                   onClick={() => setActiveTool('fill')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Bucket Fill Tool — Click a tile to flood-fill all connected tiles of the same terrain with your selected biome.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fill'
                       ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
@@ -1612,6 +1640,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-erase-btn"
                   onClick={() => setActiveTool('erase')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Erase Tool — Click or drag across tiles to clear them back to open ocean water.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'erase'
                       ? 'bg-destructive text-destructive-foreground shadow-sm'
@@ -1629,6 +1662,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-pan-btn"
                   onClick={() => setActiveTool('pan')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Pan Camera Tool [Spacebar + Drag] — Drag the map viewport to pan smoothly without selecting or modifying tiles.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'pan'
                       ? 'bg-primary text-primary-foreground shadow-sm'
@@ -1646,6 +1684,11 @@ export function MapCanvas({
                   type="button"
                   data-testid="tool-fog-btn"
                   onClick={() => setActiveTool('fog')}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Fog of War Tool — Shroud unexplored regions in mystery or reveal them as players explore the world.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'fog'
                       ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
@@ -1667,6 +1710,11 @@ export function MapCanvas({
                     setRulerStart(null)
                     setRulerHover(null)
                   }}
+                  onMouseEnter={() =>
+                    setActiveHintText(
+                      'Distance Ruler Tool — Click an origin tile and a destination tile to measure travel distances in leagues, miles, and march days.'
+                    )
+                  }
                   className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                     activeTool === 'ruler'
                       ? 'bg-amber-600 text-white shadow-sm'
@@ -1977,8 +2025,64 @@ export function MapCanvas({
               <Download className="h-3.5 w-3.5" />
               <span>SVG</span>
             </button>
+
+            {/* Studio Hover Hints Toggle & Help/Tutorial Manual Button */}
+            <button
+              type="button"
+              data-testid="toggle-hover-hints-btn"
+              onClick={() => setShowHoverHints((v) => !v)}
+              className={`px-2 py-1.5 rounded-md border text-xs font-semibold flex items-center gap-1 transition-colors ${
+                showHoverHints
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300'
+                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+              }`}
+              title="Toggle live contextual hover hints in the Studio Status Bar"
+            >
+              <Lightbulb className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Hints</span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="open-studio-tutorial-btn"
+              onClick={() => setShowTutorialModal(true)}
+              className="px-2.5 py-1.5 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+              title="Open World Building Studio Guide, 4-Stage Card Rules & Map Editor Tutorial"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Studio Guide</span>
+            </button>
           </div>
         </div>
+
+        {/* Photoshop / Warcraft 3 Editor Live Contextual Status & Hover-Hint Bar */}
+        {showHoverHints && (
+          <div
+            data-testid="studio-hover-hint-bar"
+            className="pt-1.5 border-t border-border/70 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="px-1.5 py-0.5 rounded bg-muted font-mono font-bold text-[10px] text-foreground shrink-0 uppercase">
+                Tool: {activeTool === 'inspect' ? 'Select [S]' : activeTool}
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono font-semibold text-[10px] shrink-0">
+                ({inspectedTile.col}, {inspectedTile.row}) ·{' '}
+                {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
+              </span>
+              <span className="text-foreground/90 truncate flex items-center gap-1">
+                <Lightbulb className="h-3 w-3 text-amber-500 shrink-0" />
+                <span className="truncate">{activeHintText}</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(true)}
+              className="text-[10px] font-semibold text-primary hover:underline shrink-0"
+            >
+              ❓ Full Tutorial &amp; 4-Stage Table →
+            </button>
+          </div>
+        )}
 
         {/* Safe Mode Indicator / Active Painting Warning Strip */}
         {!isViewOnly && activeTool !== 'inspect' && activeTool !== 'pan' && (
@@ -3526,6 +3630,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('all')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'All Layers View — Inspect and edit all 5 layers of the selected tile in a single docked panel.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'all'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3537,6 +3646,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('base')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 1 (Base & Hydrology) — Switch between Land and Water domains in 1 click, set base biomes, or toggle rivers and roads.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'base'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3548,6 +3662,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('relief')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 2 (Relief & Canopy) — Add mountains, hills, canyons, volcanoes, forests, jungles, or optional whiteboard marker symbols.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'relief'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3559,6 +3678,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('resources')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 3 (Resources & Wonders) — Stamp crops, iron/gold veins, mana springs, monoliths, or custom natural features.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'resources'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3570,6 +3694,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('settlements')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 4 (Settlements & Ruins) — Place camps, villages, towns, cities, or citadels, and upgrade or collapse them into explorable ruins.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'settlements'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3581,6 +3710,11 @@ export function MapCanvas({
                   <button
                     type="button"
                     onClick={() => setSidebarLayerTab('realm')}
+                    onMouseEnter={() =>
+                      setActiveHintText(
+                        'Layer 5 (Societies, Lore Notes & History) — Assign territory to a Species/Society, write Location Story & Lore Notes, and view card history.'
+                      )
+                    }
                     className={`flex-1 min-w-[50px] py-1 px-1.5 rounded text-[11px] font-bold text-center transition-colors ${
                       sidebarLayerTab === 'realm'
                         ? 'bg-background text-primary shadow-xs border border-primary/30'
@@ -3599,10 +3733,33 @@ export function MapCanvas({
                         <span>🌍</span>
                         <span>Layer 1: Base Terrain & Hydrology</span>
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-mono">
-                        {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {TERRAIN_PALETTE[inspectedTile.terrain]?.label || inspectedTile.terrain}
+                        </span>
+                        <button
+                          type="button"
+                          data-testid="layer-help-btn-1"
+                          onClick={() => toggleLayerHelp('layer1')}
+                          className="w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-bold flex items-center justify-center hover:bg-primary/25"
+                          title="Toggle Layer 1 Help Tip"
+                        >
+                          ?
+                        </button>
+                      </div>
                     </div>
+
+                    {activeLayerHelp.layer1 && (
+                      <div
+                        data-testid="layer-help-box-1"
+                        className="p-2 rounded bg-primary/5 border border-primary/20 text-[11px] text-muted-foreground"
+                      >
+                        <strong>Layer 1 Tip (1. Genesis — Earth &amp; Water):</strong> Click{' '}
+                        <strong>🌱 Land Domain</strong> or <strong>🌊 Water Domain</strong> to switch
+                        domains in 1 click. Clicking any base biome (like Grasslands) cleanly resets
+                        leftover trees or mountains so every click is a clean single change.
+                      </div>
+                    )}
 
                     {/* 1-Click Domain Quick Switch */}
                     <div className="flex items-center gap-1.5 p-1 rounded-md bg-background/80 border border-border">
@@ -4418,6 +4575,14 @@ export function MapCanvas({
           </div>
         </div>
       </div>
+
+      {/* Studio Help, Hints & 4-Stage World Building Tutorial Modal */}
+      <StudioHelpTutorialModal
+        isOpen={showTutorialModal}
+        onClose={() => setShowTutorialModal(false)}
+        showHoverHints={showHoverHints}
+        onToggleHoverHints={setShowHoverHints}
+      />
     </div>
   )
 }
