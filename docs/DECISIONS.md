@@ -1237,6 +1237,32 @@ status: active
 - **Consequences**:
   - Anchors all future planning, design reviews, and code changes permanently to the human creator's vision and the authentic *World Building* ruleset.
 
+---
+
+## ADR-046: Workspace Self-Audit Re-Alignment — Stage-Aware Genesis Palette, Uncrushed Modular Studio Map, Rich In-Dock Turn Workbench & Rubric Re-Alignment
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  A full self-audit of past commits, ADRs, and UI components against `docs/world_building_original_docs.md` and ADR-045 uncovered five concrete remaining misalignments:
+  1. **Double-Sidebar Map Squeeze**: The `Classic Studio` preset opened both a Left Dock (`390px`) and Right Dock (`340px`) on top of `MapCanvas`'s internal Tile Inspector, squeezing the center map canvas on laptop viewports.
+  2. **Palette Drawer Missed Genesis Filtering**: While Phase 36 hid Primal/Civilization layers in the Sidebar during Stage 1: Genesis, the Brush Palette Drawer still showed `3. Strategic Resources`, `4. Settlements & Roads`, and `6. Realm Borders` in Genesis, plus 4X jargon (`Strategic Resources`, `Harvestable Nodes`).
+  3. **Docked Cards Panel Lacked Quick Presets & Speaker Chime-In**: Players in `Modular Studio` had to switch away from the map to pick card presets or switch speakers.
+  4. **Rubric Drift Root Cause**: `docs/AUDIT_RUBRIC.md` benchmarked the app against 4X/grand-strategy games (*Crusader Kings III*), incentivizing unrequested video-game mechanics.
+- **Decision**:
+  1. **Complete Stage-Aware Genesis Palette & Storytelling Terminology (`MapCanvas.tsx`)**:
+     - Hid Primal/Civilization Palette Drawer tabs (`resources`, `settlements`, `borders`) during Stage 1: Genesis unless `+ Later Ages` is explicitly toggled on.
+     - Renamed `Strategic Resources` / `Harvestable Nodes` → `Natural Resources & Features` / `World Features`.
+  2. **Uncrushed Wide Center Map in Modular Studio (`workspaceLayoutEngine.ts`)**:
+     - Updated default `Classic Studio` preset to Left Dock (`340px`, Cards & Turn), wide unobstructed Center Map Canvas, and tabbed Bottom Drawer (`210px`, Codex & Chronicle) — eliminating the 3-sidebar squeeze while still allowing 1-click docking to Right, Left, Bottom, or Floating.
+  3. **Rich In-Dock Turn Workbench & Relative Era Context (`Play.tsx`)**:
+     - Added Speaker Chime-In pills, authentic relative era time context (`Pre-History · Tens of Thousands of Years Ago` for Genesis, `Early History · Thousands of Years Ago` for Primal, etc.), and Quick Stage/Suit Presets directly inside the docked `Cards & Turn` panel.
+  4. **Re-Aligned `docs/AUDIT_RUBRIC.md`**:
+     - Added the mandatory ADR-045 Re-Alignment Directive deprecating 4X video-game simulation criteria in favor of Ruleset Fidelity and Photoshop/Wonderdraft-caliber creative studio ergonomics.
+- **Consequences**:
+  - Brings the entire workspace, UI, and governance docs back into 100% alignment with the original *World Building* ruleset and human-experience-led design.
+
+
 
 
 

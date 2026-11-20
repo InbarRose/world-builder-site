@@ -417,5 +417,9 @@ status: active
 - [x] **Phase 39: Draggable Floating Windows, Tabbed Panel Stacks & Photoshop Shortcuts** *(ADR-044)*
   - [x] Added undockable, draggable, resizable floating studio windows over the canvas with click-to-focus z-index stacking and double-click roll-up.
   - [x] Wired `Modular Studio` tab (`tab-modular-studio`), top-bar `Workspace` preset & panel menu (`studio-workspace-menu-btn`), and Photoshop-style `Tab` hotkey to toggle Pure Canvas mode, verified by `workspaceLayoutEngine.test.tsx` (**227/227 tests passing across 33 suites**).
+- [x] **Phases 40–42: Workspace Self-Audit & Ruleset Re-Alignment** *(ADR-045 & ADR-046)*
+  - [x] **Phase 40**: Extended Stage-Aware Genesis Basic Geography filtering to the `MapCanvas` Brush Palette Drawer, replaced 4X jargon (`Strategic Resources` / `Harvestable Nodes` → `Natural Resources & Features` / `World Features`), and uncrushed the `Classic Studio` center map layout (Left: Cards `340px`, Center: Wide Map, Bottom: Codex & Chronicle).
+  - [x] **Phase 41**: Enriched the Modular Studio docked `Cards & Turn` panel with Speaker Chime-In pills, Quick Stage/Suit Presets for the drawn card, and authentic relative era time context per `docs/world_building_original_docs.md`.
+  - [x] **Phase 42**: Re-aligned `docs/AUDIT_RUBRIC.md` with ADR-045 (deprecating 4X computer-game simulation criteria in favor of Ruleset Fidelity and creative studio ergonomics) and verified full build + all 33 test suites (**227/227 tests passing**).
 
 
