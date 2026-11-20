@@ -125,9 +125,9 @@ export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schemat
 export interface ActiveMapPlacementConfig {
   itemLabel: string
   itemIcon: string
-  mode: 'move' | 'multi'
+  mode: 'move' | 'multi' | 'free'
   placedTileIds: string[]
-  onChangeMode: (mode: 'move' | 'multi') => void
+  onChangeMode: (mode: 'move' | 'multi' | 'free') => void
   onInteractTile: (tileId: string, isDrag: boolean) => void
   onUndoLastTile: () => void
   onLockIn: () => void
@@ -1262,7 +1262,7 @@ export function MapCanvas({
   }
 
   const handleTileMouseEnter = (col: number, row: number) => {
-    if (isDragging && activePlacement) {
+    if (isDragging && activePlacement && activePlacement.mode !== 'free') {
       const id = getTileId(col, row)
       setSelectedTileId(id)
       activePlacement.onInteractTile(id, true)
@@ -2668,7 +2668,7 @@ export function MapCanvas({
         )}
       </div>
 
-      {/* Interactive Draw-Phase Placement Banner (Drag to Move, Multi-Tile Paint & Lock In!) */}
+      {/* Universal Turn Map Session Banner (Drag to Move, Multi-Tile Paint, or Free Map Edit & Lock In!) */}
       {activePlacement && (
         <div
           data-testid="active-placement-bar"
@@ -2677,7 +2677,7 @@ export function MapCanvas({
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
               <span className="text-base">{activePlacement.itemIcon || '📍'}</span>
-              <span>Placing: {activePlacement.itemLabel}</span>
+              <span>Turn Map Changes: {activePlacement.itemLabel}</span>
             </span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-900 dark:text-emerald-200 font-mono text-[10px] font-bold">
               {activePlacement.placedTileIds.length}{' '}
@@ -2686,7 +2686,9 @@ export function MapCanvas({
             <span className="text-[11px] text-muted-foreground hidden md:inline">
               {activePlacement.mode === 'move'
                 ? 'Click or drag anywhere on the map to move your item'
-                : 'Click or drag across multiple tiles to paint a range, river, or forest'}
+                : activePlacement.mode === 'multi'
+                ? 'Click or drag across multiple tiles to paint a range, river, or forest'
+                : 'Use any map tool or sidebar layer to apply all consequences of this turn, then Lock In'}
             </span>
           </div>
 
@@ -2718,6 +2720,22 @@ export function MapCanvas({
               >
                 🖌️ Multi-Tile Range
               </button>
+              <button
+                type="button"
+                data-testid="placement-mode-free-btn"
+                onClick={() => {
+                  setIsViewOnly(false)
+                  activePlacement.onChangeMode('free')
+                }}
+                className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors ${
+                  activePlacement.mode === 'free'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Freely edit any combination of tiles, settlements, borders, rivers, or ruins for this turn"
+              >
+                ✏️ Free Map Edit
+              </button>
             </div>
 
             {activePlacement.mode === 'multi' && activePlacement.placedTileIds.length > 1 && (
@@ -2738,7 +2756,7 @@ export function MapCanvas({
               onClick={activePlacement.onLockIn}
               className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1"
             >
-              <span>🔒 Lock In Placement</span>
+              <span>🔒 Lock In Changes</span>
             </button>
             <button
               type="button"
@@ -3158,7 +3176,7 @@ export function MapCanvas({
                           type="button"
                           data-testid={`map-tile-${col}-${row}`}
                           onClick={(e) => {
-                            if (activePlacement && !e.altKey) {
+                            if (activePlacement && activePlacement.mode !== 'free' && !e.altKey) {
                               return
                             }
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
@@ -3170,7 +3188,7 @@ export function MapCanvas({
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
                               return
                             }
-                            if (activePlacement && !e.altKey) {
+                            if (activePlacement && activePlacement.mode !== 'free' && !e.altKey) {
                               setIsDragging(true)
                               setSelectedTileId(id)
                               activePlacement.onInteractTile(id, false)
@@ -3214,7 +3232,7 @@ export function MapCanvas({
                               : ''
                           }${tile.label ? ` — ${tile.label}` : ''}`}
                           className={`relative border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
-                            activePlacement
+                            activePlacement && activePlacement.mode !== 'free'
                               ? activePlacement.mode === 'move'
                                 ? 'cursor-move'
                                 : 'cursor-crosshair'

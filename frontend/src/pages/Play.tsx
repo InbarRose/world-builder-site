@@ -143,6 +143,7 @@ import {
   cloneMapState,
   repositionDraftOnMap,
   shouldDefaultToMultiTilePlacement,
+  computeModifiedTileIds,
 } from '../engine/turnWorkbenchEngine'
 import { SessionVaultModal } from '../components/SessionVaultModal'
 import {
@@ -288,7 +289,7 @@ export function Play() {
   const [showCardExamples, setShowCardExamples] = useState(false)
   const [showBotAssist, setShowBotAssist] = useState(false)
   const [isPlacementActive, setIsPlacementActive] = useState(false)
-  const [placementMode, setPlacementMode] = useState<'move' | 'multi'>('move')
+  const [placementMode, setPlacementMode] = useState<'move' | 'multi' | 'free'>('move')
   const [placementBaseMap, setPlacementBaseMap] = useState<MapState | null>(null)
   const [placementTileIds, setPlacementTileIds] = useState<string[]>([])
   const [placementReturnTab, setPlacementReturnTab] = useState<StudioTab | null>(null)
@@ -805,6 +806,10 @@ export function Play() {
       if (prevTile !== nextTile) {
         changedTileIds.push(tid)
       }
+    }
+
+    if (isPlacementActive && placementBaseMap) {
+      setPlacementTileIds(computeModifiedTileIds(placementBaseMap, newMap))
     }
 
     if (gameMode === 'studio' && turnPhase === 'action_select' && changedTileIds.length > 0) {

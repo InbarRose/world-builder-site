@@ -638,4 +638,46 @@ export function repositionDraftOnMap(
   return workingMap
 }
 
+function tileVisualSignature(tile: MapTile | undefined): string {
+  if (!tile) return ''
+  const slotSig = (tile.slots || [])
+    .map((s) => `${s.name}:${s.icon}:${s.category}`)
+    .join('|')
+  return [
+    tile.domain || '',
+    tile.terrain,
+    tile.relief || 'none',
+    tile.flora || 'none',
+    tile.overlay || 'none',
+    tile.hasRiver ? '1' : '0',
+    tile.hasRoad ? '1' : '0',
+    tile.territoryId || '',
+    tile.label || '',
+    tile.regionName || '',
+    tile.notes || '',
+    tile.cartographicSymbol || '',
+    tile.isUnexplored ? '1' : '0',
+    slotSig,
+  ].join('::')
+}
+
+/**
+ * Computes the exact set of tile IDs modified between a pre-turn baseMap snapshot
+ * and the current map state, enabling Universal Turn Map Change Sessions across
+ * all 4 stages (Genesis, Primal, Civilization, Intrigue, and Ace Disasters).
+ */
+export function computeModifiedTileIds(baseMap: MapState, currentMap: MapState): string[] {
+  const allIds = new Set<string>([
+    ...Object.keys(baseMap.tiles),
+    ...Object.keys(currentMap.tiles),
+  ])
+  const modified: string[] = []
+  for (const tid of allIds) {
+    if (tileVisualSignature(baseMap.tiles[tid]) !== tileVisualSignature(currentMap.tiles[tid])) {
+      modified.push(tid)
+    }
+  }
+  return modified
+}
+
 
