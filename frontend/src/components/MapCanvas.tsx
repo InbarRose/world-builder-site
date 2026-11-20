@@ -122,6 +122,18 @@ import {
 export type MapTool = 'inspect' | 'brush' | 'fill' | 'erase' | 'pan' | 'fog' | 'ruler'
 export type AtlasRenderStyle = 'tilt-25d' | 'flat-illustrated' | 'simple-schematic'
 
+export interface ActiveMapPlacementConfig {
+  itemLabel: string
+  itemIcon: string
+  mode: 'move' | 'multi'
+  placedTileIds: string[]
+  onChangeMode: (mode: 'move' | 'multi') => void
+  onInteractTile: (tileId: string, isDrag: boolean) => void
+  onUndoLastTile: () => void
+  onLockIn: () => void
+  onCancel: () => void
+}
+
 interface MapCanvasProps {
   map: MapState
   worldName: string
@@ -136,6 +148,7 @@ interface MapCanvasProps {
   onSelectEvent?: (moveId: number) => void
   onStampActiveTurnOnTile?: (tileId: string) => void
   activeTurnActionLabel?: string
+  activePlacement?: ActiveMapPlacementConfig | null
   onChange: (newMap: MapState) => void
 }
 
@@ -587,6 +600,7 @@ export function MapCanvas({
   onSelectEvent,
   onStampActiveTurnOnTile,
   activeTurnActionLabel,
+  activePlacement = null,
   onChange,
 }: MapCanvasProps) {
   const [isViewOnly, setIsViewOnly] = useState<boolean>(initialViewOnly)
@@ -1248,6 +1262,12 @@ export function MapCanvas({
   }
 
   const handleTileMouseEnter = (col: number, row: number) => {
+    if (isDragging && activePlacement) {
+      const id = getTileId(col, row)
+      setSelectedTileId(id)
+      activePlacement.onInteractTile(id, true)
+      return
+    }
     if (activeTool === 'ruler' && rulerStart) {
       setRulerHover({ col, row })
     }
@@ -2648,6 +2668,90 @@ export function MapCanvas({
         )}
       </div>
 
+      {/* Interactive Draw-Phase Placement Banner (Drag to Move, Multi-Tile Paint & Lock In!) */}
+      {activePlacement && (
+        <div
+          data-testid="active-placement-bar"
+          className="no-print card px-3 py-2 border-2 border-emerald-500/60 bg-emerald-500/10 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+              <span className="text-base">{activePlacement.itemIcon || '📍'}</span>
+              <span>Placing: {activePlacement.itemLabel}</span>
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-600/20 text-emerald-900 dark:text-emerald-200 font-mono text-[10px] font-bold">
+              {activePlacement.placedTileIds.length}{' '}
+              {activePlacement.placedTileIds.length === 1 ? 'tile' : 'tiles'}
+            </span>
+            <span className="text-[11px] text-muted-foreground hidden md:inline">
+              {activePlacement.mode === 'move'
+                ? 'Click or drag anywhere on the map to move your item'
+                : 'Click or drag across multiple tiles to paint a range, river, or forest'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="inline-flex rounded-md border border-border bg-background/90 p-0.5">
+              <button
+                type="button"
+                data-testid="placement-mode-move-btn"
+                onClick={() => activePlacement.onChangeMode('move')}
+                className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors ${
+                  activePlacement.mode === 'move'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Click or drag to move a single item to a new tile"
+              >
+                ✋ Move / Drag
+              </button>
+              <button
+                type="button"
+                data-testid="placement-mode-multi-btn"
+                onClick={() => activePlacement.onChangeMode('multi')}
+                className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors ${
+                  activePlacement.mode === 'multi'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Click or drag across multiple tiles (e.g. mountain range, river, forest)"
+              >
+                🖌️ Multi-Tile Range
+              </button>
+            </div>
+
+            {activePlacement.mode === 'multi' && activePlacement.placedTileIds.length > 1 && (
+              <button
+                type="button"
+                data-testid="placement-undo-tile-btn"
+                onClick={activePlacement.onUndoLastTile}
+                className="px-2 py-1 rounded-md border border-border bg-background hover:bg-muted text-[11px] font-semibold"
+                title="Remove the last painted tile"
+              >
+                ↩️ Undo Tile
+              </button>
+            )}
+
+            <button
+              type="button"
+              data-testid="lock-in-placement-btn"
+              onClick={activePlacement.onLockIn}
+              className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1"
+            >
+              <span>🔒 Lock In Placement</span>
+            </button>
+            <button
+              type="button"
+              data-testid="cancel-placement-btn"
+              onClick={activePlacement.onCancel}
+              className="px-2 py-1 rounded-md border border-border bg-background hover:bg-destructive/10 hover:text-destructive text-[11px] font-semibold transition-colors"
+            >
+              ✕ Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Grid & Tile Slot Inspector Split with Photoshop-style Left Vertical Tool Rail */}
       <div className="flex gap-2 items-start">
         {/* 48px Photoshop-style Left Vertical Tool Rail */}
@@ -3044,6 +3148,9 @@ export function MapCanvas({
                       const isRulerOrigin = Boolean(
                         rulerStart && rulerStart.col === col && rulerStart.row === row
                       )
+                      const isPlacementHighlighted = Boolean(
+                        activePlacement?.placedTileIds.includes(id)
+                      )
 
                       return (
                         <button
@@ -3051,6 +3158,9 @@ export function MapCanvas({
                           type="button"
                           data-testid={`map-tile-${col}-${row}`}
                           onClick={(e) => {
+                            if (activePlacement && !e.altKey) {
+                              return
+                            }
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
                               return
                             }
@@ -3058,6 +3168,12 @@ export function MapCanvas({
                           }}
                           onMouseDown={(e) => {
                             if (isSpacePressed || activeTool === 'pan' || e.button === 1) {
+                              return
+                            }
+                            if (activePlacement && !e.altKey) {
+                              setIsDragging(true)
+                              setSelectedTileId(id)
+                              activePlacement.onInteractTile(id, false)
                               return
                             }
                             if (!isViewOnly && (activeTool === 'brush' || activeTool === 'erase') && !e.altKey) {
@@ -3098,7 +3214,15 @@ export function MapCanvas({
                               : ''
                           }${tile.label ? ` — ${tile.label}` : ''}`}
                           className={`relative border border-black/15 flex flex-col items-center justify-center transition-transform overflow-hidden ${
-                            isSelected || isRulerOrigin
+                            activePlacement
+                              ? activePlacement.mode === 'move'
+                                ? 'cursor-move'
+                                : 'cursor-crosshair'
+                              : ''
+                          } ${
+                            isPlacementHighlighted
+                              ? 'ring-2 ring-emerald-400 z-20 scale-105 shadow-xl brightness-110'
+                              : isSelected || isRulerOrigin
                               ? 'ring-2 ring-white z-20 scale-110 shadow-xl'
                               : isInRulerPath
                               ? 'ring-2 ring-amber-400 z-20 brightness-110 shadow-md'
