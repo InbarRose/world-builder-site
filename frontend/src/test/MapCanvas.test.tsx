@@ -65,6 +65,7 @@ describe('MapCanvas Component', () => {
 
     render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
 
+    fireEvent.click(screen.getByTestId('tool-gm-prep-btn'))
     const fogBtn = screen.getByRole('button', { name: /Fog of War Tool/i })
     fireEvent.click(fogBtn)
 
@@ -316,6 +317,7 @@ describe('MapCanvas Component', () => {
 
     render(<RulerMap />)
 
+    fireEvent.click(screen.getByTestId('tool-gm-prep-btn'))
     const rulerBtn = screen.getByRole('button', { name: /Distance Ruler Tool/i })
     fireEvent.click(rulerBtn)
 
@@ -683,10 +685,10 @@ describe('MapCanvas Component', () => {
     fireEvent.click(screen.getByTestId('map-tile-1-1'))
     expect(screen.getByTestId('inspector-region-name-input')).toHaveValue('The Ironcrown Spine')
 
-    // 2. Select settlement tile (3, 3) and verify Resource Trade Synergy & Lifecycle
+    // 2. Select settlement tile (3, 3) and verify Nearby Resources & Storytelling Lifecycle
     fireEvent.click(screen.getByTestId('map-tile-3-3'))
     const lifecyclePanel = screen.getByTestId('inspector-settlement-lifecycle-panel')
-    expect(lifecyclePanel).toHaveTextContent(/Forge & Mining Hub/i)
+    expect(lifecyclePanel).toHaveTextContent(/Nearby Natural Resources:/i)
     expect(lifecyclePanel).toHaveTextContent(/Iron Mine/i)
 
     // Upgrade Village -> Market Town
@@ -750,6 +752,31 @@ describe('MapCanvas Component', () => {
 
     fireEvent.click(screen.getByTestId('close-studio-tutorial-btn'))
     expect(screen.queryByTestId('studio-help-tutorial-modal')).not.toBeInTheDocument()
+  })
+
+  it('Phase 36: focuses on basic geography during Stage 1 Genesis and allows toggling later-age layers', () => {
+    const map = createInitialMap(4, 4)
+    const handleChange = vi.fn()
+
+    render(
+      <MapCanvas
+        map={map}
+        worldName="Genesis Realm"
+        currentStage="genesis"
+        gameMode="studio"
+        onChange={handleChange}
+      />
+    )
+
+    // In Genesis Studio mode, basic geography focus banner is shown and Layer 4 Settlements is hidden by default
+    expect(screen.getByTestId('genesis-geography-focus-banner')).toHaveTextContent(
+      /Stage 1: Genesis/i
+    )
+    expect(screen.queryByText(/Layer 4: Settlements & Holdings/i)).not.toBeInTheDocument()
+
+    // Clicking "+ Later Ages" reveals Primal/Civilization layers on demand
+    fireEvent.click(screen.getByTestId('toggle-later-age-layers-btn'))
+    expect(screen.getByText(/Layer 4: Settlements & Holdings/i)).toBeInTheDocument()
   })
 })
 

@@ -200,7 +200,6 @@ import {
   setAmbientVolume,
   AmbientSoundscapeMood,
 } from '../engine/soundEngine'
-import { computeWorldStabilityIndex } from '../engine/narrativeEngine'
 
 type StudioTab = 'cards' | 'map' | 'timeline' | 'entities' | 'split'
 
@@ -229,7 +228,6 @@ export function Play() {
   const [flyoutEntityId, setFlyoutEntityId] = useState<string | null>(null)
   const [ambientMood, setAmbientMood] = useState<AmbientSoundscapeMood>(() => getAmbientMood())
   const [ambientVolume, setAmbientVolumeState] = useState<number>(() => getAmbientVolume())
-  const worldStability = useMemo(() => computeWorldStabilityIndex(world), [world])
 
   // 3.1 Companion Mode Optional Toggleable Panels (All Collapsible & Independent)
   const [companionShowEventLog, setCompanionShowEventLog] = useState(false)
@@ -1953,15 +1951,6 @@ export function Play() {
             <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-mono font-medium">
               Turn #{drawHistory.length}
             </span>
-
-            {/* Stability Index */}
-            <span
-              className={`hidden md:inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium border ${worldStability.badgeColor}`}
-              title={`World Stability Index: ${worldStability.score}/100 (${worldStability.status})`}
-            >
-              <span>{worldStability.icon}</span>
-              <span>Stability {worldStability.score}%</span>
-            </span>
           </div>
 
           {/* ZONE 2 (Center): Play Studio Mode Segment */}
@@ -1988,7 +1977,7 @@ export function Play() {
               }`}
               title="3.2 Full Studio: Complete turn orchestration"
             >
-              <span>🏆 Studio</span>
+              <span>🗺️ Studio</span>
             </button>
             <button
               type="button"
@@ -2566,17 +2555,6 @@ export function Play() {
             )}
 
             <div className="ml-auto flex items-center gap-2 shrink-0">
-              {/* Geopolitical Stability / World Tension Index */}
-              <div
-                className={`px-2.5 py-1 rounded-lg border text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all ${worldStability.badgeColor}`}
-                title={`${worldStability.summary} (Score: ${worldStability.score}/100 • Alliances: ${worldStability.breakdown.alliancesCount}, Conflicts: ${worldStability.breakdown.conflictsCount}, Cataclysms: ${worldStability.breakdown.cataclysmsCount}, Settlements: ${worldStability.breakdown.settlementCount})`}
-                aria-label={`World Stability Index: ${worldStability.status}`}
-              >
-                <span>{worldStability.icon}</span>
-                <span className="font-bold hidden md:inline">{worldStability.status}</span>
-                <span className="text-[10px] font-mono opacity-85">({worldStability.score}%)</span>
-              </div>
-
               <button
                 type="button"
                 onClick={() => setShowAgesModal(true)}
@@ -2678,16 +2656,6 @@ export function Play() {
                   </button>
                 )
               })}
-            </div>
-
-            {/* Geopolitical Stability Index in Companion Mode */}
-            <div
-              className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold flex items-center gap-1 shrink-0 ${worldStability.badgeColor}`}
-              title={worldStability.summary}
-            >
-              <span>{worldStability.icon}</span>
-              <span className="font-bold">{worldStability.status}</span>
-              <span className="text-[10px] font-mono opacity-85">({worldStability.score}%)</span>
             </div>
 
             {/* Optional Toggleable Panels (Off by default, available whenever the user wants) */}
@@ -3041,6 +3009,8 @@ export function Play() {
               <MapCanvas
                 map={world.map}
                 worldName={world.name}
+                currentStage={world.currentStage}
+                gameMode={gameMode}
                 drawHistory={world.drawHistory}
                 entities={world.entities}
                 selectedTileId={selectedTileId}
@@ -3622,10 +3592,7 @@ export function Play() {
                                   </div>
                                   <div>
                                     <div className="font-bold flex items-center gap-1.5">
-                                      <span>Recommended: {botRecommendation.preset.icon} {botRecommendation.preset.name}</span>
-                                      <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[10px] font-mono">
-                                        Score: {botRecommendation.evaluation.totalScore}
-                                      </span>
+                                      <span>Story Suggestion: {botRecommendation.preset.icon} {botRecommendation.preset.name}</span>
                                     </div>
                                     <div className="text-[11px] text-muted-foreground">
                                       Weighted by world history, tile terrain, and {activePlayer?.name || 'Bot'} personality
@@ -5085,6 +5052,8 @@ export function Play() {
                     <MapCanvas
                       map={world.map}
                       worldName={world.name}
+                      currentStage={world.currentStage}
+                      gameMode={gameMode}
                       drawHistory={world.drawHistory}
                       entities={world.entities}
                       selectedTileId={selectedTileId}
@@ -5173,6 +5142,8 @@ export function Play() {
               <MapCanvas
                 map={world.map}
                 worldName={world.name}
+                currentStage={world.currentStage}
+                gameMode={gameMode}
                 drawHistory={world.drawHistory}
                 entities={world.entities}
                 selectedTileId={selectedTileId}
