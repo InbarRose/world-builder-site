@@ -247,5 +247,45 @@
     "abilityGranted": "Sky-Citadel & Bronze Colossus",
     "creativePrompt": "How do citizens travel to the floating citadel? What power animates the thousand-foot guardian colossus?",
     "exampleNarrative": "Suspended among the clouds on anti-gravitic lodestones, the city hovered silently while its bronze guardian watched the world."
+  },
+  {
+    "id": "civ_con_stone_bridge",
+    "name": "Great Stone Bridge & King Road",
+    "description": "Arched stone spans and paved highways linking distant cities across rivers.",
+    "slotCategory": "structure",
+    "slotPriority": 76,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌉",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "hasRoad": true
+  },
+  {
+    "id": "civ_con_border_castle",
+    "name": "Walled Border Castle",
+    "description": "A towering stone keep guarding a strategic mountain pass or river crossing.",
+    "slotCategory": "structure",
+    "slotPriority": 82,
+    "graphic": {
+      "assetId": "castle-citadel",
+      "fallbackAssetId": null,
+      "glyph": "🏰",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "castle"
   }
 ]

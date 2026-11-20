@@ -71,6 +71,7 @@ import {
   calculateEpochYear,
   getCardDisplay,
   getNextStage,
+  getPhaseRelevantExamples,
   isFantasticalCard,
   loadCardColors,
   loadPowerData,
@@ -4187,7 +4188,8 @@ export function Play() {
                           </div>
                           {showCardExamples && (
                             <p className="text-muted-foreground leading-relaxed pt-1 border-t border-border/50">
-                              <strong className="text-foreground">Inspiration:</strong> {powerData.examples}
+                              <strong className="text-foreground">Classic Examples ({currentStageData?.name}):</strong>{' '}
+                              {getPhaseRelevantExamples(currentStage, drawnCard, powerData.examples)}
                             </p>
                           )}
                         </div>

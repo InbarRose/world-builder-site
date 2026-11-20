@@ -219,5 +219,65 @@
     "abilityGranted": "Planar Colonization Bridge",
     "creativePrompt": "What miraculous vegetation and strange skies await colonists beyond the portal threshold?",
     "exampleNarrative": "Through the shimmering gateway of silver light, pioneer skyships sailed onto the violet shores of the floating moonlet."
+  },
+  {
+    "id": "civ_exp_port_city",
+    "name": "Founding a Busy Trade Port",
+    "description": "Settlers establish a fortified harbor city to control coastal shipping lanes.",
+    "slotCategory": "settlement",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": "city-walled",
+      "fallbackAssetId": null,
+      "glyph": "⚓",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "city"
+  },
+  {
+    "id": "civ_exp_frontier_outpost",
+    "name": "Frontier Garrison & Watchtower",
+    "description": "Soldiers and pioneers claim untamed borderlands with a timber-and-stone fort.",
+    "slotCategory": "structure",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": "castle-citadel",
+      "fallbackAssetId": null,
+      "glyph": "🗼",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "castle"
+  },
+  {
+    "id": "civ_exp_kingdom_unification",
+    "name": "Unification of Rival Towns",
+    "description": "Neighboring towns swear fealty under one crown, forming a unified kingdom.",
+    "slotCategory": "settlement",
+    "slotPriority": 84,
+    "graphic": {
+      "assetId": "city-walled",
+      "fallbackAssetId": null,
+      "glyph": "👑",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "capital"
   }
 ]

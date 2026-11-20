@@ -20,6 +20,7 @@
     }
   ],
   "disastersShards": [
-    "./disasters/part1-cataclysms.json"
+    "./disasters/part1-cataclysms.json",
+    "./disasters/part2-classic-disasters.json"
   ]
 }

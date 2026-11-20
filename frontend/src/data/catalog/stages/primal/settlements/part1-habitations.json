@@ -207,5 +207,65 @@
     "overlayChange": "capital",
     "creativePrompt": "What miraculous celestial ward protects this glowing sanctuary from mortal harm?",
     "exampleNarrative": "Alabaster spires arose overnight, glowing with the eternal warmth of an unbroken dawn."
+  },
+  {
+    "id": "pri_set_fishing_village",
+    "name": "Coastal Fishing Village",
+    "description": "Stilt huts and wooden piers clustered along a sheltered cove.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "village-hamlet",
+      "fallbackAssetId": null,
+      "glyph": "🏡",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
+  },
+  {
+    "id": "pri_set_mountain_hamlet",
+    "name": "Mountain Valley Hamlet",
+    "description": "Stone cottages tucked into a high pass sheltered from winter winds.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": "village-hamlet",
+      "fallbackAssetId": null,
+      "glyph": "🏘️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
+  },
+  {
+    "id": "pri_set_nomad_camp",
+    "name": "Seasonal Nomad Encampment",
+    "description": "Painted tents pitched along a migration trail near fresh water.",
+    "slotCategory": "settlement",
+    "slotPriority": 65,
+    "graphic": {
+      "assetId": "camp-nomad",
+      "fallbackAssetId": null,
+      "glyph": "🏕️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
   }
 ]

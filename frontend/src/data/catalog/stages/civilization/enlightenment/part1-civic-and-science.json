@@ -206,5 +206,62 @@
     "abilityGranted": "Planar Arcane Synthesis",
     "creativePrompt": "What impending planar convergence was calculated by the astronomical mages?",
     "exampleNarrative": "Prisms of starlight split into raw arcane equations upon the observatory floor, calculating the movements of the gods."
+  },
+  {
+    "id": "civ_enl_written_law",
+    "name": "Written Code of Laws",
+    "description": "Carved stone tablets establishing courts, property rights, and civic order.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚖️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_enl_grand_library",
+    "name": "Grand Library & Scholars Guild",
+    "description": "A famed center of learning attracting scribes, cartographers, and philosophers.",
+    "slotCategory": "structure",
+    "slotPriority": 75,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "📚",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_enl_steel_forging",
+    "name": "Fine Steel & Armor Craft",
+    "description": "Master smiths perfect tempered steel blades, sturdy shields, and siege gear.",
+    "slotCategory": "feature",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚒️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

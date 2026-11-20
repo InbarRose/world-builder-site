@@ -206,5 +206,62 @@
     "abilityGranted": "Sun-Mithril & Sky-Mounts",
     "creativePrompt": "How light is solar mithril? How does a champion earn the loyalty of a hatched sky-beast?",
     "exampleNarrative": "Forged from feathers of fallen stars, the glowing mithril mail was light as linen yet turned aside the sharpest lance."
+  },
+  {
+    "id": "pri_res_iron_vein",
+    "name": "Surface Iron Ore Deposit",
+    "description": "Rich veins of iron exposed along rocky foothills, ready for early smelting.",
+    "slotCategory": "resource",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⛏️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_res_wild_horses",
+    "name": "Domesticated Herds & Horses",
+    "description": "Swift plains mounts and hardy livestock tamed for travel, milk, and wool.",
+    "slotCategory": "resource",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🐎",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_res_grain_fields",
+    "name": "Cultivated Grain & Barley",
+    "description": "Hardy staple crops grown along fertile riverbanks to feed growing villages.",
+    "slotCategory": "resource",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌾",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]
