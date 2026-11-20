@@ -1131,6 +1131,33 @@ status: active
   - Gives new and returning players immediate, self-serve guidance via hover hints, inline `?` help cards, and the 4-stage tutorial modal.
   - All 222 unit and integration tests passing across 32 test suites.
 
+---
+
+## ADR-041: Mostly-Bare Pre-Genesis Starting Map Generation
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  The creator inspected an exported Turn-0 world (`vales-of-valdris.world.json`) and noted:
+  > *"the starting map that was generated had too much detail. it should be mostly bare. just a few things to get the players started."*
+  - In `vales-of-valdris.world.json` (`drawHistory: []`), `generateNaturalWorld` had populated almost every land tile with Whittaker climate biomes (`tundra`, `hills`, `mountain-snow`, `volcano`, `forest`, `jungle`, `canyon`, `swamp`), pre-seeded 25–35% of land tiles with resource slots (`Deep Gold Vein ⛏️`, `Iron Ore Quarry 🪨`, `Golden Grain Fields 🌾`, `Ancient Timber Grove 🌲`), and pre-seeded 2 settlements (`First Hearth Sanctuary 🏡`, `Elderwood Encampment 🏕️`).
+  - Per the original game design (`docs/world_building_original_docs.md`, *Setup / Pre-Genesis*):
+    > *"Before starting this stage, make sure you already have some basic terrain features such as coastlines for your continent(s) and maybe a river, or a mountain or two."*
+  - In *World Building*, the players themselves create the world's mountains, rivers, forests, and landmarks during **1. Genesis** and found its settlements and resources during **2. Primal** and **3. Civilization**.
+- **Decision**:
+  1. **Natural Coastlines with Mostly-Bare Open Landmasses (`proceduralWorldEngine.ts`)**:
+     - Preserved the 6 natural fractal coastline presets (`continent`, `highlands`, `inland-sea`, `archipelago`, `pangaea`, `twin-continents`) so each landmass still has an organic, interesting shoreline.
+     - Changed default land tile generation so **90%+ of land tiles** start as clean, open `plains` (`relief: 'none'`, `flora: 'none'`, `slots: []`, `overlay: 'none'`) ready for players to shape during Stage 1: Genesis.
+  2. **Sparse Pre-Genesis Starter Features Only**:
+     - Seeds only **`1–4` mountain tiles** at the highest interior elevation ridge (`terrain: 'mountain'`, `relief: 'mountain'`).
+     - Seeds only **`1–2` forest tiles** (`terrain: 'forest'`, `flora: 'forest'`) as a subtle starting landmark.
+     - Traces **`1` gentle downhill river** (`traceProceduralDownhillRivers(..., 1)`) from a starter peak to the sea.
+     - Seeds **zero** pre-existing resource slots and **zero** pre-existing settlements on Turn 0.
+- **Consequences**:
+  - Turn-0 starting maps now match the authentic Pre-Genesis tabletop setup: clean, inviting continents and coastlines with just a river, a mountain or two, and a small grove to inspire the table's first card draws.
+  - All 6 unit tests in `proceduralWorldEngine.test.ts` and all 222 tests across 32 suites pass.
+
+
 
 
 
