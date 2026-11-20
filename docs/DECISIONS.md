@@ -1287,6 +1287,27 @@ status: active
 - **Consequences**:
   - Eliminates visual overwhelm after drawing a card, makes drawing from the deck tactile and intuitive, and ensures Turn-0 maps are truly bare canvases ready for Stage 1: Genesis.
 
+---
+
+## ADR-048: Interactive Draw-Phase Map Placement — Drag-to-Move, Multi-Tile Painting (Ranges / Rivers) & Lock-In Mode
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Previously, clicking **"📍 Place on Map"** during the card draw phase silently stamped the feature onto the center default coordinate `(10,6)` without opening the map, moving the item, or letting the player paint multi-tile features like rivers or mountain ranges.
+- **Decision**:
+  1. **Clean Snapshot & Repositioning Engine (`turnWorkbenchEngine.ts`)**:
+     - Added `cloneMapState`, `shouldDefaultToMultiTilePlacement`, and `repositionDraftOnMap(baseMap, targetTileIds, draft, recordId, preset)`.
+     - Re-deriving placement from a clean pre-placement snapshot ensures dragging a single item from tile A → tile B cleanly restores tile A with zero leftover artifacts, and cancelling restores the exact original map.
+  2. **Interactive Placement Mode on MapCanvas (`MapCanvas.tsx`, `Play.tsx`)**:
+     - Pressing **`📍 Place on Map`** (`place-on-map-btn`) now immediately brings up the **World Map** with the **`active-placement-bar`** banner at the top.
+     - **`✋ Move / Drag` Mode** (`placement-mode-move-btn`): Click or drag anywhere on the map to smoothly reposition your item.
+     - **`🖌️ Multi-Tile Range` Mode** (`placement-mode-multi-btn`): Click or drag across multiple tiles to draw a mountain range, river, forest, or coastline (auto-selected for multi-tile features), with **`↩️ Undo Tile`** support.
+     - **`🔒 Lock In Placement`** (`lock-in-placement-btn`): Commits all placed tile coordinates into the active turn record and returns cleanly to the Turn card. **`✕ Cancel`** restores the pre-placement map.
+- **Consequences**:
+  - Makes placing card features onto the world map feel immediate, spatial, and tactile—just like drawing on a shared tabletop whiteboard.
+
+
 
 
 

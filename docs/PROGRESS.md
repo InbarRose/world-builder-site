@@ -426,5 +426,8 @@ status: active
   - [x] Made the physical Card Deck (`clickable-card-deck`) and deck stack bar directly clickable to draw cards in `Play.tsx`.
   - [x] Replaced the post-draw panel explosion with a focused 2-tab flow (`✨ 1. Pick a Preset` | `✍️ 2. Write / Place on Map`) plus collapsible `💡 Examples` and `🤖 Bot Assist` toggles.
   - [x] Simplified `TimelinePanel.tsx` header by tucking Copy/Export/Print/Clear into a compact `⋯ More` popover.
+- [x] **Phase 44: Interactive Draw-Phase Map Placement — Drag-to-Move, Multi-Tile Painting & Lock-In Mode** *(ADR-048)*
+  - [x] Added `cloneMapState`, `shouldDefaultToMultiTilePlacement`, and `repositionDraftOnMap` in `turnWorkbenchEngine.ts` so moving or cancelling placements cleanly restores previous tiles with zero leftover artifacts.
+  - [x] Wired **`📍 Place on Map`** in `Play.tsx` to immediately bring up the World Map in Interactive Placement Mode (`active-placement-bar` in `MapCanvas.tsx`) with **`✋ Move / Drag`**, **`🖌️ Multi-Tile Range`** (for rivers, mountain ranges, forests), **`↩️ Undo Tile`**, **`🔒 Lock In Placement`**, and **`✕ Cancel`**.
 
 
