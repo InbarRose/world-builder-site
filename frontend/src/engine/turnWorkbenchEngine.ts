@@ -33,6 +33,7 @@ export interface TurnActionDraft {
   icon: string
   slotCategory: TileSlotCategory
   slotPriority: number
+  domainChange?: 'land' | 'water'
   terrainChange?: TerrainType
   reliefChange?: ReliefType
   floraChange?: FloraType
@@ -40,6 +41,7 @@ export interface TurnActionDraft {
   cartographicSymbol?: string
   hasRiver?: boolean
   hasRoad?: boolean
+  territoryId?: string
   note: string
   placedTileIds: string[]
 }
@@ -110,6 +112,33 @@ export const WORKBENCH_SLOT_CATEGORIES: {
   { id: 'structure', label: 'Structure', icon: '🏰' },
   { id: 'resource', label: 'Resource', icon: '💎' },
   { id: 'myth', label: 'Myth / Wonder', icon: '✨' },
+]
+
+export const WORKBENCH_RELIEF_OPTIONS: {
+  id: ReliefType | ''
+  label: string
+  icon: string
+}[] = [
+  { id: '', label: 'Keep Relief', icon: '🎯' },
+  { id: 'none', label: 'Flat / Clear', icon: '➖' },
+  { id: 'hills', label: 'Hills', icon: '⛰️' },
+  { id: 'mountain', label: 'Mountain', icon: '🏔️' },
+  { id: 'mountain-snow', label: 'Snow Peak', icon: '❄️' },
+  { id: 'canyon', label: 'Canyon', icon: '🏜️' },
+  { id: 'volcano', label: 'Volcano', icon: '🌋' },
+]
+
+export const WORKBENCH_FLORA_OPTIONS: {
+  id: FloraType | ''
+  label: string
+  icon: string
+}[] = [
+  { id: '', label: 'Keep Canopy', icon: '🎯' },
+  { id: 'none', label: 'Clear Canopy', icon: '➖' },
+  { id: 'forest', label: 'Forest', icon: '🌲' },
+  { id: 'jungle', label: 'Jungle', icon: '🌴' },
+  { id: 'marsh', label: 'Marshland', icon: '🌾' },
+  { id: 'oasis', label: 'Oasis', icon: '🏝️' },
 ]
 
 const STAGE_DEFAULT_CUSTOM_META: Record<
@@ -254,21 +283,62 @@ export function stampDraftOnMapTile(
   let updated: MapTile = {
     ...tile,
     slots: [...(tile.slots || [])],
+    linkedEntityIds: [...(tile.linkedEntityIds || [])],
   }
 
-  if (draft.terrainChange) {
-    updated.terrain = draft.terrainChange
-    updated.domain =
-      draft.terrainChange === 'ocean' || draft.terrainChange === 'water'
-        ? 'water'
-        : 'land'
+  // 1. Domain & Base Terrain Clean Single-Change Hygiene
+  const isWaterStamp =
+    draft.domainChange === 'water' ||
+    draft.terrainChange === 'ocean' ||
+    draft.terrainChange === 'water'
+
+  if (isWaterStamp) {
+    updated.domain = 'water'
+    updated.terrain = draft.terrainChange === 'ocean' ? 'ocean' : 'water'
+    updated.relief = 'none'
+    updated.flora = 'none'
+    updated.hasRoad = false
+    updated.cartographicSymbol = draft.cartographicSymbol || undefined
+  } else if (draft.domainChange === 'land' || draft.terrainChange) {
+    updated.domain = 'land'
+    const nextTerrain =
+      draft.terrainChange ||
+      (updated.terrain === 'ocean' || updated.terrain === 'water'
+        ? 'plains'
+        : updated.terrain)
+    updated.terrain = nextTerrain
+
+    // When changing base terrain to plains/grassland or switching from water to land,
+    // cleanly reset leftover relief/flora/symbols unless explicitly requested by the draft
+    if (
+      nextTerrain === 'plains' ||
+      nextTerrain === 'desert' ||
+      nextTerrain === 'tundra' ||
+      draft.domainChange === 'land'
+    ) {
+      updated.relief = draft.reliefChange || 'none'
+      updated.flora = draft.floraChange || 'none'
+      updated.cartographicSymbol = draft.cartographicSymbol || undefined
+    }
   }
-  if (draft.reliefChange) updated.relief = draft.reliefChange
-  if (draft.floraChange) updated.flora = draft.floraChange
-  if (draft.overlayChange) updated.overlay = draft.overlayChange
-  if (draft.cartographicSymbol) updated.cartographicSymbol = draft.cartographicSymbol
+
+  // 2. Layer 2: Explicit Relief, Flora & Trope Overrides
+  if (draft.reliefChange !== undefined) updated.relief = draft.reliefChange
+  if (draft.floraChange !== undefined) updated.flora = draft.floraChange
+  if (draft.overlayChange !== undefined) updated.overlay = draft.overlayChange
+  if (draft.cartographicSymbol !== undefined) {
+    updated.cartographicSymbol = draft.cartographicSymbol || undefined
+  }
   if (draft.hasRiver) updated.hasRiver = true
-  if (draft.hasRoad) updated.hasRoad = true
+  if (draft.hasRoad && updated.domain !== 'water') updated.hasRoad = true
+
+  // 3. Layer 5: Faction / Realm Claim Override
+  if (draft.territoryId !== undefined) {
+    updated.territoryId = draft.territoryId || undefined
+    if (draft.territoryId && !updated.linkedEntityIds.includes(draft.territoryId)) {
+      updated.linkedEntityIds.push(draft.territoryId)
+    }
+  }
 
   const slotName =
     draft.featureName.trim() || draft.actionTitle.trim() || 'World Feature'
