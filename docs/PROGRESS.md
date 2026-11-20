@@ -399,4 +399,24 @@ status: active
 - [x] Implement Phase 34: Removal of 4X Computer-Game Numeric Stats, Authentic Location Story & Lore Notes Panel, Interactive Studio Tutorial, and WC3/Photoshop Hover-Hint Status Bar (ADR-040).
 - [x] Implement Phase 35: Mostly-Bare Pre-Genesis Starting Map Generation (ADR-041).
 
+---
+
+## Upcoming Backlog: Storytelling Core & Full-Viewport Design Studio
+
+- [ ] **Phase 36: De-Gamification & Authentic Stage-Aware Genesis Geography** *(Planned ADR-042)*
+  - [ ] Remove numeric `World Stability Index (Stability XX%)` badges from `Play.tsx` header and sub-navigation.
+  - [ ] Make Map Editor & Sidebar stage-aware: during **Stage 1: Genesis**, focus on **Basic Geography** (`Coastlines & Terrain`, `Relief & Water`, `Plants & Flora`, `Landmarks & Features`) and collapse Primal/Civilization layers behind a `Show Later-Age Layers` toggle (always open in Free-Create).
+  - [ ] Simplify Layer 4 Settlements (replace `⬆️ Upgrade Holding` & Trade Archetypes with a clean Settlement Type picker + Ruins lore toggle) and demote Dijkstra `Project Realm Borders` in favor of direct manual Territory/Region painting.
+  - [ ] Rename `🏆 Studio` → `🗺️ Studio`, show `🤖 Bot Pick` / weight tuners only when a Bot seat is active, and move `Fog / Reveal` & `Distance Ruler` into a collapsible `GM / RPG Prep` submenu.
+- [ ] **Phase 37: Full-Viewport Shell & Top Real-Estate Reclamation** *(Planned ADR-043)*
+  - [ ] Lock active Play Studio to `100vw × 100vh` (`h-screen overflow-hidden`, zero page scrolling) by hiding the tall global site navbar/footer in `Layout.tsx` during active Studio sessions.
+  - [ ] Consolidate global nav, realm header, mode switcher, and studio menus into a single **38px Photoshop-style Top Menu Bar** (reclaiming ~220px of vertical space).
+  - [ ] Move MapCanvas tools (`Select`, `Brush`, `Fill`, `Erase`, `Pan`, `Palette`, `Layers`, `Undo/Redo`, `GM Tools`) into a **48px Vertical Left Tool Rail** beside the canvas, with a **24px Slim Bottom Status & Hover-Hint Bar**.
+- [ ] **Phase 38: Modular Dockable & Resizable Side Panels (`WorkspaceDockEngine`)** *(Planned ADR-044)*
+  - [ ] Implement `workspaceLayoutEngine.ts` with `localStorage` persistence for modular panels (`Cards & Turn`, `Tile Inspector`, `Codex`, `Chronicle / History`), dock slots (`left`, `right`, `bottom`, `floating`, `hidden`), resizable splitters, and 1-click Workspace Presets (`Classic Studio`, `Pure Canvas`, `Card Focus`, `Lore & Chronicle`).
+  - [ ] Keep the World Map centered and always visible while panels dock on the sides/bottom with independent internal scrolling and 1-click dock-repositioning controls.
+- [ ] **Phase 39: Draggable Floating Windows, Tabbed Panel Stacks & Photoshop Shortcuts** *(Planned ADR-045)*
+  - [ ] Support undocking any Studio panel into a draggable, resizable floating window over the canvas with click-to-focus stacking and double-click roll-up.
+  - [ ] Support tabbed panel stacks within docks and Photoshop-style workspace hotkeys (`Tab` to toggle all panels for pure canvas view, `F1–F4` to toggle Cards/Inspector/Codex/History).
+
 
