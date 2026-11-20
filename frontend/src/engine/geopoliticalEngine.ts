@@ -762,3 +762,221 @@ export function getProvinceChronicleHistory(
     return false
   })
 }
+
+const SETTLEMENT_UPGRADE_LADDER: Record<
+  string,
+  { nextOverlay: MapTile['overlay']; label: string; icon: string; priority: number }
+> = {
+  none: { nextOverlay: 'settlement', label: 'Farming Village', icon: '🏡', priority: 90 },
+  settlement: { nextOverlay: 'town', label: 'Market Town', icon: '🏘️', priority: 93 },
+  town: { nextOverlay: 'city', label: 'Fortified City', icon: '🏙️', priority: 96 },
+  city: { nextOverlay: 'capital', label: 'Royal Capital', icon: '👑', priority: 99 },
+  capital: { nextOverlay: 'castle', label: 'High Citadel Capital', icon: '🏰', priority: 99 },
+  castle: { nextOverlay: 'capital', label: 'Royal Capital', icon: '👑', priority: 99 },
+}
+
+/**
+ * Advances a tile's settlement holding to the next urban/fortified tier.
+ */
+export function upgradeTileSettlementTier(tile: MapTile): Partial<MapTile> {
+  const current = tile.overlay || 'none'
+  const step = SETTLEMENT_UPGRADE_LADDER[current] || SETTLEMENT_UPGRADE_LADDER.settlement
+  const filteredSlots = (tile.slots || []).filter((s) => s.category !== 'settlement')
+
+  return {
+    overlay: step.nextOverlay,
+    slots: [
+      ...filteredSlots,
+      {
+        id: `slot_settlement_${step.nextOverlay}`,
+        category: 'settlement',
+        type: step.nextOverlay,
+        name: tile.label ? `${tile.label} (${step.label})` : step.label,
+        icon: step.icon,
+        priority: step.priority,
+      },
+    ],
+  }
+}
+
+/**
+ * Collapses an active settlement or citadel on a tile into Ancient Ruins / Dungeon site,
+ * preserving ancestral faction ownership and historical origin metadata.
+ */
+export function collapseTileSettlementToRuins(tile: MapTile): Partial<MapTile> {
+  const originOverlay = tile.overlay !== 'none' ? tile.overlay : 'settlement'
+  const originNames: Record<string, string> = {
+    settlement: 'Former Village',
+    town: 'Ruined Market Town',
+    city: 'Fallen Walled City',
+    capital: 'Sunken Royal Capital',
+    castle: 'Shattered Citadel',
+  }
+  const ruinOriginLabel = originNames[originOverlay] || 'Ancient Settlement Ruins'
+  const filteredSlots = (tile.slots || []).filter(
+    (s) => s.category !== 'settlement' && s.type !== 'ruins'
+  )
+
+  const ruinName = tile.label
+    ? tile.label.startsWith('Ruins of ')
+      ? tile.label
+      : `Ruins of ${tile.label}`
+    : 'Ancient Ruins'
+
+  const existingNotes = tile.notes ? `${tile.notes}\n` : ''
+
+  return {
+    overlay: 'ruins',
+    label: ruinName,
+    ancestralOwnerId: tile.territoryId || tile.ancestralOwnerId,
+    ruinOriginLabel,
+    notes: `${existingNotes}[Collapsed into Ruins: ${ruinOriginLabel}]`.trim(),
+    slots: [
+      ...filteredSlots,
+      {
+        id: 'slot_structure_ruins',
+        category: 'structure',
+        type: 'ruins',
+        name: `${ruinName} (${ruinOriginLabel})`,
+        icon: '🏛️',
+        priority: 89,
+      },
+    ],
+  }
+}
+
+/**
+ * Reclaims a ruined tile back into an active settlement holding, restoring ancestral faction claim if unowned.
+ */
+export function reclaimTileRuins(tile: MapTile): Partial<MapTile> {
+  const restoredLabel = tile.label
+    ? tile.label.replace(/^Ruins of\s+/i, '')
+    : 'Reclaimed Outpost'
+  const filteredSlots = (tile.slots || []).filter(
+    (s) => s.type !== 'ruins' && s.category !== 'settlement'
+  )
+  const existingNotes = tile.notes ? `${tile.notes}\n` : ''
+
+  return {
+    overlay: 'town',
+    label: restoredLabel,
+    territoryId: tile.territoryId || tile.ancestralOwnerId,
+    notes: `${existingNotes}[Reclaimed & Rebuilt from ${tile.ruinOriginLabel || 'Ancient Ruins'}]`.trim(),
+    slots: [
+      ...filteredSlots,
+      {
+        id: 'slot_settlement_reclaimed',
+        category: 'settlement',
+        type: 'town',
+        name: `${restoredLabel} (Reclaimed Town)`,
+        icon: '🏘️',
+        priority: 93,
+      },
+    ],
+  }
+}
+
+export interface SettlementResourceSynergy {
+  localResources: string[]
+  connectedResources: string[]
+  allResources: string[]
+  tradeArchetype: string
+  prosperityBonus: number
+}
+
+/**
+ * Computes Layer 3 Strategic Resource to Layer 4 Settlement trade synergy
+ * across the tile itself and immediate road/river/border neighbors.
+ */
+export function getSettlementResourceSynergy(
+  map: MapState,
+  tileId: string
+): SettlementResourceSynergy {
+  const tile = map.tiles[tileId]
+  if (!tile) {
+    return {
+      localResources: [],
+      connectedResources: [],
+      allResources: [],
+      tradeArchetype: 'Unsettled Wilderness',
+      prosperityBonus: 0,
+    }
+  }
+
+  const localResources = (tile.slots || [])
+    .filter((s) => s.category === 'resource' || s.category === 'myth')
+    .map((s) => s.name)
+
+  const connectedSet = new Set<string>()
+  const neighbors = getOrthogonalNeighbors(tile.col, tile.row, map.width, map.height)
+
+  for (const nb of neighbors) {
+    const nbTile = map.tiles[nb.id]
+    if (!nbTile) continue
+    for (const s of nbTile.slots || []) {
+      if (s.category === 'resource' || s.category === 'myth') {
+        connectedSet.add(s.name)
+      }
+    }
+    // Follow 1-hop road or river corridors for extended resource gathering
+    if ((tile.hasRoad && nbTile.hasRoad) || (tile.hasRiver && nbTile.hasRiver)) {
+      const secondHop = getOrthogonalNeighbors(nb.col, nb.row, map.width, map.height)
+      for (const hop of secondHop) {
+        if (hop.id === tileId) continue
+        const hopTile = map.tiles[hop.id]
+        if (!hopTile) continue
+        if ((tile.hasRoad && hopTile.hasRoad) || (tile.hasRiver && hopTile.hasRiver)) {
+          for (const s of hopTile.slots || []) {
+            if (s.category === 'resource' || s.category === 'myth') {
+              connectedSet.add(s.name)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const connectedResources = Array.from(connectedSet).filter(
+    (r) => !localResources.includes(r)
+  )
+  const allResources = [...localResources, ...connectedResources]
+  const combinedText = allResources.join(' ').toLowerCase()
+
+  const hasMinerals = /iron|gold|gem|ore|mine|quarry|obsidian|silver/.test(combinedText)
+  const hasFood = /grain|wheat|fish|vineyard|pasture|cattle|crop|fruit/.test(combinedText)
+  const hasTimber = /timber|lumber|wood|forest/.test(combinedText)
+  const hasArcane = /mana|dragon|monolith|sun-fruit|myth|ley|crystal/.test(combinedText)
+
+  const categoryCount =
+    (hasMinerals ? 1 : 0) +
+    (hasFood ? 1 : 0) +
+    (hasTimber ? 1 : 0) +
+    (hasArcane ? 1 : 0)
+
+  let tradeArchetype = '🛡️ Frontier Holding'
+  if (tile.overlay === 'ruins') {
+    tradeArchetype = '🏛️ Forsaken Ruin & Delve Site'
+  } else if (categoryCount >= 3) {
+    tradeArchetype = '⚖️ Grand Mercantile Emporium'
+  } else if (hasArcane && hasMinerals) {
+    tradeArchetype = '🔮 Runeforge & Artificer Citadel'
+  } else if (hasArcane) {
+    tradeArchetype = '🔮 Arcane & Mythic Conclave'
+  } else if (hasMinerals) {
+    tradeArchetype = '⚒️ Forge & Mining Hub'
+  } else if (hasFood && hasTimber) {
+    tradeArchetype = '🌾 Prosperous Heartland Market'
+  } else if (hasFood) {
+    tradeArchetype = '🌾 Breadbasket & Granary Hub'
+  } else if (hasTimber) {
+    tradeArchetype = '🪵 Timber & Craft Guild'
+  }
+
+  return {
+    localResources,
+    connectedResources,
+    allResources,
+    tradeArchetype,
+    prosperityBonus: allResources.length * 2 + (tile.hasRoad ? 2 : 0) + (tile.hasRiver ? 2 : 0),
+  }
+}
