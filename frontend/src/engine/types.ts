@@ -128,6 +128,7 @@ export interface DrawRecord {
   actionTitle?: string
   presetId?: string
   note: string
+  causedByRecordId?: string
   linkedTileIds?: string[]
   linkedEntityIds?: string[]
   epochYear?: string

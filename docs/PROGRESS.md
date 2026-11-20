@@ -336,7 +336,12 @@ status: active
   - [x] 1-Click Regional Naming & Canvas Banners (`MapCanvas.tsx`): Region naming input and `🎲 Name Region` generator in the sidebar Tile Inspector (`assignRegionNameToCluster`), batch `🗺️ Auto-Name Regions` in the Layers drawer (`autoNameMajorRegions`), and centroid Region Banners on the map canvas.
   - [x] Settlement Lifecycle & Connected Resource Trade Synergy (`geopoliticalEngine.ts`, `MapCanvas.tsx`, `twoPageOverviewEngine.ts`): 1-click `⬆️ Upgrade Holding`, `🏚️ Collapse to Ruins` (preserving `ancestralOwnerId` and `ruinOriginLabel`), and `⚒️ Reclaim & Rebuild` in Layer 4, plus dynamic Layer 3 resource connectivity and fantasy Trade Archetypes.
   - [x] 5-Layer Turn Workbench Synchronization (`turnWorkbenchEngine.ts`, `Play.tsx`): Added 1-click Domain Switcher (`🌱 Land` / `🌊 Water`), Layer 2 Relief & Canopy pills, Layer 5 Faction Territory claims, and clean single-change terrain stamp hygiene.
-  - [x] Comprehensive test coverage in `regionCartographyEngine.test.ts`, `geopoliticalEngine.test.ts`, `turnWorkbenchEngine.test.ts`, and `MapCanvas.test.tsx` (217/217 tests passing across 32 test suites).
+  - [x] Comprehensive test coverage in `regionCartographyEngine.test.ts`, `geopoliticalEngine.test.ts`, `turnWorkbenchEngine.test.ts`, and `MapCanvas.test.tsx` (218/218 tests passing across 32 test suites).
+- [x] **Phase 33: Causal Historical Lineage & Consequence Chains, 1-Click Bulk Region Operations, and Live Codex Holdings Integration** *(Score: 100.0 / 100 Core + 20.0 / 20.0 Studio Architecture via ADR-039)*
+  - [x] Causal Historical Lineage & Consequence Chains (`turnWorkbenchEngine.ts`, `Play.tsx`, `MapCanvas.tsx`): `causedByRecordId` linking, `getCausalChainForRecord` (`parentEvent`, `childEvents`, `rootAncestor`, `chainDepth`), `inferCausalParentFromTile`, Turn Workbench causal selector, and `⏪ Caused by` / `⛓️ Led to` badges in Tile Inspector.
+  - [x] 1-Click Bulk Region Operations (`regionCartographyEngine.ts`, `MapCanvas.tsx`): `claimRegionForFaction`, `toggleRegionFogOfWar`, and `applyCanopyOrReliefToRegion` exposed directly inside the sidebar `inspector-region-card`.
+  - [x] Live Codex Realm Holdings & Map Focus (`EntityRegistry.tsx`): Each Codex Entity card displays spanned Named Geographic Regions (`🗺️`), harvested Layer 3 Strategic Resources (`⛏️`, `🌾`, `🔮`), and a 1-click `📍 Focus Realm (col,row)` jump button.
+  - [x] Comprehensive test coverage across 32 test suites (**221/221 tests passing**).
 
 ---
 
@@ -381,5 +386,6 @@ status: active
 - [x] Implement Phase 30: Direct In-Place Tile Editing on Sidebar & Restructured Palette Menus (ADR-036, Core Score: 99.5 / 100).
 - [x] Implement Phase 31: Safe Tile Selection Defaults, 1-Click Domain Switcher & Clean Single-Change Clicks (ADR-037, Core Score: 99.8 / 100).
 - [x] Implement Phase 32: Contiguous Regional Cartography, Settlement Evolution & Ruin Lifecycle, and 5-Layer Turn Workbench Integration (ADR-038, Core Score: 100.0 / 100).
+- [x] Implement Phase 33: Causal Historical Lineage & Consequence Chains, 1-Click Bulk Region Operations, and Live Codex Holdings Integration (ADR-039, Core Score: 100.0 / 100 + Studio Architecture: 20.0 / 20.0).
 
 

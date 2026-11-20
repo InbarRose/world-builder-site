@@ -8,6 +8,8 @@ import {
   createBrainstormIdea,
   applyBrainstormIdea,
   appendChimeInQuote,
+  getCausalChainForRecord,
+  inferCausalParentFromTile,
 } from '../engine/turnWorkbenchEngine'
 import { createDefaultTile } from '../engine/mapEngine'
 import { getActionPresetsForDraw } from '../engine/presets'
@@ -165,5 +167,59 @@ describe('Phase 23: Editable Turn Event & Map Stamp Workbench Engine (turnWorkbe
     // Layer 5 territory claim stamped and linked
     expect(updatedTile.territoryId).toBe('soc_sun_empire')
     expect(updatedTile.linkedEntityIds).toContain('soc_sun_empire')
+  })
+
+  it('Phase 33: resolves Causal Historical Lineage & Consequence Chains (Caused By -> Led To) and infers causal parent from tile history', () => {
+    const history: DrawRecord[] = [
+      {
+        id: 'rec_1',
+        moveId: 1,
+        card: { id: 'c1', suit: '♠', value: 'A' },
+        timestamp: '2026-01-01T00:00:00Z',
+        stage: 'genesis',
+        actionTitle: 'Volcanic Eruption of Mt. Ash',
+        note: 'Mt. Ash erupted at (2,2).',
+        linkedTileIds: ['2,2'],
+      },
+      {
+        id: 'rec_2',
+        moveId: 2,
+        card: { id: 'c2', suit: '♦', value: 'K' },
+        timestamp: '2026-01-01T01:00:00Z',
+        stage: 'civilization',
+        actionTitle: 'Fall of Oakhaven',
+        note: 'Oakhaven collapsed into ash ruins.',
+        causedByRecordId: 'rec_1',
+        linkedTileIds: ['2,2'],
+      },
+      {
+        id: 'rec_3',
+        moveId: 3,
+        card: { id: 'c3', suit: '♣', value: 'Q' },
+        timestamp: '2026-01-01T02:00:00Z',
+        stage: 'intrigue',
+        actionTitle: 'Rise of the Ashen Cult',
+        note: 'Cultists claimed the ruins of Oakhaven.',
+        causedByRecordId: 'rec_2',
+        linkedTileIds: ['2,2'],
+      },
+    ]
+
+    const chain2 = getCausalChainForRecord(history, 'rec_2')
+    expect(chain2.parentEvent?.id).toBe('rec_1')
+    expect(chain2.childEvents.map((c) => c.id)).toEqual(['rec_3'])
+    expect(chain2.rootAncestor?.id).toBe('rec_1')
+    expect(chain2.chainDepth).toBe(1)
+
+    const chain3 = getCausalChainForRecord(history, 'rec_3')
+    expect(chain3.parentEvent?.id).toBe('rec_2')
+    expect(chain3.rootAncestor?.id).toBe('rec_1')
+    expect(chain3.chainDepth).toBe(2)
+
+    const tile22 = {
+      ...createDefaultTile(2, 2, 'volcano'),
+      linkedEventIds: ['rec_1', 'rec_2', 'rec_3'],
+    }
+    expect(inferCausalParentFromTile(tile22, history, 'rec_4')).toBe('rec_3')
   })
 })

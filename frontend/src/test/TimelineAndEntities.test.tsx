@@ -281,4 +281,57 @@ describe('TimelinePanel & EntityRegistry Components', () => {
     expect(updatedEntities[0].diplomaticLinks[0].type).toBe('alliance')
     expect(updatedEntities[1].diplomaticLinks[0].type).toBe('alliance')
   })
+
+  it('Phase 33: displays Live Realm Holdings (Spanned Regions, Harvested Resources) and 1-Click Focus Realm on Map in EntityRegistry', () => {
+    const world = createNewWorld('CodexHoldingsWorld')
+    world.map.tiles['2,3'] = {
+      ...world.map.tiles['2,3'],
+      territoryId: 'soc_valor',
+      regionName: 'The Whispering Weald',
+      slots: [
+        {
+          id: 'res_mana_1',
+          category: 'myth',
+          type: 'mana_spring',
+          name: 'Mana Spring',
+          icon: '🔮',
+          priority: 75,
+        },
+      ],
+    }
+
+    const entities = [
+      {
+        id: 'soc_valor',
+        name: 'Republic of Valor',
+        icon: '👑',
+        category: 'society' as const,
+        stageCreated: 'civilization' as const,
+        description: 'Merchant kingdom.',
+        traits: ['Mercantile'],
+        status: 'Flourishing',
+        originTileId: '2,3',
+      },
+    ]
+
+    const handleSelectTile = vi.fn()
+    render(
+      <EntityRegistry
+        entities={entities}
+        currentStage="civilization"
+        drawHistory={[]}
+        map={world.map}
+        onSelectTile={handleSelectTile}
+        onChange={vi.fn()}
+      />
+    )
+
+    const holdingsSummary = screen.getByTestId('codex-holdings-summary-soc_valor')
+    expect(holdingsSummary).toHaveTextContent('The Whispering Weald')
+    expect(holdingsSummary).toHaveTextContent('Mana Spring')
+
+    const focusBtn = screen.getByTestId('focus-realm-map-btn-soc_valor')
+    fireEvent.click(focusBtn)
+    expect(handleSelectTile).toHaveBeenCalledWith('2,3')
+  })
 })

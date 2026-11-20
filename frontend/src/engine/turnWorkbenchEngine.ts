@@ -42,6 +42,7 @@ export interface TurnActionDraft {
   hasRiver?: boolean
   hasRoad?: boolean
   territoryId?: string
+  causedByRecordId?: string
   note: string
   placedTileIds: string[]
 }
@@ -424,10 +425,87 @@ export function syncDraftToDrawRecord(
     presetId: draft.source === 'preset' ? draft.presetId : undefined,
     power: record.power || draft.actionTitle.trim() || 'World Event',
     note: draft.note.trim(),
+    causedByRecordId:
+      draft.causedByRecordId !== undefined
+        ? draft.causedByRecordId || undefined
+        : record.causedByRecordId,
     linkedTileIds: mergedTiles,
     linkedEntityIds: mergedEntities,
     slotChanges: updatedSlotChanges,
   }
+}
+
+export interface CausalEventChain {
+  parentEvent?: DrawRecord
+  childEvents: DrawRecord[]
+  rootAncestor?: DrawRecord
+  chainDepth: number
+}
+
+/**
+ * Resolves the immediate causal parent ("Caused by"), downstream consequences ("Led to"),
+ * root ancestor, and chain depth for any historical DrawRecord in the Chronicle.
+ */
+export function getCausalChainForRecord(
+  drawHistory: DrawRecord[],
+  recordId: string
+): CausalEventChain {
+  const byId = new Map<string, DrawRecord>()
+  for (const r of drawHistory) {
+    byId.set(r.id, r)
+  }
+
+  const current = byId.get(recordId)
+  if (!current) {
+    return { childEvents: [], chainDepth: 0 }
+  }
+
+  const parentEvent = current.causedByRecordId
+    ? byId.get(current.causedByRecordId)
+    : undefined
+
+  const childEvents = drawHistory.filter(
+    (r) => r.causedByRecordId === recordId && r.id !== recordId
+  )
+
+  // Walk upward with cycle protection to find root ancestor and chain depth
+  let depth = 0
+  let cursor = parentEvent
+  let rootAncestor = parentEvent
+  const visited = new Set<string>([recordId])
+
+  while (cursor && !visited.has(cursor.id)) {
+    visited.add(cursor.id)
+    depth++
+    rootAncestor = cursor
+    cursor = cursor.causedByRecordId ? byId.get(cursor.causedByRecordId) : undefined
+  }
+
+  return {
+    parentEvent,
+    childEvents,
+    rootAncestor,
+    chainDepth: depth,
+  }
+}
+
+/**
+ * Automatically infers the most recent prior historical event on a tile
+ * so stamping onto an established location or ruin naturally links causal history.
+ */
+export function inferCausalParentFromTile(
+  tile: MapTile,
+  drawHistory: DrawRecord[],
+  currentRecordId: string
+): string | undefined {
+  const candidates = drawHistory.filter(
+    (r) =>
+      r.id !== currentRecordId &&
+      ((r.linkedTileIds && r.linkedTileIds.includes(tile.id)) ||
+        (tile.linkedEventIds && tile.linkedEventIds.includes(r.id)))
+  )
+  if (candidates.length === 0) return undefined
+  return candidates[candidates.length - 1].id
 }
 
 /**

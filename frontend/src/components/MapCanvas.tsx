@@ -95,7 +95,11 @@ import {
   assignRegionNameToCluster,
   autoNameMajorRegions,
   generateEvocativeRegionName,
+  claimRegionForFaction,
+  toggleRegionFogOfWar,
+  applyCanopyOrReliefToRegion,
 } from '../engine/regionCartographyEngine'
+import { getCausalChainForRecord } from '../engine/turnWorkbenchEngine'
 import {
   renderCartographicMarkerSVG,
   getSymbolsByCategory,
@@ -3443,14 +3447,100 @@ export function MapCanvas({
                     )}
                   </div>
                   {!isViewOnly ? (
-                    <input
-                      type="text"
-                      data-testid="inspector-region-name-input"
-                      value={inspectedTile.regionName || ''}
-                      onChange={(e) => handleAssignInspectedRegionName(e.target.value)}
-                      placeholder={`Name all ${inspectedRegion.tileIds.length} contiguous ${inspectedRegion.categoryLabel.toLowerCase()} tiles...`}
-                      className="input w-full text-xs h-7"
-                    />
+                    <div className="space-y-1.5">
+                      <input
+                        type="text"
+                        data-testid="inspector-region-name-input"
+                        value={inspectedTile.regionName || ''}
+                        onChange={(e) => handleAssignInspectedRegionName(e.target.value)}
+                        placeholder={`Name all ${inspectedRegion.tileIds.length} contiguous ${inspectedRegion.categoryLabel.toLowerCase()} tiles...`}
+                        className="input w-full text-xs h-7"
+                      />
+
+                      {/* 1-Click Bulk Region Operations */}
+                      <div
+                        data-testid="region-bulk-ops-bar"
+                        className="flex flex-wrap items-center gap-1 pt-0.5"
+                      >
+                        <span className="text-[9px] font-bold uppercase text-muted-foreground mr-0.5">
+                          Region Ops:
+                        </span>
+                        {entities.length > 0 && (
+                          <select
+                            data-testid="region-claim-faction-select"
+                            value={inspectedTile.territoryId || ''}
+                            onChange={(e) => {
+                              pushToUndo(map)
+                              onChange(
+                                claimRegionForFaction(
+                                  map,
+                                  selectedTileId,
+                                  e.target.value || undefined
+                                )
+                              )
+                            }}
+                            className="input h-6 text-[10px] py-0 px-1.5 w-auto"
+                            title="Claim or clear faction ownership across this entire contiguous region"
+                          >
+                            <option value="">🚩 Claim Region...</option>
+                            {entities.map((ent) => (
+                              <option key={ent.id} value={ent.id}>
+                                🚩 {ent.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        <button
+                          type="button"
+                          data-testid="region-toggle-fog-btn"
+                          onClick={() => {
+                            pushToUndo(map)
+                            onChange(toggleRegionFogOfWar(map, selectedTileId))
+                          }}
+                          className="px-1.5 py-0.5 rounded border border-border bg-background hover:bg-muted text-[10px] font-medium flex items-center gap-1 transition-colors"
+                          title="Shroud or reveal Fog of War across this entire contiguous region"
+                        >
+                          <span>🌫️</span>
+                          <span>{inspectedTile.isUnexplored ? 'Reveal Region' : 'Fog Region'}</span>
+                        </button>
+                        {inspectedDomain === 'land' && (
+                          <>
+                            <button
+                              type="button"
+                              data-testid="region-forest-btn"
+                              onClick={() => {
+                                pushToUndo(map)
+                                onChange(
+                                  applyCanopyOrReliefToRegion(map, selectedTileId, {
+                                    flora: 'forest',
+                                  })
+                                )
+                              }}
+                              className="px-1.5 py-0.5 rounded border border-border bg-background hover:bg-muted text-[10px] font-medium flex items-center gap-1 transition-colors"
+                              title="Apply Forest Canopy across all land tiles in this contiguous region"
+                            >
+                              <span>🌲 Forest All</span>
+                            </button>
+                            <button
+                              type="button"
+                              data-testid="region-clear-canopy-btn"
+                              onClick={() => {
+                                pushToUndo(map)
+                                onChange(
+                                  applyCanopyOrReliefToRegion(map, selectedTileId, {
+                                    flora: 'none',
+                                  })
+                                )
+                              }}
+                              className="px-1.5 py-0.5 rounded border border-border bg-background hover:bg-muted text-[10px] font-medium flex items-center gap-1 transition-colors"
+                              title="Clear flora canopy across all tiles in this contiguous region"
+                            >
+                              <span>➖ Clear Canopy</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   ) : (
                     <p className="text-xs font-serif italic text-foreground">
                       {inspectedRegion.name}
@@ -4417,30 +4507,51 @@ export function MapCanvas({
 
               {linkedEvents.length > 0 ? (
                 <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                  {linkedEvents.map((ev) => (
-                    <button
-                      key={ev.id}
-                      type="button"
-                      onClick={() => onSelectEvent?.(ev.moveId)}
-                      className="w-full text-left text-xs p-2 rounded bg-muted/50 hover:bg-accent border border-border/60 hover:border-primary space-y-0.5 transition-colors block"
-                      title={`Jump to Turn #${ev.moveId} in Chronicle`}
-                    >
-                      <div className="font-semibold flex justify-between text-[11px]">
-                        <span className="text-primary">
-                          Turn #{ev.moveId} ({ev.card.value}
-                          {ev.card.suit}) · {ev.actionTitle || ev.power}
-                        </span>
-                        <span className="text-muted-foreground uppercase text-[10px]">
-                          {ev.stage} →
-                        </span>
-                      </div>
-                      {ev.note && (
-                        <p className="text-[11px] text-muted-foreground leading-snug">
-                          {ev.note}
-                        </p>
-                      )}
-                    </button>
-                  ))}
+                  {linkedEvents.map((ev) => {
+                    const chain = getCausalChainForRecord(drawHistory, ev.id)
+                    return (
+                      <button
+                        key={ev.id}
+                        type="button"
+                        onClick={() => onSelectEvent?.(ev.moveId)}
+                        className="w-full text-left text-xs p-2 rounded bg-muted/50 hover:bg-accent border border-border/60 hover:border-primary space-y-1 transition-colors block"
+                        title={`Jump to Turn #${ev.moveId} in Chronicle`}
+                      >
+                        <div className="font-semibold flex justify-between text-[11px]">
+                          <span className="text-primary">
+                            Turn #{ev.moveId} ({ev.card.value}
+                            {ev.card.suit}) · {ev.actionTitle || ev.power}
+                          </span>
+                          <span className="text-muted-foreground uppercase text-[10px]">
+                            {ev.stage} →
+                          </span>
+                        </div>
+                        {ev.note && (
+                          <p className="text-[11px] text-muted-foreground leading-snug">
+                            {ev.note}
+                          </p>
+                        )}
+                        {(chain.parentEvent || chain.childEvents.length > 0) && (
+                          <div className="flex flex-wrap items-center gap-1 pt-0.5 text-[10px]">
+                            {chain.parentEvent && (
+                              <span className="px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 font-medium">
+                                ⏪ Caused by: Turn #{chain.parentEvent.moveId} (
+                                {chain.parentEvent.actionTitle || chain.parentEvent.power})
+                              </span>
+                            )}
+                            {chain.childEvents.length > 0 && (
+                              <span className="px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-800 dark:text-purple-300 font-medium">
+                                ⛓️ Led to:{' '}
+                                {chain.childEvents
+                                  .map((c) => `Turn #${c.moveId}`)
+                                  .join(', ')}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground italic">
