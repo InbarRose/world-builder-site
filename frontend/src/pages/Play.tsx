@@ -4420,6 +4420,40 @@ export function Play() {
                                   </select>
                                 </div>
                               )}
+
+                              {/* Causal Historical Lineage: Caused By / Consequence Of */}
+                              {world.drawHistory.length > 1 && (
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                    ⛓️ Causal Historical Link (Caused By Prior Event):
+                                  </span>
+                                  <select
+                                    data-testid="workbench-causal-parent-select"
+                                    value={turnDraft.causedByRecordId || ''}
+                                    onChange={(e) =>
+                                      applyLiveTurnDraftUpdate({
+                                        ...turnDraft,
+                                        causedByRecordId: e.target.value || undefined,
+                                      })
+                                    }
+                                    className="input w-full text-xs py-1 h-7"
+                                  >
+                                    <option value="">Independent Event (No Causal Parent)</option>
+                                    {world.drawHistory
+                                      .filter((rec) => rec.id !== latestDraw?.id)
+                                      .slice()
+                                      .reverse()
+                                      .map((rec) => (
+                                        <option key={rec.id} value={rec.id}>
+                                          Turn #{rec.moveId}: {rec.actionTitle || rec.power || 'Event'}{' '}
+                                          {rec.linkedTileIds?.length
+                                            ? `at (${rec.linkedTileIds[0]})`
+                                            : ''}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </div>
+                              )}
                             </div>
                           )}
 

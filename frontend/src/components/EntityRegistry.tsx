@@ -1622,35 +1622,95 @@ export function EntityRegistry({
                         </div>
                       </div>
 
-                      {/* Clickable Spatial & Lineage Wiki Pills */}
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        {ent.originTileId && (
-                          <button
-                            type="button"
-                            onClick={() => onSelectTile?.(ent.originTileId!)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border hover:border-primary hover:text-primary transition-colors"
-                            title={`Inspect Tile (${ent.originTileId}) on the Map`}
-                          >
-                            <MapPin className="h-3 w-3 text-primary" />
-                            <span>Seat: ({ent.originTileId})</span>
-                          </button>
-                        )}
-                        {territoryCount > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border">
-                            <Shield className="h-3 w-3 text-primary" />
-                            <span>Territory: {territoryCount} tiles</span>
-                          </span>
-                        )}
-                        {parentSpecies && (
-                          <button
-                            type="button"
-                            onClick={() => setInspectedEntityId(parentSpecies.id)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary font-medium hover:underline"
-                          >
-                            <span>Lineage: {parentSpecies.icon} {parentSpecies.name}</span>
-                          </button>
-                        )}
-                      </div>
+                      {/* Clickable Spatial & Lineage Wiki Pills + Live Realm Holdings */}
+                      {(() => {
+                        const ownedTiles = map
+                          ? Object.values(map.tiles).filter(
+                              (t) =>
+                                t.territoryId === ent.id ||
+                                t.linkedEntityIds?.includes(ent.id)
+                            )
+                          : []
+                        const focusTileId = ent.originTileId || ownedTiles[0]?.id
+                        const harvestedResources = Array.from(
+                          new Set(
+                            ownedTiles.flatMap((t) =>
+                              (t.slots || [])
+                                .filter(
+                                  (s) => s.category === 'resource' || s.category === 'myth'
+                                )
+                                .map((s) => `${s.icon} ${s.name}`)
+                            )
+                          )
+                        )
+                        const spannedRegions = Array.from(
+                          new Set(
+                            ownedTiles
+                              .map((t) => t.regionName?.trim())
+                              .filter((r): r is string => Boolean(r))
+                          )
+                        )
+
+                        return (
+                          <div className="space-y-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                              {focusTileId && (
+                                <button
+                                  type="button"
+                                  data-testid={`focus-realm-map-btn-${ent.id}`}
+                                  onClick={() => onSelectTile?.(focusTileId)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 font-semibold transition-colors"
+                                  title={`Focus Realm on Map at Tile (${focusTileId})`}
+                                >
+                                  <MapPin className="h-3 w-3" />
+                                  <span>📍 Focus Realm ({focusTileId})</span>
+                                </button>
+                              )}
+                              {territoryCount > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border border-border">
+                                  <Shield className="h-3 w-3 text-primary" />
+                                  <span>Territory: {territoryCount} tiles</span>
+                                </span>
+                              )}
+                              {parentSpecies && (
+                                <button
+                                  type="button"
+                                  onClick={() => setInspectedEntityId(parentSpecies.id)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 text-primary font-medium hover:underline"
+                                >
+                                  <span>
+                                    Lineage: {parentSpecies.icon} {parentSpecies.name}
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+
+                            {(harvestedResources.length > 0 || spannedRegions.length > 0) && (
+                              <div
+                                data-testid={`codex-holdings-summary-${ent.id}`}
+                                className="flex flex-wrap items-center gap-1 text-[10px]"
+                              >
+                                {spannedRegions.map((regName) => (
+                                  <span
+                                    key={regName}
+                                    className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-medium"
+                                  >
+                                    🗺️ {regName}
+                                  </span>
+                                ))}
+                                {harvestedResources.slice(0, 4).map((resLabel) => (
+                                  <span
+                                    key={resLabel}
+                                    className="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 font-medium"
+                                  >
+                                    {resLabel}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
 
                       {/* Companion Settlement Icon Strip */}
                       {ent.settlementIcons && (
