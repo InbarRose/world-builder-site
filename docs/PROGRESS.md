@@ -435,5 +435,9 @@ status: active
 - [x] **Phase 46: Streamlined 1-Button Card Flexibility Menu (`Redraw`, `Discard & Draw`, `Freeform Turn`) & Minimal Turn Bar** *(ADR-050)*
   - [x] Added `handleDiscardAndDrawAnother` and `handleFreeformOverrideTurn` in `Play.tsx` so players have zero-penalty creative freedom on every draw.
   - [x] Collapsed 7 loose turn/deck buttons and the static phase tracker into **`Draw Card`** + 1 expandable **`🃏 Card Options ▾`** popover (`card-options-menu-btn`), dramatically streamlining the Studio interface.
+- [x] **Phase 47: Default to Full-Viewport Modular Studio on Launch** *(ADR-051)*
+  - [x] Updated `Play.tsx` so Studio sessions launch directly into `Modular Studio` (`studio-dock-workspace`) with the World Map centered and immediately visible alongside docked Cards, Codex, and Chronicle.
+- [x] **Phase 48: Authentic Pre-Stage Guided Setup Rituals (`PreStageSetupModal.tsx`)** *(ADR-052)*
+  - [x] Created `PreStageSetupModal.tsx` implementing the original ruleset's Pre-Genesis, Pre-Primal (quick Species creator + origin tile), Pre-Civilization (quick Society creator + parent species), and Pre-Intrigue (inline city/settlement naming checklist) rituals, triggered on era transitions and via `✨ Stage Setup`.
 
 

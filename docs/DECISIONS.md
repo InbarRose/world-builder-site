@@ -1345,6 +1345,34 @@ status: active
 - **Consequences**:
   - Gives players total creative sovereignty over every draw with zero penalties while cutting top turn-bar clutter by over 70%.
 
+---
+
+## ADR-051: Default to Full-Viewport Modular Studio on Session Launch
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Previously, launching or resuming a Studio session defaulted to `activeTab = 'cards'`, hiding the World Map until the player manually switched tabs.
+- **Decision**:
+  - Changed the default Studio tab in `Play.tsx` to `'dock'` (**Modular Studio**), so players immediately see the full-viewport centered World Map flanked by the docked `Cards & Turn` panel on the left and tabbed `Codex & Chronicle` at the bottom with zero scrolling.
+- **Consequences**:
+  - Delivers the Photoshop-style whiteboard studio experience immediately upon entering any world.
+
+---
+
+## ADR-052: Authentic Pre-Stage Guided Setup Rituals (`PreStageSetupModal.tsx`)
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  In `docs/world_building_original_docs.md`, each of the 4 stages begins with a brief collaborative Pre-Stage setup (*Pre-Genesis* coastlines & starting features, *Pre-Primal* each player creating a sentient species & picking its origin tile, *Pre-Civilization* creating founding societies within species, *Pre-Intrigue* naming cities, nations & societies).
+- **Decision**:
+  - Created `PreStageSetupModal.tsx` providing lightweight, skippable 1-screen setup checklists and quick-creators matching all 4 Pre-Stage rules verbatim.
+  - Wired it to open automatically after advancing eras (`handleAdvanceStageCeremonially`) and on demand via `✨ Stage Setup` (`open-prestage-setup-btn`) in the Studio bar.
+- **Consequences**:
+  - Brings the canonical tabletop stage transitions directly into the Studio without forcing rigid rules or blocking freeform play.
+
+
 
 
 
