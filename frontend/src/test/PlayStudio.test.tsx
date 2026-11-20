@@ -662,22 +662,42 @@ describe('Play Studio & Rules Integration', () => {
     expect(titleInput.value.length).toBeGreaterThan(0)
     expect(featureInput.value.length).toBeGreaterThan(0)
 
-    // Place the preset on the map via "📍 Place on Map"
+    // Place the preset on the map via "📍 Place on Map" -> opens Interactive Map Placement Mode!
     const placeBtn = screen.getByTestId('place-on-map-btn')
     await act(async () => {
       fireEvent.click(placeBtn)
     })
 
-    // Verify badge shows it is placed on map AND still editable
-    expect(screen.getByTestId('workbench-placed-tiles-badge')).toHaveTextContent(/On Map/i)
-
-    // Edit the Feature Name and Action Title AFTER placing on map
+    // Phase 44: Verify Interactive Placement Bar appears on the map, move item to (4,4), paint multi-tile (5,4), and Lock In!
+    expect(screen.getByTestId('active-placement-bar')).toBeInTheDocument()
     await act(async () => {
-      fireEvent.change(featureInput, { target: { value: 'Dragonspine Summit' } })
-      fireEvent.change(titleInput, { target: { value: 'Rising of Dragonspine' } })
+      fireEvent.click(screen.getByTestId('placement-mode-move-btn'))
     })
-    expect(featureInput.value).toBe('Dragonspine Summit')
-    expect(titleInput.value).toBe('Rising of Dragonspine')
+    await act(async () => {
+      fireEvent.mouseDown(screen.getByTestId('map-tile-4-4'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('placement-mode-multi-btn'))
+    })
+    await act(async () => {
+      fireEvent.mouseDown(screen.getByTestId('map-tile-5-4'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('lock-in-placement-btn'))
+    })
+
+    // Verify we returned to the Turn Card and badge shows both locked-in tiles (4,4; 5,4) AND still editable
+    expect(screen.getByTestId('workbench-placed-tiles-badge')).toHaveTextContent(/4,4; 5,4/i)
+
+    // Re-query inputs after returning from map placement and edit Feature Name and Action Title AFTER locking in
+    const featureInputAfter = screen.getByTestId('workbench-feature-name-input') as HTMLInputElement
+    const titleInputAfter = screen.getByTestId('workbench-action-title-input') as HTMLInputElement
+    await act(async () => {
+      fireEvent.change(featureInputAfter, { target: { value: 'Dragonspine Summit' } })
+      fireEvent.change(titleInputAfter, { target: { value: 'Rising of Dragonspine' } })
+    })
+    expect(featureInputAfter.value).toBe('Dragonspine Summit')
+    expect(titleInputAfter.value).toBe('Rising of Dragonspine')
 
     // Switch to Custom Event / Stamp mode and customize icon & terrain
     const customBtn = screen.getByTestId('switch-to-custom-workbench-btn')

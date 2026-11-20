@@ -14,6 +14,7 @@
 import {
   DrawRecord,
   FloraType,
+  MapState,
   MapTile,
   ReliefType,
   StageId,
@@ -22,7 +23,7 @@ import {
   TileSlotCategory,
 } from './types'
 import { StageActionPreset } from './presets'
-import { addSlotToTile } from './mapEngine'
+import { addSlotToTile, createDefaultTile } from './mapEngine'
 import { generateFeatureName, generateLedgerProse } from './flavorNameEngine'
 
 export interface TurnActionDraft {
@@ -573,4 +574,68 @@ export function appendChimeInQuote(
   }
   return `${trimmed}\n\n${quoteBlock}`
 }
+
+/**
+ * Deep-clones a MapState (used as a clean pre-placement snapshot so dragging
+ * or cancelling an interactive map placement leaves zero leftover artifacts).
+ */
+export function cloneMapState(map: MapState): MapState {
+  const clonedTiles: MapState['tiles'] = {}
+  for (const [id, tile] of Object.entries(map.tiles)) {
+    clonedTiles[id] = {
+      ...tile,
+      slots: tile.slots ? tile.slots.map((s) => ({ ...s })) : [],
+      tags: tile.tags ? [...tile.tags] : [],
+      linkedEventIds: tile.linkedEventIds ? [...tile.linkedEventIds] : [],
+      linkedEntityIds: tile.linkedEntityIds ? [...tile.linkedEntityIds] : [],
+      customColors: tile.customColors ? { ...tile.customColors } : undefined,
+    }
+  }
+  return {
+    ...map,
+    tiles: clonedTiles,
+  }
+}
+
+/**
+ * Infers whether a draft/preset is naturally a multi-tile feature (e.g. a river,
+ * mountain range, forest, road, or desert) vs. a single-tile landmark.
+ */
+export function shouldDefaultToMultiTilePlacement(
+  draft: TurnActionDraft,
+  preset?: StageActionPreset | null
+): boolean {
+  if (draft.hasRiver || draft.hasRoad) return true
+  if (draft.reliefChange === 'mountain-range') return true
+  const combined = `${draft.featureName} ${draft.actionTitle} ${preset?.name || ''}`.toLowerCase()
+  return /(river|stream|range|ridge|forest|jungle|woods|desert|road|highway|coast|reef|marsh|swamp)/.test(
+    combined
+  )
+}
+
+/**
+ * Re-applies the active TurnActionDraft onto a clean pre-placement baseMap across
+ * all targetTileIds. Moving a single item simply passes `[newTileId]`, cleanly
+ * reverting the old tile; multi-tile painting passes all painted tile IDs.
+ */
+export function repositionDraftOnMap(
+  baseMap: MapState,
+  targetTileIds: string[],
+  draft: TurnActionDraft,
+  recordId: string,
+  _preset?: StageActionPreset | null
+): MapState {
+  const workingMap = cloneMapState(baseMap)
+  const uniqueIds = Array.from(new Set(targetTileIds))
+  for (const tid of uniqueIds) {
+    const [colStr, rowStr] = tid.split(',')
+    const col = Number(colStr) || 0
+    const row = Number(rowStr) || 0
+    const baseTile = workingMap.tiles[tid] || createDefaultTile(col, row)
+    const { updatedTile } = stampDraftOnMapTile(baseTile, draft, recordId, 1)
+    workingMap.tiles[tid] = updatedTile
+  }
+  return workingMap
+}
+
 

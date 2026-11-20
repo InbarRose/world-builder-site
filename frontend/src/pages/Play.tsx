@@ -140,13 +140,16 @@ import {
   createBrainstormIdea,
   applyBrainstormIdea,
   appendChimeInQuote,
+  cloneMapState,
+  repositionDraftOnMap,
+  shouldDefaultToMultiTilePlacement,
 } from '../engine/turnWorkbenchEngine'
 import { SessionVaultModal } from '../components/SessionVaultModal'
 import {
   createWorldCheckpoint,
   saveWorldCheckpoint,
 } from '../engine/snapshotVaultEngine'
-import { MapCanvas } from '../components/MapCanvas'
+import { ActiveMapPlacementConfig, MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
 import { StudioDockWorkspace } from '../components/StudioDockWorkspace'
@@ -284,6 +287,12 @@ export function Play() {
   const [turnFocusTab, setTurnFocusTab] = useState<'presets' | 'edit'>('presets')
   const [showCardExamples, setShowCardExamples] = useState(false)
   const [showBotAssist, setShowBotAssist] = useState(false)
+  const [isPlacementActive, setIsPlacementActive] = useState(false)
+  const [placementMode, setPlacementMode] = useState<'move' | 'multi'>('move')
+  const [placementBaseMap, setPlacementBaseMap] = useState<MapState | null>(null)
+  const [placementTileIds, setPlacementTileIds] = useState<string[]>([])
+  const [placementReturnTab, setPlacementReturnTab] = useState<StudioTab | null>(null)
+  const [placementDraftSnapshot, setPlacementDraftSnapshot] = useState<TurnActionDraft | null>(null)
   const [workspaceLayout, setWorkspaceLayout] = useState<StudioWorkspaceLayout>(() =>
     loadStudioWorkspaceLayout()
   )
@@ -1348,6 +1357,195 @@ export function Play() {
       `Placed "${activeDraft.featureName || activeDraft.actionTitle}" on (${targetCoord}) & recorded — still editable!`
     )
   }
+
+  // Begin Interactive Map Placement Mode: brings up the map, lets player drag/move or paint multi-tile ranges, then Lock In
+  const handleBeginInteractivePlacement = (initialCoord = selectedTileId) => {
+    if (world.isLocked) return
+    playTokenPlaceSound()
+    let activeDraft = { ...turnDraft }
+    if (!activeDraft.featureName.trim() && !activeDraft.actionTitle.trim()) {
+      const generated = createCustomTurnDraft(currentStage, powerData?.power, initialCoord)
+      activeDraft = {
+        ...activeDraft,
+        actionTitle: generated.actionTitle,
+        featureName: generated.featureName,
+      }
+    }
+    if (!activeDraft.note.trim()) {
+      activeDraft.note = generateDraftChronicleNote(
+        activeDraft,
+        currentStage,
+        initialCoord,
+        powerData?.power,
+        selectedPreset
+      )
+    }
+
+    const baseMap = cloneMapState(world.map)
+    const defaultMode: 'move' | 'multi' = shouldDefaultToMultiTilePlacement(
+      activeDraft,
+      selectedPreset
+    )
+      ? 'multi'
+      : 'move'
+    const activeRecId = drawHistory[drawHistory.length - 1]?.id || `turn_${Date.now()}`
+    const initialTiles = [initialCoord]
+    const previewMap = repositionDraftOnMap(
+      baseMap,
+      initialTiles,
+      activeDraft,
+      activeRecId,
+      selectedPreset
+    )
+
+    setPlacementBaseMap(baseMap)
+    setPlacementMode(defaultMode)
+    setPlacementTileIds(initialTiles)
+    setPlacementDraftSnapshot(activeDraft)
+    setIsPlacementActive(true)
+    setSelectedTileId(initialCoord)
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      map: previewMap,
+    }))
+
+    if (activeTab === 'cards') {
+      setPlacementReturnTab('cards')
+      setActiveTab('map')
+    } else {
+      setPlacementReturnTab(null)
+    }
+  }
+
+  const handlePlacementInteractTile = (tileId: string, isDrag: boolean) => {
+    if (!isPlacementActive || !placementBaseMap) return
+    const activeDraft = placementDraftSnapshot || turnDraft
+    const activeRecId = drawHistory[drawHistory.length - 1]?.id || `turn_${Date.now()}`
+
+    let nextTileIds: string[] = placementTileIds
+    if (placementMode === 'move') {
+      if (placementTileIds.length === 1 && placementTileIds[0] === tileId) return
+      nextTileIds = [tileId]
+    } else {
+      if (!isDrag && placementTileIds.includes(tileId) && placementTileIds.length > 1) {
+        nextTileIds = placementTileIds.filter((id) => id !== tileId)
+      } else if (!placementTileIds.includes(tileId)) {
+        nextTileIds = [...placementTileIds, tileId]
+      } else {
+        return
+      }
+    }
+
+    const updatedMap = repositionDraftOnMap(
+      placementBaseMap,
+      nextTileIds,
+      activeDraft,
+      activeRecId,
+      selectedPreset
+    )
+    setPlacementTileIds(nextTileIds)
+    setSelectedTileId(tileId)
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      map: updatedMap,
+    }))
+  }
+
+  const handlePlacementUndoLastTile = () => {
+    if (!isPlacementActive || !placementBaseMap || placementTileIds.length <= 1) return
+    const activeDraft = placementDraftSnapshot || turnDraft
+    const activeRecId = drawHistory[drawHistory.length - 1]?.id || `turn_${Date.now()}`
+    const nextTileIds = placementTileIds.slice(0, -1)
+    const updatedMap = repositionDraftOnMap(
+      placementBaseMap,
+      nextTileIds,
+      activeDraft,
+      activeRecId,
+      selectedPreset
+    )
+    setPlacementTileIds(nextTileIds)
+    setSelectedTileId(nextTileIds[nextTileIds.length - 1] || selectedTileId)
+    persistWorldUpdate((prev) => ({
+      ...prev,
+      map: updatedMap,
+    }))
+  }
+
+  const handleLockInPlacement = () => {
+    if (!isPlacementActive) return
+    playTokenPlaceSound()
+    const baseDraft = placementDraftSnapshot || turnDraft
+    const mergedTileIds = Array.from(new Set([...baseDraft.placedTileIds, ...placementTileIds]))
+    const lockedDraft: TurnActionDraft = {
+      ...baseDraft,
+      placedTileIds: mergedTileIds,
+    }
+    setTurnDraft(lockedDraft)
+    setPendingNote(lockedDraft.note)
+    setTurnModifiedTiles((prev) => Array.from(new Set([...prev, ...placementTileIds])))
+
+    persistWorldUpdate((prev) => {
+      if (prev.drawHistory.length === 0) return prev
+      const lastIdx = prev.drawHistory.length - 1
+      const lastRec = prev.drawHistory[lastIdx]
+      const updatedRec = syncDraftToDrawRecord(lastRec, lockedDraft, placementTileIds)
+      const nextHistory = [...prev.drawHistory]
+      nextHistory[lastIdx] = updatedRec
+      return {
+        ...prev,
+        drawHistory: nextHistory,
+      }
+    })
+
+    setIsPlacementActive(false)
+    setPlacementBaseMap(null)
+    setPlacementDraftSnapshot(null)
+    setRecordSavedFeedback(
+      `Locked in "${lockedDraft.featureName || lockedDraft.actionTitle}" across ${placementTileIds.length} ${
+        placementTileIds.length === 1 ? 'tile' : 'tiles'
+      } (${placementTileIds.join('; ')})!`
+    )
+    if (placementReturnTab) {
+      setActiveTab(placementReturnTab)
+      setPlacementReturnTab(null)
+    }
+  }
+
+  const handleCancelPlacement = () => {
+    if (placementBaseMap) {
+      persistWorldUpdate((prev) => ({
+        ...prev,
+        map: placementBaseMap,
+      }))
+    }
+    setIsPlacementActive(false)
+    setPlacementBaseMap(null)
+    setPlacementTileIds([])
+    setPlacementDraftSnapshot(null)
+    if (placementReturnTab) {
+      setActiveTab(placementReturnTab)
+      setPlacementReturnTab(null)
+    }
+  }
+
+  const activePlacementConfig: ActiveMapPlacementConfig | null = isPlacementActive
+    ? {
+        itemLabel:
+          (placementDraftSnapshot || turnDraft).featureName ||
+          (placementDraftSnapshot || turnDraft).actionTitle ||
+          selectedPreset?.name ||
+          powerData?.power ||
+          'Feature',
+        itemIcon: (placementDraftSnapshot || turnDraft).icon || selectedPreset?.icon || '📍',
+        mode: placementMode,
+        placedTileIds: placementTileIds,
+        onChangeMode: (nextMode) => setPlacementMode(nextMode),
+        onInteractTile: handlePlacementInteractTile,
+        onUndoLastTile: handlePlacementUndoLastTile,
+        onLockIn: handleLockInPlacement,
+        onCancel: handleCancelPlacement,
+      }
+    : null
 
   // Switch to or initialize Custom Event / Map Stamp mode in 1 click
   const handleSwitchToCustomDraft = () => {
@@ -4231,9 +4429,9 @@ export function Play() {
                               <button
                                 type="button"
                                 data-testid="place-on-map-btn"
-                                onClick={() => handlePlaceDraftOnMap(selectedTileId)}
+                                onClick={() => handleBeginInteractivePlacement(selectedTileId)}
                                 className="px-3 py-1 rounded-lg bg-primary text-primary-foreground font-bold text-[11px] hover:bg-primary/90 transition-all shadow-2xs flex items-center gap-1"
-                                title="Stamp this preset or custom feature onto the selected map coordinate and populate the turn record while keeping all fields editable"
+                                title="Open the World Map to drag/move this item or paint across multiple tiles, then Lock In your placement"
                               >
                                 <span>📍 Place on Map ({selectedTileId})</span>
                               </button>
@@ -5362,6 +5560,7 @@ export function Play() {
                         turnDraft.actionTitle ||
                         selectedPreset?.name
                       }
+                      activePlacement={activePlacementConfig}
                       onChange={handleWorkspaceMapChange}
                       initialViewOnly={true}
                     />
@@ -5455,6 +5654,7 @@ export function Play() {
                     turnDraft.actionTitle ||
                     selectedPreset?.name
                   }
+                  activePlacement={activePlacementConfig}
                   onChange={handleWorkspaceMapChange}
                   initialViewOnly={false}
                 />
@@ -5601,10 +5801,10 @@ export function Play() {
                         <div className="flex gap-1.5">
                           <button
                             type="button"
-                            onClick={() => handlePlaceDraftOnMap(selectedTileId)}
+                            onClick={() => handleBeginInteractivePlacement(selectedTileId)}
                             className="btn-outline flex-1 py-1.5 text-[11px] font-semibold"
                           >
-                            📍 Stamp ({selectedTileId})
+                            📍 Place / Drag on Map
                           </button>
                           <button
                             type="button"
@@ -5708,6 +5908,7 @@ export function Play() {
                   turnDraft.actionTitle ||
                   selectedPreset?.name
                 }
+                activePlacement={activePlacementConfig}
                 onChange={handleWorkspaceMapChange}
                 initialViewOnly={true}
               />
