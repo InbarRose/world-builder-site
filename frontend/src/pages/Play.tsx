@@ -4440,8 +4440,7 @@ export function Play() {
                                   >
                                     <option value="">Independent Event (No Causal Parent)</option>
                                     {world.drawHistory
-                                      .filter((rec) => rec.id !== latestDraw?.id)
-                                      .slice()
+                                      .slice(0, -1)
                                       .reverse()
                                       .map((rec) => (
                                         <option key={rec.id} value={rec.id}>
