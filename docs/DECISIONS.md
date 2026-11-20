@@ -1307,6 +1307,25 @@ status: active
 - **Consequences**:
   - Makes placing card features onto the world map feel immediate, spatial, and tactile—just like drawing on a shared tabletop whiteboard.
 
+---
+
+## ADR-049: Universal Turn Map Change Sessions Across All Four Stages (`✏️ Free Map Edit` & Automatic Diff Lock-In)
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  The creator observed that modifying the map and locking those changes in as the results/consequences of a turn should be a universal core pattern across **all four stages** (*Genesis*, *Primal*, *Civilization*, *Intrigue*, and *Ace Natural Disasters*), not just single-item placement during Genesis. For example, a single Civilization or Intrigue turn might simultaneously expand borders, collapse a rival city into ruins, build a road, and add a myth marker—all attached to the same Chronicle entry.
+- **Decision**:
+  1. **Automatic Map Diff Engine (`computeModifiedTileIds` in `turnWorkbenchEngine.ts`)**:
+     - Added a pure cartographic diff comparing `placementBaseMap` against the live map across terrain, relief, flora, rivers, roads, settlements, ruins, territories, labels, regions, lore notes, and slots.
+  2. **`✏️ Free Map Edit` Mode Inside the Universal Turn Map Session (`MapCanvas.tsx`, `Play.tsx`)**:
+     - Added **`✏️ Free Map Edit`** (`placement-mode-free-btn`) alongside `✋ Move / Drag` and `🖌️ Multi-Tile Range` inside `active-placement-bar`.
+     - Entering Free Map Edit unlocks full MapCanvas editing (all tools + sidebar layers) while continuously tracking every modified tile against the pre-turn snapshot, highlighting them with emerald session rings, and displaying the live count of modified tiles.
+     - Clicking **`🔒 Lock In Changes`** commits the entire set of map consequences into the active Chronicle turn (`linkedTileIds`), while **`✕ Cancel`** restores the exact pre-turn map snapshot.
+- **Consequences**:
+  - Unifies map editing and Chronicle storytelling across all 4 stages into one cohesive, reversible "Edit Map for This Turn → Lock In Consequences" workflow.
+
+
 
 
 

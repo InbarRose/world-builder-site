@@ -429,5 +429,8 @@ status: active
 - [x] **Phase 44: Interactive Draw-Phase Map Placement — Drag-to-Move, Multi-Tile Painting & Lock-In Mode** *(ADR-048)*
   - [x] Added `cloneMapState`, `shouldDefaultToMultiTilePlacement`, and `repositionDraftOnMap` in `turnWorkbenchEngine.ts` so moving or cancelling placements cleanly restores previous tiles with zero leftover artifacts.
   - [x] Wired **`📍 Place on Map`** in `Play.tsx` to immediately bring up the World Map in Interactive Placement Mode (`active-placement-bar` in `MapCanvas.tsx`) with **`✋ Move / Drag`**, **`🖌️ Multi-Tile Range`** (for rivers, mountain ranges, forests), **`↩️ Undo Tile`**, **`🔒 Lock In Placement`**, and **`✕ Cancel`**.
+- [x] **Phase 45: Universal Turn Map Change Sessions Across All Four Stages (`✏️ Free Map Edit` & Automatic Diff Lock-In)** *(ADR-049)*
+  - [x] Added `computeModifiedTileIds(baseMap, currentMap)` in `turnWorkbenchEngine.ts` + unit tests in `turnWorkbenchEngine.test.ts`.
+  - [x] Added **`✏️ Free Map Edit`** mode (`placement-mode-free-btn`) inside the Turn Map Session bar (`MapCanvas.tsx`, `Play.tsx`) so players in any stage (Genesis, Primal, Civilization, Intrigue, Ace Disasters) can freely apply any set of map consequences (terrain, rivers, roads, settlements, ruins, borders, labels) and **`🔒 Lock In Changes`** to attach all modified tiles to that Chronicle turn (or **`✕ Cancel`** to roll back cleanly).
 
 
