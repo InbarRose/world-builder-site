@@ -21,9 +21,6 @@ import {
   MapState,
   MapTile,
   TerrainType,
-  ReliefType,
-  FloraType,
-  TileSlot,
 } from './types'
 import { getTileId, DEFAULT_MAP_WIDTH, DEFAULT_MAP_HEIGHT } from './mapEngine'
 
@@ -432,107 +429,33 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
   const waterCutoffIndex = Math.floor(allElevations.length * targetWaterPercent)
   const seaLevelThreshold = allElevations[waterCutoffIndex] || 0.45
 
-  // Pass 3: Synthesize Biomes, Relief, Hydrology and Slots
-  for (let r = 0; r < height; r++) {
-    const ny = r / (height - 1 || 1)
-    // Latitude gradient: 0 at equator, 1 at poles (North r=0, South r=height-1)
-    const latPoleFactor = Math.abs(ny - 0.5) * 2 // 0 at center, 1 at edges
+  // Pass 3: Synthesize Clean Pre-Genesis Coastline & Bare Landmass
+  // Per original World Building rules (Pre-Genesis):
+  // "draw a basic outline of a coastline, and maybe a few features as a starting map...
+  //  a single main landmass, a few features, and maybe some islands... coastlines for your
+  //  continent(s) and maybe a river, or a mountain or two."
+  const landCandidates: {
+    id: string
+    c: number
+    r: number
+    elevScore: number
+    moistScore: number
+  }[] = []
 
+  for (let r = 0; r < height; r++) {
     for (let c = 0; c < width; c++) {
       const id = getTileId(c, r)
       const elev = elevationGrid[r][c]
       const moist = moistureGrid[r][c]
       const conv = convergenceGrid[r][c]
 
-      let domain: 'land' | 'water' = 'land'
-      let terrain: TerrainType = 'plains'
-      let relief: ReliefType = 'none'
-      let flora: FloraType = 'none'
-
-      if (elev <= seaLevelThreshold) {
-        domain = 'water'
-        terrain = elev < seaLevelThreshold - 0.18 ? 'ocean' : 'water'
-      } else {
-        domain = 'land'
-        const landElev = (elev - seaLevelThreshold) / (1 - seaLevelThreshold || 1)
-
-        // 1. High Tectonic / Alpine Peaks
-        if (landElev > 0.65 || conv > 0.38 || (activePreset === 'highlands' && landElev > 0.48)) {
-          terrain = 'mountain'
-          relief = landElev > 0.85 || latPoleFactor > 0.65 ? 'mountain-snow' : 'mountain-range'
-          if (rng() < 0.05) {
-            terrain = 'volcano'
-            relief = 'volcano'
-          }
-        } else if (landElev > 0.48) {
-          // Upland Ridges & Hills
-          relief = 'hills'
-          terrain = moist > 0.5 ? 'forest' : 'plains'
-          if (latPoleFactor > 0.7) terrain = 'tundra'
-        } else {
-          // Lowland / Midland Biomes based on Latitude & Moisture (Whittaker Matrix)
-          if (latPoleFactor > 0.75) {
-            // Polar / Subpolar Tundra
-            terrain = 'tundra'
-            relief = moist > 0.6 ? 'hills' : 'none'
-          } else if (latPoleFactor < 0.35 && moist < 0.35) {
-            // Tropical / Subtropical Arid Desert & Redstone Canyons
-            terrain = rng() < 0.3 ? 'canyon' : 'desert'
-            if (terrain === 'canyon') relief = 'mesa'
-          } else if (latPoleFactor < 0.45 && moist > 0.65) {
-            // Equatorial / Tropical Rainforest & Jungle
-            terrain = 'jungle'
-            flora = 'jungle'
-          } else if (moist > 0.55) {
-            // Temperate Woodlands & Forest
-            terrain = 'forest'
-            flora = 'forest'
-          } else if (moist < 0.3 && landElev < 0.25) {
-            // Lowland Marsh & Fen
-            terrain = 'swamp'
-            flora = 'marsh'
-          } else {
-            // Fertile Temperate Steppe & Plains
-            terrain = 'plains'
-          }
-        }
-      }
-
-      // Slot seeding for prominent features
-      const slots: TileSlot[] = []
-
-      // Add resource slots to appropriate biomes
-      if (domain === 'land') {
-        const slotRoll = rng()
-        if (terrain === 'mountain' && slotRoll < 0.35) {
-          slots.push({
-            id: `res_${c}_${r}`,
-            category: 'resource',
-            type: 'mine',
-            name: slotRoll < 0.12 ? 'Deep Gold Vein' : 'Iron Ore Quarry',
-            icon: slotRoll < 0.12 ? '⛏️' : '🪨',
-            priority: 40,
-          })
-        } else if ((terrain === 'forest' || terrain === 'jungle') && slotRoll < 0.3) {
-          slots.push({
-            id: `res_${c}_${r}`,
-            category: 'resource',
-            type: 'timber',
-            name: terrain === 'jungle' ? 'Exotic Spice Canopy' : 'Ancient Timber Grove',
-            icon: terrain === 'jungle' ? '🌺' : '🌲',
-            priority: 40,
-          })
-        } else if (terrain === 'plains' && slotRoll < 0.25) {
-          slots.push({
-            id: `res_${c}_${r}`,
-            category: 'resource',
-            type: 'food',
-            name: 'Golden Grain Fields',
-            icon: '🌾',
-            priority: 40,
-          })
-        }
-      }
+      const isWater = elev <= seaLevelThreshold
+      const domain: 'land' | 'water' = isWater ? 'water' : 'land'
+      const terrain: TerrainType = isWater
+        ? elev < seaLevelThreshold - 0.18
+          ? 'ocean'
+          : 'water'
+        : 'plains'
 
       tiles[id] = {
         id,
@@ -540,9 +463,9 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
         row: r,
         domain,
         terrain,
-        relief,
-        flora,
-        slots,
+        relief: 'none',
+        flora: 'none',
+        slots: [],
         overlay: 'none',
         hasRiver: false,
         hasRoad: false,
@@ -550,14 +473,58 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
         linkedEventIds: [],
         linkedEntityIds: [],
       }
+
+      if (!isWater) {
+        const isInterior = c > 0 && c < width - 1 && r > 0 && r < height - 1
+        landCandidates.push({
+          id,
+          c,
+          r,
+          elevScore: elev + conv * 0.4 + (isInterior ? 0.1 : 0),
+          moistScore: moist + (isInterior ? 0.05 : 0),
+        })
+      }
     }
   }
 
-  // Pass 4: Trace Natural Rivers Downhill from High Elevation to Coastal Sea
-  traceProceduralDownhillRivers(tiles, width, height, rng)
+  // Pass 4: Seed Just a Few Starting Features (2–4 Mountains & 2–3 Forest tiles)
+  if (landCandidates.length > 0) {
+    const byElevation = [...landCandidates].sort((a, b) => b.elevScore - a.elevScore)
+    const maxMountains = activePreset === 'highlands' ? 4 : 2
+    const mountainCount = Math.min(
+      maxMountains,
+      Math.max(1, Math.floor(landCandidates.length * 0.03))
+    )
 
-  // Pass 5: Seed 2 Ancestral Starting Settlements on Prime River / Coastal Valleys
-  seedAncestralSettlements(tiles, width, height, rng)
+    const mountainIds = new Set<string>()
+    for (let i = 0; i < mountainCount && i < byElevation.length; i++) {
+      const target = byElevation[i]
+      const tile = tiles[target.id]
+      if (tile) {
+        tile.terrain = 'mountain'
+        tile.relief = 'mountain'
+        mountainIds.add(target.id)
+      }
+    }
+
+    // Seed 1 small starting grove (2–3 forest tiles) away from the mountain peaks
+    const byMoisture = landCandidates
+      .filter((cand) => !mountainIds.has(cand.id))
+      .sort((a, b) => b.moistScore - a.moistScore)
+    const forestCount = Math.min(2, Math.max(1, Math.floor(landCandidates.length * 0.025)))
+
+    for (let i = 0; i < forestCount && i < byMoisture.length; i++) {
+      const target = byMoisture[i]
+      const tile = tiles[target.id]
+      if (tile) {
+        tile.terrain = 'plains'
+        tile.flora = 'forest'
+      }
+    }
+  }
+
+  // Pass 5: Trace 1 Starting River Downhill from a Mountain Peak to the Sea
+  traceProceduralDownhillRivers(tiles, width, height, rng)
 
   return {
     width,
@@ -568,7 +535,7 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
 }
 
 /**
- * Traces 2–4 natural downhill rivers flowing from high elevations down to seas.
+ * Traces 1 natural starting river flowing from a mountain peak down to the coast.
  */
 function traceProceduralDownhillRivers(
   tiles: Record<string, MapTile>,
@@ -576,12 +543,12 @@ function traceProceduralDownhillRivers(
   height: number,
   rng: () => number
 ) {
-  // Find potential headwaters in mountains/hills
+  // Find potential headwaters in the starting mountain peaks (or interior land if none)
   const headwaterCandidates: { c: number; r: number }[] = []
   for (let r = 1; r < height - 1; r++) {
     for (let c = 1; c < width - 1; c++) {
       const tile = tiles[`${c},${r}`]
-      if (tile && tile.domain === 'land' && (tile.terrain === 'mountain' || tile.relief === 'hills')) {
+      if (tile && tile.domain === 'land' && tile.terrain === 'mountain') {
         headwaterCandidates.push({ c, r })
       }
     }
@@ -589,126 +556,49 @@ function traceProceduralDownhillRivers(
 
   if (headwaterCandidates.length === 0) return
 
-  // Shuffle and pick 3 river springs
-  for (let i = headwaterCandidates.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1))
-    const tmp = headwaterCandidates[i]
-    headwaterCandidates[i] = headwaterCandidates[j]
-    headwaterCandidates[j] = tmp
-  }
+  const startIdx = Math.floor(rng() * headwaterCandidates.length)
+  let curr = headwaterCandidates[startIdx]
+  const visited = new Set<string>()
 
-  const riverCount = Math.min(3, headwaterCandidates.length)
-  for (let i = 0; i < riverCount; i++) {
-    let curr = headwaterCandidates[i]
-    const visited = new Set<string>()
+  for (let step = 0; step < 12; step++) {
+    const key = `${curr.c},${curr.r}`
+    if (visited.has(key)) break
+    visited.add(key)
 
-    for (let step = 0; step < 16; step++) {
-      const key = `${curr.c},${curr.r}`
-      if (visited.has(key)) break
-      visited.add(key)
+    const tile = tiles[key]
+    if (!tile) break
 
-      const tile = tiles[key]
-      if (!tile) break
-      tile.hasRiver = true
+    // Stop once we reach water
+    if (tile.domain === 'water') break
 
-      // If reached water, river terminates into bay
-      if (tile.domain === 'water') break
+    tile.hasRiver = true
 
-      // Walk toward neighbors with lower elevation or closer to sea
-      const neighbors = [
-        { c: curr.c + 1, r: curr.r },
-        { c: curr.c - 1, r: curr.r },
-        { c: curr.c, r: curr.r + 1 },
-        { c: curr.c, r: curr.r - 1 },
-      ].filter((n) => n.c >= 0 && n.c < width && n.r >= 0 && n.r < height)
+    const neighbors = [
+      { c: curr.c + 1, r: curr.r },
+      { c: curr.c - 1, r: curr.r },
+      { c: curr.c, r: curr.r + 1 },
+      { c: curr.c, r: curr.r - 1 },
+    ].filter((n) => n.c >= 0 && n.c < width && n.r >= 0 && n.r < height)
 
-      // Prefer neighbors that are water or plains/swamps
-      let bestNext = neighbors[0]
-      let bestScore = Infinity
+    let bestNext = neighbors[0]
+    let bestScore = Infinity
 
-      for (const nb of neighbors) {
-        const nbTile = tiles[`${nb.c},${nb.r}`]
-        if (!nbTile || visited.has(`${nb.c},${nb.r}`)) continue
-        let score = 5
-        if (nbTile.domain === 'water') score = 0
-        else if (nbTile.terrain === 'swamp') score = 1
-        else if (nbTile.terrain === 'plains') score = 2
-        else if (nbTile.terrain === 'forest') score = 3
-        else if (nbTile.terrain === 'mountain') score = 10
+    for (const nb of neighbors) {
+      const nbKey = `${nb.c},${nb.r}`
+      const nbTile = tiles[nbKey]
+      if (!nbTile || visited.has(nbKey)) continue
+      let score = 5
+      if (nbTile.domain === 'water') score = 0
+      else if (nbTile.terrain === 'plains') score = 2
+      else if (nbTile.terrain === 'mountain') score = 8
 
-        if (score < bestScore) {
-          bestScore = score
-          bestNext = nb
-        }
-      }
-
-      if (!bestNext || visited.has(`${bestNext.c},${bestNext.r}`)) break
-      curr = bestNext
-    }
-  }
-}
-
-/**
- * Seeds 1–2 ancestral settlements in fertile river valleys or protected bays.
- */
-function seedAncestralSettlements(
-  tiles: Record<string, MapTile>,
-  width: number,
-  height: number,
-  rng: () => number
-) {
-  const fertileCandidates: string[] = []
-
-  for (let r = 1; r < height - 1; r++) {
-    for (let c = 1; c < width - 1; c++) {
-      const id = `${c},${r}`
-      const tile = tiles[id]
-      if (
-        tile &&
-        tile.domain === 'land' &&
-        tile.terrain !== 'mountain' &&
-        tile.terrain !== 'volcano' &&
-        (tile.hasRiver || tile.terrain === 'plains')
-      ) {
-        fertileCandidates.push(id)
+      if (score < bestScore) {
+        bestScore = score
+        bestNext = nb
       }
     }
-  }
 
-  if (fertileCandidates.length === 0) return
-
-  // Pick up to 2 distinct locations
-  const idx1 = Math.floor(rng() * fertileCandidates.length)
-  const id1 = fertileCandidates[idx1]
-  const t1 = tiles[id1]
-  if (t1) {
-    t1.overlay = 'settlement'
-    t1.slots = t1.slots || []
-    t1.slots.unshift({
-      id: `set_${id1}`,
-      category: 'settlement',
-      type: 'village',
-      name: 'First Hearth Sanctuary',
-      icon: '🏡',
-      priority: 85,
-    })
-  }
-
-  if (fertileCandidates.length > 5) {
-    const idx2 = (idx1 + Math.floor(fertileCandidates.length / 2)) % fertileCandidates.length
-    const id2 = fertileCandidates[idx2]
-    const t2 = tiles[id2]
-    if (t2) {
-      t2.overlay = 'settlement'
-      t2.slots = t2.slots || []
-      t2.slots.unshift({
-        id: `set_${id2}`,
-        category: 'settlement',
-        type: 'camp',
-        name: 'Elderwood Encampment',
-        icon: '🏕️',
-        priority: 85,
-      })
-    }
+    if (!bestNext || visited.has(`${bestNext.c},${bestNext.r}`)) break
+    curr = bestNext
   }
 }

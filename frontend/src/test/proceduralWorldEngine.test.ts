@@ -81,36 +81,51 @@ describe('proceduralWorldEngine', () => {
     }
   })
 
-  it('generates tectonic mountain cordilleras and downstream river channels', () => {
-    const map = generateNaturalWorld({ width: 24, height: 16, preset: 'highlands', seed: 'orogeny-test-777' })
+  it('generates a mostly bare Pre-Genesis starting map with natural coastlines and only a few starting features (1–4 mountains, 1–2 forest tiles, 1 river)', () => {
+    const map = generateNaturalWorld({
+      width: 20,
+      height: 12,
+      preset: 'continent',
+      seed: 'pre-genesis-bare-777',
+    })
     const tiles = Object.values(map.tiles)
+    const landTiles = tiles.filter((t) => t.domain === 'land')
 
-    const mountainCount = tiles.filter((t) => t.terrain === 'mountain' || t.relief?.includes('mountain')).length
-    expect(mountainCount).toBeGreaterThan(5)
+    // At least 90% of land tiles must be bare open land (plains with no relief and no flora)
+    const barePlainsCount = landTiles.filter(
+      (t) => t.terrain === 'plains' && t.relief === 'none' && t.flora === 'none'
+    ).length
+    expect(barePlainsCount / landTiles.length).toBeGreaterThanOrEqual(0.9)
 
-    // Downhill rivers should be present
+    // Only 1–4 starting mountain peaks
+    const mountainCount = landTiles.filter((t) => t.terrain === 'mountain').length
+    expect(mountainCount).toBeGreaterThanOrEqual(1)
+    expect(mountainCount).toBeLessThanOrEqual(4)
+
+    // Only 1–2 starting forest tiles
+    const forestCount = landTiles.filter((t) => t.flora === 'forest').length
+    expect(forestCount).toBeGreaterThanOrEqual(1)
+    expect(forestCount).toBeLessThanOrEqual(2)
+
+    // 1 starting downhill river path
     const riverTiles = tiles.filter((t) => t.hasRiver)
     expect(riverTiles.length).toBeGreaterThan(0)
-
-    // Ancestral settlement seeds
-    const settlements = tiles.filter((t) => t.overlay === 'settlement' || t.slots?.some((s) => s.category === 'settlement'))
-    expect(settlements.length).toBeGreaterThan(0)
-    expect(settlements[0].slots?.[0].name).toBeTruthy()
+    expect(riverTiles.length).toBeLessThanOrEqual(12)
   })
 
-  it('seeds harvestable resources in ecologically suitable biomes', () => {
-    const map = generateNaturalWorld({ width: 20, height: 14, preset: 'continent', seed: 'resources-seed-888' })
+  it('keeps Turn-0 starting maps completely free of pre-seeded resource slots and settlements so players build them during play', () => {
+    const map = generateNaturalWorld({
+      width: 20,
+      height: 12,
+      preset: 'highlands',
+      seed: 'clean-start-888',
+    })
     const tiles = Object.values(map.tiles)
 
-    const resourceSlots = tiles.flatMap((t) => (t.slots || []).filter((s) => s.category === 'resource'))
-    expect(resourceSlots.length).toBeGreaterThan(0)
+    const allExplicitSlots = tiles.flatMap((t) => t.slots || [])
+    expect(allExplicitSlots).toHaveLength(0)
 
-    // Mineral slots should be in mountains or canyons or volcanoes
-    const mineralSlots = tiles.filter((t) =>
-      (t.slots || []).some((s) => s.type === 'mine')
-    )
-    for (const t of mineralSlots) {
-      expect(['mountain', 'canyon', 'hills', 'volcano']).toContain(t.terrain)
-    }
+    const allSettlementOverlays = tiles.filter((t) => t.overlay !== 'none')
+    expect(allSettlementOverlays).toHaveLength(0)
   })
 })
