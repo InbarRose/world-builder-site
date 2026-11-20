@@ -1528,14 +1528,14 @@ export function MapCanvas({
 
   return (
     <div
-      className="space-y-4 select-none"
+      className="space-y-2 select-none"
       onMouseUp={handleMouseUpGlobal}
       onMouseLeave={handleMouseUpGlobal}
     >
-      {/* Sleek Top Cartography Bar */}
-      <div className="no-print card p-3 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Left: View Only vs Edit Map Toggle + Painting Tools */}
+      {/* Ultra-Slim Top Cartography Strip (Tools moved to Left Photoshop Vertical Rail) */}
+      <div className="no-print card px-2.5 py-1.5 space-y-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
+          {/* Left: View Only vs Edit Map Toggle + Palette/Layers/Grid Drawers */}
           <div className="flex flex-wrap items-center gap-1.5">
             {/* View Atlas vs Edit Map Switcher */}
             <div
@@ -1584,238 +1584,6 @@ export function MapCanvas({
 
             {!isViewOnly && (
               <>
-                <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
-                {/* 1. Safe Select & Inspect Tool (Default & Primary) */}
-                <button
-                  type="button"
-                  data-testid="tool-inspect-btn"
-                  onClick={() => setActiveTool('inspect')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Select & Inspect Tool [S / Esc] — Click any tile on the map to focus it in the right-hand Inspector Dock and edit its 5 layers without accidental painting.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'inspect'
-                      ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/40'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Safe Select & Inspect Mode: Click any tile to inspect and edit its layers safely without accidental painting (Hotkey: S, V, or Esc)"
-                  aria-label="Select & Inspect Tool"
-                >
-                  <MousePointer className="h-3.5 w-3.5" />
-                  <span>Select & Inspect</span>
-                  <span className="text-[10px] opacity-75 font-mono">[S]</span>
-                </button>
-
-                {/* 2. Paint Brush Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-brush-btn"
-                  onClick={() => setActiveTool('brush')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Paint Brush Tool [B] — Click and drag across map tiles to paint the active palette biome or feature. Press [S] or [Esc] anytime to return to Safe Select.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'brush'
-                      ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Paint Brush: Paint terrain and features across map tiles (Hotkey: B)"
-                  aria-label="Paint Brush Tool"
-                >
-                  <Paintbrush className="h-3.5 w-3.5" />
-                  <span>Paint Brush</span>
-                  <span className="text-[10px] opacity-75 font-mono">[B]</span>
-                </button>
-
-                {/* 3. Bucket Fill Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-fill-btn"
-                  onClick={() => setActiveTool('fill')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Bucket Fill Tool — Click a tile to flood-fill all connected tiles of the same terrain with your selected biome.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'fill'
-                      ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Bucket Fill: Flood fill contiguous matching terrain"
-                  aria-label="Bucket Fill Tool"
-                >
-                  <PaintBucket className="h-3.5 w-3.5" />
-                  <span>Bucket Fill</span>
-                </button>
-
-                {/* 4. Erase Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-erase-btn"
-                  onClick={() => setActiveTool('erase')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Erase Tool — Click or drag across tiles to clear them back to open ocean water.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'erase'
-                      ? 'bg-destructive text-destructive-foreground shadow-sm'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Erase: Reset tile to open ocean water"
-                  aria-label="Erase Tool"
-                >
-                  <Eraser className="h-3.5 w-3.5" />
-                  <span>Erase</span>
-                </button>
-
-                {/* 5. Pan Map Tool */}
-                <button
-                  type="button"
-                  data-testid="tool-pan-btn"
-                  onClick={() => setActiveTool('pan')}
-                  onMouseEnter={() =>
-                    setActiveHintText(
-                      'Pan Camera Tool [Spacebar + Drag] — Drag the map viewport to pan smoothly without selecting or modifying tiles.'
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
-                    activeTool === 'pan'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                  title="Pan Map Camera (or hold Spacebar + Drag)"
-                  aria-label="Pan Map Tool"
-                >
-                  <Hand className="h-3.5 w-3.5" />
-                  <span>Pan Map</span>
-                </button>
-
-                {/* Optional GM / RPG Prep Tools Popover (Fog of War & Distance Ruler) */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    data-testid="tool-gm-prep-btn"
-                    onClick={() => setShowGmPrepMenu((v) => !v)}
-                    onMouseEnter={() =>
-                      setActiveHintText(
-                        'GM / RPG Prep Tools — Optional tools for running RPG campaigns on your finished map (Fog of War shroud & Distance Ruler).'
-                      )
-                    }
-                    className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1 transition-colors ${
-                      activeTool === 'fog' || activeTool === 'ruler' || showGmPrepMenu
-                        ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
-                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                    }`}
-                    title="Optional GM / RPG Prep Tools (Fog of War & Distance Ruler)"
-                    aria-label="GM Prep Tools"
-                  >
-                    <Compass className="h-3.5 w-3.5" />
-                    <span>GM Prep</span>
-                  </button>
-
-                  {showGmPrepMenu && (
-                    <div
-                      data-testid="gm-prep-popover"
-                      className="absolute left-0 mt-1.5 w-48 rounded-lg border border-border bg-card shadow-xl p-1.5 z-40 space-y-1"
-                    >
-                      <div className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        RPG Campaign Prep
-                      </div>
-                      <button
-                        type="button"
-                        data-testid="tool-fog-btn"
-                        onClick={() => {
-                          setActiveTool('fog')
-                          setShowGmPrepMenu(false)
-                        }}
-                        className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
-                          activeTool === 'fog'
-                            ? 'bg-stone-800 text-stone-100'
-                            : 'hover:bg-accent text-foreground'
-                        }`}
-                        title="Fog of War: Shroud or Reveal Unexplored Wilderness"
-                        aria-label="Fog of War Tool"
-                      >
-                        <CloudFog className="h-3.5 w-3.5" />
-                        <span>Fog / Reveal</span>
-                      </button>
-                      <button
-                        type="button"
-                        data-testid="tool-ruler-btn"
-                        onClick={() => {
-                          setActiveTool('ruler')
-                          setRulerStart(null)
-                          setRulerHover(null)
-                          setShowGmPrepMenu(false)
-                        }}
-                        className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
-                          activeTool === 'ruler'
-                            ? 'bg-amber-600 text-white'
-                            : 'hover:bg-accent text-foreground'
-                        }`}
-                        title="Distance Ruler: Measure distances in leagues, miles, and march days"
-                        aria-label="Distance Ruler Tool"
-                      >
-                        <Ruler className="h-3.5 w-3.5" />
-                        <span>Distance Ruler</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
-
-                {/* Undo / Redo History Controls */}
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    disabled={undoStack.length === 0}
-                    className="px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    title={
-                      undoStack.length > 0
-                        ? `Undo (${undoStack.length} step${undoStack.length > 1 ? 's' : ''}) — Ctrl+Z`
-                        : 'Undo (Ctrl+Z)'
-                    }
-                    aria-label="Undo Map Action"
-                  >
-                    <Undo2 className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Undo</span>
-                    {undoStack.length > 0 && (
-                      <span className="text-[10px] px-1 py-0.2 rounded bg-muted-foreground/15 text-muted-foreground font-mono">
-                        {undoStack.length}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRedo}
-                    disabled={redoStack.length === 0}
-                    className="px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    title={
-                      redoStack.length > 0
-                        ? `Redo (${redoStack.length} step${redoStack.length > 1 ? 's' : ''}) — Ctrl+Y`
-                        : 'Redo (Ctrl+Y)'
-                    }
-                    aria-label="Redo Map Action"
-                  >
-                    <Redo2 className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Redo</span>
-                    {redoStack.length > 0 && (
-                      <span className="text-[10px] px-1 py-0.2 rounded bg-muted-foreground/15 text-muted-foreground font-mono">
-                        {redoStack.length}
-                      </span>
-                    )}
-                  </button>
-                </div>
-
                 <div className="h-5 w-px bg-border mx-0.5 hidden sm:block" />
 
                 {/* Drawer Toggles to Prevent Clutter */}
@@ -2864,8 +2632,242 @@ export function MapCanvas({
         )}
       </div>
 
-      {/* Main Grid & Tile Slot Inspector Split */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+      {/* Main Grid & Tile Slot Inspector Split with Photoshop-style Left Vertical Tool Rail */}
+      <div className="flex gap-2 items-start">
+        {/* 48px Photoshop-style Left Vertical Tool Rail */}
+        {!isViewOnly && (
+          <aside
+            data-testid="studio-left-tool-rail"
+            aria-label="Map Tools Rail"
+            className="no-print card p-1.5 w-12 shrink-0 flex flex-col items-center gap-1.5 sticky top-2 z-20"
+          >
+            {/* 1. Safe Select & Inspect Tool */}
+            <button
+              type="button"
+              data-testid="tool-inspect-btn"
+              onClick={() => setActiveTool('inspect')}
+              onMouseEnter={() =>
+                setActiveHintText(
+                  'Select & Inspect Tool [S / Esc] — Click any tile on the map to focus it in the right-hand Inspector Dock and edit its layers without accidental painting.'
+                )
+              }
+              className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                activeTool === 'inspect'
+                  ? 'bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/40'
+                  : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+              }`}
+              title="Safe Select & Inspect [S / Esc]"
+              aria-label="Select & Inspect Tool"
+            >
+              <MousePointer className="h-4 w-4" />
+              <span className="text-[8px] font-mono leading-none mt-0.5">S</span>
+            </button>
+
+            {/* 2. Paint Brush Tool */}
+            <button
+              type="button"
+              data-testid="tool-brush-btn"
+              onClick={() => setActiveTool('brush')}
+              onMouseEnter={() =>
+                setActiveHintText(
+                  'Paint Brush Tool [B] — Click and drag across map tiles to paint the active palette biome or feature. Press [S] or [Esc] anytime to return to Safe Select.'
+                )
+              }
+              className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                activeTool === 'brush'
+                  ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
+                  : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+              }`}
+              title="Paint Brush [B]"
+              aria-label="Paint Brush Tool"
+            >
+              <Paintbrush className="h-4 w-4" />
+              <span className="text-[8px] font-mono leading-none mt-0.5">B</span>
+            </button>
+
+            {/* 3. Bucket Fill Tool */}
+            <button
+              type="button"
+              data-testid="tool-fill-btn"
+              onClick={() => setActiveTool('fill')}
+              onMouseEnter={() =>
+                setActiveHintText(
+                  'Bucket Fill Tool — Click a tile to flood-fill all connected tiles of the same terrain with your selected biome.'
+                )
+              }
+              className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                activeTool === 'fill'
+                  ? 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-400'
+                  : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+              }`}
+              title="Bucket Fill: Flood fill contiguous matching terrain"
+              aria-label="Bucket Fill Tool"
+            >
+              <PaintBucket className="h-4 w-4" />
+            </button>
+
+            {/* 4. Erase Tool */}
+            <button
+              type="button"
+              data-testid="tool-erase-btn"
+              onClick={() => setActiveTool('erase')}
+              onMouseEnter={() =>
+                setActiveHintText(
+                  'Erase Tool — Click or drag across tiles to clear them back to open ocean water.'
+                )
+              }
+              className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                activeTool === 'erase'
+                  ? 'bg-destructive text-destructive-foreground shadow-sm'
+                  : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+              }`}
+              title="Erase: Reset tile to open ocean water"
+              aria-label="Erase Tool"
+            >
+              <Eraser className="h-4 w-4" />
+            </button>
+
+            {/* 5. Pan Map Tool */}
+            <button
+              type="button"
+              data-testid="tool-pan-btn"
+              onClick={() => setActiveTool('pan')}
+              onMouseEnter={() =>
+                setActiveHintText(
+                  'Pan Camera Tool [Spacebar + Drag] — Drag the map viewport to pan smoothly without selecting or modifying tiles.'
+                )
+              }
+              className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                activeTool === 'pan'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+              }`}
+              title="Pan Map Camera (Spacebar + Drag)"
+              aria-label="Pan Map Tool"
+            >
+              <Hand className="h-4 w-4" />
+            </button>
+
+            <div className="w-6 h-px bg-border my-0.5" />
+
+            {/* Optional GM / RPG Prep Tools Popover */}
+            <div className="relative">
+              <button
+                type="button"
+                data-testid="tool-gm-prep-btn"
+                onClick={() => setShowGmPrepMenu((v) => !v)}
+                onMouseEnter={() =>
+                  setActiveHintText(
+                    'GM / RPG Prep Tools — Optional tools for running RPG campaigns on your finished map (Fog of War shroud & Distance Ruler).'
+                  )
+                }
+                className={`w-9 h-9 rounded-md flex flex-col items-center justify-center transition-colors ${
+                  activeTool === 'fog' || activeTool === 'ruler' || showGmPrepMenu
+                    ? 'bg-stone-800 text-stone-100 dark:bg-stone-700 shadow-sm'
+                    : 'bg-secondary/70 text-secondary-foreground hover:bg-secondary'
+                }`}
+                title="Optional GM / RPG Prep Tools (Fog of War & Distance Ruler)"
+                aria-label="GM Prep Tools"
+              >
+                <Compass className="h-4 w-4" />
+                <span className="text-[7px] font-bold leading-none mt-0.5">GM</span>
+              </button>
+
+              {showGmPrepMenu && (
+                <div
+                  data-testid="gm-prep-popover"
+                  className="absolute left-11 top-0 w-48 rounded-lg border border-border bg-card shadow-xl p-1.5 z-50 space-y-1"
+                >
+                  <div className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    RPG Campaign Prep
+                  </div>
+                  <button
+                    type="button"
+                    data-testid="tool-fog-btn"
+                    onClick={() => {
+                      setActiveTool('fog')
+                      setShowGmPrepMenu(false)
+                    }}
+                    className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                      activeTool === 'fog'
+                        ? 'bg-stone-800 text-stone-100'
+                        : 'hover:bg-accent text-foreground'
+                    }`}
+                    title="Fog of War: Shroud or Reveal Unexplored Wilderness"
+                    aria-label="Fog of War Tool"
+                  >
+                    <CloudFog className="h-3.5 w-3.5" />
+                    <span>Fog / Reveal</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="tool-ruler-btn"
+                    onClick={() => {
+                      setActiveTool('ruler')
+                      setRulerStart(null)
+                      setRulerHover(null)
+                      setShowGmPrepMenu(false)
+                    }}
+                    className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors ${
+                      activeTool === 'ruler'
+                        ? 'bg-amber-600 text-white'
+                        : 'hover:bg-accent text-foreground'
+                    }`}
+                    title="Distance Ruler: Measure distances in leagues, miles, and march days"
+                    aria-label="Distance Ruler Tool"
+                  >
+                    <Ruler className="h-3.5 w-3.5" />
+                    <span>Distance Ruler</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="w-6 h-px bg-border my-0.5" />
+
+            {/* Undo / Redo */}
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={undoStack.length === 0}
+              className="w-9 h-9 rounded-md flex flex-col items-center justify-center border border-border text-foreground hover:bg-muted disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+              title={
+                undoStack.length > 0
+                  ? `Undo (${undoStack.length} step${undoStack.length > 1 ? 's' : ''}) — Ctrl+Z`
+                  : 'Undo (Ctrl+Z)'
+              }
+              aria-label="Undo Map Action"
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+              {undoStack.length > 0 && (
+                <span className="text-[8px] font-mono leading-none mt-0.5 text-muted-foreground">
+                  {undoStack.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={redoStack.length === 0}
+              className="w-9 h-9 rounded-md flex flex-col items-center justify-center border border-border text-foreground hover:bg-muted disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+              title={
+                redoStack.length > 0
+                  ? `Redo (${redoStack.length} step${redoStack.length > 1 ? 's' : ''}) — Ctrl+Y`
+                  : 'Redo (Ctrl+Y)'
+              }
+              aria-label="Redo Map Action"
+            >
+              <Redo2 className="h-3.5 w-3.5" />
+              {redoStack.length > 0 && (
+                <span className="text-[8px] font-mono leading-none mt-0.5 text-muted-foreground">
+                  {redoStack.length}
+                </span>
+              )}
+            </button>
+          </aside>
+        )}
+
+        <div className="flex-1 min-w-0 grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
         {/* Interactive Fantasy Cartography Canvas (8 cols) */}
         <div className="xl:col-span-8 card p-3 sm:p-5 overflow-x-auto bg-gradient-to-b from-amber-50/40 to-stone-100/50 dark:from-slate-900 dark:to-slate-950">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -4647,6 +4649,7 @@ export function MapCanvas({
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
 

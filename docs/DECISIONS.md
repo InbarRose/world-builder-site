@@ -1179,6 +1179,26 @@ status: active
   - Restores complete stage-by-stage fidelity to the original *World Building* ruleset while keeping advanced tools 1 click away for later ages and RPG prep.
   - All 223 unit and integration tests passing across 32 test suites.
 
+---
+
+## ADR-043: Full-Viewport Studio Shell, Top Real-Estate Reclamation & Photoshop-Style Left Vertical Tool Rail
+
+- **Status**: Accepted
+- **Date**: 2026-11-19
+- **Context**:
+  Previously, playing in World Studio stacked 4 horizontal chrome bars (~260–320px total vertical height) plus `max-w-7xl mx-auto` boxed margins above the map canvas, forcing players to scroll down constantly just to see their world map.
+- **Decision**:
+  1. **Full-Viewport Studio Shell (`Layout.tsx`)**:
+     - When on `/play`, `Layout.tsx` renders an edge-to-edge `h-screen w-screen overflow-hidden` shell (`full-viewport-studio-shell`), suppressing the tall global site navbar and footer to reclaim ~150px of vertical height and full widescreen width.
+  2. **Slim Photoshop-Style Studio Menu Bar (`Play.tsx`)**:
+     - Replaced the boxed `max-w-7xl` layout with a full-width `h-full w-full flex flex-col overflow-hidden` root (`studio-full-viewport-root`).
+     - Added a compact `☰ Menu` dropdown (`studio-site-menu-btn`) inside the slim top bar (`studio-top-menubar`) providing 1-click access to Home, Rules & Reference, World Atlas, and Studio Main Menu.
+  3. **48px Photoshop-Style Left Vertical Tool Rail (`MapCanvas.tsx`)**:
+     - Moved all active painting/navigation tools (`Select [S]`, `Brush [B]`, `Fill`, `Erase`, `Pan`, `GM Prep`, `Undo/Redo`) out of the top toolbar into a docked vertical left rail (`studio-left-tool-rail`) beside the map canvas, leaving a single slim top strip above the canvas.
+- **Consequences**:
+  - Reclaims ~200px+ of vertical screen height and full widescreen canvas width while establishing the foundational shell for Phases 38–39 (modular dockable, resizable, and floating studio panels).
+
+
 
 
 

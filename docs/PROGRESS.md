@@ -407,10 +407,10 @@ status: active
   - [x] Removed all numeric `World Stability Index (Stability XX%)` badges from `Play.tsx` header, sub-navigation, and Companion Mode.
   - [x] Made `MapCanvas.tsx` stage-aware: during **Stage 1: Genesis**, the Sidebar defaults to **Basic Geography** (Coastlines/Terrain, Relief/Water/Flora, and Location Lore Notes) with an optional `+ Later Ages` toggle (`toggle-later-age-layers-btn`); Free-Create keeps all layers open.
   - [x] Simplified Layer 4 Settlements (removed Trade Archetype headings, reframed to `Grow Settlement` / `Mark as Ruins`), renamed `🏆 Studio` → `🗺️ Studio`, removed numeric `Score:` from suggestions, and tucked `Fog / Reveal` & `Distance Ruler` into a compact `GM Prep` popover (`tool-gm-prep-btn`).
-- [ ] **Phase 37: Full-Viewport Shell & Top Real-Estate Reclamation** *(Planned ADR-043)*
-  - [ ] Lock active Play Studio to `100vw × 100vh` (`h-screen overflow-hidden`, zero page scrolling) by hiding the tall global site navbar/footer in `Layout.tsx` during active Studio sessions.
-  - [ ] Consolidate global nav, realm header, mode switcher, and studio menus into a single **38px Photoshop-style Top Menu Bar** (reclaiming ~220px of vertical space).
-  - [ ] Move MapCanvas tools (`Select`, `Brush`, `Fill`, `Erase`, `Pan`, `Palette`, `Layers`, `Undo/Redo`, `GM Tools`) into a **48px Vertical Left Tool Rail** beside the canvas, with a **24px Slim Bottom Status & Hover-Hint Bar**.
+- [x] **Phase 37: Full-Viewport Shell & Top Real-Estate Reclamation** *(ADR-043)*
+  - [x] Locked `/play` to `100vw × 100vh` (`h-screen w-screen overflow-hidden`) in `Layout.tsx` (`full-viewport-studio-shell`), suppressing the tall global site navbar and footer during active Studio play.
+  - [x] Converted `Play.tsx` to a full-bleed `studio-full-viewport-root` with a slim Photoshop-style top menu bar (`studio-top-menubar`) and compact `☰ Menu` dropdown (`studio-site-menu-btn`) for Home / Rules / Atlas / Main Menu.
+  - [x] Moved MapCanvas tools (`Select [S]`, `Brush [B]`, `Fill`, `Erase`, `Pan`, `GM Prep`, `Undo/Redo`) into a docked **48px Vertical Left Tool Rail** (`studio-left-tool-rail`) beside the map canvas.
 - [ ] **Phase 38: Modular Dockable & Resizable Side Panels (`WorkspaceDockEngine`)** *(Planned ADR-044)*
   - [ ] Implement `workspaceLayoutEngine.ts` with `localStorage` persistence for modular panels (`Cards & Turn`, `Tile Inspector`, `Codex`, `Chronicle / History`), dock slots (`left`, `right`, `bottom`, `floating`, `hidden`), resizable splitters, and 1-click Workspace Presets (`Classic Studio`, `Pure Canvas`, `Card Focus`, `Lore & Chronicle`).
   - [ ] Keep the World Map centered and always visible while panels dock on the sides/bottom with independent internal scrolling and 1-click dock-repositioning controls.

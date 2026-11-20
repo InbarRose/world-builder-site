@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Play as PlayIcon,
   Shuffle,
@@ -40,6 +40,7 @@ import {
   Camera,
   Lightbulb,
   MessageSquare,
+  Menu,
 } from 'lucide-react'
 import {
   BotPersonalityId,
@@ -267,6 +268,7 @@ export function Play() {
   const [showAgesModal, setShowAgesModal] = useState(false)
   const [showDeckEmptyDialog, setShowDeckEmptyDialog] = useState(false)
   const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
+  const [showSiteMenu, setShowSiteMenu] = useState(false)
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
   const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
@@ -1874,55 +1876,125 @@ export function Play() {
 
   if (isInLauncher) {
     return (
-      <div className="max-w-7xl mx-auto py-4">
-        <StudioLauncher onSelectWorld={handleLauncherSelectWorld} />
-        {showNewGameCeremonyModal && (
-          <NewGameCeremonyModal
-            isOpen={showNewGameCeremonyModal}
-            onClose={() => setShowNewGameCeremonyModal(false)}
-            onLaunchWorld={(nw) => {
-              saveWorld(nw)
-              handleLauncherSelectWorld(nw)
-              setShowNewGameCeremonyModal(false)
-            }}
-          />
-        )}
-        {incomingSharedWorld && (
-          <IncomingSharedWorldModal
-            incomingWorld={incomingSharedWorld}
-            onAccept={handleAcceptSharedWorld}
-            onDecline={handleDeclineSharedWorld}
-          />
-        )}
+      <div className="h-full w-full overflow-y-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          <StudioLauncher onSelectWorld={handleLauncherSelectWorld} />
+          {showNewGameCeremonyModal && (
+            <NewGameCeremonyModal
+              isOpen={showNewGameCeremonyModal}
+              onClose={() => setShowNewGameCeremonyModal(false)}
+              onLaunchWorld={(nw) => {
+                saveWorld(nw)
+                handleLauncherSelectWorld(nw)
+                setShowNewGameCeremonyModal(false)
+              }}
+            />
+          )}
+          {incomingSharedWorld && (
+            <IncomingSharedWorldModal
+              incomingWorld={incomingSharedWorld}
+              onAccept={handleAcceptSharedWorld}
+              onDecline={handleDeclineSharedWorld}
+            />
+          )}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4">
+    <div
+      data-testid="studio-full-viewport-root"
+      className="h-full w-full flex flex-col overflow-hidden"
+    >
       {/* =========================================================================
-          1. LEVEL 1: UNIFIED PLAY WORKSPACE HEADER (AAA HIERARCHY & FOCUS ZONES)
+          1. LEVEL 1: SLIM FULL-VIEWPORT STUDIO MENU BAR (PHOTOSHOP-STYLE)
           ========================================================================= */}
-      <header className="no-print card p-3 sm:p-3.5 space-y-2.5 border-border/80 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          {/* ZONE 1 (Left): Navigation Hierarchy & Breadcrumbs */}
-          <div className="flex flex-wrap items-center gap-2 min-w-0">
+      <header
+        data-testid="studio-top-menubar"
+        className="no-print border-b border-border/80 bg-card/95 backdrop-blur px-2.5 py-1.5 space-y-1.5 shrink-0 z-30"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* ZONE 1 (Left): App Menu Dropdown & Realm Breadcrumbs */}
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {/* Compact Site Navigation Menu (replaces bulky global site navbar) */}
+            <div className="relative">
+              <button
+                type="button"
+                data-testid="studio-site-menu-btn"
+                onClick={() => {
+                  setShowSiteMenu((prev) => !prev)
+                  setShowAtmosphereMenu(false)
+                  setShowSettingsMenu(false)
+                  setShowShareMenu(false)
+                }}
+                className="px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-xs font-semibold flex items-center gap-1 transition-colors"
+                title="World Builder Navigation (Home, Rules, Atlas, Main Menu)"
+                aria-label="World Builder Menu"
+              >
+                <Menu className="h-3.5 w-3.5 text-primary" />
+                <span className="hidden xl:inline">Menu</span>
+              </button>
+              {showSiteMenu && (
+                <div
+                  data-testid="studio-site-menu-popover"
+                  className="absolute left-0 mt-1.5 w-48 rounded-xl border border-border bg-card shadow-xl p-1.5 z-50 text-xs space-y-0.5"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSiteMenu(false)
+                      handleReturnToLauncher()
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
+                  >
+                    <Home className="h-3.5 w-3.5 text-primary" />
+                    <span>Studio Main Menu</span>
+                  </button>
+                  <Link
+                    to="/"
+                    onClick={() => setShowSiteMenu(false)}
+                    className="w-full px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    <span>Home Page</span>
+                  </Link>
+                  <Link
+                    to="/rules"
+                    onClick={() => setShowSiteMenu(false)}
+                    className="w-full px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span>Rules &amp; Reference</span>
+                  </Link>
+                  <Link
+                    to="/map"
+                    onClick={() => setShowSiteMenu(false)}
+                    className="w-full px-2.5 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <MapIcon className="h-3.5 w-3.5" />
+                    <span>World Atlas</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Title Screen / Main Menu Button */}
             <button
               type="button"
               onClick={handleReturnToLauncher}
-              className="px-2.5 py-1.5 rounded-lg border border-border bg-muted/40 hover:bg-muted text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+              className="px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-xs font-semibold flex items-center gap-1 transition-colors"
               title="Return to Play Studio Main Menu"
             >
               <Home className="h-3.5 w-3.5 text-primary" />
-              <span>Main Menu</span>
+              <span className="hidden sm:inline">Main Menu</span>
             </button>
 
-            <span className="text-muted-foreground/60 select-none">/</span>
+            <span className="text-muted-foreground/50 select-none">/</span>
 
             {/* Realm Identity Pill */}
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate max-w-[200px] sm:max-w-[280px]">
+              <span className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate max-w-[180px] sm:max-w-[240px]">
                 {world.name}
               </span>
               {world.isLocked && (
@@ -2567,6 +2639,8 @@ export function Play() {
           </nav>
         )}
       </header>
+
+      <div className="flex-1 min-h-0 overflow-y-auto px-2.5 py-2 space-y-3">
 
       {/* Celebratory Stage Advance Banner */}
       {stageCelebration && (
@@ -5632,6 +5706,7 @@ export function Play() {
         isOpen={showShortcutsModal}
         onClose={() => setShowShortcutsModal(false)}
       />
+      </div>
     </div>
   )
 }
