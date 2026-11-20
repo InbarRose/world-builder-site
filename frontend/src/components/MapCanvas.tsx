@@ -84,8 +84,18 @@ import {
   calculateTileDefense,
   calculateProvinceEconomy,
   getProvinceChronicleHistory,
+  upgradeTileSettlementTier,
+  collapseTileSettlementToRuins,
+  reclaimTileRuins,
+  getSettlementResourceSynergy,
   ProvinceTier,
 } from '../engine/geopoliticalEngine'
+import {
+  detectGeographicRegions,
+  assignRegionNameToCluster,
+  autoNameMajorRegions,
+  generateEvocativeRegionName,
+} from '../engine/regionCartographyEngine'
 import {
   renderCartographicMarkerSVG,
   getSymbolsByCategory,
@@ -670,6 +680,16 @@ export function MapCanvas({
     return projectRealmInfluence(map, entities).geopolitical
   }, [map, entities])
 
+  const regionAnalysis = React.useMemo(() => {
+    return detectGeographicRegions(map, 1)
+  }, [map])
+
+  const handleAutoNameAllRegions = () => {
+    pushToUndo(map)
+    onChange(autoNameMajorRegions(map, 3))
+    setVisibleLayers((prev) => ({ ...prev, labels: true }))
+  }
+
   const [selectedTerrain, setSelectedTerrain] = useState<TerrainType>('plains')
   const [selectedRelief, setSelectedRelief] = useState<ReliefType>('none')
   const [selectedFlora, setSelectedFlora] = useState<FloraType>('none')
@@ -1051,6 +1071,16 @@ export function MapCanvas({
 
   const inspectedDomain = getTileDomain(inspectedTile)
   const inspectedSlots = getEffectiveTileSlots(inspectedTile, entities)
+  const inspectedRegion = regionAnalysis.tileRegionMap[selectedTileId]
+  const inspectedSynergy = React.useMemo(
+    () => getSettlementResourceSynergy(map, selectedTileId),
+    [map, selectedTileId]
+  )
+
+  const handleAssignInspectedRegionName = (newName: string) => {
+    pushToUndo(map)
+    onChange(assignRegionNameToCluster(map, selectedTileId, newName))
+  }
 
   const applyToolToTile = (col: number, row: number, altKey = false) => {
     const id = getTileId(col, row)
@@ -2106,6 +2136,15 @@ export function MapCanvas({
                 >
                   <span>👑 Project Realm Borders</span>
                 </button>
+                <button
+                  type="button"
+                  data-testid="auto-name-regions-btn"
+                  onClick={handleAutoNameAllRegions}
+                  className="btn-outline px-2.5 py-1 text-xs flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/30 font-medium"
+                  title="Automatically detect and name major contiguous mountain ranges, forests, deserts, swamps, and inland seas"
+                >
+                  <span>🗺️ Auto-Name Regions</span>
+                </button>
               </div>
             </div>
 
@@ -2820,6 +2859,11 @@ export function MapCanvas({
                       const neighborContext = computeTileNeighborContext(map, col, row)
                       const tilePerims = computeBorderPerimeters(map, id)
                       const provinceProfile = geopoliticalState.provinces[id]
+                      const tileRegion = regionAnalysis.tileRegionMap[id]
+                      const isRegionCentroid =
+                        Boolean(tileRegion?.isNamed) &&
+                        tileRegion.centroid.col === col &&
+                        tileRegion.centroid.row === row
 
                       // Hex vs Square calculations
                       const center = isHex
@@ -3060,6 +3104,17 @@ export function MapCanvas({
                       {visibleLayers.labels && tile.label && (
                         <span className="relative z-10 text-[8px] font-serif font-bold text-amber-50 bg-stone-950/75 px-1 rounded truncate max-w-[94%] mt-0.5 shadow-sm">
                           {tile.label}
+                        </span>
+                      )}
+
+                      {/* Geographic Region Centroid Banner */}
+                      {visibleLayers.labels && isRegionCentroid && tileRegion && (
+                        <span
+                          data-testid={`region-banner-${col}-${row}`}
+                          className="relative z-20 text-[8px] font-serif italic font-bold text-amber-200 bg-stone-900/90 border border-amber-400/50 px-1.5 py-0.2 rounded-full truncate max-w-[96%] mt-0.5 shadow-md tracking-wide"
+                          title={`${tileRegion.name} (${tileRegion.categoryLabel} · ${tileRegion.tileIds.length} tiles)`}
+                        >
+                          {tileRegion.icon} {tileRegion.name}
                         </span>
                       )}
 
@@ -3353,6 +3408,56 @@ export function MapCanvas({
                   className="input w-full text-xs h-8"
                 />
               </div>
+
+              {inspectedRegion && (
+                <div
+                  data-testid="inspector-region-card"
+                  className="pt-2 border-t border-primary/15 space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                      <span>{inspectedRegion.icon}</span>
+                      <span>
+                        Region ({inspectedRegion.categoryLabel} · {inspectedRegion.tileIds.length}{' '}
+                        {inspectedRegion.tileIds.length === 1 ? 'tile' : 'tiles'})
+                      </span>
+                    </label>
+                    {!isViewOnly && (
+                      <button
+                        type="button"
+                        data-testid="inspector-autoname-region-btn"
+                        onClick={() => {
+                          const generated = generateEvocativeRegionName(
+                            inspectedRegion.category,
+                            inspectedTile.col * 31 +
+                              inspectedTile.row * 17 +
+                              Math.floor(Math.random() * 100)
+                          )
+                          handleAssignInspectedRegionName(generated)
+                        }}
+                        className="text-[10px] font-semibold text-primary hover:underline"
+                        title="Auto-name this entire contiguous geographic region"
+                      >
+                        🎲 Name Region
+                      </button>
+                    )}
+                  </div>
+                  {!isViewOnly ? (
+                    <input
+                      type="text"
+                      data-testid="inspector-region-name-input"
+                      value={inspectedTile.regionName || ''}
+                      onChange={(e) => handleAssignInspectedRegionName(e.target.value)}
+                      placeholder={`Name all ${inspectedRegion.tileIds.length} contiguous ${inspectedRegion.categoryLabel.toLowerCase()} tiles...`}
+                      className="input w-full text-xs h-7"
+                    />
+                  ) : (
+                    <p className="text-xs font-serif italic text-foreground">
+                      {inspectedRegion.name}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Direct In-Place Layered Tile Studio (Edit Mode Only) */}
@@ -3860,6 +3965,94 @@ export function MapCanvas({
                         ))}
                       </div>
                     </div>
+
+                    {/* Settlement Lifecycle & Connected Resource Trade Synergy */}
+                    {(['settlement', 'town', 'city', 'capital', 'castle'].includes(
+                      inspectedTile.overlay
+                    ) ||
+                      inspectedTile.overlay === 'ruins') && (
+                      <div
+                        data-testid="inspector-settlement-lifecycle-panel"
+                        className="pt-2 border-t border-border/70 space-y-2"
+                      >
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-semibold text-foreground">
+                            {inspectedSynergy.tradeArchetype}
+                          </span>
+                          {inspectedSynergy.prosperityBonus > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
+                              +{inspectedSynergy.prosperityBonus} Prosperity
+                            </span>
+                          )}
+                        </div>
+
+                        {inspectedSynergy.allResources.length > 0 && (
+                          <p className="text-[10px] text-muted-foreground">
+                            <span className="font-semibold">Connected Layer 3 Resources:</span>{' '}
+                            {inspectedSynergy.allResources.join(', ')}
+                          </p>
+                        )}
+
+                        {inspectedTile.overlay === 'ruins' ? (
+                          <div className="flex items-center justify-between gap-2 bg-stone-500/10 border border-stone-500/30 rounded p-1.5">
+                            <div className="text-[10px]">
+                              <span className="font-bold text-amber-700 dark:text-amber-300 block">
+                                🏛️ {inspectedTile.ruinOriginLabel || 'Ancient Settlement Ruins'}
+                              </span>
+                              {inspectedTile.ancestralOwnerId &&
+                                entityColorMap[inspectedTile.ancestralOwnerId] && (
+                                  <span className="text-muted-foreground">
+                                    Ancestral Builder:{' '}
+                                    {entityColorMap[inspectedTile.ancestralOwnerId].name}
+                                  </span>
+                                )}
+                            </div>
+                            <button
+                              type="button"
+                              data-testid="inspector-reclaim-ruins-btn"
+                              onClick={() =>
+                                handleUpdateInspectedTile(reclaimTileRuins(inspectedTile))
+                              }
+                              className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-colors shadow-2xs"
+                              title="Reclaim and rebuild these ruins into an active settlement"
+                            >
+                              ⚒️ Reclaim & Rebuild
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              data-testid="inspector-upgrade-settlement-btn"
+                              onClick={() =>
+                                handleUpdateInspectedTile(
+                                  upgradeTileSettlementTier(inspectedTile)
+                                )
+                              }
+                              className="flex-1 py-1 px-2 rounded bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                              title="Advance holding to the next urban or fortified tier"
+                            >
+                              <span>⬆️</span>
+                              <span>Upgrade Holding</span>
+                            </button>
+                            <button
+                              type="button"
+                              data-testid="inspector-collapse-ruins-btn"
+                              onClick={() =>
+                                handleUpdateInspectedTile(
+                                  collapseTileSettlementToRuins(inspectedTile)
+                                )
+                              }
+                              className="flex-1 py-1 px-2 rounded bg-amber-600/15 hover:bg-amber-600/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                              title="Cataclysm / Siege: Collapse this holding into explorable TTRPG ruins while preserving its ancestral lore"
+                            >
+                              <span>🏚️</span>
+                              <span>Collapse to Ruins</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
