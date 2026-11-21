@@ -184,9 +184,9 @@ export function createWorkspacePreset(presetId: WorkspacePresetId): StudioWorksp
   return {
     presetId: 'classic',
     panels,
-    leftDockWidth: 340,
-    rightDockWidth: 340,
-    bottomDockHeight: 210,
+    leftDockWidth: 320,
+    rightDockWidth: 320,
+    bottomDockHeight: 170,
     activeLeftTab: 'cards',
     activeRightTab: null,
     activeBottomTab: 'codex',
