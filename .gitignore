@@ -38,3 +38,8 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
+
+# Local exported simulation worlds & Playwright artifacts
+local-exports/
+frontend/playwright-report/
+frontend/test-results/
