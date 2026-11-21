@@ -192,7 +192,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
 
-    // Switch to 3.1 Companion Mode
+    // Switch to 3.1 Companion Mode via ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Companion/i }))
     })
@@ -206,7 +209,10 @@ describe('Play Studio & Rules Integration', () => {
       screen.getByText(/Full 4-Ages Matrix/i)
     ).toBeInTheDocument()
 
-    // Switch to 3.3 Freeform Mode
+    // Switch to 3.3 Freeform Mode via ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Free-Create/i }))
     })
@@ -384,7 +390,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
-    // Open Adventure Hooks modal from header
+    // Open Adventure Hooks modal from ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     const hooksBtn = screen.getByRole('button', { name: /Tabletop Campaign Adventure Hooks/i })
     await act(async () => {
       fireEvent.click(hooksBtn)
@@ -396,7 +405,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Close Campaign Hooks Dialog/i }))
     })
 
-    // Open Session Zero Primer modal from header
+    // Open Session Zero Primer modal from ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     const primerBtn = screen.getByRole('button', { name: /Session Zero 1-Page Campaign Primer/i })
     await act(async () => {
       fireEvent.click(primerBtn)
@@ -521,7 +533,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
-    // Open Real-Time Table Peer Sync Modal
+    // Open Real-Time Table Peer Sync Modal via ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     const syncBtn = screen.getByRole('button', { name: /Real-Time Table Peer Synchronization/i })
     await act(async () => {
       fireEvent.click(syncBtn)
@@ -891,7 +906,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
     })
 
-    // 1. Open Session Checkpoint Vault via header button
+    // 1. Open Session Checkpoint Vault via ⋯ More menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
     const vaultBtn = screen.getByTestId('header-open-vault-btn')
     await act(async () => {
       fireEvent.click(vaultBtn)
@@ -1023,11 +1041,16 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
 
-    // Phase 47: Modular Studio with centered Map Canvas is active immediately on launch
+    // Phase 47 & 59: Modular Studio + always-visible Turn State-Machine Stepper active on launch
     expect(screen.getByTestId('studio-dock-workspace')).toBeInTheDocument()
     expect(screen.getByTestId('studio-center-canvas')).toBeInTheDocument()
+    expect(screen.getByTestId('top-nav-turn-stepper')).toBeInTheDocument()
+    expect(screen.getByTestId('studio-more-tools-btn')).toBeInTheDocument()
 
-    // Phase 48: Open Pre-Stage Setup Ritual Modal
+    // Phase 48 & 59: Open Pre-Stage Setup Ritual Modal via Workspace menu
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('studio-workspace-menu-btn'))
+    })
     await act(async () => {
       fireEvent.click(screen.getByTestId('open-prestage-setup-btn'))
     })
