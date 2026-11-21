@@ -3139,7 +3139,7 @@ export function Play() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed inset-x-0 top-16 z-50 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-95 duration-300"
+          className="fixed inset-x-0 bottom-14 z-50 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-95 duration-300"
         >
           <div className="px-6 py-2.5 rounded-2xl bg-amber-500 text-stone-950 font-black shadow-2xl backdrop-blur-md border border-amber-300 flex items-center gap-3">
             <Sparkles className="h-5 w-5 animate-spin text-amber-950" />
@@ -5839,7 +5839,7 @@ export function Play() {
                   className="no-print card px-3 py-1.5 bg-card/95 backdrop-blur-md border-primary/25 shadow-sm flex flex-wrap items-center justify-between gap-2 text-xs"
                 >
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    {drawnCard ? (
+                    {turnPhase === 'action_select' && drawnCard ? (
                       <>
                         <span className="px-2 py-0.5 rounded-md bg-primary/15 text-primary font-bold flex items-center gap-1">
                           <span>{getCardDisplay(drawnCard).display}</span>
@@ -5874,7 +5874,7 @@ export function Play() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                    {!drawnCard ? (
+                    {!(turnPhase === 'action_select' && drawnCard) ? (
                       <>
                         <button
                           type="button"
@@ -6094,7 +6094,7 @@ export function Play() {
                               Quick Ideas for {powerData?.power || 'This Card'}:
                             </div>
                             <div className="flex flex-wrap gap-1">
-                              {availableActionPresets.slice(0, 6).map((preset) => (
+                              {availableActionPresets.slice(0, 4).map((preset) => (
                                 <button
                                   key={preset.id}
                                   type="button"
@@ -6121,14 +6121,14 @@ export function Play() {
                             setTurnDraft((prev) => ({ ...prev, featureName: e.target.value }))
                           }
                           placeholder="Name this feature or event..."
-                          className="input w-full h-8 text-xs"
+                          className="input w-full h-7 text-xs"
                         />
                         <textarea
                           value={turnDraft.note}
                           onChange={(e) =>
                             setTurnDraft((prev) => ({ ...prev, note: e.target.value }))
                           }
-                          rows={3}
+                          rows={2}
                           placeholder="Record what happened in the world chronicle..."
                           className="input w-full text-xs resize-y"
                         />

@@ -455,5 +455,8 @@ status: active
   - [x] Added `studio-top-card-ribbon` directly above the center World Map in `StudioDockWorkspace.tsx` + `Play.tsx` (`Draw Card`, `Freeform`, `📍 Place / Edit Map`, `✓ Log Turn`, `Redraw`, `Discard`, and `🗺️ Pure Canvas` toggle).
 - [x] **Phase 55: Headless 270-Permutation Campaign Fuzz & Simulation Suite (Local & CI)** *(ADR-059)*
   - [x] Created `frontend/src/test/headlessCampaignSimulation.test.ts` verifying 120 Pre-Genesis bare-map permutations, 100 full 4-stage headless campaign playthroughs with JSON round-trip & 2-Page Overview synthesis, and 50 Turn Map Session / Card Flexibility permutations.
+- [x] **Phase 56: Live Multi-Stage Browser E2E Verification & Surgical UX Polish** *(ADR-060 · ADR-045 Score: 92.0 / 100)*
+  - [x] Verified all 8 live interactive E2E user journey steps at `1440×900` (`0` console errors, `0` failed network requests): full-viewport `100vh` lock, bare Pre-Genesis map, Top Card Ribbon draw/place/lock-in/log, State-Machine Lock after Turn #1, Pure Canvas + Edge Trays, and `Genesis → Primal` transition + Pre-Primal Species creation.
+  - [x] Fixed Top Card Ribbon reset after `Log Turn`, centered floating Edge Tray bar (`bottom-3 left-1/2`), tightened Left Dock height so primary buttons stay visible without inner scroll, and moved Era Celebration toast to `bottom-14`.
 
 

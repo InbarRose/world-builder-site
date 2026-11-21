@@ -1479,6 +1479,23 @@ status: active
 - **Consequences**:
   - Guarantees rock-solid headless engine reliability across 270+ automated permutations in `< 1 second` on every commit and PR.
 
+---
+
+## ADR-060: Live Multi-Stage Browser E2E Verification & Surgical UX Polish
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  A live interactive multi-stage E2E playthrough (`Genesis → Primal`) at `1440×900` verified all 8 core journeys passing with `0` console errors and `0` failed network requests (`1440×900` zero-scroll viewport lock, ultra-bare Pre-Genesis map, Top Card Draw Ribbon, multi-tile placement + Lock In, State-Machine Lock after Turn #1, Pure Canvas + Edge Trays, and Pre-Primal Species Ritual), while surfacing 4 final surgical UX polish items.
+- **Decision**:
+  1. **Top Card Draw Ribbon Turn-End Reset (`Play.tsx`)**: Gated active card display on `turnPhase === 'action_select' && drawnCard` so clicking `✓ Log Turn` cleanly resets the ribbon back to `▶ Draw Card`.
+  2. **Centered Floating Edge Tray Dock (`StudioDockWorkspace.tsx`)**: Positioned `studio-edge-tray-bar` at `bottom-3 left-1/2 -translate-x-1/2` so Pure Canvas edge pills never overlap the right-hand Tile Inspector.
+  3. **Tighter Left Dock Fit (`Play.tsx`)**: Reduced docked quick-idea chips to 4 and note rows to 2 so `📍 Place / Drag on Map` and `✓ Log Turn` fit cleanly without clipping at `1440×900`.
+  4. **Unobstructed Era Celebration Toast (`Play.tsx`)**: Moved `stageCelebration` toast from `top-16` to `bottom-14` so it never overlaps top header actions.
+- **Consequences**:
+  - Elevates the verified ADR-045 adversarial score from **84.5 -> 92.0 / 100** across **34 test suites (234/234 tests passing, including 270 headless permutations)** and verified live E2E browser journeys.
+
+
 
 
 

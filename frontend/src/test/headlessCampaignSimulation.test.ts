@@ -101,9 +101,12 @@ describe('Phase 55: Headless Multi-Hundred-Permutation Campaign Simulation Suite
 
     for (let i = 0; i < 100; i++) {
       const preset = ALL_PRESETS[i % ALL_PRESETS.length]
-      const baseWorld = createNewWorld(`Simulated Realm #${i + 1}`, {
-        geographyPreset: preset,
-      })
+      const seed = `sim-campaign-${i}`
+      const baseWorld = createNewWorld(`Simulated Realm #${i + 1}`, seed)
+      baseWorld.map = generateNaturalWorld({ width: 20, height: 12, seed, preset })
+      if (baseWorld.generationSettings) {
+        baseWorld.generationSettings.geographyPreset = preset
+      }
 
       // Play through all 4 stages headlessly (3 turns per stage = 12 turns per full campaign)
       const finished = autoPlayFullWorld(baseWorld, 3)
@@ -156,9 +159,10 @@ describe('Phase 55: Headless Multi-Hundred-Permutation Campaign Simulation Suite
       const isDisaster = i % 5 === 0
       const isFantastical = !isDisaster && i % 3 === 0
 
-      const world = createNewWorld(`Session Perm ${i}`, {
-        geographyPreset: ALL_PRESETS[i % ALL_PRESETS.length],
-      })
+      const preset = ALL_PRESETS[i % ALL_PRESETS.length]
+      const seed = `session-perm-${i}`
+      const world = createNewWorld(`Session Perm ${i}`, seed)
+      world.map = generateNaturalWorld({ width: 20, height: 12, seed, preset })
       const deck = buildShuffledDeck(world.deckConfig)
       expect(deck.length).toBeGreaterThan(20)
 

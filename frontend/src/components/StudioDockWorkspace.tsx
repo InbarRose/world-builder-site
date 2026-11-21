@@ -399,7 +399,7 @@ export function StudioDockWorkspace({
       {collapsedOrHiddenPanels.length > 0 && (
         <div
           data-testid="studio-edge-tray-bar"
-          className="no-print fixed bottom-3 right-3 z-40 flex items-center gap-1.5 px-2 py-1.5 rounded-full border border-border/90 bg-card/95 backdrop-blur-md shadow-xl"
+          className="no-print fixed bottom-3 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border/90 bg-card/95 backdrop-blur-md shadow-xl"
         >
           {collapsedOrHiddenPanels.map((p) => {
             const badge = panelBadges[p.id]
