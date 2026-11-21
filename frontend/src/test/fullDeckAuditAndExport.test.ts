@@ -4,6 +4,7 @@ import {
   auditFullDeckAcrossAllStages,
   runAndAuditWorldPermutation,
 } from '../engine/fullDeckAuditEngine'
+import { serializeWorldForExport } from '../engine/storageService'
 
 describe('Phase 58: Exhaustive 54-Card × 4-Stage Audit & Full-Deck Loadable World Exports (ADR-062)', () => {
   it('audits all 54 cards across all 4 stages (216 card-phase pairs) confirming >= 10 presets, >= 15 examples, and valid map stamps', () => {
@@ -35,6 +36,8 @@ describe('Phase 58: Exhaustive 54-Card × 4-Stage Audit & Full-Deck Loadable Wor
       expect(res.audit.settlements).toBeGreaterThan(0)
       expect(res.audit.namedLandmarks).toBeGreaterThan(0)
       expect(res.audit.entities).toBeGreaterThan(0)
+      // Engineering Data Efficiency Gate: even a 216-turn portable .world.json must stay < 750 KB
+      expect(res.audit.jsonBytes).toBeLessThan(750_000)
     }
 
     // Verify World #1 truly played a full 54-card deck per phase (216 turns)
@@ -67,7 +70,7 @@ describe('Phase 58: Exhaustive 54-Card × 4-Stage Audit & Full-Deck Loadable Wor
         const mdPath = path.join(outDir, `${res.spec.slug}.2-page-overview.md`)
         const svgPath = path.join(outDir, `${res.spec.slug}.map.svg`)
 
-        fs.writeFileSync(jsonPath, JSON.stringify(res.world, null, 2), 'utf-8')
+        fs.writeFileSync(jsonPath, serializeWorldForExport(res.world, true), 'utf-8')
         fs.writeFileSync(mdPath, res.overviewMarkdown, 'utf-8')
         fs.writeFileSync(svgPath, res.mapSvg, 'utf-8')
 

@@ -207,6 +207,32 @@ export function branchWorldAtMove(
   )
 }
 
+export const MAX_ROLLING_TURN_SNAPSHOTS = 12
+
+export function appendCappedTurnSnapshot(
+  existing: TurnSnapshot[] | undefined,
+  snapshot: TurnSnapshot,
+  maxSnapshots = MAX_ROLLING_TURN_SNAPSHOTS
+): TurnSnapshot[] {
+  const filtered = (existing || []).filter((s) => s.moveId !== snapshot.moveId)
+  const next = [...filtered, snapshot]
+  return next.length > maxSnapshots ? next.slice(next.length - maxSnapshots) : next
+}
+
+/**
+ * Serializes a WorldState cleanly for portable .world.json export/sharing.
+ * Strips redundant per-turn full-map snapshots so even 200+ turn worlds stay
+ * compact (~200-400 KB instead of 30+ MB) while preserving 100% of Chronicle,
+ * Map, Codex Entities, Players, and Settings.
+ */
+export function serializeWorldForExport(world: WorldState, pretty = true): string {
+  const portable: WorldState = {
+    ...world,
+    snapshots: [],
+  }
+  return pretty ? JSON.stringify(portable, null, 2) : JSON.stringify(portable)
+}
+
 export function recordTurnSnapshot(world: WorldState, moveId: number): TurnSnapshot {
   return {
     moveId,
@@ -369,6 +395,7 @@ export function serializeWorld(world: WorldState): string {
     {
       ...world,
       schemaVersion: CURRENT_SCHEMA_VERSION,
+      snapshots: [],
     },
     null,
     2
