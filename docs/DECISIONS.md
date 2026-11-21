@@ -1463,6 +1463,23 @@ status: active
 - **Consequences**:
   - Enables an entire 4-age *World Building* session on a single uninterrupted pane of glass with 90%+ of the viewport dedicated to the living map.
 
+---
+
+## ADR-059: Headless Multi-Hundred-Permutation Campaign Fuzz & Simulation Test Suite (`headlessCampaignSimulation.test.ts`)
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Unit tests for individual functions did not verify end-to-end headless campaign stability across hundreds of seeds, geography presets, card draws, and full 4-stage playthroughs.
+- **Decision**:
+  - Created `frontend/src/test/headlessCampaignSimulation.test.ts` running automatically both locally and in GitHub Actions CI (`npm run test:ci`):
+    - **120 Pre-Genesis Bare-Map Permutations** (20 seeds × 6 geography presets) asserting `>= 92%` bare open plains, `1–2` mountains, `1–2` forests, and `0` rivers/slots/settlements.
+    - **100 Complete Headless 4-Stage Campaign Playthroughs** (`Genesis → Primal → Civilization → Intrigue`) verifying contiguous `moveId`s, zero corrupt states, lossless JSON export/re-import round-trips, and valid 2-Page World Overview synthesis.
+    - **50 Interactive Turn Map Session & Card Flexibility Permutations** verifying Drag-to-Move clean tile reversion, Multi-Tile range painting, Free Map Edit diff tracking, and Chronicle `linkedTileIds` sync.
+- **Consequences**:
+  - Guarantees rock-solid headless engine reliability across 270+ automated permutations in `< 1 second` on every commit and PR.
+
+
 
 
 
