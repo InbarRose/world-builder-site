@@ -208,9 +208,17 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
       await restoreBtn.click()
     }
 
-    // 2. Open & close Compendium, Session Checkpoint Vault, Hooks, Primer
+    // 2. Verify always-visible Turn State-Machine Stepper & tucked ⋯ More Tools popover
+    await expect(page.getByTestId('top-nav-turn-stepper')).toBeVisible({ timeout: 5000 })
+    const moreBtn = page.getByTestId('studio-more-tools-btn')
+    await expect(moreBtn).toBeVisible({ timeout: 5000 })
+    // Table Sync & Vault must be tucked inside More ▾ (not cluttering the main top bar)
+    await expect(page.getByTestId('studio-more-tools-popover')).toHaveCount(0)
+
     for (const label of [/Compendium/i, /Session Checkpoint Vault/i, /Hooks/i, /Primer/i]) {
-      const btn = page.getByRole('button', { name: label }).first()
+      await moreBtn.click()
+      await expect(page.getByTestId('studio-more-tools-popover')).toBeVisible({ timeout: 3000 })
+      const btn = page.getByTestId('studio-more-tools-popover').getByRole('button', { name: label }).first()
       if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
         await btn.click()
         await page.waitForTimeout(150)

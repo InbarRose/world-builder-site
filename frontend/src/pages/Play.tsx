@@ -283,7 +283,6 @@ export function Play() {
   const [showSetupWizardModal, setShowSetupWizardModal] = useState(false)
   const [showAgesModal, setShowAgesModal] = useState(false)
   const [showDeckEmptyDialog, setShowDeckEmptyDialog] = useState(false)
-  const [showAtmosphereMenu, setShowAtmosphereMenu] = useState(false)
   const [showSiteMenu, setShowSiteMenu] = useState(false)
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
   const [showCardOptionsMenu, setShowCardOptionsMenu] = useState(false)
@@ -323,6 +322,7 @@ export function Play() {
   }, [activeTab])
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
+  const [showMoreToolsMenu, setShowMoreToolsMenu] = useState(false)
   const [showEpochCeremonyModal, setShowEpochCeremonyModal] = useState(false)
   const [showPreStageModal, setShowPreStageModal] = useState(false)
   const [showNewGameCeremonyModal, setShowNewGameCeremonyModal] = useState(false)
@@ -620,9 +620,9 @@ export function Play() {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (!target.closest('.focus-popover-container')) {
-        setShowAtmosphereMenu(false)
         setShowShareMenu(false)
         setShowSettingsMenu(false)
+        setShowMoreToolsMenu(false)
       }
     }
     document.addEventListener('click', handleOutsideClick)
@@ -2302,8 +2302,7 @@ export function Play() {
                 data-testid="studio-site-menu-btn"
                 onClick={() => {
                   setShowSiteMenu((prev) => !prev)
-                  setShowAtmosphereMenu(false)
-                  setShowSettingsMenu(false)
+                            setShowSettingsMenu(false)
                   setShowShareMenu(false)
                 }}
                 className="px-2 py-1 rounded-md border border-border bg-muted/40 hover:bg-muted text-xs font-semibold flex items-center gap-1 transition-colors"
@@ -2398,59 +2397,60 @@ export function Play() {
             )}
 
             {/* Turn Counter Pill */}
-            <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-mono font-medium">
+            <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-mono font-medium">
               Turn #{drawHistory.length}
             </span>
+
+            {/* Always-Visible Turn State-Machine Stepper (Phase 59) */}
+            {gameMode !== 'free-create' && (
+              <div
+                data-testid="top-nav-turn-stepper"
+                className="hidden md:flex items-center gap-1 px-2 py-0.5 rounded-lg bg-muted/50 border border-border/70 text-[11px]"
+                title="Active Turn Flow: Draw a card → Shape & Place on Map → Log to Chronicle"
+              >
+                <span
+                  className={
+                    turnPhase === 'await_draw'
+                      ? 'font-bold text-primary'
+                      : 'text-muted-foreground'
+                  }
+                >
+                  1. Draw
+                </span>
+                <span className="text-muted-foreground/50">→</span>
+                <span
+                  className={
+                    turnPhase === 'action_select' || isPlacementActive
+                      ? 'font-bold text-primary'
+                      : 'text-muted-foreground'
+                  }
+                >
+                  {isPlacementActive ? '2. Placing on Map' : '2. Shape'}
+                </span>
+                <span className="text-muted-foreground/50">→</span>
+                <span
+                  className={
+                    turnPhase === 'action_select' &&
+                    !isPlacementActive &&
+                    (Boolean(selectedPreset) || Boolean(pendingNote.trim()) || turnModifiedTiles.length > 0)
+                      ? 'font-bold text-emerald-600 dark:text-emerald-400'
+                      : 'text-muted-foreground'
+                  }
+                >
+                  3. Log
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* ZONE 2 (Center): Play Studio Mode Segment */}
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border text-xs font-semibold shadow-inner">
-            <button
-              type="button"
-              onClick={() => handleModeChange('companion')}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                gameMode === 'companion'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              title="3.1 Companion Mode: Card draw & live table companion"
-            >
-              <span>🃏 Companion</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeChange('studio')}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                gameMode === 'studio'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              title="3.2 Full Studio: Complete turn orchestration"
-            >
-              <span>🗺️ Studio</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeChange('free-create')}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 ${
-                gameMode === 'free-create'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-              title="3.3 Free-Create: Map drafting & codex without rules"
-            >
-              <span>🎨 Free-Create</span>
-            </button>
-          </div>
-
-          {/* ZONE 3 (Right): Focus Zone Trays & Administrative Settings */}
+          {/* ZONE 2 (Right): Bare-Minimum World-Building Controls + ⋯ More Popover */}
           <div className="flex items-center gap-1.5 focus-popover-container">
             {/* Active Seat Pill */}
             {activePlayer && gameMode !== 'free-create' && (
               <button
                 type="button"
                 onClick={() => setShowPlayersModal(true)}
-                className="text-[11px] px-2.5 py-1 rounded-full text-white font-medium flex items-center gap-1 shadow-2xs hover:opacity-90 transition-opacity"
+                className="text-[11px] px-2 py-1 rounded-full text-white font-medium flex items-center gap-1 shadow-2xs hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: activePlayer.color }}
                 title="Active Player Seat (Click to open Player Council)"
               >
@@ -2459,193 +2459,28 @@ export function Play() {
               </button>
             )}
 
-            {/* Atmosphere Popover / Sound Tray */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAtmosphereMenu((prev) => !prev)
-                  setShowSettingsMenu(false)
-                  setShowShareMenu(false)
-                }}
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                  ambientMood !== 'none'
-                    ? 'border-primary/40 bg-primary/10 text-primary'
-                    : 'border-border bg-background hover:bg-muted text-muted-foreground'
-                }`}
-                title="Atmosphere & Ambient Soundscapes"
-                aria-label="Atmosphere Menu"
-              >
-                <Volume2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">
-                  {ambientMood === 'campfire' ? 'Hearth' : ambientMood === 'ocean' ? 'Ocean' : ambientMood === 'ether' ? 'Ether' : 'Atmosphere'}
-                </span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
-              </button>
-
-              {/* Atmosphere Popover Menu */}
-              {showAtmosphereMenu && (
-                <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-2.5 shadow-xl z-30 space-y-2 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
-                    Ambient Atmosphere
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleAmbientMood('campfire')}
-                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
-                        ambientMood === 'campfire'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'bg-muted/50 hover:bg-muted text-foreground'
-                      }`}
-                    >
-                      <span className="text-sm">🔥</span>
-                      <span className="text-[10px]">Hearth</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleAmbientMood('ocean')}
-                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
-                        ambientMood === 'ocean'
-                          ? 'bg-sky-600 text-white shadow-xs'
-                          : 'bg-muted/50 hover:bg-muted text-foreground'
-                      }`}
-                    >
-                      <span className="text-sm">🌊</span>
-                      <span className="text-[10px]">Ocean</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleAmbientMood('ether')}
-                      className={`px-2 py-1.5 rounded-lg font-semibold flex flex-col items-center gap-0.5 transition-colors ${
-                        ambientMood === 'ether'
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : 'bg-muted/50 hover:bg-muted text-foreground'
-                      }`}
-                    >
-                      <span className="text-sm">✨</span>
-                      <span className="text-[10px]">Ether</span>
-                    </button>
-                  </div>
-                  {ambientMood !== 'none' && (
-                    <div className="space-y-1 pt-1 border-t border-border/60">
-                      <div className="flex justify-between text-[10px] text-muted-foreground px-1">
-                        <span>Volume</span>
-                        <span>{Math.round(ambientVolume * 100)}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        value={ambientVolume}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value)
-                          setAmbientVolumeState(val)
-                          setAmbientVolume(val)
-                        }}
-                        className="w-full h-1.5 accent-primary cursor-pointer"
-                        aria-label="Ambient Volume Slider"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Spotlight Command Palette (Ctrl+K) */}
-            <button
-              type="button"
-              onClick={() => setShowCommandPalette(true)}
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 hover:border-primary/60"
-              title="Open Spotlight Command Palette (Ctrl+K)"
-              aria-label="Command Palette"
-            >
-              <Search className="h-3.5 w-3.5 text-primary" />
-              <span className="hidden md:inline font-mono text-[10px] bg-muted px-1 py-0.5 rounded border border-border text-muted-foreground">
-                Ctrl+K
-              </span>
-            </button>
-
-            {/* TTRPG Campaign Quick Launchers */}
-            <button
-              type="button"
-              onClick={() => setShowCompendiumModal(true)}
-              aria-label="Tabletop Presets & Tropes Compendium"
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
-              title="Tabletop Presets & Tropes Compendium (200+ canonical powers, whiteboard tropes, traditions, and skills)"
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Compendium</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCampaignHooksModal(true)}
-              aria-label="Tabletop Campaign Adventure Hooks"
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
-              title="Tabletop Campaign Adventure Hooks & Rumor Tables (D&D / OSR)"
-            >
-              <Compass className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Hooks</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowSessionZeroPrimerModal(true)}
-              aria-label="Session Zero 1-Page Campaign Primer"
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
-              title="Session Zero 1-Page Campaign Primer Handout"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Primer</span>
-            </button>
+            {/* Core Always-Visible 2-Page World Overview */}
             <button
               type="button"
               onClick={() => setShowTwoPagerModal(true)}
               aria-label="2-Page World Overview"
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
-              title="Deterministic Non-LLM 2-Page World Overview Folio (Page 1: Atlas & Landmarks · Page 2: Peoples & 4 Ages)"
+              className="btn-outline px-2.5 py-1 text-xs font-semibold flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
+              title="2-Page World Overview Folio (Page 1: Atlas & Landmarks · Page 2: Peoples & 4 Ages)"
             >
               <Columns className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">2-Pager</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowVaultModal(true)}
-              aria-label="Session Checkpoint Vault"
-              className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
-              title="Tabletop Session Checkpoint Vault & Disaster Recovery (Alt+S)"
-              data-testid="header-open-vault-btn"
-            >
-              <Camera className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Vault</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowTableSyncModal(true)}
-              aria-label="Real-Time Table Peer Synchronization"
-              className={`btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${
-                isSyncActive
-                  ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/40 bg-emerald-500/10'
-                  : 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10'
-              }`}
-              title="Real-Time Table Peer & Second-Screen TV Sync"
-            >
-              <Radio className={`h-3.5 w-3.5 ${isSyncActive ? 'animate-pulse' : ''}`} />
-              <span className="hidden lg:inline">
-                {isSyncActive ? `Sync (${connectedPeers.length + 1})` : 'Table Sync'}
-              </span>
+              <span className="hidden sm:inline">2-Pager</span>
             </button>
 
-            {/* Share & Export Popover */}
+            {/* Streamlined Share & Backup Popover */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => {
                   setShowShareMenu((prev) => !prev)
-                  setShowAtmosphereMenu(false)
-                  setShowSettingsMenu(false)
+                  setShowMoreToolsMenu(false)
+                            setShowSettingsMenu(false)
                 }}
-                className="btn-outline px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5"
+                className="btn-outline px-2.5 py-1 text-xs font-semibold flex items-center gap-1"
                 title="Share Realm & Export Suite"
                 aria-label="Share & Export Menu"
               >
@@ -2655,75 +2490,7 @@ export function Play() {
               </button>
 
               {showShareMenu && (
-                <div className="absolute right-0 mt-1.5 w-56 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-30 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCompendiumModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-indigo-600 dark:text-indigo-400"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    <span>📖 Presets & Tropes Compendium</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCampaignHooksModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
-                  >
-                    <Compass className="h-3.5 w-3.5" />
-                    <span>⚔️ Campaign Hooks & Rumors</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSessionZeroPrimerModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-primary"
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    <span>📜 Session Zero Primer Handout</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowTwoPagerModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-cyan-600 dark:text-cyan-400"
-                  >
-                    <Columns className="h-3.5 w-3.5" />
-                    <span>📄 2-Page World Overview</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowVaultModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
-                    data-testid="share-menu-open-checkpoints-btn"
-                  >
-                    <Camera className="h-3.5 w-3.5" />
-                    <span>📸 Session Checkpoint Vault</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowTableSyncModal(true)
-                      setShowShareMenu(false)
-                    }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-400"
-                  >
-                    <Radio className="h-3.5 w-3.5" />
-                    <span>📡 Live Table &amp; TV Sync</span>
-                  </button>
-                  <div className="border-t border-border my-1" />
+                <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-40 space-y-1 animate-in fade-in zoom-in-95 duration-150 text-xs">
                   <button
                     type="button"
                     onClick={() => {
@@ -2733,7 +2500,7 @@ export function Play() {
                     className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-accent flex items-center gap-2 font-medium"
                   >
                     <FileJson className="h-3.5 w-3.5 text-primary" />
-                    <span>Share & Backup JSON</span>
+                    <span>Share &amp; Backup JSON</span>
                   </button>
                   <button
                     type="button"
@@ -2750,14 +2517,242 @@ export function Play() {
               )}
             </div>
 
+            {/* ⋯ More Tools Popover (Non-Core Auxiliary Tools: Table Sync, Vault, Compendium, Hooks, Primer, Atmosphere, Play Modes) */}
+            <div className="relative">
+              <button
+                type="button"
+                data-testid="studio-more-tools-btn"
+                aria-label="More Tools Menu"
+                onClick={() => {
+                  setShowMoreToolsMenu((prev) => !prev)
+                  setShowShareMenu(false)
+                  setShowSettingsMenu(false)
+                          }}
+                className={`btn-outline px-2.5 py-1 text-xs font-semibold flex items-center gap-1 ${
+                  showMoreToolsMenu ? 'border-primary/50 bg-primary/10 text-primary' : ''
+                }`}
+                title="More Tools: Play Modes, Table Sync, Checkpoint Vault, Compendium, Hooks, Primer & Atmosphere"
+              >
+                <span>⋯ More</span>
+                <ChevronDown className="h-3 w-3 opacity-60" />
+              </button>
+
+              {showMoreToolsMenu && (
+                <div
+                  data-testid="studio-more-tools-popover"
+                  className="absolute right-0 mt-1.5 w-64 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-2 shadow-xl z-40 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 text-xs"
+                >
+                  {/* Play Mode Switcher */}
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                    Play Mode
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 bg-muted/50 p-1 rounded-lg border border-border/60">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleModeChange('companion')
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className={`px-1.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                        gameMode === 'companion'
+                          ? 'bg-primary text-primary-foreground shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      🃏 Companion
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleModeChange('studio')
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className={`px-1.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                        gameMode === 'studio'
+                          ? 'bg-primary text-primary-foreground shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      🗺️ Studio
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleModeChange('free-create')
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className={`px-1.5 py-1 rounded text-[11px] font-semibold transition-all ${
+                        gameMode === 'free-create'
+                          ? 'bg-primary text-primary-foreground shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      🎨 Free-Create
+                    </button>
+                  </div>
+
+                  <div className="border-t border-border/60 pt-1.5 space-y-0.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-0.5">
+                      Tabletop &amp; Session Utilities
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowTableSyncModal(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      aria-label="Real-Time Table Peer Synchronization"
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center justify-between font-medium text-emerald-600 dark:text-emerald-400"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Radio className={`h-3.5 w-3.5 ${isSyncActive ? 'animate-pulse' : ''}`} />
+                        <span>{isSyncActive ? `Table Sync (${connectedPeers.length + 1})` : 'Table Sync'}</span>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="header-open-vault-btn"
+                      aria-label="Session Checkpoint Vault"
+                      onClick={() => {
+                        setShowVaultModal(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
+                    >
+                      <Camera className="h-3.5 w-3.5" />
+                      <span>Session Checkpoint Vault</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Tabletop Presets & Tropes Compendium"
+                      onClick={() => {
+                        setShowCompendiumModal(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-indigo-600 dark:text-indigo-400"
+                    >
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>Presets &amp; Tropes Compendium</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Tabletop Campaign Adventure Hooks"
+                      onClick={() => {
+                        setShowCampaignHooksModal(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-amber-600 dark:text-amber-400"
+                    >
+                      <Compass className="h-3.5 w-3.5" />
+                      <span>Campaign Hooks &amp; Rumors</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Session Zero 1-Page Campaign Primer"
+                      onClick={() => {
+                        setShowSessionZeroPrimerModal(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center gap-2 font-medium text-primary"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>Session Zero Primer</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Command Palette"
+                      onClick={() => {
+                        setShowCommandPalette(true)
+                        setShowMoreToolsMenu(false)
+                      }}
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent flex items-center justify-between font-medium"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Search className="h-3.5 w-3.5 text-primary" />
+                        <span>Command Palette</span>
+                      </span>
+                      <span className="font-mono text-[10px] text-muted-foreground">Ctrl+K</span>
+                    </button>
+                  </div>
+
+                  {/* Ambient Atmosphere Audio */}
+                  <div className="border-t border-border/60 pt-1.5 space-y-1.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 flex items-center gap-1">
+                      <Volume2 className="h-3 w-3" />
+                      <span>Ambient Atmosphere</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAmbientMood('campfire')}
+                        className={`px-2 py-1 rounded-lg font-semibold flex items-center justify-center gap-1 text-[11px] ${
+                          ambientMood === 'campfire'
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-muted/50 hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <span>🔥</span>
+                        <span>Hearth</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAmbientMood('ocean')}
+                        className={`px-2 py-1 rounded-lg font-semibold flex items-center justify-center gap-1 text-[11px] ${
+                          ambientMood === 'ocean'
+                            ? 'bg-sky-600 text-white'
+                            : 'bg-muted/50 hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <span>🌊</span>
+                        <span>Ocean</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAmbientMood('ether')}
+                        className={`px-2 py-1 rounded-lg font-semibold flex items-center justify-center gap-1 text-[11px] ${
+                          ambientMood === 'ether'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-muted/50 hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <span>✨</span>
+                        <span>Ether</span>
+                      </button>
+                    </div>
+                    {ambientMood !== 'none' && (
+                      <div className="space-y-1 pt-0.5">
+                        <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                          <span>Volume</span>
+                          <span>{Math.round(ambientVolume * 100)}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={ambientVolume}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value)
+                            setAmbientVolumeState(val)
+                            setAmbientVolume(val)
+                          }}
+                          className="w-full h-1.5 accent-primary cursor-pointer"
+                          aria-label="Ambient Volume Slider"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* ⚙️ Administrative Settings Menu (Hiding Administrative Clutter Away) */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => {
                   setShowSettingsMenu((prev) => !prev)
-                  setShowAtmosphereMenu(false)
-                  setShowShareMenu(false)
+                            setShowShareMenu(false)
                 }}
                 className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                 title="Studio Administration & Ceremony Settings"
@@ -2984,46 +2979,30 @@ export function Play() {
               }`}
             >
               <Clock className="h-3.5 w-3.5" />
-              <span>Historian · Timeline ({drawHistory.length})</span>
+              <span>Chronicle ({drawHistory.length})</span>
             </button>
 
             {gameMode === 'studio' && (
-              <>
-                <button
-                  type="button"
-                  role="tab"
-                  data-testid="tab-modular-studio"
-                  aria-selected={activeTab === 'dock'}
-                  onClick={() => setActiveTab('dock')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all ${
-                    activeTab === 'dock'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/50 hover:bg-muted text-foreground'
-                  }`}
-                  title="Photoshop-Style Modular Studio: Map centered with movable, resizable, and floating Cards, Codex & History panels"
-                >
-                  <Columns className="h-3.5 w-3.5" />
-                  <span>Modular Studio</span>
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === 'split'}
-                  onClick={() => setActiveTab('split')}
-                  className={`hidden lg:flex px-3.5 py-1.5 rounded-lg text-xs font-semibold items-center gap-1.5 shrink-0 transition-all ${
-                    activeTab === 'split'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/50 hover:bg-muted text-foreground'
-                  }`}
-                >
-                  <Columns className="h-3.5 w-3.5" />
-                  <span>Side-by-Side Studio</span>
-                </button>
-              </>
+              <button
+                type="button"
+                role="tab"
+                data-testid="tab-modular-studio"
+                aria-selected={activeTab === 'dock'}
+                onClick={() => setActiveTab('dock')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all ${
+                  activeTab === 'dock'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-muted/50 hover:bg-muted text-foreground'
+                }`}
+                title="Modular Studio: Map centered with movable, resizable, and floating Cards, Codex & Chronicle panels"
+              >
+                <Columns className="h-3.5 w-3.5" />
+                <span>Modular Studio</span>
+              </button>
             )}
 
-            <div className="ml-auto flex items-center gap-2 shrink-0">
-              {/* Modular Studio Workspace Presets & Panel Toggles */}
+            <div className="ml-auto flex items-center gap-1.5 shrink-0">
+              {/* Modular Studio Workspace Presets, Views & Reference */}
               {gameMode === 'studio' && (
                 <div className="relative">
                   <button
@@ -3035,7 +3014,7 @@ export function Play() {
                         ? 'border-primary/40 bg-primary/10 text-primary'
                         : 'border-border bg-background hover:bg-muted text-muted-foreground'
                     }`}
-                    title="Customize Modular Studio panels, docks, floating windows, and presets (Tab = Pure Canvas)"
+                    title="Customize Modular Studio panels, views, Stage Setup, and 4-Ages Matrix (Tab = Pure Canvas)"
                   >
                     <Columns className="h-3.5 w-3.5" />
                     <span>Workspace</span>
@@ -3109,30 +3088,50 @@ export function Play() {
                           )
                         })}
                       </div>
+
+                      <div className="border-t border-border/60 pt-1.5 space-y-0.5">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-0.5">
+                          Views &amp; Reference
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('split')
+                            setShowWorkspaceMenu(false)
+                          }}
+                          className="w-full text-left px-2 py-1 rounded hover:bg-accent flex items-center gap-1.5 text-foreground"
+                        >
+                          <Columns className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>Side-by-Side Classic View</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="open-prestage-setup-btn"
+                          onClick={() => {
+                            setShowPreStageModal(true)
+                            setShowWorkspaceMenu(false)
+                          }}
+                          className="w-full text-left px-2 py-1 rounded hover:bg-accent flex items-center gap-1.5 text-foreground"
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                          <span>Stage Setup Checklist</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAgesModal(true)
+                            setShowWorkspaceMenu(false)
+                          }}
+                          className="w-full text-left px-2 py-1 rounded hover:bg-accent flex items-center gap-1.5 text-primary font-medium"
+                        >
+                          <BookOpen className="h-3.5 w-3.5" />
+                          <span>4-Ages Rules Matrix</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               )}
-
-              <button
-                type="button"
-                data-testid="open-prestage-setup-btn"
-                onClick={() => setShowPreStageModal(true)}
-                className="text-xs text-muted-foreground hover:text-primary font-semibold flex items-center gap-1"
-                title="Open Pre-Stage Setup Checklist (Pre-Genesis, Pre-Primal Species, Pre-Civilization Societies, Pre-Intrigue Naming)"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                <span className="hidden md:inline">Stage Setup</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowAgesModal(true)}
-                className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">4-Ages Matrix</span>
-              </button>
             </div>
           </nav>
         )}
