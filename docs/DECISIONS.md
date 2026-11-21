@@ -1534,3 +1534,19 @@ status: active
   2. Fixed 4 live UX paper-cuts uncovered in `Play.tsx`: auto-dismissing + dismissible `stageCelebration` toast, non-occluding bottom-right `conclaveHandoff` toast, resetting `turnFocusTab` to `'presets'` on every card draw/redraw, and syncing locked-in tile coordinates into auto-populated chronicle notes.
   3. Added `frontend/src/engine/simulationReportEngine.ts`, `npm run simulate`, `frontend/src/test/simulationReportGenerator.test.ts`, and `docs/SIMULATION_REPORT.md` to run **320 headless permutations** (120 Pre-Genesis bare maps + 150 full 4-stage campaigns spanning 2,400 turns + 50 turn-session stress tests) and emit human-readable Markdown with ASCII cartographic maps, complete 4-age chronicles, and synthesized 2-Page World Overviews.
 - **Consequences:** Both local developers and CI verify **590 total headless permutations** across `headlessCampaignSimulation.test.ts` and `simulationReportGenerator.test.ts` on every PR, and users can inspect real generated worlds anytime in `docs/SIMULATION_REPORT.md` or regenerate them via `npm run simulate`.
+
+## ADR-062: Static LLM-Free Playwright E2E/Chaos Suite, Exhaustive 54-Card × 4-Stage Audit & Loadable Full-Deck World Exports (Phase 58)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** To ensure regressions are caught deterministically without requiring an LLM to drive the browser, and to verify that every single card in a full 54-card deck works across all 4 stages and produces loadable, visually clean worlds across settings permutations.
+- **Decision:**
+  1. Added `@playwright/test` + `frontend/playwright.config.ts` + `frontend/e2e/studio-e2e-and-chaos.spec.ts` (`npm run test:e2e`) running 4 deterministic, LLM-free Chromium suites against the production build (`vite preview`):
+     - Full 4-stage Acceptance Journey (`Genesis → Primal → Civilization → Intrigue → 2-Page Overview`)
+     - Complete Menu, Popover, Pure Canvas, Edge Tray & Card Options Audit
+     - Deterministic Seeded Chaos / Monkey Runner (`seed = 133742`, 60 rapid UI actions, 0 crashes)
+     - Live UI Import & 2-Page Overview verification of a 216-turn Full-Deck `.world.json` export
+  2. Fixed a real `localStorage` `QuotaExceededError` caught by the 216-turn live import test in `storageService.ts` by trimming heavy snapshots from the `localStorage` mirror (while retaining full data in IndexedDB).
+  3. Added `frontend/src/engine/fullDeckAuditEngine.ts`, `frontend/src/test/fullDeckAuditAndExport.test.ts`, and `npm run export:worlds` to exhaustively audit all **216 card × stage combinations** (`54` cards × `4` stages) and simulate + audit **6 full-deck-scale settings permutations** (including a **216-turn 54-cards-per-phase** world), exporting loadable `.world.json`, `.2-page-overview.md`, and `.map.svg` files to `local-exports/simulated-worlds/` (gitignored).
+  4. Wired `npm run export:worlds` and `npm run test:e2e` into `.github/workflows/ci.yml` so every PR runs both headless Vitest simulations and real Chromium Playwright E2E + Chaos tests automatically.
+- **Consequences:** End-to-end UI acceptance, menu coverage, chaos resilience, 54-card-per-phase deck audits, and 216-turn import verification are now 100% automated, static, LLM-free, and CI-gated.

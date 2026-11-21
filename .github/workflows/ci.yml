@@ -33,3 +33,15 @@ jobs:
       - name: Build static frontend
         working-directory: ./frontend
         run: npm run build
+
+      - name: Export full-deck audited worlds for E2E import verification
+        working-directory: ./frontend
+        run: npm run export:worlds
+
+      - name: Install Playwright Chromium
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run static Playwright E2E, Menu Audit & Seeded Chaos tests
+        working-directory: ./frontend
+        run: npm run test:e2e

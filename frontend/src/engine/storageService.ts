@@ -297,10 +297,30 @@ export function saveWorld(world: WorldState): WorldState {
     } else {
       worlds.unshift(updated)
     }
-    localStorage.setItem(STORAGE_WORLDS_KEY, JSON.stringify(worlds))
-    localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated.id)
+    try {
+      localStorage.setItem(STORAGE_WORLDS_KEY, JSON.stringify(worlds))
+      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated.id)
+    } catch {
+      // Large 200+ turn realms can exceed 5MB localStorage mirror quota; trim snapshots for the mirror (full data lives in IndexedDB)
+      try {
+        const compactWorlds = worlds.map((w) => ({ ...w, snapshots: [] }))
+        localStorage.setItem(STORAGE_WORLDS_KEY, JSON.stringify(compactWorlds))
+        localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated.id)
+      } catch {
+        // Final fallback: keep only the active realm in localStorage mirror
+        try {
+          localStorage.setItem(
+            STORAGE_WORLDS_KEY,
+            JSON.stringify([{ ...updated, snapshots: [] }])
+          )
+          localStorage.setItem(STORAGE_ACTIVE_ID_KEY, updated.id)
+        } catch (quotaErr) {
+          console.warn('localStorage mirror quota reached; persisted via IndexedDB:', quotaErr)
+        }
+      }
+    }
   } catch (error) {
-    console.error('Failed to save world to localStorage:', error)
+    console.warn('Failed to save world to localStorage mirror:', error)
   }
   return updated
 }

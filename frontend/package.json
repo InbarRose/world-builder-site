@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run",
+    "test:e2e": "playwright test",
     "simulate": "node -e \"process.env.WRITE_SIM_REPORT='1'; require('child_process').execSync('npx vitest run src/test/simulationReportGenerator.test.ts --pool=forks', { stdio: 'inherit' })\"",
+    "export:worlds": "node -e \"process.env.EXPORT_LOCAL_WORLDS='1'; require('child_process').execSync('npx vitest run src/test/fullDeckAuditAndExport.test.ts --pool=forks', { stdio: 'inherit' })\"",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.3.1",
     "@types/react": "^18.0.28",
