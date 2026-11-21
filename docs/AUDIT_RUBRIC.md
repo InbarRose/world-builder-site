@@ -312,3 +312,19 @@ graph TD
 1. **No Inflation Rule**: Score increases are strictly forbidden without corresponding automated test files, demonstrable user-facing features, and verified code implementation.
 2. **Adversarial Audit Rule**: Every phase PR must include an adversarial audit section detailing known limitations and remaining gaps.
 3. **Continuous Verification Rule**: 100% of automated tests must pass on CI and the production bundle must build cleanly before any PR is merged.
+
+---
+
+## Track B: Traditional Software Engineering Quality & Reliability (100 Points — Added in ADR-064)
+
+Alongside Product, Ruleset Fidelity, and Human Experience scoring (Track A), the codebase is independently audited on **6 traditional software engineering tracks**. Scores must be backed by measurable evidence (bundle output, file sizes, CI checks, Playwright traces, and Vitest assertions) and must never be inflated.
+
+| # | Engineering Track | Weight | Pre-Phase 60 | Post-Phase 60 | Measurable Evidence & Remaining Gaps |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **E1** | **Data Efficiency, Serialization & Storage Hygiene** | 20 | 10 / 20 | **18 / 20** | Fixed 36.2 MB `.world.json` snapshot bloat (`appendCappedTurnSnapshot` + `serializeWorldForExport`); enforced `< 750 KB` CI gate even for 216-turn worlds; `localStorage` quota fallback + IndexedDB persistence. Remaining: schema migration fuzz tests for legacy v1/v2 imports. |
+| **E2** | **Accessibility (a11y), Keyboard & Modal Discipline** | 15 | 9 / 15 | **13 / 15** | Added global `Escape`-to-close handler for all Studio modals/popovers and `role="dialog" aria-modal="true"` on `ShareTableModal`. Remaining: full focus-trap & axe-core automated Playwright a11y audit. |
+| **E3** | **Architecture, Modularity & Maintainability** | 20 | 12 / 20 | **13 / 20** | Pure headless engines (`src/engine/`) and SOLID multi-shard JSON catalogs (`src/data/catalog/`) are well isolated, and `AppErrorBoundary` guards top-level crashes. **Honest primary gap:** `Play.tsx` (~6,700 lines) and `MapCanvas.tsx` remain monolithic and need decomposition into focused feature hooks/components. |
+| **E4** | **Bundle Performance & Code Splitting** | 15 | 7 / 15 | **12 / 15** | Added Vite `manualChunks` (`vendor-react`, `vendor-icons`, `vendor-misc`, `catalog-data`, `engine-core`) splitting the 1.4 MB monolith into cached vendor/engine/catalog chunks. Remaining: `React.lazy()` route & modal code-splitting to bring main app chunk under 500 kB. |
+| **E5** | **Automated Testing, Static E2E & Chaos Reliability** | 15 | 14 / 15 | **15 / 15** | 36 Vitest suites (237 tests), 590+ headless simulation permutations, 216 card×stage matrix audit, and 4 LLM-free Playwright Chromium E2E/Menu/Seeded-Chaos/Import specs gated in `.github/workflows/ci.yml`. |
+| **E6** | **Type Safety, Linting, Security & Observability** | 15 | 12 / 15 | **13 / 15** | Strict `tsc` passes with 0 errors; 0 console/page/network errors across all Playwright specs; top-level `AppErrorBoundary` recovery UI; SVG XML escaping. Remaining: wire `npm run lint` (`eslint --max-warnings 0`) into CI. |
+| | **TOTAL ENGINEERING QUALITY SCORE** | **100** | **64 / 100** | **84 / 100** | **+20 pts** from concrete Phase 60 hardening; honest 16-pt headroom tracked in E3, E4, E2, E6. |

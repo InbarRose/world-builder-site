@@ -1561,3 +1561,16 @@ status: active
   2. Consolidated all non-core / auxiliary utilities (`Table Sync`, `Session Checkpoint Vault`, `Compendium`, `Adventure Hooks`, `Session Zero Primer`, `Command Palette`, `Ambient Atmosphere`, and `Companion / Studio / Free-Create` mode switcher) into the single expandable `⋯ More ▾` popover (`studio-more-tools-popover`).
   3. Streamlined the Workspace Tab Bar to the 5 core world-building views (`Deck & Draw`, `World Map`, `Codex`, `Chronicle (N)`, `Modular Studio`) + `Workspace ▾` (tucking `Side-by-Side Classic View`, `Stage Setup Checklist`, and `4-Ages Rules Matrix` inside `Workspace ▾`), and compacted default dock dimensions (`leftDockWidth: 320`, `bottomDockHeight: 170`) in `workspaceLayoutEngine.ts` to maximize map viewport.
 - **Consequences:** Eliminates top-bar clutter and wrapping at `1440×900`, keeps the active turn state machine visible at all times, and reclaims ~120px of vertical canvas space while keeping every auxiliary feature 1 click away inside `⋯ More ▾`.
+
+## ADR-064: Traditional Engineering Scoring Tracks, Snapshot Bloat Sterilization, Modal a11y, Error Boundary & Bundle Splitting (Phase 60)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** Inspecting exported `.world.json` files revealed a 36.2 MB snapshot-bloat bug (unbounded per-turn full-map clones in `world.snapshots`), leftover `/100` videogame stability fractions in the 2-Page World Overview, missing `Escape`-to-close / `role="dialog"` on modals, no top-level React Error Boundary, and a 1.4 MB unsplit JS bundle. Additionally, the user requested formal **Traditional Software Engineering Scoring Tracks** alongside Product/HX scoring.
+- **Decision:**
+  1. Codified **Track B: Traditional Software Engineering Quality & Reliability (100 points across E1–E6)** in `docs/AUDIT_RUBRIC.md` (Pre-Phase 60 baseline: `64/100` → Post-Phase 60: `84/100`).
+  2. Sterilized the 36.2 MB snapshot-bloat bug via `appendCappedTurnSnapshot` (`MAX_ROLLING_TURN_SNAPSHOTS = 12`) and `serializeWorldForExport` / `serializeWorld` in `storageService.ts` + `autoPlayEngine.ts`, and added a hard `< 750 KB` export size gate in `fullDeckAuditAndExport.test.ts`.
+  3. Removed remaining numeric `(/100)` stability scores from `twoPageOverviewEngine.ts` and `WorldTwoPagerModal.tsx` (completing ADR-042 de-gamification).
+  4. Added universal `Escape`-to-close handling for all Studio modals/popovers in `Play.tsx` and `role="dialog" aria-modal="true"` on `ShareTableModal.tsx`.
+  5. Added top-level `AppErrorBoundary.tsx` in `App.tsx` and Vite `manualChunks` code splitting (`vendor-react`, `vendor-icons`, `vendor-misc`, `catalog-data`, `engine-core`) in `vite.config.ts`.
+- **Consequences:** Exported 216-turn `.world.json` files shrink by **> 98%** (from 36.2 MB to ~400 KB), production chunks are cleanly split for browser caching, every modal closes cleanly on `Escape`, and engineering quality is measured independently from product UX.
