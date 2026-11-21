@@ -271,5 +271,69 @@
     "overlayChange": "ruins",
     "creativePrompt": "How does Haunted Ruins & Undead Lord reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Haunted Ruins & Undead Lord, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_myth_sunken_temple",
+    "name": "Sunken Temple Rising From the Sea",
+    "description": "Barnacle-crusted spires emerge at low tide, humming with forgotten ancient magic.",
+    "creativePrompt": "What treasure hunters or sea-cults are racing to reach the temple first?",
+    "exampleNarrative": "After a night of strange tides, ancient marble steps broke the waves off the coast, glowing faintly green.",
+    "slotCategory": "myth",
+    "slotPriority": 88,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏛️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "int_myth_whispering_woods",
+    "name": "Cursed Forest of Whispers",
+    "description": "Travelers entering an old wood hear familiar voices luring them off the safe path.",
+    "creativePrompt": "What ancient spirit or broken bargain cursed the trees?",
+    "exampleNarrative": "No woodcutter dared step past the pale boundary stones once the autumn leaves began to whisper names.",
+    "slotCategory": "myth",
+    "slotPriority": 84,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌲",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_myth_twin_moons_prophecy",
+    "name": "Prophecy of the Converging Moons",
+    "description": "An ancient verse spreads across taverns and temples, foretelling a hero or calamity.",
+    "creativePrompt": "Which factions are trying to fulfill the prophecy — and who is trying to stop it?",
+    "exampleNarrative": "Seers across three kingdoms spoke the same riddle as the twin moons drew closer in the night sky.",
+    "slotCategory": "myth",
+    "slotPriority": 86,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌙",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

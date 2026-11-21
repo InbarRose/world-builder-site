@@ -291,5 +291,69 @@
     "overlayChange": "castle",
     "creativePrompt": "How does Walled Border Castle reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Walled Border Castle, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_con_grand_aqueduct",
+    "name": "Grand Stone Aqueduct",
+    "description": "Miles of soaring stone arches carrying pure mountain spring water into a growing city.",
+    "creativePrompt": "How did abundant fresh water transform the city into a jewel of the realm?",
+    "exampleNarrative": "Twin tiers of limestone arches spanned the valley, feeding public fountains, baths, and lush gardens.",
+    "slotCategory": "structure",
+    "slotPriority": 78,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏛️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_con_beacon_lighthouse",
+    "name": "Great Harbor Lighthouse",
+    "description": "A towering coastal spire burning signal fires visible for leagues across dark seas.",
+    "creativePrompt": "What legendary shipwreck inspired the construction of this coastal beacon?",
+    "exampleNarrative": "The tall marble beacon guided merchant fleets safely past the jagged reefs into the golden harbor.",
+    "slotCategory": "structure",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🗼",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_con_grand_harbor",
+    "name": "Walled Harbor & Royal Drydock",
+    "description": "Massive sea-chains, stone breakwaters, and shipyards building ocean-going vessels.",
+    "creativePrompt": "Which distant shores are the new ships being built to explore or conquer?",
+    "exampleNarrative": "Protected by twin sea-towers and a heavy iron chain, the Grand Harbor became the busiest port on the sea.",
+    "slotCategory": "structure",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚓",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "city"
   }
 ]

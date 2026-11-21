@@ -274,5 +274,68 @@
     },
     "creativePrompt": "How does Secret Pact Between Rivals reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Secret Pact Between Rivals, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_sch_counterfeit_ring",
+    "name": "Counterfeit Coin & Guild Sabotage",
+    "description": "A hidden syndicate floods rival markets with clipped silver to collapse their economy.",
+    "creativePrompt": "Where is the secret mint hidden, and which respectable banker runs it?",
+    "exampleNarrative": "Merchants bit down on gleaming new crowns only to find lead cores, triggering panic in the bazaar.",
+    "slotCategory": "feature",
+    "slotPriority": 78,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪙",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_sch_court_impostor",
+    "name": "Spy & Doppelganger at Court",
+    "description": "A trusted advisor or envoy is secretly feeding state secrets to a foreign power.",
+    "creativePrompt": "What crucial battle plan or royal secret has already been leaked?",
+    "exampleNarrative": "Letters sealed in invisible ink left the palace every full moon, always one step ahead of the royal guard.",
+    "slotCategory": "feature",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🎭",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_sch_stolen_map",
+    "name": "Theft of the Forbidden Map",
+    "description": "A priceless chart showing secret mountain passes or vault keys vanishes overnight.",
+    "creativePrompt": "Who hired the thieves, and where does the stolen map actually lead?",
+    "exampleNarrative": "The royal cartographer’s vault was found open at dawn, missing only a single vellum scroll.",
+    "slotCategory": "feature",
+    "slotPriority": 76,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🗺️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

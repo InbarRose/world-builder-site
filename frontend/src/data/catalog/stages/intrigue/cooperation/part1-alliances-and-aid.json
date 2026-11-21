@@ -277,5 +277,68 @@
     },
     "creativePrompt": "How does Disaster Relief & Reconstruction reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Disaster Relief & Reconstruction, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_coop_monster_hunters",
+    "name": "Joint Monster-Hunting Guild",
+    "description": "Nations fund a cross-border order of rangers and mages to keep wild threats at bay.",
+    "creativePrompt": "Where is the guild’s fortress headquarters, and what quarry are they tracking now?",
+    "exampleNarrative": "Bearing silver badges honored in every kingdom, the Wardens rode out to hunt beasts plaguing the roads.",
+    "slotCategory": "feature",
+    "slotPriority": 78,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🐉",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_coop_royal_festival",
+    "name": "Grand Tournament & Truce Festival",
+    "description": "Rival realms pause hostilities for a week of jousts, music, and quiet diplomacy.",
+    "creativePrompt": "What unexpected romance, duel, or secret deal stole the spotlight at the festival?",
+    "exampleNarrative": "Pavilion tents of crimson and gold filled the meadow as champions competed and diplomats whispered.",
+    "slotCategory": "feature",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🎪",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_coop_refugee_haven",
+    "name": "Secret Haven & Safe Passage Network",
+    "description": "Sympathetic citizens across borders shelter exiles, scholars, and persecuted folk.",
+    "creativePrompt": "What coded sign marks a safe house along the border roads?",
+    "exampleNarrative": "Lanterns hung in attic windows guided fugitives safely across the river to a welcoming free city.",
+    "slotCategory": "feature",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕯️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

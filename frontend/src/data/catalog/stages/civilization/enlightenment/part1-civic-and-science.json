@@ -269,5 +269,68 @@
     },
     "creativePrompt": "How does Fine Steel & Armor Craft reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Fine Steel & Armor Craft, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_enl_astronomy_nav",
+    "name": "Astronomy & Star-Chart Navigation",
+    "description": "Brass astrolabes and star tables enabling bold voyages far beyond sight of land.",
+    "creativePrompt": "What uncharted sea or distant continent was first reached using these star charts?",
+    "exampleNarrative": "Royal astronomers mapped the southern skies, unlocking open-ocean trade routes for daring captains.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🔭",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_enl_alchemists_guild",
+    "name": "Guild of Alchemists & Apothecaries",
+    "description": "Experimenters distilling glass, medicines, dyes, and volatile black-powder.",
+    "creativePrompt": "Which famous elixir or explosive invention put this guild in high demand?",
+    "exampleNarrative": "Behind tall arched windows, guild scholars distilled remedies that curbed winter fevers and dyed royal silk.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚗️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_enl_architecture_domes",
+    "name": "Grand Architecture & Vaulted Domes",
+    "description": "Soaring stone domes, rose windows, and civic amphitheaters defining an era.",
+    "creativePrompt": "Which majestic temple or hall became the architectural wonder of the age?",
+    "exampleNarrative": "Master builders raised a gilded dome that could be seen shimmering from a day’s ride away.",
+    "slotCategory": "structure",
+    "slotPriority": 76,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕌",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

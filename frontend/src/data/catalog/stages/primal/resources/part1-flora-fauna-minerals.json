@@ -269,5 +269,68 @@
     },
     "creativePrompt": "How does Cultivated Grain & Barley reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Cultivated Grain & Barley, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_res_gold_stream",
+    "name": "Gold-Panning Mountain Stream",
+    "description": "Glittering nuggets of river gold washing down from high rocky peaks.",
+    "creativePrompt": "How does the discovery of gleaming gold change trade or rivalry among tribes?",
+    "exampleNarrative": "Shining flakes along the gravel shoals drew prospectors and artisans from across the valley.",
+    "slotCategory": "resource",
+    "slotPriority": 74,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "💰",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_res_ancient_timber",
+    "name": "Ancient Hardwood Timber Grove",
+    "description": "Towering ironwood and cedar trees prized for ships, longhouses, and shields.",
+    "creativePrompt": "Are these sacred trees harvested carefully, or fiercely guarded by forest dwellers?",
+    "exampleNarrative": "Straight-trunked cedars from the old grove became the ribs of the first ocean-going hulls.",
+    "slotCategory": "resource",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪵",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_res_salt_flats",
+    "name": "Natural Salt Flats & Spice Beds",
+    "description": "Vast gleaming crusts of salt essential for preserving food through harsh winters.",
+    "creativePrompt": "Which trails converge on the salt flats, and who levies tribute on passing packs?",
+    "exampleNarrative": "Salt from the white basin allowed tribes to store meat for seasons and journey far beyond their homelands.",
+    "slotCategory": "resource",
+    "slotPriority": 72,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🧂",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

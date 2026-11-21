@@ -248,5 +248,68 @@
     },
     "creativePrompt": "How does Herbal Medicine & Healing reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Herbal Medicine & Healing, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_skill_stone_masonry",
+    "name": "Stone Carving & Early Masonry",
+    "description": "Shaping fitted megaliths, sturdy terraces, and enduring dry-stone walls.",
+    "creativePrompt": "What iconic landmark was the first masterwork of their stonecraft?",
+    "exampleNarrative": "With bronze chisels and patience, the hill clans raised terraced walls that outlasted empires.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🧱",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_skill_beast_taming",
+    "name": "Beast Taming & Falconry",
+    "description": "Bonding with hunting hounds, giant eagles, or mountain rams as loyal companions.",
+    "creativePrompt": "What rare creature became the proud emblem of this species?",
+    "exampleNarrative": "Trained wind-hawks circled the cliffs, scouting herds and warning villages of approaching danger.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🦅",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_skill_pottery_kilns",
+    "name": "Fire-Forging & Glazed Pottery",
+    "description": "Mastering hot kilns to craft watertight amphorae, bricks, and early bronze tools.",
+    "creativePrompt": "What distinctive pattern or glaze marks their pottery across the continent?",
+    "exampleNarrative": "Painted clay vessels sealed with beeswax carried grain, oil, and wine along the earliest river routes.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏺",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

@@ -285,5 +285,72 @@
     "overlayChange": "capital",
     "creativePrompt": "How does Unification of Rival Towns reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Unification of Rival Towns, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_exp_pass_colony",
+    "name": "High Mountain Pass Colony",
+    "description": "A fortified toll-town established to claim and tax a vital highland trade corridor.",
+    "creativePrompt": "Who resents the tolls charged at the pass, and what smugglers seek hidden goat-trails?",
+    "exampleNarrative": "Settlers claimed the snowbound saddle, turning a treacherous trail into a fortified customs town.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏔️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "town",
+    "hasRoad": true
+  },
+  {
+    "id": "civ_exp_delta_metropolis",
+    "name": "River Delta Metropolis",
+    "description": "Sprawling canals, markets, and warehouses rising where a great river meets the sea.",
+    "creativePrompt": "Which rival merchant families vie for control of the delta’s bustling docks?",
+    "exampleNarrative": "Built on pilings and bridges across the fertile delta, the new metropolis grew richer than old capitals.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏙️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "city"
+  },
+  {
+    "id": "civ_exp_island_charter",
+    "name": "Overseas Island Charter Colony",
+    "description": "Pioneers sail across open straits to establish a distant island stronghold and port.",
+    "creativePrompt": "What unexpected ruins or native inhabitants did the colonists discover on the island?",
+    "exampleNarrative": "Three caravels dropped anchor in a turquoise bay, raising the realm’s banner over an uncharted archipelago.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏝️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "town"
   }
 ]
