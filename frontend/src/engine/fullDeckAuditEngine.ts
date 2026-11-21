@@ -7,7 +7,11 @@
  */
 
 import { generateNaturalWorld } from './proceduralWorldEngine'
-import { createNewWorld, parseImportedWorld } from './storageService'
+import {
+  createNewWorld,
+  parseImportedWorld,
+  serializeWorldForExport,
+} from './storageService'
 import { autoPlayFullWorld } from './autoPlayEngine'
 import {
   DEFAULT_DECK_CONFIG,
@@ -320,8 +324,8 @@ export function runAndAuditWorldPermutation(spec: WorldPermutationSpec): Audited
     issues.push('SVG map export is malformed')
   }
 
-  // 5. Lossless JSON Export & Re-Import Round-Trip Audit
-  const jsonStr = JSON.stringify(finished, null, 2)
+  // 5. Lossless JSON Export & Re-Import Round-Trip Audit (compact portable JSON)
+  const jsonStr = serializeWorldForExport(finished, true)
   const reimported = parseImportedWorld(jsonStr)
   const reimportVerified = Boolean(
     reimported &&

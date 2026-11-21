@@ -629,6 +629,36 @@ export function Play() {
     return () => document.removeEventListener('click', handleOutsideClick)
   }, [])
 
+  // Phase 60 (a11y): Global Escape-to-close handler for all Studio modals & popovers
+  useEffect(() => {
+    const handleGlobalEscape = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setShowMoreToolsMenu(false)
+      setShowShareMenu(false)
+      setShowSettingsMenu(false)
+      setShowWorkspaceMenu(false)
+      setShowSiteMenu(false)
+      setShowShareModal(false)
+      setShowExportModal(false)
+      setShowTwoPagerModal(false)
+      setShowVaultModal(false)
+      setShowCompendiumModal(false)
+      setShowCampaignHooksModal(false)
+      setShowSessionZeroPrimerModal(false)
+      setShowTableSyncModal(false)
+      setShowPlayersModal(false)
+      setShowAutoPlayModal(false)
+      setShowWorldManager(false)
+      setShowSetupWizardModal(false)
+      setShowAgesModal(false)
+      setShowEpochCeremonyModal(false)
+      setShowPreStageModal(false)
+      setShowCommandPalette(false)
+    }
+    window.addEventListener('keydown', handleGlobalEscape)
+    return () => window.removeEventListener('keydown', handleGlobalEscape)
+  }, [])
+
   const handleReturnToLauncher = useCallback(() => {
     setIsInLauncher(true)
     setSearchParams({ view: 'launcher' })

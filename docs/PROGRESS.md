@@ -477,3 +477,10 @@ status: active
   - [x] Consolidated non-core auxiliary tools (`Table Sync`, `Session Checkpoint Vault`, `Compendium`, `Adventure Hooks`, `Session Zero Primer`, `Command Palette`, `Ambient Atmosphere`, and `Companion / Studio / Free-Create` modes) into `⋯ More ▾` (`studio-more-tools-btn` / `studio-more-tools-popover`).
   - [x] Streamlined Workspace Tab Bar to 5 core tabs (`Deck & Draw`, `World Map`, `Codex`, `Chronicle (N)`, `Modular Studio`) + `Workspace ▾` (tucking `Side-by-Side`, `Stage Setup`, `4-Ages Matrix`) and compacted default dock dimensions (`leftDockWidth: 320`, `bottomDockHeight: 170`) in `workspaceLayoutEngine.ts`.
   - [x] Updated `PlayStudio.test.tsx` and `studio-e2e-and-chaos.spec.ts` (**36/36 Vitest suites, 237/237 tests + 4/4 Playwright E2E/Menu/Chaos/Import specs passing**).
+
+- [x] **Phase 60: Traditional Engineering Scoring Tracks, 36 MB Snapshot Bloat Fix, Modal a11y, Error Boundary & Bundle Splitting** *(ADR-064 · Engineering Score: 64 → 84 / 100)*
+  - [x] Codified **Track B: Traditional Software Engineering Quality & Reliability (100 pts across E1–E6)** in `docs/AUDIT_RUBRIC.md`.
+  - [x] Fixed 36.2 MB `.world.json` snapshot bloat via `appendCappedTurnSnapshot` (`MAX_ROLLING_TURN_SNAPSHOTS = 12`) and `serializeWorldForExport` / `serializeWorld` (`storageService.ts`, `autoPlayEngine.ts`), reducing 216-turn `.world.json` exports by **> 98%** and gating `< 750 KB` in `fullDeckAuditAndExport.test.ts`.
+  - [x] Removed leftover numeric `(/100)` stability fractions from `twoPageOverviewEngine.ts` and `WorldTwoPagerModal.tsx` (ADR-042).
+  - [x] Hardened modal a11y: universal `Escape`-to-close handler for all Studio modals/popovers (`Play.tsx`) and `role="dialog" aria-modal="true"` on `ShareTableModal.tsx`.
+  - [x] Added top-level `AppErrorBoundary.tsx` (`App.tsx`) and Vite `manualChunks` code splitting (`vite.config.ts`).

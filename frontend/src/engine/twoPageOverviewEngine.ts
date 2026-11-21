@@ -657,7 +657,7 @@ export function buildWorldTwoPageOverview(world: WorldState): WorldTwoPageOvervi
           .join(', ')}`
       : 'awaiting its first chronicled civilizations'
 
-  const defaultExecutiveSynopsis = `${world.name} is a ${world.generationSettings.geographyPreset} realm (${biomeBreakdown.landPercent}% landmass, ${biomeBreakdown.waterPercent}% seas) dominated by ${dominantBiomeNames}, with key geographic anchors at ${topLandmarkNames}. Across ${world.drawHistory.length} recorded turns reaching Age ${currentStageMeta.number}: ${currentStageMeta.name}, ${speciesCount} species, ${societyCount} societies, and ${mythCount} mythic forces have risen—${leadEntityText}. Current geopolitical climate: ${stability.status} (${stability.score}/100) — ${stability.summary}`
+  const defaultExecutiveSynopsis = `${world.name} is a ${world.generationSettings.geographyPreset} realm (${biomeBreakdown.landPercent}% landmass, ${biomeBreakdown.waterPercent}% seas) dominated by ${dominantBiomeNames}, with key geographic anchors at ${topLandmarkNames}. Across ${world.drawHistory.length} recorded turns reaching Age ${currentStageMeta.number}: ${currentStageMeta.name}, ${speciesCount} species, ${societyCount} societies, and ${mythCount} mythic forces have risen—${leadEntityText}. Current geopolitical climate: ${stability.status} — ${stability.summary}`
 
   const customOverride = world.twoPagerConfig?.customSynopsisOverride?.trim()
   const executiveSynopsis = customOverride || defaultExecutiveSynopsis
@@ -700,7 +700,7 @@ export function exportTwoPageOverviewMarkdown(overview: WorldTwoPageOverview): s
   // PAGE 1
   lines.push(`# 📄 ${overview.worldName} — 2-Page World Overview`)
   lines.push(
-    `**Seed**: \`${overview.seed}\` · **Current Era**: ${overview.currentStageName} · **Turns**: ${overview.totalTurns} · **Stability**: ${overview.stability.icon} ${overview.stability.status} (${overview.stability.score}/100)`
+    `**Seed**: \`${overview.seed}\` · **Current Era**: ${overview.currentStageName} · **Turns**: ${overview.totalTurns} · **Climate**: ${overview.stability.icon} ${overview.stability.status}`
   )
   lines.push('')
   lines.push('## Page 1: Physical Atlas & Iconic Landmarks')

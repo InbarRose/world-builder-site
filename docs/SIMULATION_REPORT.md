@@ -1,7 +1,7 @@
 # World Builder — Headless Multi-Stage Simulation Report
 
 > **Total Permutations Simulated:** `320` (120 Pre-Genesis bare maps + 150 full 4-stage campaigns spanning **2,400 turns** + 50 card/map session stress tests)
-> **Invariant Failures:** `0` | **4-Stage Completion Rate:** `150/150 (100%)` | **Runtime:** `2791 ms`
+> **Invariant Failures:** `0` | **4-Stage Completion Rate:** `150/150 (100%)` | **Runtime:** `2812 ms`
 
 ---
 
@@ -84,10 +84,10 @@ Below are **3 full simulated worlds** generated headlessly from Pre-Genesis thro
 <summary><strong>View Full Synthesized 2-Page World Overview (Valdoria (Continent))</strong></summary>
 
 # 📄 Valdoria (Continent) — 2-Page World Overview
-**Seed**: `sim-report-continent-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Stability**: 🕊️ Golden Age (92/100)
+**Seed**: `sim-report-continent-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Climate**: 🕊️ Golden Age
 
 ## Page 1: Physical Atlas & Iconic Landmarks
-> Valdoria (Continent) is a continent realm (52% landmass, 48% seas) dominated by grasslands & meadows (98%) and fen & marshland (1%), with key geographic anchors at Thalassian Capital (12,3), Verdant Lair (11,7), Whispering Massif (18,7). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 2 mythic forces have risen—anchored by ⛵ Thalassian League, 👑 Solaris Hegemony, 🔮 Conclave of the Silver Spire. Current geopolitical climate: Golden Age (92/100) — Flourishing treaties, peace pacts, and thriving settlements unite the lands.
+> Valdoria (Continent) is a continent realm (52% landmass, 48% seas) dominated by grasslands & meadows (98%) and fen & marshland (1%), with key geographic anchors at Thalassian Capital (12,3), Verdant Lair (11,7), Whispering Massif (18,7). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 2 mythic forces have risen—anchored by ⛵ Thalassian League, 👑 Solaris Hegemony, 🔮 Conclave of the Silver Spire. Current geopolitical climate: Golden Age — Flourishing treaties, peace pacts, and thriving settlements unite the lands.
 
 **Cartographic Profile**: 52% Land (124 tiles) / 48% Water (116 tiles) · 🏔️ 1 Peaks · 🌲 3 Forests · 🌊 2 Rivers · 🏘️ 8 Settlements · 🏛️ 7 Landmarks
 
@@ -184,10 +184,10 @@ Below are **3 full simulated worlds** generated headlessly from Pre-Genesis thro
 <summary><strong>View Full Synthesized 2-Page World Overview (The Shattered Isles (Archipelago))</strong></summary>
 
 # 📄 The Shattered Isles (Archipelago) — 2-Page World Overview
-**Seed**: `sim-report-archipelago-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Stability**: 🌋 Age of Chaos (5/100)
+**Seed**: `sim-report-archipelago-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Climate**: 🌋 Age of Chaos
 
 ## Page 1: Physical Atlas & Iconic Landmarks
-> The Shattered Isles (Archipelago) is a archipelago realm (36% landmass, 64% seas) dominated by grasslands & meadows (99%) and alpine peaks (1%), with key geographic anchors at Iron Citadel (10,5), Thalassian Capital (12,3), OakHaven (11,11). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 0 mythic forces have risen—anchored by ⛵ Thalassian League, 🔮 Conclave of the Silver Spire, 👑 Solaris Hegemony. Current geopolitical climate: Age of Chaos (5/100) — Cataclysms and widespread strife have unraveled the established order.
+> The Shattered Isles (Archipelago) is a archipelago realm (36% landmass, 64% seas) dominated by grasslands & meadows (99%) and alpine peaks (1%), with key geographic anchors at Iron Citadel (10,5), Thalassian Capital (12,3), OakHaven (11,11). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 0 mythic forces have risen—anchored by ⛵ Thalassian League, 🔮 Conclave of the Silver Spire, 👑 Solaris Hegemony. Current geopolitical climate: Age of Chaos — Cataclysms and widespread strife have unraveled the established order.
 
 **Cartographic Profile**: 36% Land (86 tiles) / 64% Water (154 tiles) · 🏔️ 1 Peaks · 🌲 1 Forests · 🌊 3 Rivers · 🏘️ 8 Settlements · 🏛️ 10 Landmarks
 
@@ -284,10 +284,10 @@ Below are **3 full simulated worlds** generated headlessly from Pre-Genesis thro
 <summary><strong>View Full Synthesized 2-Page World Overview (Twin Realms of Sol & Vesper (Twin Continents))</strong></summary>
 
 # 📄 Twin Realms of Sol & Vesper (Twin Continents) — 2-Page World Overview
-**Seed**: `sim-report-twin-continents-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Stability**: 🛡️ Pax & Stability (67/100)
+**Seed**: `sim-report-twin-continents-0` · **Current Era**: 4. Intrigue · **Turns**: 16 · **Climate**: 🛡️ Pax & Stability
 
 ## Page 1: Physical Atlas & Iconic Landmarks
-> Twin Realms of Sol & Vesper (Twin Continents) is a twin-continents realm (54% landmass, 46% seas) dominated by grasslands & meadows (96%) and alpine peaks (2%), with key geographic anchors at Ironpeak Cradle (12,10), OakCrossing (0,11), Conclave Capital (13,7). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 1 mythic forces have risen—anchored by 🔮 Conclave of the Silver Spire, ⛵ Thalassian League, 👑 Solaris Hegemony. Current geopolitical climate: Pax & Stability (67/100) — Order and civil progress prevail across the established realms.
+> Twin Realms of Sol & Vesper (Twin Continents) is a twin-continents realm (54% landmass, 46% seas) dominated by grasslands & meadows (96%) and alpine peaks (2%), with key geographic anchors at Ironpeak Cradle (12,10), OakCrossing (0,11), Conclave Capital (13,7). Across 16 recorded turns reaching Age 4: Intrigue, 3 species, 3 societies, and 1 mythic forces have risen—anchored by 🔮 Conclave of the Silver Spire, ⛵ Thalassian League, 👑 Solaris Hegemony. Current geopolitical climate: Pax & Stability — Order and civil progress prevail across the established realms.
 
 **Cartographic Profile**: 54% Land (130 tiles) / 46% Water (110 tiles) · 🏔️ 3 Peaks · 🌲 3 Forests · 🌊 0 Rivers · 🏘️ 8 Settlements · 🏛️ 9 Landmarks
 

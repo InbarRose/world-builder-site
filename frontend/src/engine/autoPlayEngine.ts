@@ -19,7 +19,7 @@ import {
 } from './presets'
 import { sampleWeightedPreset } from './affinityEngine'
 import { generateFeatureName, generateLedgerProse } from './flavorNameEngine'
-import { cloneMapState, recordTurnSnapshot } from './storageService'
+import { appendCappedTurnSnapshot, cloneMapState, recordTurnSnapshot } from './storageService'
 import {
   BotPersonalityId,
   Card,
@@ -1009,10 +1009,7 @@ export function executeAutomatedTurn(
   }
 
   const snapshot = recordTurnSnapshot(nextWorldState, moveId)
-  const existingSnapshots = (nextWorldState.snapshots || []).filter(
-    (s) => s.moveId !== moveId
-  )
-  nextWorldState.snapshots = [...existingSnapshots, snapshot]
+  nextWorldState.snapshots = appendCappedTurnSnapshot(nextWorldState.snapshots, snapshot)
 
   return nextWorldState
 }
