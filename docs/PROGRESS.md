@@ -453,5 +453,7 @@ status: active
   - [x] Expanded all 12 Primal/Civilization/Intrigue suit shards to 13–14 classic fantasy RPG presets each and expanded Natural Disasters to 12 per stage (48 total), enforced by `catalogExtensibility.test.ts`.
 - [x] **Phase 54: Single-Pane-of-Glass Top Card Draw Ribbon & Pure Canvas Play** *(ADR-058)*
   - [x] Added `studio-top-card-ribbon` directly above the center World Map in `StudioDockWorkspace.tsx` + `Play.tsx` (`Draw Card`, `Freeform`, `📍 Place / Edit Map`, `✓ Log Turn`, `Redraw`, `Discard`, and `🗺️ Pure Canvas` toggle).
+- [x] **Phase 55: Headless 270-Permutation Campaign Fuzz & Simulation Suite (Local & CI)** *(ADR-059)*
+  - [x] Created `frontend/src/test/headlessCampaignSimulation.test.ts` verifying 120 Pre-Genesis bare-map permutations, 100 full 4-stage headless campaign playthroughs with JSON round-trip & 2-Page Overview synthesis, and 50 Turn Map Session / Card Flexibility permutations.
 
 
