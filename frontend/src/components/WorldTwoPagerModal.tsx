@@ -406,9 +406,6 @@ export function WorldTwoPagerModal({
                     <div className="font-bold flex items-center justify-end gap-1">
                       <span>{overview.stability.icon}</span>
                       <span>{overview.stability.status}</span>
-                      <span className="font-mono text-muted-foreground">
-                        ({overview.stability.score}/100)
-                      </span>
                     </div>
                     <div className="text-[11px] text-muted-foreground font-mono">
                       Seed: {overview.seed} · {overview.totalTurns} Turns
