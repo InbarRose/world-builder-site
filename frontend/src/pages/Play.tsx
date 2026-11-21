@@ -669,6 +669,7 @@ export function Play() {
       active: true,
       stageName,
     })
+    setTimeout(() => setStageCelebration(null), 3500)
     // Offer the authentic Pre-Primal / Pre-Civilization / Pre-Intrigue setup ritual
     setShowPreStageModal(true)
     try {
@@ -975,6 +976,7 @@ export function Play() {
     }
 
     setSelectedPreset(null)
+    setTurnFocusTab('presets')
     setGeneratedFeatureName('')
     setPresetCategory('all')
     setPresetSearchQuery('')
@@ -1118,6 +1120,7 @@ export function Play() {
     setDeck(nextDeck)
     setDrawnCard(nextCard)
     setSelectedPreset(null)
+    setTurnFocusTab('presets')
     setGeneratedFeatureName('')
 
     let power: string | undefined = undefined
@@ -1157,6 +1160,7 @@ export function Play() {
     setDeck(nextDeck)
     setDrawnCard(nextCard)
     setSelectedPreset(null)
+    setTurnFocusTab('presets')
     setGeneratedFeatureName('')
     setTurnFocusTab('presets')
 
@@ -1271,6 +1275,7 @@ export function Play() {
     }
     setDrawnCard(customCard)
     setSelectedPreset(null)
+    setTurnFocusTab('presets')
     setGeneratedFeatureName('')
     setShowCardPickerPopover(false)
 
@@ -1603,8 +1608,14 @@ export function Play() {
     playTokenPlaceSound()
     const baseDraft = placementDraftSnapshot || turnDraft
     const mergedTileIds = Array.from(new Set([...baseDraft.placedTileIds, ...placementTileIds]))
+    const primaryLockedTile = placementTileIds[0] || mergedTileIds[0]
+    const syncedNote =
+      primaryLockedTile && baseDraft.note
+        ? baseDraft.note.replace(/\(\d+\s*,\s*\d+\)/, `(${primaryLockedTile})`)
+        : baseDraft.note
     const lockedDraft: TurnActionDraft = {
       ...baseDraft,
+      note: syncedNote,
       placedTileIds: mergedTileIds,
     }
     setTurnDraft(lockedDraft)
@@ -1859,6 +1870,7 @@ export function Play() {
     setTurnPhase('await_draw')
     setShowTurnVerifyDialog(false)
     setSelectedPreset(null)
+    setTurnFocusTab('presets')
     setGeneratedFeatureName('')
     setPresetCategory('all')
     setPresetSearchQuery('')
@@ -3141,25 +3153,32 @@ export function Play() {
           aria-live="polite"
           className="fixed inset-x-0 bottom-14 z-50 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-95 duration-300"
         >
-          <div className="px-6 py-2.5 rounded-2xl bg-amber-500 text-stone-950 font-black shadow-2xl backdrop-blur-md border border-amber-300 flex items-center gap-3">
-            <Sparkles className="h-5 w-5 animate-spin text-amber-950" />
+          <div className="pointer-events-auto px-5 py-2 rounded-2xl bg-amber-500 text-stone-950 font-black shadow-2xl backdrop-blur-md border border-amber-300 flex items-center gap-2.5">
+            <Sparkles className="h-4 w-4 animate-spin text-amber-950" />
             <span className="text-sm tracking-wide">
               Dawn of a New Era: {stageCelebration.stageName}
             </span>
-            <span className="text-lg">🌟</span>
+            <button
+              type="button"
+              onClick={() => setStageCelebration(null)}
+              aria-label="Dismiss era banner"
+              className="ml-1 rounded-full px-1.5 py-0.5 text-xs font-bold hover:bg-amber-600/40"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
 
-      {/* Tabletop Conclave Turn Handoff Ritual Toast */}
+      {/* Tabletop Conclave Turn Handoff Ritual Toast (non-occluding bottom-right) */}
       {conclaveHandoff && (
         <div
           role="status"
           aria-live="polite"
-          className="fixed inset-x-0 top-16 z-50 flex items-center justify-center p-3 animate-in fade-in slide-in-from-top-2 duration-300 pointer-events-auto"
+          className="fixed bottom-16 right-4 z-50 flex items-end justify-end p-2 animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-none"
         >
           <div
-            className="card max-w-lg w-full p-4 rounded-2xl shadow-2xl border-2 flex items-center justify-between gap-3.5 bg-card/95 backdrop-blur-md"
+            className="pointer-events-auto card max-w-md w-full p-3 rounded-2xl shadow-2xl border-2 flex items-center justify-between gap-3 bg-card/95 backdrop-blur-md"
             style={{ borderColor: conclaveHandoff.player.color }}
           >
             <div className="flex items-center gap-3">
