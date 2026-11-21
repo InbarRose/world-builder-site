@@ -25,6 +25,7 @@ import {
 interface StudioDockWorkspaceProps {
   layout: StudioWorkspaceLayout
   onChangeLayout: (next: StudioWorkspaceLayout) => void
+  topOverlayBar?: React.ReactNode
   centerCanvas: React.ReactNode
   panelContents: Record<StudioPanelId, React.ReactNode>
   panelBadges?: Partial<Record<StudioPanelId, { count?: number; highlight?: boolean }>>
@@ -33,6 +34,7 @@ interface StudioDockWorkspaceProps {
 export function StudioDockWorkspace({
   layout,
   onChangeLayout,
+  topOverlayBar,
   centerCanvas,
   panelContents,
   panelBadges = {},
@@ -273,9 +275,12 @@ export function StudioDockWorkspace({
         {/* CENTER FULL-BLEED MAP CANVAS (ALWAYS VISIBLE) */}
         <div
           data-testid="studio-center-canvas"
-          className="flex-1 min-w-0 h-full overflow-y-auto p-2 bg-muted/15"
+          className="flex-1 min-w-0 h-full flex flex-col overflow-hidden bg-muted/15"
         >
-          {centerCanvas}
+          {topOverlayBar && (
+            <div className="shrink-0 px-2 pt-2 pb-1">{topOverlayBar}</div>
+          )}
+          <div className="flex-1 min-h-0 overflow-y-auto p-2">{centerCanvas}</div>
         </div>
 
         {/* RIGHT RESIZABLE DOCK */}
