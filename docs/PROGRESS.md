@@ -460,3 +460,8 @@ status: active
   - [x] Fixed Top Card Ribbon reset after `Log Turn`, centered floating Edge Tray bar (`bottom-3 left-1/2`), tightened Left Dock height so primary buttons stay visible without inner scroll, and moved Era Celebration toast to `bottom-14`.
 
 
+
+- [x] **Phase 57: Full 4-Stage Interactive E2E Browser Playthrough & 320-Permutation Headless Simulation Report Generator** *(ADR-061)*
+  - [x] Completed full 4-stage live interactive E2E browser playthrough (`http://localhost:5173/play` at `1440×900`, `0` console errors, `0` failed network requests) spanning **Genesis → Primal → Civilization → Intrigue**, including Pre-Primal Species setup (`"Sunborn Elves"`), Pre-Civilization Society setup (`"Kingdom of Solaria"`), Pre-Intrigue City Naming (`"Highspire"`), Chronicle verification across all 4 ages, and full 2-Page World Overview rendering.
+  - [x] Fixed 4 UX paper-cuts uncovered during the full 4-stage live playthrough (`Play.tsx`): auto-dismiss + `✕` button on `stageCelebration` toast, non-occluding bottom-right `conclaveHandoff` toast, resetting `turnFocusTab` to `'presets'` on every card draw/redraw, and syncing locked-in tile coordinates into auto-populated chronicle notes.
+  - [x] Added deterministic headless simulation report engine (`simulationReportEngine.ts`), `npm run simulate` script, CI-gated test (`simulationReportGenerator.test.ts`), and inspectable report (`docs/SIMULATION_REPORT.md`) covering **320 permutations** (120 Pre-Genesis bare maps + 150 full 4-stage campaigns spanning 2,400 turns + 50 card/map session tests) with ASCII cartographic maps, complete 4-age chronicles, and 2-Page World Overviews (**35/35 test suites, 235/235 tests passing**).
