@@ -937,5 +937,210 @@
     },
     "creativePrompt": "How does Unnatural Fog Enveloping a Region reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Unnatural Fog Enveloping a Region, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "dis_genesis_landslide",
+    "name": "Colossal Mountain Landslide",
+    "description": "An entire mountainside shears away, damming a valley and creating a rugged highland lake.",
+    "creativePrompt": "What natural basin or trapped valley was reshaped by the falling rock?",
+    "exampleNarrative": "With a roar heard across the continent, the cliffside collapsed and turned the gorge into a deep tarn.",
+    "slotCategory": "elevation",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪨",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "genesis",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "terrainChange": "hills",
+    "reliefChange": "hills"
+  },
+  {
+    "id": "dis_genesis_ash_winter",
+    "name": "Supervolcano Ash Winter",
+    "description": "A massive distant eruption dims the sun for decades, chilling temperate lands.",
+    "creativePrompt": "Which hardy plants or creatures survived the long grey chill?",
+    "exampleNarrative": "Grey snow drifted across the valleys for a generation before green shoots finally broke through.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌫️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "genesis",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "terrainChange": "tundra"
+  },
+  {
+    "id": "dis_primal_mudslide",
+    "name": "Monsoon Mudslides & Flooded Caves",
+    "description": "Weeks of relentless rain wash away hillside camps and reshape river deltas.",
+    "creativePrompt": "Where did the displaced clans rebuild their homes after the waters receded?",
+    "exampleNarrative": "Torrential rains swept the foothills clean, forcing the hill tribes to seek higher stone ridges.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌧️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "primal",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "terrainChange": "swamp"
+  },
+  {
+    "id": "dis_primal_frost_blight",
+    "name": "Bitter Frost Killing Wild Herds",
+    "description": "An early freeze decimated migrating game, forcing tribes to innovate or ally.",
+    "creativePrompt": "What new hunting or preservation tradition was born from surviving the frost?",
+    "exampleNarrative": "When the autumn herds vanished beneath the sleet, two rival tribes shared fire to survive.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "❄️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "primal",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true
+  },
+  {
+    "id": "dis_civ_locust_plague",
+    "name": "Great Locust Swarm & Trade Panic",
+    "description": "Billions of locusts darken the sky, devouring grain fields across entire provinces.",
+    "creativePrompt": "Which neighboring kingdom profiteered from selling emergency grain?",
+    "exampleNarrative": "The skies hummed black for four days, leaving the breadbasket province bare before winter.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🦗",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "civilization",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true
+  },
+  {
+    "id": "dis_civ_coastal_erosion",
+    "name": "Sinking Coastline & Drowned Ruins",
+    "description": "Slow subsidence and storm surges swallow an ancient coastal district beneath the waves.",
+    "creativePrompt": "What sunken towers can still be seen beneath the clear harbor water?",
+    "exampleNarrative": "Storm after storm claimed the lower quay until fish swam through the old merchant halls.",
+    "slotCategory": "hydrology",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌊",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "civilization",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true,
+    "overlayChange": "ruins"
+  },
+  {
+    "id": "dis_int_bridge_collapse",
+    "name": "Great Bridge Collapse During March",
+    "description": "A vital river crossing gives way under storm waters, stranding armies and merchants.",
+    "creativePrompt": "Was it rotten timber and floods — or deliberate sabotage by enemy agents?",
+    "exampleNarrative": "The center arch plunged into the foaming rapids just as the royal supply train reached the bank.",
+    "slotCategory": "structure",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌉",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "intrigue",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true
+  },
+  {
+    "id": "dis_int_sinkhole_market",
+    "name": "Market Square Sinkhole & Ancient Vault",
+    "description": "The ground caves in beneath a bustling plaza, revealing forgotten subterranean catacombs.",
+    "creativePrompt": "What ancient danger or treasure was uncovered beneath the city streets?",
+    "exampleNarrative": "Cobblestones vanished into darkness at midday, exposing an ancient vaulted chamber no one knew existed.",
+    "slotCategory": "myth",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕳️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "stage": "intrigue",
+    "suit": "",
+    "isFantastical": false,
+    "isDisaster": true
   }
 ]

@@ -269,5 +269,68 @@
     },
     "creativePrompt": "How does Ancestor Worship & Burial Cairns reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Ancestor Worship & Burial Cairns, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_trad_solstice_stars",
+    "name": "Solstice Stargazing Vigil",
+    "description": "Gatherings on the longest night to chart constellations and tell creation myths.",
+    "creativePrompt": "Which constellation is revered most, and what omen does it foretell?",
+    "exampleNarrative": "Each winter solstice, elders climbed the high ridge to name the stars and pass down the old songs.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌟",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_trad_oath_stones",
+    "name": "Sacred Oath Stones",
+    "description": "Standing stones where tribes swear blood-oaths, marriages, and truces.",
+    "creativePrompt": "What curse or disgrace befalls anyone who breaks an oath sworn at the stones?",
+    "exampleNarrative": "A ring of weathered monoliths became the neutral ground where rival clans swore unbreakable peace.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🗿",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "pri_trad_campfire_bards",
+    "name": "Oral Bards & Campfire Chronicles",
+    "description": "Traveling storytellers who memorize lineages, treaties, and heroic deeds in verse.",
+    "creativePrompt": "Which legendary tale is every child taught before they can walk?",
+    "exampleNarrative": "Before ink or parchment existed, the Flame-Singers carried the memory of every tribe from fire to fire.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪕",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

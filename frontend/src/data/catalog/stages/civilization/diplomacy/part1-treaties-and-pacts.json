@@ -278,5 +278,68 @@
     },
     "creativePrompt": "How does Negotiated Border Treaty reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Negotiated Border Treaty, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "civ_dip_free_cities_council",
+    "name": "Council of Free Cities",
+    "description": "Independent city-states form a shared senate to arbitrate disputes and pool navies.",
+    "creativePrompt": "Which city hosts the rotating council, and what rival empire fears their unity?",
+    "exampleNarrative": "Envoys from seven harbor towns signed the Free Charter, pledging mutual defense and open ports.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏛️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_dip_scholar_exchange",
+    "name": "Scholarly & Artisan Exchange",
+    "description": "Kingdoms swap architects, healers, and scribes to share breakthroughs in peace.",
+    "creativePrompt": "What marvelous joint project arose from combining two cultures’ finest crafts?",
+    "exampleNarrative": "Masons from the mountain holds traveled south to teach dome-vaulting in exchange for star-charts.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "📜",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "civ_dip_neutral_sanctuary",
+    "name": "Treaty of the Neutral Sanctuary",
+    "description": "A sacred valley or island is declared weapons-free neutral ground for all nations.",
+    "creativePrompt": "Who enforces the peace inside the sanctuary, and what secrets are traded there?",
+    "exampleNarrative": "All warring banners agreed to lay down arms within the White Valley, turning it into a haven for envoys.",
+    "slotCategory": "feature",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🕊️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

@@ -5833,6 +5833,123 @@ export function Play() {
                   highlight: drawHistory.length > 0,
                 },
               }}
+              topOverlayBar={
+                <div
+                  data-testid="studio-top-card-ribbon"
+                  className="no-print card px-3 py-1.5 bg-card/95 backdrop-blur-md border-primary/25 shadow-sm flex flex-wrap items-center justify-between gap-2 text-xs"
+                >
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    {drawnCard ? (
+                      <>
+                        <span className="px-2 py-0.5 rounded-md bg-primary/15 text-primary font-bold flex items-center gap-1">
+                          <span>{getCardDisplay(drawnCard).display}</span>
+                          <span>·</span>
+                          <span>{powerData?.power || turnDraft.actionTitle || 'Power'}</span>
+                        </span>
+                        {isFantasticalCard(drawnCard) && (
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
+                            ✨ Fantastical
+                          </span>
+                        )}
+                        {drawnCard.value === 'A' && (
+                          <span className="px-1.5 py-0.5 rounded bg-destructive/15 text-destructive text-[10px] font-bold">
+                            🌋 Disaster
+                          </span>
+                        )}
+                        {turnDraft.featureName && (
+                          <span className="text-foreground font-semibold truncate max-w-[200px]">
+                            “{turnDraft.featureName}”
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground font-medium flex items-center gap-1.5">
+                        <span className="font-bold text-foreground">
+                          Age {currentStageData?.number}: {currentStageData?.name}
+                        </span>
+                        <span>·</span>
+                        <span>{deck.length} cards in deck</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                    {!drawnCard ? (
+                      <>
+                        <button
+                          type="button"
+                          data-testid="ribbon-draw-card-btn"
+                          disabled={world.isLocked || deck.length === 0}
+                          onClick={handleDrawCard}
+                          className="btn-primary px-3 py-1 text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <PlayIcon className="h-3 w-3" />
+                          <span>Draw Card ({deck.length})</span>
+                        </button>
+                        {!world.isLocked && (
+                          <button
+                            type="button"
+                            onClick={handleFreeformOverrideTurn}
+                            className="btn-outline px-2.5 py-1 text-[11px] font-semibold flex items-center gap-1"
+                            title="Start a Freeform Turn without drawing a card"
+                          >
+                            <Wand2 className="h-3 w-3 text-primary" />
+                            <span>Freeform</span>
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleBeginInteractivePlacement(selectedTileId)}
+                          className="btn-outline px-2.5 py-1 text-[11px] font-semibold border-emerald-500/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10"
+                        >
+                          📍 Place / Edit Map
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleConfirmTurnChronicle}
+                          className="btn-primary px-3 py-1 text-[11px] font-bold flex items-center gap-1"
+                        >
+                          <Check className="h-3 w-3" />
+                          <span>Log Turn</span>
+                        </button>
+                        {!world.isLocked && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleRedrawCurrentCard}
+                              className="btn-outline p-1 text-amber-600 dark:text-amber-400"
+                              title="Redraw card (no penalty)"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDiscardAndDrawAnother}
+                              className="btn-outline p-1 text-rose-500"
+                              title="Discard & draw another (no penalty)"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </>
+                        )}
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleWorkspaceLayoutChange(toggleAllPanelsHidden(workspaceLayout))
+                      }
+                      className="btn-outline px-2 py-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground"
+                      title="Toggle Pure Canvas (Hide/Show all side trays — Hotkey: Tab)"
+                    >
+                      {workspaceLayout.allPanelsHidden ? '◫ Show Trays' : '🗺️ Pure Canvas'}
+                    </button>
+                  </div>
+                </div>
+              }
               centerCanvas={
                 <MapCanvas
                   map={world.map}

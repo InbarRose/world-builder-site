@@ -449,5 +449,9 @@ status: active
   - [x] Locked world dimension presets (`14×9`, `20×12`, `26×15`) and Square/Hex topology switchers in `MapCanvas.tsx` once Turn #1 begins in normal play (`isCampaignStarted`), verified in `MapCanvas.test.tsx`.
 - [x] **Phase 52: Single-Pane-of-Glass Edge Tray Pills & Contextual Notification Highlights** *(ADR-056)*
   - [x] Added `studio-edge-tray-bar` with live counts and pulsing attention highlights in `StudioDockWorkspace.tsx` + `Play.tsx` so hidden/collapsed trays pop back open in 1 click.
+- [x] **Phase 53: Grand Classic Fantasy Tropes Expansion (`>= 12–14` Classics Per Stage, Suit & Disaster)** *(ADR-057)*
+  - [x] Expanded all 12 Primal/Civilization/Intrigue suit shards to 13–14 classic fantasy RPG presets each and expanded Natural Disasters to 12 per stage (48 total), enforced by `catalogExtensibility.test.ts`.
+- [x] **Phase 54: Single-Pane-of-Glass Top Card Draw Ribbon & Pure Canvas Play** *(ADR-058)*
+  - [x] Added `studio-top-card-ribbon` directly above the center World Map in `StudioDockWorkspace.tsx` + `Play.tsx` (`Draw Card`, `Freeform`, `📍 Place / Edit Map`, `✓ Log Turn`, `Redraw`, `Discard`, and `🗺️ Pure Canvas` toggle).
 
 

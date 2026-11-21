@@ -278,5 +278,68 @@
     },
     "creativePrompt": "How does Popular Uprising & Civil War reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Popular Uprising & Civil War, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "int_con_mercenary_company",
+    "name": "Rogue Mercenary Company",
+    "description": "A veteran sellsword army goes unpaid and carves out its own fiefdom by force.",
+    "creativePrompt": "Which bankrupt lord hired them, and who is now offering a bounty to break their hold?",
+    "exampleNarrative": "The Iron Wolves marched out of the border war unpaid and seized a wealthy river town for themselves.",
+    "slotCategory": "feature",
+    "slotPriority": 82,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "⚔️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_con_pirate_armada",
+    "name": "Corsair & Pirate Armada Raids",
+    "description": "United pirate captains prey on coastal shipping lanes from hidden island coves.",
+    "creativePrompt": "Which secret patron supplies the corsairs with maps of royal treasure galleons?",
+    "exampleNarrative": "Black-sailed galleys swept the straits, forcing coastal cities to pay hefty tribute or starve.",
+    "slotCategory": "feature",
+    "slotPriority": 80,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🏴‍☠️",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
+  },
+  {
+    "id": "int_con_succession_crisis",
+    "name": "War of the Contested Throne",
+    "description": "An aging ruler dies without a clear heir, plunging noble houses into civil war.",
+    "creativePrompt": "Which two claimants hold the strongest armies, and who holds the royal seal?",
+    "exampleNarrative": "With the throne empty, rival banners raised armies across the heartland, dividing old allies overnight.",
+    "slotCategory": "feature",
+    "slotPriority": 86,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "👑",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    }
   }
 ]

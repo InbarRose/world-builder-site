@@ -273,5 +273,71 @@
     "overlayChange": "settlement",
     "creativePrompt": "How does Seasonal Nomad Encampment reshape the people, landmarks, or stories in this region?",
     "exampleNarrative": "Word spread across the realm of Seasonal Nomad Encampment, leaving a lasting mark on the land and its chronicles."
+  },
+  {
+    "id": "pri_set_treehouse_canopy",
+    "name": "Treehouse Canopy Village",
+    "description": "Woven wooden platforms and rope bridges suspended high among giant forest boughs.",
+    "creativePrompt": "How do the canopy dwellers guard their elevated walkways from ground predators?",
+    "exampleNarrative": "High above the mossy floor, lanterns swayed between ancient oaks as the Canopy Folk built their first sky-village.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌳",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
+  },
+  {
+    "id": "pri_set_cliff_caves",
+    "name": "Cliffside Cave Dwellings",
+    "description": "Carved stone homes and warm hearths hollowed into towering canyon walls.",
+    "creativePrompt": "What secrets lie deeper inside the tunnels behind the cliffside homes?",
+    "exampleNarrative": "Carving shelters into the red cliffs, the early clans found safety from storms and wandering beasts.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🪨",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
+  },
+  {
+    "id": "pri_set_oasis_camp",
+    "name": "Oasis Caravan Camp",
+    "description": "Shaded tents and watering pools welcoming desert travelers and herders.",
+    "creativePrompt": "Who controls the spring water, and what rules govern guests at the oasis?",
+    "exampleNarrative": "Around the emerald palms of the desert spring, a permanent gathering camp took root.",
+    "slotCategory": "settlement",
+    "slotPriority": 70,
+    "graphic": {
+      "assetId": null,
+      "fallbackAssetId": null,
+      "glyph": "🌴",
+      "primaryColor": null,
+      "secondaryColor": null,
+      "params": {
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.15,
+        "scale": 1
+      }
+    },
+    "overlayChange": "settlement"
   }
 ]

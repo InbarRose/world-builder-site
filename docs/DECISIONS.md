@@ -1435,6 +1435,35 @@ status: active
 - **Consequences**:
   - Players can collapse side/bottom trays for maximum canvas space (`Tab` or `×`) and pop them open smoothly in 1 click whenever notified.
 
+---
+
+## ADR-057: Grand Classic Fantasy Tropes Library (`>= 12–14` Classics Per Stage, Suit & Natural Disaster)
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  Building on ADR-054, the creator asked to expand the library of classic, instantly recognizable fantasy RPG tropes across every stage and suit so tables never run short of timeless inspiration.
+- **Decision**:
+  - Expanded every Primal, Civilization, and Intrigue suit shard to **13–14 classic fantasy RPG presets** (Treehouse Canopy Village, Cliffside Cave Dwellings, Oasis Caravan Camp, Sacred Oath Stones, Gold-Panning Stream, Grand Aqueduct, Great Harbor Lighthouse, Council of Free Cities, Rogue Mercenary Company, Corsair Armada, War of the Contested Throne, Monster-Hunting Guild, Sunken Temple Rising, Cursed Forest of Whispers, etc.).
+  - Expanded Natural Disasters to **12 classic disasters per stage** (48 total).
+  - Raised the permanent automated guard in `catalogExtensibility.test.ts` to enforce `>= 12` presets for every `(stage, suit)` and every `(stage, Ace Natural Disaster)`.
+- **Consequences**:
+  - Gives every tabletop group a rich, classic, zero-friction catalog of fantasy worldbuilding tropes across all 4 stages.
+
+---
+
+## ADR-058: Single-Pane-of-Glass Top Card Draw Ribbon (`studio-top-card-ribbon`) & Pure Canvas Play
+
+- **Status**: Accepted
+- **Date**: 2026-11-20
+- **Context**:
+  To complete the Single-Pane-of-Glass Studio journey (Map centered, Card Draw on top, Codex/Chronicle in collapsible side/bottom trays with notification dots), players needed a sleek top-center Card Draw Ribbon directly above the World Map so they can draw cards, trigger interactive map placement, redraw/discard, log turns, or toggle Pure Canvas mode without ever leaving the map.
+- **Decision**:
+  - Added `topOverlayBar` to `StudioDockWorkspace.tsx` and rendered `studio-top-card-ribbon` directly above the center World Map in `Play.tsx` with 1-click `Draw Card`, `Freeform`, `📍 Place / Edit Map`, `✓ Log Turn`, `Redraw`, `Discard`, and `🗺️ Pure Canvas` / `◫ Show Trays`.
+- **Consequences**:
+  - Enables an entire 4-age *World Building* session on a single uninterrupted pane of glass with 90%+ of the viewport dedicated to the living map.
+
+
 
 
 
