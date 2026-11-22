@@ -26,6 +26,7 @@ import {
   Lightbulb,
 } from 'lucide-react'
 import { StudioHelpTutorialModal } from './StudioHelpTutorialModal'
+import { MapInventoryDrawer, MapInventoryItem } from './MapInventoryDrawer'
 import {
   DrawRecord,
   FloraType,
@@ -628,6 +629,8 @@ export function MapCanvas({
   const [showTutorialModal, setShowTutorialModal] = useState(false)
   const [showHoverHints, setShowHoverHints] = useState(false)
   const [showMapOptionsMenu, setShowMapOptionsMenu] = useState(false)
+  const [showInventoryDrawer, setShowInventoryDrawer] = useState(false)
+  const [highlightedRegionId, setHighlightedRegionId] = useState<string | null>(null)
   const [activeHintText, setActiveHintText] = useState<string>(
     'Safe Select & Inspect Mode [S] — Click any tile on the map to inspect and edit its 5 layers in the right panel without accidental painting.'
   )
@@ -1626,6 +1629,23 @@ export function MapCanvas({
                 </button>
               </>
             )}
+
+            {/* Collapsible Map Asset Inventory (Always accessible in View & Edit modes) */}
+            <button
+              type="button"
+              data-testid="map-inventory-btn"
+              onClick={() => setShowInventoryDrawer((v) => !v)}
+              className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 border transition-colors ${
+                showInventoryDrawer
+                  ? 'bg-primary/15 border-primary/50 text-primary font-semibold'
+                  : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+              title="Open searchable Map Asset Inventory (Regions, Rivers, Settlements, Landmarks)"
+              aria-label="Map Asset Inventory"
+            >
+              <span>🗺️</span>
+              <span>Inventory</span>
+            </button>
           </div>
 
           {/* Right: Compact Zoom Buttons + ⋯ Map Options Popover (Single Row) */}
@@ -1920,6 +1940,21 @@ export function MapCanvas({
             </div>
           </div>
         </div>
+
+        {/* Collapsible Map Asset Inventory Drawer (Phase 67, ADR-070) */}
+        <MapInventoryDrawer
+          isOpen={showInventoryDrawer}
+          map={map}
+          regions={regionAnalysis.regions}
+          selectedTileId={selectedTileId}
+          highlightedRegionId={highlightedRegionId}
+          onClose={() => setShowInventoryDrawer(false)}
+          onSelectItem={(item: MapInventoryItem) => {
+            setActiveTool('inspect')
+            setHighlightedRegionId(item.regionId || null)
+            onSelectTile?.(item.tileId)
+          }}
+        />
 
         {/* Photoshop / Warcraft 3 Editor Live Contextual Status & Hover-Hint Bar */}
         {showHoverHints && (
@@ -3421,12 +3456,69 @@ export function MapCanvas({
                         </span>
                       )}
 
-                      {/* Geographic Region Centroid Banner */}
+                      {/* Interactive River Hit-Badge so Rivers are always directly selectable */}
+                      {visibleLayers.watershed && tile.hasRiver && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          data-testid={`river-badge-${col}-${row}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setActiveTool('inspect')
+                            setHighlightedRegionId(null)
+                            onSelectTile?.(id)
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setActiveTool('inspect')
+                              setHighlightedRegionId(null)
+                              onSelectTile?.(id)
+                            }
+                          }}
+                          className="absolute bottom-0.5 left-0.5 z-20 px-1 rounded bg-sky-700/90 hover:bg-sky-600 text-[9px] text-white cursor-pointer shadow-sm border border-sky-300/60"
+                          title={`Select River at (${col},${row})`}
+                        >
+                          🌊
+                        </span>
+                      )}
+
+                      {/* Highlighted Region Outline Ring */}
+                      {highlightedRegionId && tileRegion?.id === highlightedRegionId && (
+                        <span
+                          className="absolute inset-0 pointer-events-none ring-2 ring-amber-400/90 ring-inset z-15 rounded-[2px]"
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      {/* Geographic Region Centroid Banner (Directly clickable to select & highlight region) */}
                       {visibleLayers.labels && isRegionCentroid && tileRegion && (
                         <span
+                          role="button"
+                          tabIndex={0}
                           data-testid={`region-banner-${col}-${row}`}
-                          className="relative z-20 text-[8px] font-serif italic font-bold text-amber-200 bg-stone-900/90 border border-amber-400/50 px-1.5 py-0.2 rounded-full truncate max-w-[96%] mt-0.5 shadow-md tracking-wide"
-                          title={`${tileRegion.name} (${tileRegion.categoryLabel} · ${tileRegion.tileIds.length} tiles)`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setActiveTool('inspect')
+                            setHighlightedRegionId(tileRegion.id)
+                            onSelectTile?.(id)
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setActiveTool('inspect')
+                              setHighlightedRegionId(tileRegion.id)
+                              onSelectTile?.(id)
+                            }
+                          }}
+                          className={`relative z-20 text-[8px] font-serif italic font-bold px-1.5 py-0.2 rounded-full truncate max-w-[96%] mt-0.5 shadow-md tracking-wide cursor-pointer transition-colors ${
+                            highlightedRegionId === tileRegion.id
+                              ? 'bg-amber-500 text-stone-950 border border-amber-200 ring-1 ring-amber-300'
+                              : 'text-amber-200 bg-stone-900/90 hover:bg-amber-600 hover:text-stone-950 border border-amber-400/50'
+                          }`}
+                          title={`Click to select region: ${tileRegion.name} (${tileRegion.categoryLabel} · ${tileRegion.tileIds.length} tiles)`}
                         >
                           {tileRegion.icon} {tileRegion.name}
                         </span>

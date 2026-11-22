@@ -837,5 +837,58 @@ describe('MapCanvas Component', () => {
     expect(screen.queryByTestId('map-dimension-presets')).not.toBeInTheDocument()
     expect(screen.queryByRole('group', { name: /Grid Topology Mode/i })).not.toBeInTheDocument()
   })
+
+  it('Phase 67: provides collapsible searchable Map Asset Inventory and directly clickable Region Banners & River badges', () => {
+    const baseMap = createInitialMap(6, 5)
+    baseMap.tiles['2,2'] = {
+      ...baseMap.tiles['2,2'],
+      domain: 'land',
+      terrain: 'plains',
+      hasRiver: true,
+      label: 'Silverbrook',
+    }
+    baseMap.tiles['3,2'] = {
+      ...baseMap.tiles['3,2'],
+      domain: 'land',
+      terrain: 'mountain',
+      relief: 'mountain',
+      regionName: 'Dragonspine Peaks',
+      regionId: 'reg_dragonspine',
+    }
+
+    const onSelectTile = vi.fn()
+    render(
+      <MapCanvas
+        map={baseMap}
+        worldName="Inventory Test"
+        selectedTileId="0,0"
+        onSelectTile={onSelectTile}
+        onChange={() => undefined}
+      />
+    )
+
+    // 1. Inventory drawer is hidden by default and opens on click
+    expect(screen.queryByTestId('map-inventory-drawer')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('map-inventory-btn'))
+    expect(screen.getByTestId('map-inventory-drawer')).toBeInTheDocument()
+
+    // 2. Filter by Rivers & search for Silverbrook, then click to select
+    fireEvent.click(screen.getByTestId('inventory-filter-rivers'))
+    fireEvent.change(screen.getByTestId('map-inventory-search'), {
+      target: { value: 'Silverbrook' },
+    })
+    fireEvent.click(screen.getByTestId('inventory-item-river_2,2'))
+    expect(onSelectTile).toHaveBeenCalledWith('2,2')
+
+    // 3. Direct click on River Badge on the map selects the river tile
+    onSelectTile.mockClear()
+    fireEvent.click(screen.getByTestId('river-badge-2-2'))
+    expect(onSelectTile).toHaveBeenCalledWith('2,2')
+
+    // 4. Direct click on Region Banner on the map selects the region cleanly
+    onSelectTile.mockClear()
+    fireEvent.click(screen.getByTestId('region-banner-3-2'))
+    expect(onSelectTile).toHaveBeenCalledWith('3,2')
+  })
 })
 

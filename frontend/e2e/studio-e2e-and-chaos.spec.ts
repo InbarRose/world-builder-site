@@ -204,6 +204,13 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
     await page.getByTestId('expand-history-btn').click()
     await page.getByTestId('expand-history-btn').click()
 
+    // Verify collapsible searchable Map Asset Inventory drawer opens, filters, and closes
+    await page.getByTestId('map-inventory-btn').click()
+    await expect(page.getByTestId('map-inventory-drawer')).toBeVisible({ timeout: 3000 })
+    await page.getByTestId('inventory-filter-regions').click()
+    await page.getByTestId('map-inventory-btn').click()
+    await expect(page.getByTestId('map-inventory-drawer')).toBeHidden({ timeout: 3000 })
+
     // 2. Verify always-visible Turn State-Machine Stepper & tucked ⋯ More Tools popover
     await expect(page.getByTestId('top-nav-turn-stepper')).toBeVisible({ timeout: 5000 })
     const moreBtn = page.getByTestId('studio-more-tools-btn')
