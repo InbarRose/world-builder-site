@@ -355,4 +355,28 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
     expect(errors.pageErrors).toEqual([])
     expect(errors.failedRequests).toEqual([])
   })
+
+  test('5. Multi-Viewport Responsive Acceptance (1280x720 Compact Laptop & 768x1024 Tablet)', async ({
+    page,
+  }) => {
+    const errors = attachErrorCollectors(page)
+
+    // A. Compact Laptop (1280x720)
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await launchFreshStudioRealm(page)
+    await expect(page.getByTestId('studio-center-canvas')).toBeVisible()
+    await expect(page.getByTestId('studio-right-sidebar')).toBeVisible()
+    await expect(page.getByTestId('map-options-menu-btn')).toBeVisible()
+    await drawAndLogOneTurn(page)
+
+    // B. Tablet Portrait (768x1024)
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await expect(page.getByTestId('studio-dock-workspace')).toBeVisible()
+    await expect(page.getByTestId('expand-map-btn')).toBeVisible()
+    await expect(page.getByTestId('studio-more-tools-btn')).toBeVisible()
+
+    expect(errors.consoleErrors).toEqual([])
+    expect(errors.pageErrors).toEqual([])
+    expect(errors.failedRequests).toEqual([])
+  })
 })
