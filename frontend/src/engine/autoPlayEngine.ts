@@ -1029,7 +1029,8 @@ export function autoPlayStage(
 
   const turnsToRun = Math.min(resolvedTurns, currentDeck.length)
   for (let i = 0; i < turnsToRun; i++) {
-    const card = currentDeck.pop()!
+    const card = currentDeck.pop()
+    if (!card) break
     currentWorld = executeAutomatedTurn(currentWorld, card, rng)
   }
 
@@ -1078,7 +1079,8 @@ export function autoPlayFullWorld(
     const stageDeck = buildShuffledDeck(currentWorld.deckConfig, rng)
     const count = Math.min(resolvedTurns, stageDeck.length)
     for (let i = 0; i < count; i++) {
-      const card = stageDeck.pop()!
+      const card = stageDeck.pop()
+      if (!card) break
       currentWorld = executeAutomatedTurn(currentWorld, card, rng)
     }
   }

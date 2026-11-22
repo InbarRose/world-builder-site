@@ -493,7 +493,9 @@ export function bucketFillTerrain(
   const queue: [number, number][] = [[startCol, startRow]]
 
   while (queue.length > 0) {
-    const [col, row] = queue.shift()!
+    const nextCoord = queue.shift()
+    if (!nextCoord) break
+    const [col, row] = nextCoord
     const id = getTileId(col, row)
     if (visited.has(id)) continue
     visited.add(id)

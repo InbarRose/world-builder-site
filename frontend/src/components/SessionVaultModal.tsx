@@ -53,7 +53,7 @@ export const SessionVaultModal: React.FC<SessionVaultModalProps> = ({
 
   useEffect(() => {
     if (isOpen && world?.id) {
-      refreshList()
+      setCheckpoints(listWorldCheckpoints(world.id))
       setConfirmRestoreId(null)
     }
   }, [isOpen, world?.id])

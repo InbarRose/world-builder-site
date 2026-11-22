@@ -27,6 +27,7 @@ import {
   RelationshipType,
   StageId,
   WorldEntity,
+  WorldState,
 } from '../engine/types'
 import {
   COLOR_SWATCH_PALETTES,
@@ -166,7 +167,7 @@ export function EntityRegistry({
       createdAt: '',
       updatedAt: '',
       isLocked: false,
-      deckConfig: {} as any,
+      deckConfig: {} as WorldState['deckConfig'],
       currentStage,
       stageNotes: {},
       drawHistory,
@@ -1358,7 +1359,11 @@ export function EntityRegistry({
                 {inspectedEntity.originTileId && (
                   <button
                     type="button"
-                    onClick={() => onSelectTile?.(inspectedEntity.originTileId!)}
+                    onClick={() => {
+                      if (inspectedEntity.originTileId) {
+                        onSelectTile?.(inspectedEntity.originTileId)
+                      }
+                    }}
                     className="px-2.5 py-1 rounded-md bg-background border border-primary/40 text-primary font-semibold hover:bg-primary/10 flex items-center gap-1"
                   >
                     <MapPin className="h-3.5 w-3.5" />
@@ -1414,7 +1419,11 @@ export function EntityRegistry({
                         {realm.capitalTileId && (
                           <button
                             type="button"
-                            onClick={() => onSelectTile?.(realm.capitalTileId!)}
+                            onClick={() => {
+                              if (realm.capitalTileId) {
+                                onSelectTile?.(realm.capitalTileId)
+                              }
+                            }}
                             className="text-[10px] text-primary underline mt-0.5 block mx-auto font-mono"
                           >
                             Tile ({realm.capitalTileId})

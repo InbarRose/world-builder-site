@@ -426,7 +426,7 @@ export function Play() {
   const persistWorldUpdate = useCallback((updater: (prev: WorldState) => WorldState) => {
     setWorld((prev) => {
       const next = saveWorld(updater(prev))
-      saveWorldAsync(next).catch(() => {})
+      saveWorldAsync(next).catch(() => undefined)
       setSavedWorlds(listSavedWorlds())
       if (peerSessionRef.current && peerSessionRef.current.getRole() !== 'spectator') {
         peerSessionRef.current.broadcastWorldState(next)
@@ -464,7 +464,7 @@ export function Play() {
                 )
               ) {
                 const saved = saveWorld(incomingWorld)
-                saveWorldAsync(saved).catch(() => {})
+                saveWorldAsync(saved).catch(() => undefined)
                 setSavedWorlds(listSavedWorlds())
                 return saved
               }
@@ -613,7 +613,7 @@ export function Play() {
     } else if (searchParams.get('view') === 'launcher' || searchParams.get('menu') === 'true') {
       setIsInLauncher(true)
     }
-  }, [searchParams])
+  }, [searchParams, world.id])
 
   // Dismiss focus zone popovers on outside click
   useEffect(() => {
@@ -981,7 +981,8 @@ export function Play() {
     }, 110)
 
     const newDeck = [...deck]
-    const card = newDeck.pop()!
+    const card = newDeck.pop()
+    if (!card) return
     setDeck(newDeck)
     setDrawnCard(card)
     if (card.value === 'A') {
@@ -1143,7 +1144,8 @@ export function Play() {
     if (world.isLocked || deck.length === 0) return
     playCardDrawSound()
     const nextDeck = [...deck]
-    const nextCard = nextDeck.pop()!
+    const nextCard = nextDeck.pop()
+    if (!nextCard) return
     if (drawnCard) {
       nextDeck.unshift(drawnCard)
     }
@@ -1186,7 +1188,8 @@ export function Play() {
     if (world.isLocked || deck.length === 0) return
     playCardDrawSound()
     const nextDeck = [...deck]
-    const nextCard = nextDeck.pop()!
+    const nextCard = nextDeck.pop()
+    if (!nextCard) return
     setDeck(nextDeck)
     setDrawnCard(nextCard)
     setSelectedPreset(null)
@@ -1961,7 +1964,8 @@ export function Play() {
   const handleAutoStepOneTurn = () => {
     if (world.isLocked) return
     const currentDeck = deck.length > 0 ? [...deck] : rebuildDeck()
-    const card = currentDeck.pop()!
+    const card = currentDeck.pop()
+    if (!card) return
     setDeck(currentDeck)
     setDrawnCard(card)
 
@@ -2018,6 +2022,19 @@ export function Play() {
   }
 
   // Single-PC Laptop Driver: Keyboard Velocity Hotkeys ('D' Draw, 'R' Redraw, 'P' Place, '2' 2-Pager, 'A' Auto-Pick)
+  const driverHandlersRef = useRef({
+    handleDrawCard,
+    handleRedrawCurrentCard,
+    handlePlaceDraftOnMap,
+    handleAutoPickSmartTile,
+  })
+  driverHandlersRef.current = {
+    handleDrawCard,
+    handleRedrawCurrentCard,
+    handlePlaceDraftOnMap,
+    handleAutoPickSmartTile,
+  }
+
   useEffect(() => {
     const handleDriverHotkeys = (e: KeyboardEvent) => {
       const activeEl = document.activeElement
@@ -2042,17 +2059,17 @@ export function Play() {
       if (key === 'd') {
         if (!world.isLocked && deck.length > 0 && (gameMode === 'companion' || turnPhase === 'await_draw')) {
           e.preventDefault()
-          handleDrawCard()
+          driverHandlersRef.current.handleDrawCard()
         }
       } else if (key === 'r') {
         if (!world.isLocked && deck.length > 0 && turnPhase === 'action_select') {
           e.preventDefault()
-          handleRedrawCurrentCard()
+          driverHandlersRef.current.handleRedrawCurrentCard()
         }
       } else if (key === 'p') {
         if (!world.isLocked && turnPhase === 'action_select') {
           e.preventDefault()
-          handlePlaceDraftOnMap()
+          driverHandlersRef.current.handlePlaceDraftOnMap()
         }
       } else if (e.key === '2') {
         e.preventDefault()
@@ -2060,23 +2077,14 @@ export function Play() {
       } else if (key === 'a') {
         if (!world.isLocked && turnPhase === 'action_select') {
           e.preventDefault()
-          handleAutoPickSmartTile()
+          driverHandlersRef.current.handleAutoPickSmartTile()
         }
       }
     }
 
     window.addEventListener('keydown', handleDriverHotkeys)
     return () => window.removeEventListener('keydown', handleDriverHotkeys)
-  }, [
-    world.isLocked,
-    deck.length,
-    gameMode,
-    turnPhase,
-    handleDrawCard,
-    handleRedrawCurrentCard,
-    handlePlaceDraftOnMap,
-    handleAutoPickSmartTile,
-  ])
+  }, [world.isLocked, deck.length, gameMode, turnPhase])
 
   const handleStageChange = (newStage: StageId) => {
     if (world.isLocked) return
@@ -2143,7 +2151,7 @@ export function Play() {
       id: `player_${Date.now()}_${idx}`,
       name: `Player ${idx + 1}`,
       color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
-      role: defaultRole as any,
+      role: defaultRole as PlayerSeat['role'],
       isBot: false,
       personality: 'shaper',
     }
@@ -2173,14 +2181,18 @@ export function Play() {
 
   const isFantastical = isFantasticalCard(drawnCard)
   const isDisasterAce = drawnCard?.value === 'A'
-  const availableActionPresets = drawnCard
-    ? getActionPresetsForDraw(
-        currentStage,
-        drawnCard.value === JOKER ? '♠' : drawnCard.suit,
-        isFantastical,
-        isDisasterAce
-      )
-    : []
+  const availableActionPresets = useMemo(
+    () =>
+      drawnCard
+        ? getActionPresetsForDraw(
+            currentStage,
+            drawnCard.value === JOKER ? '♠' : drawnCard.suit,
+            isFantastical,
+            isDisasterAce
+          )
+        : [],
+    [drawnCard, currentStage, isFantastical, isDisasterAce]
+  )
 
   const botRecommendation = useMemo(() => {
     if (!drawnCard || availableActionPresets.length === 0) return null
@@ -6706,17 +6718,29 @@ export function Play() {
         }}
         onCreateWebRtcOffer={
           peerSessionRef.current
-            ? () => peerSessionRef.current!.createWebRtcOfferToken()
+            ? () => {
+                const session = peerSessionRef.current
+                if (!session) throw new Error('Peer session unavailable')
+                return session.createWebRtcOfferToken()
+              }
             : undefined
         }
         onAcceptWebRtcOffer={
           peerSessionRef.current
-            ? (token) => peerSessionRef.current!.acceptWebRtcOfferAndCreateAnswer(token)
+            ? (token) => {
+                const session = peerSessionRef.current
+                if (!session) throw new Error('Peer session unavailable')
+                return session.acceptWebRtcOfferAndCreateAnswer(token)
+              }
             : undefined
         }
         onAcceptWebRtcAnswer={
           peerSessionRef.current
-            ? (token) => peerSessionRef.current!.acceptWebRtcAnswerToken(token)
+            ? (token) => {
+                const session = peerSessionRef.current
+                if (!session) throw new Error('Peer session unavailable')
+                return session.acceptWebRtcAnswerToken(token)
+              }
             : undefined
         }
       />
@@ -6730,8 +6754,8 @@ export function Play() {
         onSelectMode={handleModeChange}
         onToggleSafeMode={() => setIsDraftingWorkshop((prev) => !prev)}
         isDraftingWorkshop={isDraftingWorkshop}
-        onUndo={() => {}}
-        onRedo={() => {}}
+        onUndo={() => undefined}
+        onRedo={() => undefined}
         canUndo={false}
         canRedo={false}
         onToggleSound={handleToggleSound}

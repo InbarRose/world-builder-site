@@ -421,7 +421,7 @@ describe('MapCanvas Component', () => {
 
   it('supports tablet two-finger pinch-to-zoom and touch pan gestures on the viewport', () => {
     const map = createInitialMap(8, 8)
-    render(<MapCanvas map={map} worldName="Eldoria" onChange={() => {}} />)
+    render(<MapCanvas map={map} worldName="Eldoria" onChange={() => undefined} />)
 
     const viewport = screen.getByTestId('atlas-viewport-container')
     expect(viewport).toBeInTheDocument()

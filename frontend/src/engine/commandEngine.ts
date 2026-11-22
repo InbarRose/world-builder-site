@@ -55,8 +55,8 @@ export class CommandEngine {
   }
 
   public undo(): WorldState | null {
-    if (this.undoStack.length === 0) return null
-    const command = this.undoStack.pop()!
+    const command = this.undoStack.pop()
+    if (!command) return null
     const revertedState = command.undo(this.currentState)
     this.currentState = revertedState
     this.redoStack.push(command)
@@ -64,8 +64,8 @@ export class CommandEngine {
   }
 
   public redo(): WorldState | null {
-    if (this.redoStack.length === 0) return null
-    const command = this.redoStack.pop()!
+    const command = this.redoStack.pop()
+    if (!command) return null
     const reappliedState = command.execute(this.currentState)
     this.currentState = reappliedState
     this.undoStack.push(command)

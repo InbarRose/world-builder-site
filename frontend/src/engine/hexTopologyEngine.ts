@@ -360,7 +360,8 @@ export function getHexLine(
     const sy = y0 < y1 ? 1 : -1
     let err = dx - dy
 
-    while (true) {
+    const maxSteps = dx + dy + 2
+    for (let step = 0; step < maxSteps; step++) {
       line.push({ col: x0, row: y0 })
       if (x0 === x1 && y0 === y1) break
       const e2 = 2 * err

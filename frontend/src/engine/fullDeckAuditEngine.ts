@@ -168,7 +168,9 @@ export function auditFullDeckAcrossAllStages(): FullDeckCardAuditResult {
     preset: 'continent',
     seed: 'audit-sample-tile',
   })
-  const sampleLandTile = Object.values(sampleMap.tiles).find((t) => t.domain === 'land')!
+  const sampleLandTile =
+    Object.values(sampleMap.tiles).find((t) => t.domain === 'land') ||
+    Object.values(sampleMap.tiles)[0]
 
   const byStage: StageCardAuditSummary[] = []
   const allFailures: string[] = []
@@ -256,7 +258,7 @@ export function runAndAuditWorldPermutation(spec: WorldPermutationSpec): Audited
     jokerCount: spec.allowFantastical ? 2 : 0,
   }
   baseWorld.generationSettings = {
-    ...baseWorld.generationSettings!,
+    ...baseWorld.generationSettings,
     seed: spec.seed,
     geographyPreset: spec.preset,
     fantasyLevel: spec.fantasyLevel,

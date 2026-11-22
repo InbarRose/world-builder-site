@@ -383,7 +383,7 @@ export function setAmbientVolume(vol: number): void {
   }
 }
 
-export function stopAmbientSoundscape(fadeMs: number = 300): void {
+export function stopAmbientSoundscape(fadeMs = 300): void {
   if (activeAmbient) {
     const toStop = activeAmbient
     activeAmbient = null

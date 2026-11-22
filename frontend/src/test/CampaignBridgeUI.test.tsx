@@ -70,7 +70,7 @@ describe('CampaignBridge UI Components', () => {
 
   it('renders SessionZeroPrimerModal with 1-page dossier contents', () => {
     const handleClose = vi.fn()
-    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {})
+    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => undefined)
 
     render(
       <SessionZeroPrimerModal

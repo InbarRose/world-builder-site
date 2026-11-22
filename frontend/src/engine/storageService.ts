@@ -49,6 +49,7 @@ export function createNewWorld(name = 'Untitled Realm', seed?: string): WorldSta
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function migrateWorldState(raw: any): WorldState {
   if (!raw || typeof raw !== 'object') {
     throw new Error('Invalid world state object')
@@ -58,6 +59,7 @@ export function migrateWorldState(raw: any): WorldState {
   const stage: StageId = raw.currentStage || raw.deckConfig?.selectedStage || 'genesis'
 
   const rawHistory: unknown[] = Array.isArray(raw.drawHistory) ? raw.drawHistory : []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const normalizedHistory: DrawRecord[] = rawHistory.map((item: any, idx: number) => {
     const moveId = typeof item.moveId === 'number' ? item.moveId : idx + 1
     const itemStage: StageId | undefined = item.stage || stage
@@ -94,6 +96,7 @@ export function migrateWorldState(raw: any): WorldState {
   if (raw.map && raw.map.tiles && typeof raw.map.tiles === 'object') {
     const width = Number(raw.map.width) || 20
     const height = Number(raw.map.height) || 12
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const normalizedTiles: Record<string, any> = {}
     for (let r = 0; r < height; r++) {
       for (let c = 0; c < width; c++) {
@@ -106,6 +109,7 @@ export function migrateWorldState(raw: any): WorldState {
             id: key,
             col: c,
             row: r,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             slots: Array.isArray(t.slots) ? t.slots.map((s: any) => ({ ...s })) : [],
             tags: Array.isArray(t.tags) ? t.tags : [],
             linkedEventIds: Array.isArray(t.linkedEventIds) ? t.linkedEventIds : [],

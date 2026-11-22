@@ -13,7 +13,13 @@ module.exports = {
     'react-refresh/only-export-components': 'warn',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
+  overrides: [
+    {
+      files: ['src/test/**/*.ts', 'src/test/**/*.tsx', 'e2e/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+  ],
 }
-
-
-
