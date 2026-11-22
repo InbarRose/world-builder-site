@@ -500,3 +500,8 @@ status: active
   - [x] Hidden the redundant Workspace Tab Bar and separate Top Card Draw Ribbon in normal Studio play (`Play.tsx`), keeping a single slim in-game nav bar above the 70/30 workspace and tucking standalone views into `⋯ More ▾`.
   - [x] Removed mouse-wheel map zooming in `MapCanvas.tsx` (zoom controlled strictly via explicit `− / 100% / + / Fit` buttons) and defaulted the optional hover-hints bar to `false`.
   - [x] Verified `npm run lint` (`0` warnings), `npm run build` (`0` bundle warnings), 36/36 Vitest suites (237/237 tests), and 4/4 Playwright Chromium specs PASS.
+
+- [x] **Phase 64: Single-Row `MapCanvas` Toolbar (`⋯ Map Options ▾`) & Extracted `useStudioKeyboardShortcuts` Hook** *(ADR-068)*
+  - [x] Consolidated `MapCanvas.tsx` secondary view/topology/shading/dimension/export/guide controls into `⋯ Map Options ▾` (`map-options-menu-btn` / `map-options-menu-popover`), leaving a single crisp toolbar row above the map.
+  - [x] Extracted `frontend/src/hooks/useStudioKeyboardShortcuts.ts` from `Play.tsx`.
+  - [x] Verified `npm run lint` (`0` warnings), `npm run build` (`0` bundle warnings), 36/36 Vitest suites (237/237 tests), and 4/4 Playwright Chromium specs PASS.
