@@ -1596,3 +1596,14 @@ status: active
   2. Fixed `onImportWorld` and `handleFileImport` in `Play.tsx` to persist, rebuild deck, and sync `setSearchParams({ world: saved.id, mode: gameMode })`.
   3. Hardened Playwright Test #4 (`studio-e2e-and-chaos.spec.ts`) to exercise the full `Import (.json)` tab → file upload → `Load & Play Imported Realm` user flow.
 - **Consequences:** Entry `index.js` dropped from `629 kB` → **`16.62 kB`**, largest chunk is `324 kB` (**0 Vite `> 500 kB` warnings**), and Track **E4** rises `12 → 15 / 15` (Track B total: **90.0 / 100**).
+
+## ADR-067: True 70/30 Single-Pane-of-Glass Studio Layout, Fullscreen Expandable Panes & Button-Only Map Zoom (Phase 63)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** Per Tier-1 Human Creator UX direction, normal Studio play should be a single pane of glass with NO tab switching between Map, Draw, and Codex, NO 4-layer stack of nav bars above the map, and NO mouse-wheel map zooming (mouse wheel should only scroll normally; map zoom is controlled via explicit `+ / − / 100% / Fit` buttons).
+- **Decision:**
+  1. Created `SinglePaneStudioLayout.tsx` as the default Studio workspace: a **70% Left World Map / 30% Right Sidebar** horizontal split (draggable `45%–85%`), with the Right Sidebar vertically split into **Top: Card & Active Turn** and **Bottom: Chronicle / Codex** (draggable `25%–78%`). Every section (Map, Card & Turn, Chronicle/Codex) has a 1-click **`⤢` Fullscreen Expand / Restore** toggle.
+  2. Eliminated both the Workspace Tab Bar and the separate Top Card Draw Ribbon bar above the map in normal Studio play (`Play.tsx`), leaving a single ultra-slim in-game top nav bar above the 70/30 workspace, with standalone views (`Deck & Draw Full View`, `Stage Setup`, `4-Ages Matrix`) tucked cleanly into `⋯ More ▾`.
+  3. Removed the non-passive mouse-wheel zoom hijack in `MapCanvas.tsx` so scrolling never accidentally zooms the map, and defaulted the optional `Hints` status bar to `false` to reclaim vertical map space.
+- **Consequences:** Dramatic reduction in top-of-screen chrome, instant single-pane visibility of Map + Active Card/Turn + Chronicle/Codex simultaneously, and intuitive mouse scrolling.
