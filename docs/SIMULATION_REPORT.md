@@ -1,7 +1,7 @@
 # World Builder — Headless Multi-Stage Simulation Report
 
 > **Total Permutations Simulated:** `320` (120 Pre-Genesis bare maps + 150 full 4-stage campaigns spanning **2,400 turns** + 50 card/map session stress tests)
-> **Invariant Failures:** `0` | **4-Stage Completion Rate:** `150/150 (100%)` | **Runtime:** `2812 ms`
+> **Invariant Failures:** `0` | **4-Stage Completion Rate:** `150/150 (100%)` | **Runtime:** `4287 ms`
 
 ---
 

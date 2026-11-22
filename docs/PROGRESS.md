@@ -505,3 +505,8 @@ status: active
   - [x] Consolidated `MapCanvas.tsx` secondary view/topology/shading/dimension/export/guide controls into `⋯ Map Options ▾` (`map-options-menu-btn` / `map-options-menu-popover`), leaving a single crisp toolbar row above the map.
   - [x] Extracted `frontend/src/hooks/useStudioKeyboardShortcuts.ts` from `Play.tsx`.
   - [x] Verified `npm run lint` (`0` warnings), `npm run build` (`0` bundle warnings), 36/36 Vitest suites (237/237 tests), and 4/4 Playwright Chromium specs PASS.
+
+- [x] **Phases 65–66: Schema Migration Fuzzing, Multi-Viewport Playwright Matrix & Final Dual-Track Audit** *(ADR-069 · Track A: 96.5 / 100 · Track B: 94.0 / 100)*
+  - [x] Added `storageResilience.test.ts` fuzzing legacy v1/v2 world migration, corrupt/array JSON payloads, and rolling snapshot caps; fixed `Array.isArray(raw)` validation gap in `storageService.ts`.
+  - [x] Added Playwright Test #5 verifying `1280×720` compact laptop and `768×1024` tablet viewports (`5/5` Playwright Chromium specs passing in CI & locally).
+  - [x] Regenerated `docs/SIMULATION_REPORT.md` and all 6 compact `.world.json` worlds (`189–425 KB`), and updated `docs/AUDIT_RUBRIC.md` (**37/37 Vitest suites, 240/240 tests + 5/5 Playwright specs passing**).

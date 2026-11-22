@@ -1617,3 +1617,14 @@ status: active
   1. Collapsed the `MapCanvas.tsx` top toolbar into **1 ultra-slim single row** (`View/Edit`, `Palette & Overlays`, `Layers`, `Zoom − 100% + Fit`, `⋯ Map Options ▾`), tucking all secondary visual/topology/shading/dimension/export/guide controls into `map-options-menu-popover`.
   2. Extracted `frontend/src/hooks/useStudioKeyboardShortcuts.ts` from `Play.tsx` to isolate Single-PC velocity hotkeys (`D/R/P/2/A/Alt+S`) with a stable window listener ref.
 - **Consequences:** Zero toolbar wrapping above the map at desktop and compact laptop widths; cleaner modularity in `Play.tsx`.
+
+## ADR-069: Schema Migration Fuzzing, Array-Payload Guard & Multi-Viewport Playwright Acceptance Matrix (Phases 65–66)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** Completing the remaining backlog items from `master_backlog_and_roadmap_v2.md` required legacy v1/v2 & corrupt-JSON schema fuzzing, multi-viewport Playwright acceptance (`1280×720` compact laptop & `768×1024` tablet), zero-tab-bounce verification, and a fresh dual-track audit.
+- **Decision:**
+  1. Added `frontend/src/test/storageResilience.test.ts` fuzzing legacy v1/v2 world migration, corrupt/truncated/array JSON payloads, and rolling snapshot cap invariants — catching and fixing a real `Array.isArray(raw)` validation gap in `migrateWorldState` (`storageService.ts`).
+  2. Added **Playwright Test #5** (`studio-e2e-and-chaos.spec.ts`) verifying `1280×720` compact laptop (full draw-and-log turn + single-row `Map Options` toolbar) and `768×1024` tablet portrait with `0` console/page/network errors.
+  3. Regenerated `docs/SIMULATION_REPORT.md` and all 6 compact `.world.json` exports (`189 KB–425 KB`) in `local-exports/simulated-worlds/`, and finalized the honest Dual-Track Scorecard in `docs/AUDIT_RUBRIC.md` (**Track A: `96.5 / 100`**, **Track B: `94.0 / 100`**).
+- **Consequences:** All planned Phases 61–66 backlog items are complete, CI-gated, and verified across 37 Vitest suites (240 tests) and 5 static Playwright Chromium specs.
