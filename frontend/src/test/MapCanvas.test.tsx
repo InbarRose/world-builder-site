@@ -725,11 +725,17 @@ describe('MapCanvas Component', () => {
 
     render(<Phase34MapTest />)
 
-    // 1. Live Hover-Hint Status Bar is visible and updates when hovering tools
+    // 1. Toggle Live Hover-Hint Status Bar on and verify it updates when hovering tools
+    fireEvent.click(screen.getByTestId('toggle-hover-hints-btn'))
     const hintBar = screen.getByTestId('studio-hover-hint-bar')
     expect(hintBar).toBeInTheDocument()
     fireEvent.mouseEnter(screen.getByTestId('tool-brush-btn'))
     expect(hintBar).toHaveTextContent(/Paint Brush Tool \[B\]/i)
+
+    // Phase 63: Mouse wheel must NOT zoom the map (controlled strictly via explicit buttons)
+    const viewport = screen.getByTestId('atlas-viewport-container')
+    fireEvent.wheel(viewport, { deltaY: -120 })
+    expect(screen.getByRole('button', { name: /Reset Camera \(100%\)/i })).toHaveTextContent('100%')
 
     // 2. Inline ? Help button on Layer 1 toggles explanation box
     fireEvent.click(screen.getByTestId('layer-help-btn-1'))

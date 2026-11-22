@@ -47,7 +47,8 @@ async function launchFreshStudioRealm(page: Page) {
   if (await quickStartBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
     await quickStartBtn.click()
   }
-  await expect(page.getByTestId('studio-top-card-ribbon')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByTestId('studio-dock-workspace')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByTestId('studio-right-sidebar')).toBeVisible({ timeout: 15000 })
 }
 
 async function closeAnyOpenDialog(page: Page) {
@@ -103,12 +104,11 @@ async function dismissPreStageModalIfOpen(page: Page, customName?: string) {
 }
 
 async function drawAndLogOneTurn(page: Page) {
-  const ribbon = page.getByTestId('studio-top-card-ribbon')
-  const drawBtn = ribbon.getByRole('button', { name: /Draw Card/i }).first()
+  const drawBtn = page.getByTestId('dock-draw-card-btn')
   await expect(drawBtn).toBeVisible({ timeout: 8000 })
   await drawBtn.click()
 
-  // Wait for either the Log Turn button in the docked Cards & Turn panel or Workbench
+  // Wait for Log Turn button inside the 30% Right Sidebar Cards & Turn pane
   const logBtn = page.getByRole('button', { name: /Log Turn|Record Turn|Complete Turn/i }).first()
   await expect(logBtn).toBeVisible({ timeout: 8000 })
 
@@ -126,10 +126,8 @@ async function drawAndLogOneTurn(page: Page) {
     await readyBtn.click()
   }
 
-  // Verify Top Ribbon cleanly returns to Draw Card state
-  await expect(ribbon.getByRole('button', { name: /Draw Card/i }).first()).toBeVisible({
-    timeout: 8000,
-  })
+  // Verify Draw Card button stays ready in the 30% Right Sidebar
+  await expect(page.getByTestId('dock-draw-card-btn')).toBeVisible({ timeout: 8000 })
 }
 
 test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit & Chaos Suite', () => {
@@ -192,21 +190,19 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
     const errors = attachErrorCollectors(page)
     await launchFreshStudioRealm(page)
 
-    // 1. Toggle Pure Canvas & inspect floating Edge Tray Pills
-    const ribbon = page.getByTestId('studio-top-card-ribbon')
-    const pureCanvasBtn = ribbon.getByRole('button', { name: /Pure Canvas/i }).first()
-    await expect(pureCanvasBtn).toBeVisible({ timeout: 5000 })
-    await pureCanvasBtn.click()
+    // 1. Toggle Fullscreen Map (Pure Canvas) & verify floating Edge Tray Pills + 70/30 restore
+    const expandMapBtn = page.getByTestId('expand-map-btn')
+    await expect(expandMapBtn).toBeVisible({ timeout: 5000 })
+    await expandMapBtn.click()
     await expect(page.getByTestId('studio-edge-tray-bar')).toBeVisible({ timeout: 5000 })
-    // Open Chronicle tray pill and close Pure Canvas
-    const chroniclePill = page.getByTestId('edge-tray-open-chronicle')
-    if (await chroniclePill.isVisible().catch(() => false)) {
-      await chroniclePill.click()
-    }
-    const restoreBtn = ribbon.getByRole('button', { name: /Restore Panels|Pure Canvas/i }).first()
-    if (await restoreBtn.isVisible().catch(() => false)) {
-      await restoreBtn.click()
-    }
+    await page.getByTestId('edge-tray-open-chronicle').click()
+    await expect(page.getByTestId('studio-right-sidebar')).toBeVisible({ timeout: 5000 })
+
+    // Verify Cards & History fullscreen expand/restore buttons
+    await page.getByTestId('expand-cards-btn').click()
+    await page.getByTestId('expand-cards-btn').click()
+    await page.getByTestId('expand-history-btn').click()
+    await page.getByTestId('expand-history-btn').click()
 
     // 2. Verify always-visible Turn State-Machine Stepper & tucked ⋯ More Tools popover
     await expect(page.getByTestId('top-nav-turn-stepper')).toBeVisible({ timeout: 5000 })
@@ -227,9 +223,9 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
       }
     }
 
-    // 3. Switch to Deck & Draw tab, draw a card, and exercise Card Options ▾ -> Redraw
-    const deckTab = page.getByRole('tab', { name: /Deck & Draw/i }).or(page.getByRole('button', { name: /Deck & Draw/i })).first()
-    await deckTab.click()
+    // 3. Open Deck & Draw Full View via ⋯ More ▾, draw a card, and exercise Card Options ▾ -> Redraw
+    await moreBtn.click()
+    await page.getByTestId('more-open-deck-view-btn').click()
     const drawBtn = page.getByRole('button', { name: /Draw Card/i }).first()
     if (await drawBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
       await drawBtn.click()
@@ -353,7 +349,7 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
     await expect(twoPagerBtn).toBeVisible({ timeout: 5000 })
     await twoPagerBtn.click()
     await expect(page.getByText(/2-Page World Overview/i)).toBeVisible({ timeout: 5000 })
-    await expect(page.getByText(/216 Turns/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/Seed:.*216 Turns/i)).toBeVisible({ timeout: 5000 })
 
     expect(errors.consoleErrors).toEqual([])
     expect(errors.pageErrors).toEqual([])
