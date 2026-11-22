@@ -626,7 +626,7 @@ export function MapCanvas({
     }
   }, [currentStage, gameMode])
   const [showTutorialModal, setShowTutorialModal] = useState(false)
-  const [showHoverHints, setShowHoverHints] = useState(true)
+  const [showHoverHints, setShowHoverHints] = useState(false)
   const [activeHintText, setActiveHintText] = useState<string>(
     'Safe Select & Inspect Mode [S] — Click any tile on the map to inspect and edit its 5 layers in the right panel without accidental painting.'
   )
@@ -945,25 +945,8 @@ export function MapCanvas({
     }
   }
 
-  // Mouse wheel zoom on viewport container with non-passive listener
-  useEffect(() => {
-    const container = viewportContainerRef.current
-    if (!container) return
+  // Phase 63 (ADR-067): Mouse wheel does NOT zoom the map (controlled strictly via explicit +/-/Fit buttons)
 
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault()
-      const factor = e.deltaY < 0 ? 1.15 : 0.87
-      setCamera((prev) => ({
-        ...prev,
-        zoom: Math.min(2.5, Math.max(0.4, Number((prev.zoom * factor).toFixed(2)))),
-      }))
-    }
-
-    container.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      container.removeEventListener('wheel', handleWheel)
-    }
-  }, [])
 
   // Spacebar pan toggle listener
   useEffect(() => {
@@ -1664,7 +1647,7 @@ export function MapCanvas({
                 type="button"
                 onClick={handleZoomOut}
                 className="px-2 py-0.5 hover:bg-accent rounded font-bold"
-                title="Zoom Out Map (or Mouse Wheel)"
+                title="Zoom Out Map"
                 aria-label="Zoom Out Map"
               >
                 −
@@ -1682,7 +1665,7 @@ export function MapCanvas({
                 type="button"
                 onClick={handleZoomIn}
                 className="px-2 py-0.5 hover:bg-accent rounded font-bold"
-                title="Zoom In Map (or Mouse Wheel)"
+                title="Zoom In Map"
                 aria-label="Zoom In Map"
               >
                 +
