@@ -187,7 +187,9 @@ export function GameSetupWizardModal({
                 </label>
                 <select
                   value={fantasyLevel}
-                  onChange={(e) => setFantasyLevel(e.target.value as any)}
+                  onChange={(e) =>
+                    setFantasyLevel(e.target.value as 'low' | 'medium' | 'high')
+                  }
                   className="input h-9 text-xs w-full py-0"
                 >
                   <option value="low">Low Fantasy (Grounded, Historical)</option>
@@ -202,7 +204,9 @@ export function GameSetupWizardModal({
                 </label>
                 <select
                   value={disasterIntensity}
-                  onChange={(e) => setDisasterIntensity(e.target.value as any)}
+                  onChange={(e) =>
+                    setDisasterIntensity(e.target.value as 'mild' | 'standard' | 'cataclysmic')
+                  }
                   className="input h-9 text-xs w-full py-0"
                 >
                   <option value="mild">Mild (Localized Hazards)</option>

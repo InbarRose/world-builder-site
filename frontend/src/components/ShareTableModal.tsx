@@ -82,8 +82,9 @@ export function ShareTableModal({ isOpen, world, onClose, onImportWorld }: Share
           throw new Error('Invalid World State structure.')
         }
         setImportedPreview(parsed)
-      } catch (err: any) {
-        setImportError(err.message || 'Failed to parse JSON world file.')
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to parse JSON world file.'
+        setImportError(message)
       }
     }
     reader.onerror = () => {

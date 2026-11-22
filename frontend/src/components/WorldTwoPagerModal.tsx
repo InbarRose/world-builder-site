@@ -675,7 +675,9 @@ export function WorldTwoPagerModal({
                               {ent.originTileId && (
                                 <button
                                   type="button"
-                                  onClick={() => handleJumpToTile(ent.originTileId!)}
+                                  onClick={() => {
+                                    if (ent.originTileId) handleJumpToTile(ent.originTileId)
+                                  }}
                                   className="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-mono text-[10px] hover:underline"
                                 >
                                   ({ent.originTileId})
@@ -798,7 +800,9 @@ export function WorldTwoPagerModal({
                                   {ev.tileId && (
                                     <button
                                       type="button"
-                                      onClick={() => handleJumpToTile(ev.tileId!)}
+                                      onClick={() => {
+                                        if (ev.tileId) handleJumpToTile(ev.tileId)
+                                      }}
                                       className="px-1 py-0.2 rounded bg-primary/10 text-primary font-mono text-[9px] shrink-0 hover:underline"
                                     >
                                       ({ev.tileId})

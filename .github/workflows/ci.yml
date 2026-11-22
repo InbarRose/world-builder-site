@@ -26,6 +26,10 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
+      - name: Lint (zero warnings)
+        working-directory: ./frontend
+        run: npm run lint
+
       - name: Run tests
         working-directory: ./frontend
         run: npm run test:ci

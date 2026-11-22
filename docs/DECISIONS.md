@@ -1574,3 +1574,14 @@ status: active
   4. Added universal `Escape`-to-close handling for all Studio modals/popovers in `Play.tsx` and `role="dialog" aria-modal="true"` on `ShareTableModal.tsx`.
   5. Added top-level `AppErrorBoundary.tsx` in `App.tsx` and Vite `manualChunks` code splitting (`vendor-react`, `vendor-icons`, `vendor-misc`, `catalog-data`, `engine-core`) in `vite.config.ts`.
 - **Consequences:** Exported 216-turn `.world.json` files shrink by **> 98%** (from 36.2 MB to ~400 KB), production chunks are cleanly split for browser caching, every modal closes cleanly on `Escape`, and engineering quality is measured independently from product UX.
+
+## ADR-065: Zero-Warning ESLint CI Gate & 100% Modal ARIA Dialog Coverage (Phase 61)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** Track B audit revealed 113 ESLint issues (10 errors, 103 warnings), no lint gate in `.github/workflows/ci.yml`, and 2 remaining modals (`IncomingSharedWorldModal.tsx`, `KeyboardShortcutsModal.tsx`) missing `role="dialog" aria-modal="true"`.
+- **Decision:**
+  1. Fixed all 10 ESLint errors and all 52 production-code warnings across `src/pages/`, `src/components/`, and `src/engine/` (bounded loop in `hexTopologyEngine.ts`, safe null guards replacing `!`, typed `catch (err: unknown)` and state setters, `driverHandlersRef` + `useMemo` in `Play.tsx`, clean `react-refresh` boundaries in `MapCanvas.tsx`), with a scoped `src/test/**` override in `.eslintrc.cjs`.
+  2. Added `npm run lint` (`--max-warnings 0`) as a required CI gate in `.github/workflows/ci.yml`.
+  3. Added `role="dialog" aria-modal="true"` to `IncomingSharedWorldModal.tsx` and `KeyboardShortcutsModal.tsx` so 100% of modals conform to ARIA dialog semantics.
+- **Consequences:** Engineering Track **E6** rises `13 → 15 / 15` and **E2** rises `13 → 14 / 15` (Track B total: **87.0 / 100**).

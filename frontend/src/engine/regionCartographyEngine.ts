@@ -206,7 +206,8 @@ export function detectGeographicRegions(
       visited.add(startId)
 
       while (queue.length > 0) {
-        const curr = queue.shift()!
+        const curr = queue.shift()
+        if (!curr) break
         const currId = getTileId(curr.col, curr.row)
         const currTile = map.tiles[currId] || createDefaultTile(curr.col, curr.row)
 

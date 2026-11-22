@@ -184,7 +184,7 @@ export interface FantasyResourcePreset {
   group: 'Food & Crops' | 'Minerals & Ores' | 'Timber & Canopy' | 'Arcane & Wonders'
 }
 
-export const FANTASY_RESOURCE_PRESETS: FantasyResourcePreset[] = [
+const FANTASY_RESOURCE_PRESETS: FantasyResourcePreset[] = [
   { name: 'Grain Fields', icon: '🌾', category: 'resource', priority: 60, group: 'Food & Crops' },
   { name: 'Coastal Fishery', icon: '🐟', category: 'resource', priority: 60, group: 'Food & Crops' },
   { name: 'Hillside Vineyard', icon: '🍇', category: 'resource', priority: 60, group: 'Food & Crops' },
@@ -209,7 +209,7 @@ export interface FantasySettlementPreset {
   description: string
 }
 
-export const FANTASY_SETTLEMENT_PRESETS: FantasySettlementPreset[] = [
+const FANTASY_SETTLEMENT_PRESETS: FantasySettlementPreset[] = [
   { name: 'Nomadic Camp', icon: '🏕️', overlay: 'settlement', priority: 80, description: 'Light encampment' },
   { name: 'Agricultural Village', icon: '🏡', overlay: 'settlement', priority: 85, description: 'Rural village' },
   { name: 'Market Town', icon: '🏘️', overlay: 'town', priority: 90, description: 'Walled town & commerce' },
@@ -840,13 +840,14 @@ export function MapCanvas({
   }
 
   const handleViewportMouseMove = (e: React.MouseEvent) => {
-    if (!isPanning || !panStartRef.current) return
-    const dx = e.clientX - panStartRef.current.startX
-    const dy = e.clientY - panStartRef.current.startY
+    const start = panStartRef.current
+    if (!isPanning || !start) return
+    const dx = e.clientX - start.startX
+    const dy = e.clientY - start.startY
     setCamera((prev) => ({
       ...prev,
-      x: panStartRef.current!.camX + dx,
-      y: panStartRef.current!.camY + dy,
+      x: start.camX + dx,
+      y: start.camY + dy,
     }))
   }
 
@@ -923,14 +924,15 @@ export function MapCanvas({
       touchGestureRef.current.prevDistance = nextDist
       touchGestureRef.current.prevMidpoint = nextMid
     } else if (e.touches.length === 1 && touchGestureRef.current.mode === 'single-pan') {
+      const gesture = touchGestureRef.current
       const t = e.touches[0]
-      const dx = t.clientX - touchGestureRef.current.startX
-      const dy = t.clientY - touchGestureRef.current.startY
+      const dx = t.clientX - gesture.startX
+      const dy = t.clientY - gesture.startY
       if (Math.hypot(dx, dy) > 4) {
         setCamera((prev) => ({
           ...prev,
-          x: touchGestureRef.current!.camX + dx,
-          y: touchGestureRef.current!.camY + dy,
+          x: gesture.camX + dx,
+          y: gesture.camY + dy,
         }))
       }
     }

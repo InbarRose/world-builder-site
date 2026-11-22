@@ -386,7 +386,9 @@ export function ExportSuiteModal({ isOpen, world, onClose, onOpenShare }: Export
                 >
                   <input
                     type="checkbox"
-                    checked={Boolean((selectiveOptions as any)[item.key])}
+                    checked={Boolean(
+                      selectiveOptions[item.key as keyof typeof selectiveOptions]
+                    )}
                     onChange={(e) =>
                       setSelectiveOptions((prev) => ({
                         ...prev,

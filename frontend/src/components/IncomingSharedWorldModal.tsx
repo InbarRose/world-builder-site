@@ -19,7 +19,12 @@ export function IncomingSharedWorldModal({
   const playerCount = incomingWorld.players?.length || 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Shared Realm Received"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="relative w-full max-w-md rounded-2xl border border-primary/30 bg-card shadow-2xl p-6 text-card-foreground">
         {/* Accent Banner */}
         <div className="flex items-center justify-between pb-3 border-b border-border/60">

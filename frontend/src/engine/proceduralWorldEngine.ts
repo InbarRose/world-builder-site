@@ -411,7 +411,7 @@ export function generateNaturalWorld(options: ProceduralGenerationOptions = {}):
       elev += convergenceScore * 0.35
 
       // Natural Moisture Field
-      let moist = moistureGen.fbm(nx * 2.2, ny * 2.2, 3)
+      const moist = moistureGen.fbm(nx * 2.2, ny * 2.2, 3)
       moistureGrid[r][c] = moist
       elevationGrid[r][c] = Math.max(0, Math.min(1, elev))
     }

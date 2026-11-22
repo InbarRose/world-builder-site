@@ -461,7 +461,8 @@ export function projectRealmInfluence(
   queue.sort((a, b) => b.power - a.power)
 
   while (queue.length > 0) {
-    const current = queue.shift()!
+    const current = queue.shift()
+    if (!current) break
     const curTile = map.tiles[current.tileId]
     if (!curTile) continue
 

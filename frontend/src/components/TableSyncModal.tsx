@@ -80,7 +80,7 @@ export function TableSyncModal({
   const handleCopyRoomCode = () => {
     const code = normalizeRoomCode(isSyncActive ? roomCode : inputRoomCode)
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(code).catch(() => {})
+      navigator.clipboard.writeText(code).catch(() => undefined)
     }
     setCopiedRoom(true)
     setTimeout(() => setCopiedRoom(false), 2000)

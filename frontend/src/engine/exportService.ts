@@ -202,7 +202,7 @@ export function exportWorldYaml(
     stageFilter: 'all',
   }
 ): string {
-  const doc: any = {}
+  const doc: Record<string, unknown> = {}
 
   if (options.includeWorldMetadata !== false) {
     doc.world = {
@@ -253,7 +253,7 @@ export function exportWorldYaml(
 /**
  * Helper to convert clean JSON objects into YAML format.
  */
-function toSimpleYaml(obj: any, indent = 0): string {
+function toSimpleYaml(obj: unknown, indent = 0): string {
   const pad = '  '.repeat(indent)
   const lines: string[] = []
 

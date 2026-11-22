@@ -48,6 +48,9 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Keyboard Shortcuts"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >

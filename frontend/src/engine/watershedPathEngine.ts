@@ -332,7 +332,8 @@ export function findOptimalRoadPath(
   while (openSet.length > 0) {
     // Find node with lowest f score
     openSet.sort((a, b) => a.f - b.f)
-    const current = openSet.shift()!
+    const current = openSet.shift()
+    if (!current) break
     const curKey = `${current.coord.col},${current.coord.row}`
 
     if (curKey === endKey) {

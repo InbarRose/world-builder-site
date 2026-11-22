@@ -115,7 +115,7 @@ const rawJsonModules = import.meta.glob('../data/catalog/**/*.json', {
 /**
  * Normalizes a relative path inside `src/data/catalog/` and retrieves the parsed JSON module.
  */
-export function resolveCatalogJson<T = any>(relativePathFromCatalogRoot: string): T {
+export function resolveCatalogJson<T = unknown>(relativePathFromCatalogRoot: string): T {
   const cleanRel = relativePathFromCatalogRoot
     .replace(/\\/g, '/')
     .replace(/^\.\//, '')
@@ -141,7 +141,7 @@ function joinCatalogPath(baseDir: string, relTarget: string): string {
  * Loads and concatenates an array of JSON shards (`part1.json`, `part2.json`, etc.)
  * declared in any manifest's `shards` array.
  */
-export function resolveManifestShards<T = any>(
+export function resolveManifestShards<T = unknown>(
   baseDir: string,
   shardsOrFile: string[] | string
 ): T[] {
@@ -699,14 +699,14 @@ export function loadCatalogCodex() {
     settlementIconSets: palettesObj.settlementIconSets.map((set): SettlementIconSetPreset => ({
       id: set.id,
       name: set.name,
-      icons: set.graphic.settlementIcons!,
+      icons: set.graphic.settlementIcons ?? { camp: '🏕️', village: '🏡', town: '🏘️', city: '🏙️', metropolis: '👑' },
       graphic: normalizeGraphicSpec(set.graphic),
     })),
   }
 }
 
 export function loadCatalogBots(): Record<BotPersonalityId, BotPersonalityMeta> {
-  const shards = resolveManifestShards<Record<string, any>>(
+  const shards = resolveManifestShards<Record<string, BotPersonalityMeta & { graphic?: GraphicSpec }>>(
     'weights',
     WEIGHTS_MANIFEST.personalitiesShards
   )
