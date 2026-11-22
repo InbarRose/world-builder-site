@@ -326,10 +326,22 @@ test.describe('Phase 58: Static LLM-Free Playwright E2E, Acceptance, Menu Audit 
       await backupOption.click()
     }
 
-    // Upload the actual exported 216-turn .world.json file through the real file input
-    const fileInput = page.locator('input[type="file"][accept*="json"], input[type="file"]').first()
+    // Switch to the Import (.json) tab inside the Share & Backup dialog
+    const shareDialog = page.getByRole('dialog', { name: /Export, Import and Share Realm/i })
+    await expect(shareDialog).toBeVisible({ timeout: 5000 })
+    await shareDialog.getByRole('button', { name: /Import \(\.json\)/i }).click()
+
+    // Upload the actual exported 216-turn .world.json file through the dialog file input
+    const fileInput = shareDialog.locator('input[type="file"]').first()
     await expect(fileInput).toBeAttached({ timeout: 5000 })
     await fileInput.setInputFiles(exportedJsonPath)
+
+    // Confirm import preview button inside the Share & Backup dialog
+    const confirmImportBtn = shareDialog.getByRole('button', {
+      name: /Load & Play Imported Realm/i,
+    })
+    await expect(confirmImportBtn).toBeVisible({ timeout: 5000 })
+    await confirmImportBtn.click()
 
     // Confirm imported 216-turn world loads into Studio cleanly
     await expect(page.getByText(/Valdoria/i).first()).toBeVisible({ timeout: 10000 })
