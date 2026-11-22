@@ -489,3 +489,8 @@ status: active
   - [x] Resolved all 10 ESLint errors and all production warnings so `npm run lint` (`--max-warnings 0`) exits `0`, and wired `npm run lint` into `.github/workflows/ci.yml`.
   - [x] Added `role="dialog" aria-modal="true"` to `IncomingSharedWorldModal.tsx` and `KeyboardShortcutsModal.tsx` (100% modal dialog coverage).
   - [x] Verified `npm run lint`, `npm run build`, and all 36 Vitest suites (237/237 tests passing).
+
+- [x] **Phase 62: Lazy Route/Bundle Code-Splitting (< 500 kB, 0 Warnings) & `.world.json` Import URL-Sync Fix** *(ADR-066 · Track B: 87 → 90 / 100)*
+  - [x] Converted `Home`, `Rules`, `Play`, and `Map` routes in `App.tsx` to `React.lazy()` + `<Suspense>` and added semantic `manualChunks` in `vite.config.ts` — entry `index.js` shrunk to `16.62 kB` and **all chunks are `< 325 kB` (0 Vite warnings)**.
+  - [x] Fixed real `.world.json` import URL-sync bug in `Play.tsx` (`onImportWorld` & `handleFileImport`) caught by Playwright Test #4.
+  - [x] Verified `npm run lint` (`0` warnings), `npm run build` (`0` warnings), 36/36 Vitest suites (237/237 tests), and 4/4 Playwright Chromium specs PASS.
