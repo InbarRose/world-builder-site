@@ -1607,3 +1607,13 @@ status: active
   2. Eliminated both the Workspace Tab Bar and the separate Top Card Draw Ribbon bar above the map in normal Studio play (`Play.tsx`), leaving a single ultra-slim in-game top nav bar above the 70/30 workspace, with standalone views (`Deck & Draw Full View`, `Stage Setup`, `4-Ages Matrix`) tucked cleanly into `⋯ More ▾`.
   3. Removed the non-passive mouse-wheel zoom hijack in `MapCanvas.tsx` so scrolling never accidentally zooms the map, and defaulted the optional `Hints` status bar to `false` to reclaim vertical map space.
 - **Consequences:** Dramatic reduction in top-of-screen chrome, instant single-pane visibility of Map + Active Card/Turn + Chronicle/Codex simultaneously, and intuitive mouse scrolling.
+
+## ADR-068: Single-Row MapCanvas Toolbar (`⋯ Map Options ▾`) & Extracted `useStudioKeyboardShortcuts` Hook (Phase 64)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** `MapCanvas.tsx` still rendered a wrapping 2-row top toolbar above the map (`2.5D/Flat/Simple`, `Square/Pointy/Flat Hex`, `Organic Shading`, `14×9/20×12/26×15`, `PNG`, `SVG`, `Hints`, `Studio Guide`, `Dimensions`), and `Play.tsx` contained inline velocity hotkey wiring.
+- **Decision:**
+  1. Collapsed the `MapCanvas.tsx` top toolbar into **1 ultra-slim single row** (`View/Edit`, `Palette & Overlays`, `Layers`, `Zoom − 100% + Fit`, `⋯ Map Options ▾`), tucking all secondary visual/topology/shading/dimension/export/guide controls into `map-options-menu-popover`.
+  2. Extracted `frontend/src/hooks/useStudioKeyboardShortcuts.ts` from `Play.tsx` to isolate Single-PC velocity hotkeys (`D/R/P/2/A/Alt+S`) with a stable window listener ref.
+- **Consequences:** Zero toolbar wrapping above the map at desktop and compact laptop widths; cleaner modularity in `Play.tsx`.

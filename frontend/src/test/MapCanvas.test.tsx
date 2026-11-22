@@ -16,6 +16,7 @@ describe('MapCanvas Component', () => {
     expect(screen.getByRole('button', { name: /Select & Inspect/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Paint Brush/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Bucket Fill/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     expect(screen.getByRole('button', { name: /14×9/i })).toBeInTheDocument()
   })
 
@@ -41,6 +42,7 @@ describe('MapCanvas Component', () => {
     expect(updatedMap.tiles['0,0'].terrain).toBe('plains')
 
     // 4. Test dimension resizing
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     fireEvent.click(screen.getByRole('button', { name: /14×9/i }))
     expect(handleChange).toHaveBeenCalledTimes(2)
     expect(handleChange.mock.calls[1][0].width).toBe(14)
@@ -258,6 +260,7 @@ describe('MapCanvas Component', () => {
 
     render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
 
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     const organicBtn = screen.getByRole('button', { name: /Organic Shading 🌄/i })
     const crispBtn = screen.getByRole('button', { name: /Crisp Grid 📐/i })
 
@@ -279,6 +282,7 @@ describe('MapCanvas Component', () => {
 
     render(<MapCanvas map={map} worldName="Eldoria" onChange={handleChange} />)
 
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     const pointyBtn = screen.getByRole('button', { name: /Pointy Hex Mode/i })
     const flatBtn = screen.getByRole('button', { name: /Flat Hex Mode/i })
     const squareBtn = screen.getByRole('button', { name: /Square Grid Mode/i })
@@ -725,7 +729,8 @@ describe('MapCanvas Component', () => {
 
     render(<Phase34MapTest />)
 
-    // 1. Toggle Live Hover-Hint Status Bar on and verify it updates when hovering tools
+    // 1. Toggle Live Hover-Hint Status Bar on via ⋯ Map Options and verify it updates when hovering tools
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     fireEvent.click(screen.getByTestId('toggle-hover-hints-btn'))
     const hintBar = screen.getByTestId('studio-hover-hint-bar')
     expect(hintBar).toBeInTheDocument()
@@ -799,7 +804,8 @@ describe('MapCanvas Component', () => {
     // Phase 37: Photoshop-style Left Vertical Tool Rail is docked beside the canvas
     expect(screen.getByTestId('studio-left-tool-rail')).toBeInTheDocument()
 
-    // Phase 51: Dimension presets are visible at Turn #0, then locked once campaign has started
+    // Phase 51 & 64: Dimension presets are visible inside ⋯ Map Options at Turn #0, then locked once campaign has started
+    fireEvent.click(screen.getByTestId('map-options-menu-btn'))
     expect(screen.getByTestId('map-dimension-presets')).toBeInTheDocument()
   })
 
