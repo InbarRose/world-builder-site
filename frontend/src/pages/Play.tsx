@@ -2168,11 +2168,13 @@ export function Play() {
       const text = await file.text()
       const imported = parseImportedWorld(text)
       const saved = saveWorld(imported)
+      setActiveWorldId(saved.id)
       setWorld(saved)
       setSavedWorlds(listSavedWorlds())
       setDeck(buildShuffledDeck(saved.deckConfig))
       setDrawnCard(null)
       setPowerData(null)
+      setSearchParams({ world: saved.id, mode: gameMode })
     } catch (err) {
       console.error('Import error:', err)
     }
@@ -6443,9 +6445,14 @@ export function Play() {
         world={world}
         onClose={() => setShowShareModal(false)}
         onImportWorld={(imported) => {
-          setActiveWorldId(imported.id)
-          setWorld(imported)
+          const saved = saveWorld(imported)
+          setActiveWorldId(saved.id)
+          setWorld(saved)
           setSavedWorlds(listSavedWorlds())
+          setDeck(buildShuffledDeck(saved.deckConfig))
+          setDrawnCard(null)
+          setTurnPhase('await_draw')
+          setSearchParams({ world: saved.id, mode: gameMode })
           playStageAdvanceSound()
         }}
       />

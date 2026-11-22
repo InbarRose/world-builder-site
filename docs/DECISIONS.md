@@ -1585,3 +1585,14 @@ status: active
   2. Added `npm run lint` (`--max-warnings 0`) as a required CI gate in `.github/workflows/ci.yml`.
   3. Added `role="dialog" aria-modal="true"` to `IncomingSharedWorldModal.tsx` and `KeyboardShortcutsModal.tsx` so 100% of modals conform to ARIA dialog semantics.
 - **Consequences:** Engineering Track **E6** rises `13 → 15 / 15` and **E2** rises `13 → 14 / 15` (Track B total: **87.0 / 100**).
+
+## ADR-066: Lazy Route/Bundle Code-Splitting Under 500 kB & Live `.world.json` Import URL Sync Fix (Phase 62)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** The production Vite build still emitted a `> 500 kB` chunk warning (`index` at `629 kB`), and Playwright Test #4 uncovered a real bug where importing a `.world.json` realm via `ShareTableModal` (`Import (.json)` → `Load & Play Imported Realm`) did not update `?world=<id>` in `searchParams`, causing the URL-sync effect to revert to the previous realm.
+- **Decision:**
+  1. Converted all 4 top-level routes (`Home`, `Rules`, `Play`, `Map`) in `App.tsx` to `React.lazy()` + `<Suspense>` and refined `vite.config.ts` `manualChunks` (`studio-map-canvas`, `studio-codex-chronicle`, `studio-modals`, `engine-core`, `catalog-data`, `vendor-react`, `vendor-icons`, `vendor-misc`).
+  2. Fixed `onImportWorld` and `handleFileImport` in `Play.tsx` to persist, rebuild deck, and sync `setSearchParams({ world: saved.id, mode: gameMode })`.
+  3. Hardened Playwright Test #4 (`studio-e2e-and-chaos.spec.ts`) to exercise the full `Import (.json)` tab → file upload → `Load & Play Imported Realm` user flow.
+- **Consequences:** Entry `index.js` dropped from `629 kB` → **`16.62 kB`**, largest chunk is `324 kB` (**0 Vite `> 500 kB` warnings**), and Track **E4** rises `12 → 15 / 15` (Track B total: **90.0 / 100**).
