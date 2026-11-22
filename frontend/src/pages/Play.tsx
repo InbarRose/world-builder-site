@@ -155,6 +155,7 @@ import { ActiveMapPlacementConfig, MapCanvas } from '../components/MapCanvas'
 import { TimelinePanel } from '../components/TimelinePanel'
 import { EntityRegistry } from '../components/EntityRegistry'
 import { SinglePaneStudioLayout } from '../components/SinglePaneStudioLayout'
+import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts'
 import {
   StudioPanelId,
   StudioWorkspaceLayout,
@@ -2021,70 +2022,19 @@ export function Play() {
     setTurnPhase('await_draw')
   }
 
-  // Single-PC Laptop Driver: Keyboard Velocity Hotkeys ('D' Draw, 'R' Redraw, 'P' Place, '2' 2-Pager, 'A' Auto-Pick)
-  const driverHandlersRef = useRef({
-    handleDrawCard,
-    handleRedrawCurrentCard,
-    handlePlaceDraftOnMap,
-    handleAutoPickSmartTile,
+  // Single-PC Laptop Driver: Extracted Keyboard Velocity Hotkeys Hook (Phase 64, ADR-068)
+  useStudioKeyboardShortcuts({
+    isLocked: Boolean(world.isLocked),
+    deckLength: deck.length,
+    gameMode,
+    turnPhase,
+    onDrawCard: handleDrawCard,
+    onRedrawCard: handleRedrawCurrentCard,
+    onPlaceDraftOnMap: handlePlaceDraftOnMap,
+    onAutoPickSmartTile: handleAutoPickSmartTile,
+    onToggleTwoPager: () => setShowTwoPagerModal((prev) => !prev),
+    onToggleVault: () => setShowVaultModal((prev) => !prev),
   })
-  driverHandlersRef.current = {
-    handleDrawCard,
-    handleRedrawCurrentCard,
-    handlePlaceDraftOnMap,
-    handleAutoPickSmartTile,
-  }
-
-  useEffect(() => {
-    const handleDriverHotkeys = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement
-      const isInput =
-        activeEl &&
-        (activeEl.tagName === 'INPUT' ||
-          activeEl.tagName === 'TEXTAREA' ||
-          activeEl.tagName === 'SELECT' ||
-          (activeEl as HTMLElement).isContentEditable)
-      if (isInput || e.ctrlKey || e.metaKey) return
-
-      const key = e.key.toLowerCase()
-
-      if (e.altKey) {
-        if (key === 's') {
-          e.preventDefault()
-          setShowVaultModal((prev) => !prev)
-        }
-        return
-      }
-
-      if (key === 'd') {
-        if (!world.isLocked && deck.length > 0 && (gameMode === 'companion' || turnPhase === 'await_draw')) {
-          e.preventDefault()
-          driverHandlersRef.current.handleDrawCard()
-        }
-      } else if (key === 'r') {
-        if (!world.isLocked && deck.length > 0 && turnPhase === 'action_select') {
-          e.preventDefault()
-          driverHandlersRef.current.handleRedrawCurrentCard()
-        }
-      } else if (key === 'p') {
-        if (!world.isLocked && turnPhase === 'action_select') {
-          e.preventDefault()
-          driverHandlersRef.current.handlePlaceDraftOnMap()
-        }
-      } else if (e.key === '2') {
-        e.preventDefault()
-        setShowTwoPagerModal((prev) => !prev)
-      } else if (key === 'a') {
-        if (!world.isLocked && turnPhase === 'action_select') {
-          e.preventDefault()
-          driverHandlersRef.current.handleAutoPickSmartTile()
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleDriverHotkeys)
-    return () => window.removeEventListener('keydown', handleDriverHotkeys)
-  }, [world.isLocked, deck.length, gameMode, turnPhase])
 
   const handleStageChange = (newStage: StageId) => {
     if (world.isLocked) return
