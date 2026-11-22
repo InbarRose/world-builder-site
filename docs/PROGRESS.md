@@ -510,3 +510,8 @@ status: active
   - [x] Added `storageResilience.test.ts` fuzzing legacy v1/v2 world migration, corrupt/array JSON payloads, and rolling snapshot caps; fixed `Array.isArray(raw)` validation gap in `storageService.ts`.
   - [x] Added Playwright Test #5 verifying `1280×720` compact laptop and `768×1024` tablet viewports (`5/5` Playwright Chromium specs passing in CI & locally).
   - [x] Regenerated `docs/SIMULATION_REPORT.md` and all 6 compact `.world.json` worlds (`189–425 KB`), and updated `docs/AUDIT_RUBRIC.md` (**37/37 Vitest suites, 240/240 tests + 5/5 Playwright specs passing**).
+
+- [x] **Phase 67: Collapsible Searchable Map Asset Inventory & Directly Clickable Region Banners / River Badges** *(ADR-070)*
+  - [x] Created `MapInventoryDrawer.tsx` (`🗺️ Inventory` toggle on MapCanvas toolbar) with live search and 6 category filters (`All`, `Regions`, `Rivers`, `Sites`, `Labels`, `Nature`) jumping directly to any tile or region.
+  - [x] Made Region Centroid Banners (`region-banner-X-Y`) directly clickable with full-region amber tile highlighting (`highlightedRegionId`) and added clickable `🌊` river badges (`river-badge-X-Y`) on river tiles.
+  - [x] Added unit + Playwright E2E coverage (`MapCanvas.test.tsx`, `studio-e2e-and-chaos.spec.ts`) — **37/37 Vitest suites (241/241 tests) + 5/5 Playwright Chromium specs passing**.

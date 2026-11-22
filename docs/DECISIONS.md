@@ -1628,3 +1628,14 @@ status: active
   2. Added **Playwright Test #5** (`studio-e2e-and-chaos.spec.ts`) verifying `1280×720` compact laptop (full draw-and-log turn + single-row `Map Options` toolbar) and `768×1024` tablet portrait with `0` console/page/network errors.
   3. Regenerated `docs/SIMULATION_REPORT.md` and all 6 compact `.world.json` exports (`189 KB–425 KB`) in `local-exports/simulated-worlds/`, and finalized the honest Dual-Track Scorecard in `docs/AUDIT_RUBRIC.md` (**Track A: `96.5 / 100`**, **Track B: `94.0 / 100`**).
 - **Consequences:** All planned Phases 61–66 backlog items are complete, CI-gated, and verified across 37 Vitest suites (240 tests) and 5 static Playwright Chromium specs.
+
+## ADR-070: Collapsible Searchable Map Asset Inventory & Directly Clickable Region Banners / River Badges (Phase 67)
+
+- **Date:** 2026-11-21
+- **Status:** Accepted
+- **Context:** Players needed a hidden-by-default searchable inventory to quickly locate any asset on the map, and reported trouble directly selecting region names and rivers on the canvas.
+- **Decision:**
+  1. Created `frontend/src/components/MapInventoryDrawer.tsx`, toggled via a compact `🗺️ Inventory` button (`map-inventory-btn`) on the MapCanvas toolbar. Provides live search (`map-inventory-search`) and 6 category filters (`All`, `Regions`, `Rivers`, `Sites`, `Labels`, `Nature`); clicking any item switches cleanly to Inspect mode, selects the tile, and highlights the full contiguous region when applicable.
+  2. Made Region Centroid Banners (`region-banner-${col}-${row}`) directly interactive (`role="button"`, `stopPropagation`) so clicking any region name selects and highlights every tile in that region with an amber outline ring even when a brush is armed.
+  3. Added directly clickable river badges (`river-badge-${col}-${row}`) on river tiles so rivers can always be selected cleanly on click.
+- **Consequences:** Every map element (regions, rivers, settlements, sites, landmarks, natural features) is both directly clickable on the canvas and searchable via the collapsible Map Asset Inventory.
