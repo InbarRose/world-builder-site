@@ -49,7 +49,10 @@ describe('Play Studio & Rules Integration', () => {
 
     // Switch to Deck & Draw tab and draw a card
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
     const drawBtn = screen.getByRole('button', { name: /Draw Card \(54\)/i })
     await act(async () => {
@@ -114,15 +117,12 @@ describe('Play Studio & Rules Integration', () => {
     })
     expect(screen.getAllByText(/Turn #1/i).length).toBeGreaterThan(0)
 
-    // Switch to World Map tab
-    await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /World Map/i }))
-    })
+    // In 70/30 Single-Pane Studio, World Map is already visible and Codex is in the right sidebar
     expect(screen.getByRole('grid', { name: /World Map Grid/i })).toBeInTheDocument()
 
-    // Switch to Codex tab
+    // Switch sidebar bottom section to Codex tab
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Codex/i }))
+      fireEvent.click(screen.getByTestId('sidebar-tab-codex'))
     })
     expect(screen.getByText(/Quick Presets/i)).toBeInTheDocument()
 
@@ -387,7 +387,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Open Adventure Hooks modal from ⋯ More menu
@@ -462,7 +465,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Draw card
@@ -530,7 +536,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Open Real-Time Table Peer Sync Modal via ⋯ More menu
@@ -592,7 +601,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Verify Tabletop Speaker / Chime-In Bar is visible on the main card screen
@@ -681,7 +693,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Draw a card in Studio Mode by clicking directly on the physical Card Deck!
@@ -773,7 +788,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Draw a card and select a preset
@@ -842,7 +860,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Test Quick-Key '2' toggling the 2-Page World Overview Modal
@@ -903,7 +924,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // 1. Open Session Checkpoint Vault via ⋯ More menu
@@ -984,7 +1008,10 @@ describe('Play Studio & Rules Integration', () => {
       fireEvent.click(screen.getByRole('button', { name: /Resume Campaign/i }))
     })
     await act(async () => {
-      fireEvent.click(screen.getByRole('tab', { name: /Deck & Draw/i }))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('more-open-deck-view-btn'))
     })
 
     // Switch to World Map tab
@@ -1047,9 +1074,9 @@ describe('Play Studio & Rules Integration', () => {
     expect(screen.getByTestId('top-nav-turn-stepper')).toBeInTheDocument()
     expect(screen.getByTestId('studio-more-tools-btn')).toBeInTheDocument()
 
-    // Phase 48 & 59: Open Pre-Stage Setup Ritual Modal via Workspace menu
+    // Phase 48 & 63: Open Pre-Stage Setup Ritual Modal via ⋯ More menu
     await act(async () => {
-      fireEvent.click(screen.getByTestId('studio-workspace-menu-btn'))
+      fireEvent.click(screen.getByTestId('studio-more-tools-btn'))
     })
     await act(async () => {
       fireEvent.click(screen.getByTestId('open-prestage-setup-btn'))
