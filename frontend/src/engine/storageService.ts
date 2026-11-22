@@ -51,7 +51,7 @@ export function createNewWorld(name = 'Untitled Realm', seed?: string): WorldSta
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function migrateWorldState(raw: any): WorldState {
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new Error('Invalid world state object')
   }
 
