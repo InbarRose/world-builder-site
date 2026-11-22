@@ -24,6 +24,13 @@ export default defineConfig({
           }
           if (id.includes('/src/data/catalog/')) return 'catalog-data'
           if (id.includes('/src/engine/')) return 'engine-core'
+          if (id.includes('/src/components/MapCanvas.tsx')) return 'studio-map-canvas'
+          if (id.includes('/src/components/EntityRegistry.tsx') || id.includes('/src/components/TimelinePanel.tsx')) {
+            return 'studio-codex-chronicle'
+          }
+          if (id.includes('/src/components/') && id.includes('Modal.tsx')) {
+            return 'studio-modals'
+          }
         },
       },
     },
