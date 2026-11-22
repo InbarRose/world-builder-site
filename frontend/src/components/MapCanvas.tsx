@@ -627,6 +627,7 @@ export function MapCanvas({
   }, [currentStage, gameMode])
   const [showTutorialModal, setShowTutorialModal] = useState(false)
   const [showHoverHints, setShowHoverHints] = useState(false)
+  const [showMapOptionsMenu, setShowMapOptionsMenu] = useState(false)
   const [activeHintText, setActiveHintText] = useState<string>(
     'Safe Select & Inspect Mode [S] — Click any tile on the map to inspect and edit its 5 layers in the right panel without accidental painting.'
   )
@@ -1608,20 +1609,8 @@ export function MapCanvas({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowGridDrawer((v) => !v)}
-                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
-                    showGridDrawer
-                      ? 'bg-accent border-primary/40 text-foreground'
-                      : 'border-border text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Maximize2 className="h-3.5 w-3.5" />
-                  <span>Dimensions & Templates</span>
-                </button>
-                <button
-                  type="button"
                   onClick={() => setShowLayersDrawer((v) => !v)}
-                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 border transition-colors ${
+                  className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1 border transition-colors ${
                     showLayersDrawer
                       ? 'bg-accent border-primary/40 text-foreground'
                       : 'border-border text-muted-foreground hover:text-foreground'
@@ -1639,8 +1628,8 @@ export function MapCanvas({
             )}
           </div>
 
-          {/* Right: Zoom, Perspective Mode Switcher & Exports */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Right: Compact Zoom Buttons + ⋯ Map Options Popover (Single Row) */}
+          <div className="flex items-center gap-1.5 relative">
             {/* 60fps Smooth Zoom & Camera Controls */}
             <div className="inline-flex items-center rounded-md border border-border bg-muted/40 p-0.5 text-xs">
               <button
@@ -1681,197 +1670,254 @@ export function MapCanvas({
               </button>
             </div>
 
-            <div
-              className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
-              role="group"
-              aria-label="Atlas Visual Perspective"
-            >
+            {/* Compact ⋯ Map Options Popover (View Style, Grid Topology, Shading, Dimensions, PNG/SVG, Hints & Guide) */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => setRenderStyle('tilt-25d')}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  renderStyle === 'tilt-25d'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                data-testid="map-options-menu-btn"
+                aria-label="Map Options Menu"
+                onClick={() => setShowMapOptionsMenu((v) => !v)}
+                className={`px-2.5 py-1 rounded-md border text-xs font-semibold flex items-center gap-1 transition-colors ${
+                  showMapOptionsMenu
+                    ? 'border-primary/50 bg-primary/10 text-primary'
+                    : 'border-border bg-background hover:bg-muted text-foreground'
                 }`}
-                title="2.5D Angled Fantasy Atlas Table View"
+                title="Map Display Options, Grid Topology, Shading, Dimensions, Export & Studio Guide"
               >
-                2.5D Atlas
+                <span>⋯ Map Options</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setRenderStyle('flat-illustrated')}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  renderStyle === 'flat-illustrated'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Top-Down Illustrated Cartography"
-              >
-                Flat Illustrated
-              </button>
-              <button
-                type="button"
-                onClick={() => setRenderStyle('simple-schematic')}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  renderStyle === 'simple-schematic'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Clean Schematic Print View"
-              >
-                Simple View
-              </button>
+
+              {showMapOptionsMenu && (
+                <div
+                  data-testid="map-options-menu-popover"
+                  className="absolute right-0 mt-1.5 w-72 rounded-xl border border-border bg-popover/95 backdrop-blur-md p-2.5 shadow-2xl z-40 space-y-2.5 text-xs"
+                >
+                  {/* Perspective */}
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Visual Perspective
+                    </div>
+                    <div
+                      className="grid grid-cols-3 rounded-md border border-border p-0.5 bg-muted/40 gap-0.5"
+                      role="group"
+                      aria-label="Atlas Visual Perspective"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setRenderStyle('tilt-25d')}
+                        className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                          renderStyle === 'tilt-25d'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        2.5D Atlas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRenderStyle('flat-illustrated')}
+                        className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                          renderStyle === 'flat-illustrated'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Flat Illustrated
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRenderStyle('simple-schematic')}
+                        className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                          renderStyle === 'simple-schematic'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Simple View
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Grid Topology (Locked once campaign starts) */}
+                  {!isCampaignStarted && (
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Grid Topology
+                      </div>
+                      <div
+                        className="grid grid-cols-3 rounded-md border border-border p-0.5 bg-muted/40 gap-0.5"
+                        role="group"
+                        aria-label="Grid Topology Mode"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => onChange({ ...map, gridTopology: 'square' })}
+                          className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                            !map.gridTopology || map.gridTopology === 'square'
+                              ? 'bg-primary text-primary-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          aria-label="Square Grid Mode"
+                        >
+                          Square
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onChange({ ...map, gridTopology: 'hex-pointy' })}
+                          className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                            map.gridTopology === 'hex-pointy'
+                              ? 'bg-primary text-primary-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          aria-label="Pointy Hex Mode"
+                        >
+                          ⬡ Pointy Hex
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onChange({ ...map, gridTopology: 'hex-flat' })}
+                          className={`px-1.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                            map.gridTopology === 'hex-flat'
+                              ? 'bg-primary text-primary-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          aria-label="Flat Hex Mode"
+                        >
+                          ⬢ Flat Hex
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Organic Shading */}
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Shading Style
+                    </div>
+                    <div
+                      className="grid grid-cols-2 rounded-md border border-border p-0.5 bg-muted/40 gap-0.5"
+                      role="group"
+                      aria-label="Cartographic Shading Mode"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setShadingMode('organic')}
+                        className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                          shadingMode === 'organic'
+                            ? 'bg-amber-600 text-white dark:bg-amber-700'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Organic Shading 🌄
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShadingMode('crisp')}
+                        className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                          shadingMode === 'crisp'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Crisp Grid 📐
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Dimensions & Templates (Pre-Campaign) */}
+                  {!isViewOnly && !isCampaignStarted && (
+                    <div className="space-y-1 border-t border-border/60 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          World Size
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowGridDrawer((v) => !v)
+                            setShowMapOptionsMenu(false)
+                          }}
+                          className="text-[10px] text-primary hover:underline font-semibold"
+                        >
+                          Dimensions &amp; Templates
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1" data-testid="map-dimension-presets">
+                        {[
+                          { label: '14×9', w: 14, h: 9 },
+                          { label: '20×12', w: 20, h: 12 },
+                          { label: '26×15', w: 26, h: 15 },
+                        ].map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => handleResizeGrid(preset.w, preset.h)}
+                            className={`px-2 py-1 rounded border text-[11px] font-medium ${
+                              map.width === preset.w && map.height === preset.h
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-background border-border hover:bg-accent'
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Exports, Hints & Studio Guide */}
+                  <div className="border-t border-border/60 pt-2 grid grid-cols-2 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleExportPng()
+                        setShowMapOptionsMenu(false)
+                      }}
+                      className="btn-outline px-2 py-1 text-[11px] flex items-center justify-center gap-1"
+                    >
+                      <Download className="h-3 w-3" />
+                      <span>PNG</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleExportSvg()
+                        setShowMapOptionsMenu(false)
+                      }}
+                      className="btn-outline px-2 py-1 text-[11px] flex items-center justify-center gap-1"
+                    >
+                      <Download className="h-3 w-3" />
+                      <span>SVG</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="toggle-hover-hints-btn"
+                      onClick={() => setShowHoverHints((v) => !v)}
+                      className={`px-2 py-1 rounded-md border text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors ${
+                        showHoverHints
+                          ? 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300'
+                          : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Lightbulb className="h-3 w-3" />
+                      <span>Hints</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="open-studio-tutorial-btn"
+                      onClick={() => {
+                        setShowTutorialModal(true)
+                        setShowMapOptionsMenu(false)
+                      }}
+                      className="px-2 py-1 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <HelpCircle className="h-3 w-3" />
+                      <span>Studio Guide</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Grid Topology Switcher: Square vs Pointy Hex vs Flat Hex (Locked once campaign starts) */}
-            {!isCampaignStarted && (
-            <div
-              className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
-              role="group"
-              aria-label="Grid Topology Mode"
-            >
-              <button
-                type="button"
-                onClick={() => onChange({ ...map, gridTopology: 'square' })}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  !map.gridTopology || map.gridTopology === 'square'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Orthogonal Square Grid (Classic)"
-                aria-label="Square Grid Mode"
-              >
-                Square
-              </button>
-              <button
-                type="button"
-                onClick={() => onChange({ ...map, gridTopology: 'hex-pointy' })}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  map.gridTopology === 'hex-pointy'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Pointy-Topped Hexagonal Grid (Tactical VTT)"
-                aria-label="Pointy Hex Mode"
-              >
-                ⬡ Pointy Hex
-              </button>
-              <button
-                type="button"
-                onClick={() => onChange({ ...map, gridTopology: 'hex-flat' })}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  map.gridTopology === 'hex-flat'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Flat-Topped Hexagonal Grid (Atlas Wargame)"
-                aria-label="Flat Hex Mode"
-              >
-                ⬢ Flat Hex
-              </button>
-            </div>
-            )}
-
-            {/* Organic Shading & Biome Blending Mode Toggle */}
-            <div
-              className="inline-flex rounded-md border border-border p-0.5 bg-muted/40"
-              role="group"
-              aria-label="Cartographic Shading Mode"
-            >
-              <button
-                type="button"
-                onClick={() => setShadingMode('organic')}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  shadingMode === 'organic'
-                    ? 'bg-amber-600 text-white dark:bg-amber-700'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Organic Biome Blending, Coastal Shallows & Multi-Octave Hillshading"
-              >
-                Organic Shading 🌄
-              </button>
-              <button
-                type="button"
-                onClick={() => setShadingMode('crisp')}
-                className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                  shadingMode === 'crisp'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title="Crisp Grid & Direct Tile Borders"
-              >
-                Crisp Grid 📐
-              </button>
-            </div>
-
-            {/* Quick Dimension Presets (Locked once campaign starts — state-machine invariant) */}
-            {!isViewOnly && !isCampaignStarted && (
-              <div className="flex items-center gap-1" data-testid="map-dimension-presets">
-                {[
-                  { label: '14×9', w: 14, h: 9 },
-                  { label: '20×12', w: 20, h: 12 },
-                  { label: '26×15', w: 26, h: 15 },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => handleResizeGrid(preset.w, preset.h)}
-                    className={`px-2 py-1 rounded border text-[11px] font-medium ${
-                      map.width === preset.w && map.height === preset.h
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-background border-border hover:bg-accent'
-                    }`}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleExportPng}
-              className="btn-outline px-2 py-1 text-[11px] flex items-center gap-1"
-            >
-              <Download className="h-3 w-3" />
-              <span>PNG</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleExportSvg}
-              className="btn-outline px-2 py-1 text-[11px] flex items-center gap-1"
-            >
-              <Download className="h-3 w-3" />
-              <span>SVG</span>
-            </button>
-
-            {/* Studio Hover Hints Toggle & Help/Tutorial Manual Button */}
-            <button
-              type="button"
-              data-testid="toggle-hover-hints-btn"
-              onClick={() => setShowHoverHints((v) => !v)}
-              className={`px-2 py-1 rounded-md border text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-                showHoverHints
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-800 dark:text-amber-300'
-                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
-              }`}
-              title="Toggle live contextual hover hints in the Studio Status Bar"
-            >
-              <Lightbulb className="h-3 w-3" />
-              <span className="hidden sm:inline">Hints</span>
-            </button>
-
-            <button
-              type="button"
-              data-testid="open-studio-tutorial-btn"
-              onClick={() => setShowTutorialModal(true)}
-              className="px-2 py-1 rounded-md bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 text-[11px] font-bold flex items-center gap-1 transition-colors shadow-2xs"
-              title="Open World Building Studio Guide, 4-Stage Card Rules & Map Editor Tutorial"
-            >
-              <HelpCircle className="h-3 w-3" />
-              <span>Studio Guide</span>
-            </button>
           </div>
         </div>
 
