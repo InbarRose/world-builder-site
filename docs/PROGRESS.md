@@ -484,3 +484,8 @@ status: active
   - [x] Removed leftover numeric `(/100)` stability fractions from `twoPageOverviewEngine.ts` and `WorldTwoPagerModal.tsx` (ADR-042).
   - [x] Hardened modal a11y: universal `Escape`-to-close handler for all Studio modals/popovers (`Play.tsx`) and `role="dialog" aria-modal="true"` on `ShareTableModal.tsx`.
   - [x] Added top-level `AppErrorBoundary.tsx` (`App.tsx`) and Vite `manualChunks` code splitting (`vite.config.ts`).
+
+- [x] **Phase 61: Zero-Warning ESLint CI Gate & 100% Modal ARIA Dialog Coverage** *(ADR-065 · Track B: 84 → 87 / 100)*
+  - [x] Resolved all 10 ESLint errors and all production warnings so `npm run lint` (`--max-warnings 0`) exits `0`, and wired `npm run lint` into `.github/workflows/ci.yml`.
+  - [x] Added `role="dialog" aria-modal="true"` to `IncomingSharedWorldModal.tsx` and `KeyboardShortcutsModal.tsx` (100% modal dialog coverage).
+  - [x] Verified `npm run lint`, `npm run build`, and all 36 Vitest suites (237/237 tests passing).
